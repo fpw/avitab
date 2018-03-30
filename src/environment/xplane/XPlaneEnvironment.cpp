@@ -56,9 +56,18 @@ void XPlaneEnvironment::addMenuEntry(const std::string& label, std::function<voi
     XPLMAppendMenuItem(subMenu, label.c_str(), &callbacks[idx], 0);
 }
 
+void XPlaneEnvironment::destroyMenu() {
+    if (subMenu) {
+        XPLMDestroyMenu(subMenu);
+        subMenu = nullptr;
+        XPLMRemoveMenuItem(XPLMFindPluginsMenu(), subMenuIdx);
+        subMenuIdx = -1;
+    }
+}
+
 XPlaneEnvironment::~XPlaneEnvironment() {
-    XPLMDestroyMenu(subMenu);
-    XPLMRemoveMenuItem(XPLMFindPluginsMenu(), subMenuIdx);
+    logger::verbose("~XPlaneEnvironment");
+    destroyMenu();
 }
 
 } /* namespace avitab */

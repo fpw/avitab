@@ -22,16 +22,17 @@
 #include "src/avitab/AviTab.h"
 #include "src/Logger.h"
 
+std::shared_ptr<avitab::Environment> environment;
 std::unique_ptr<avitab::AviTab> aviTab;
 
 PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescription) {
-    logger::init();
+    logger::init(true);
+
     strncpy(outName, "AviTab", 255);
     strncpy(outSignature, "org.solhost.folko.avitab", 255);
 
     try {
-        std::shared_ptr<avitab::Environment> env = std::make_shared<avitab::XPlaneEnvironment>();
-        aviTab = std::make_unique<avitab::AviTab>(env);
+        environment = std::make_shared<avitab::XPlaneEnvironment>();
         strncpy(outDescription, "A tablet to help with navigation.", 255);
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStart: %s", e.what());
@@ -44,7 +45,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
 
 PLUGIN_API int XPluginEnable(void) {
     try {
-        if (aviTab) {
+        if (environment) {
+            aviTab = std::make_unique<avitab::AviTab>(environment);
             aviTab->startApp();
         }
     } catch (const std::exception &e) {
@@ -56,12 +58,14 @@ PLUGIN_API int XPluginEnable(void) {
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID src, int msg, void *inParam) {
+    logger::verbose("Message from %d: %d (%p)", src, msg, inParam);
 }
 
 PLUGIN_API void XPluginDisable(void) {
     try {
         if (aviTab) {
-            aviTab->disable();
+            aviTab->stopApp();
+            aviTab.reset();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginDisable: %s", e.what());
@@ -70,8 +74,12 @@ PLUGIN_API void XPluginDisable(void) {
 
 PLUGIN_API void XPluginStop(void) {
     try {
-        if (aviTab) {
-            aviTab.release();
+        if (environment) {
+            if (aviTab) {
+                aviTab->stopApp();
+                aviTab.reset();
+            }
+            environment.reset();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStop: %s", e.what());

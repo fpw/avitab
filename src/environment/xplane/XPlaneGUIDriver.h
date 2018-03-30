@@ -20,6 +20,7 @@
 
 #include <XPLM/XPLMGraphics.h>
 #include <XPLM/XPLMDisplay.h>
+#include <atomic>
 #include "src/environment/GUIDriver.h"
 #include "DataRef.h"
 
@@ -36,8 +37,8 @@ private:
     DataRef<bool> isVrEnabled;
     int textureId = -1;
     XPLMWindowID window = nullptr;
-    int mouseX = 0, mouseY = 0;
-    bool mousePressed = false;
+    std::atomic_int mouseX {0}, mouseY {0};
+    std::atomic_bool mousePressed {false};
 
     void onDraw();
     bool onClick(int x, int y, XPLMMouseStatus status);

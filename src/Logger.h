@@ -21,7 +21,7 @@
 #include <string>
 
 namespace logger {
-    void init();
+    void init(bool showConsole);
 
     void verbose(const std::string format, ...);
     void info(const std::string format, ...);

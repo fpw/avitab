@@ -20,10 +20,40 @@
 
 namespace avitab {
 
+class AppFunctionsImpl: public AppFunctions {
+public:
+    AppFunctionsImpl(std::weak_ptr<Environment> envPtr, std::weak_ptr<LVGLToolkit> guiLib):
+        env(envPtr),
+        guiLib(guiLib)
+    {
+
+    }
+
+    Environment &environment() override {
+        if (auto e = env.lock()) {
+            return *e;
+        } else {
+            throw std::runtime_error("Environment expired");
+        }
+    }
+
+    LVGLToolkit &gui() override {
+        if (auto lv = guiLib.lock()) {
+            return *lv;
+        } else {
+            throw std::runtime_error("GUI toolkit expired");
+        }
+    }
+private:
+    std::weak_ptr<Environment> env;
+    std::weak_ptr<LVGLToolkit> guiLib;
+};
+
 AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
+    appFunctions = std::make_shared<AppFunctionsImpl>(env, guiLib);
 }
 
 void AviTab::startApp() {
@@ -36,37 +66,56 @@ void AviTab::startApp() {
 void AviTab::onShowTablet() {
     logger::info("Showing tablet");
 
-    guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
-    guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+    try {
+        guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
+        guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+    } catch (const std::exception &e) {
+        logger::error("Exception in onShowTablet: %s", e.what());
+    }
 }
 
 void AviTab::createLayout() {
     // runs in GUI thread
     auto screen = guiLib->screen();
 
-    headContainer = std::make_shared<Container>(screen);
-    headContainer->setPosition(0, 0);
-    headContainer->setDimensions(screen->getWidth(), 30);
+    if (!headContainer) {
+        headContainer = std::make_shared<Container>(screen);
+        headContainer->setPosition(0, 0);
+        headContainer->setDimensions(screen->getWidth(), 30);
+        headContainer->setLayoutRightColumns();
+    }
 
-    centerContainer = std::make_shared<Container>(screen);
-    centerContainer->setPosition(0, headContainer->getHeight());
-    centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
+    if (!headerApp) {
+        headerApp = std::make_shared<HeaderApp>(appFunctions, headContainer);
+    }
 
-    headerApp = std::make_shared<HeaderApp>(headContainer);
+    if (!centerContainer) {
+        centerContainer = std::make_shared<Container>(screen);
+        centerContainer->setPosition(0, headContainer->getHeight());
+        centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
+    }
+
 
     screen->activate();
 }
 
-void AviTab::disable() {
+void AviTab::stopApp() {
+    env->destroyMenu();
+    guiLib->destroyNativeWindow();
+
+    // now the GUI thread is stopped, we can do cleanup in the calling thread
+    cleanupLayout();
+}
+
+void AviTab::cleanupLayout() {
     logger::verbose("Stopping AviTab");
     headContainer.reset();
     centerContainer.reset();
     headerApp.reset();
-    guiLib.reset();
 }
 
 AviTab::~AviTab() {
-    guiLib.reset();
+    logger::verbose("~AviTab");
 }
 
 } /* namespace avitab */

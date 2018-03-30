@@ -15,14 +15,22 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "App.h"
+#ifndef SRC_AVITAB_APPFUNCTIONS_H_
+#define SRC_AVITAB_APPFUNCTIONS_H_
+
+#include "src/environment/Environment.h"
+#include "src/gui_toolkit/LVGLToolkit.h"
 
 namespace avitab {
 
-App::App(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container):
-    appFunctions(functions),
-    uiContainer(container)
-{
+class AppFunctions {
+public:
+    virtual Environment &environment() = 0;
+    virtual LVGLToolkit &gui() = 0;
+
+    virtual ~AppFunctions() = default;
+};
+
 }
 
-} /* namespace avitab */
+#endif /* SRC_AVITAB_APPFUNCTIONS_H_ */

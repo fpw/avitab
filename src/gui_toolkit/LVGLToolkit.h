@@ -43,6 +43,7 @@ public:
 
     ~LVGLToolkit();
 private:
+    static bool lvglIsInitialized;
     static LVGLToolkit *instance;
     std::mutex guiMutex;
     std::vector<GUITask> pendingTasks;

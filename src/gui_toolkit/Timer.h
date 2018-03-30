@@ -15,38 +15,27 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_
-#define SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_
+#ifndef SRC_GUI_TOOLKIT_TIMER_H_
+#define SRC_GUI_TOOLKIT_TIMER_H_
 
-#include <SDL2/SDL.h>
-#include <vector>
-#include <mutex>
-#include <atomic>
-#include "src/environment/GUIDriver.h"
+#include <functional>
+#include <lvgl/lvgl.h>
 
 namespace avitab {
 
-class SDLGUIDriver: public GUIDriver {
+class Timer {
 public:
-    void init(int width, int height) override;
-    void createWindow(const std::string &title) override;
+    // returns true if it wants to run again
+    using TimerFunc = std::function<bool()>;
 
-    void eventLoop();
-
-    void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
-    void readPointerState(int &x, int &y, bool &pressed) override;
+    Timer(TimerFunc callback, int periodMs);
+    void stop();
+    ~Timer();
 private:
-    std::mutex driverMutex;
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    SDL_Texture *texture = nullptr;
-
-    std::atomic_int mouseX {0}, mouseY {0};
-    bool mousePressed {false};
-
-    void onQuit();
+    TimerFunc func;
+    lv_task_t *task;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_ */
+#endif /* SRC_GUI_TOOLKIT_TIMER_H_ */

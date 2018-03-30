@@ -16,12 +16,26 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "HeaderApp.h"
+#include <ctime>
 
 namespace avitab {
 
-HeaderApp::HeaderApp(std::shared_ptr<Container> container):
-    App(container)
+HeaderApp::HeaderApp(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container):
+    App(functions, container),
+    tickTimer(std::bind(&HeaderApp::onTick, this), 1000)
 {
+    clockLabel = std::make_shared<Label>(container, "");
+    onTick();
+}
+
+bool HeaderApp::onTick() {
+    time_t now = time(nullptr);
+    tm *local = localtime(&now);
+
+    char buf[16];
+    strftime(buf, sizeof(buf), "%H:%M", local);
+    clockLabel->setText(std::string(buf));
+    return true;
 }
 
 } /* namespace avitab */

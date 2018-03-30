@@ -35,6 +35,7 @@ public:
 
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, std::function<void()> cb) = 0;
+    virtual void destroyMenu() = 0;
 
     virtual ~Environment() = default;
 };

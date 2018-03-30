@@ -22,6 +22,8 @@
 namespace avitab {
 
 void GUIDriver::init(int width, int height) {
+    logger::verbose("Initializing GUI driver");
+
     bufferWidth = width;
     bufferHeight = height;
     buffer.resize(width * height);
@@ -91,6 +93,10 @@ int GUIDriver::height() {
 
 uint32_t* GUIDriver::data() {
     return buffer.data();
+}
+
+GUIDriver::~GUIDriver() {
+    logger::verbose("Destroying GUI driver");
 }
 
 }

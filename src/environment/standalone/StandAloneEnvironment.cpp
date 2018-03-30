@@ -20,18 +20,15 @@
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment():
-    driver(std::make_shared<SDLGUIDriver>())
-{
-}
-
 void StandAloneEnvironment::eventLoop() {
     if (driver) {
         driver->eventLoop();
     }
+    driver.reset();
 }
 
 std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
+    driver = std::make_shared<SDLGUIDriver>();
     return std::make_shared<LVGLToolkit>(driver);
 }
 
@@ -39,6 +36,13 @@ void StandAloneEnvironment::createMenu(const std::string& name) {
 }
 
 void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+}
+
+void StandAloneEnvironment::destroyMenu() {
+}
+
+StandAloneEnvironment::~StandAloneEnvironment() {
+    logger::verbose("~StandAloneEnvironment");
 }
 
 } /* namespace avitab */

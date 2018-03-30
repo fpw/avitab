@@ -35,11 +35,13 @@ void log(const std::string format, va_list args) {
 
 }
 
-void logger::init() {
+void logger::init(bool showConsole) {
 #ifdef _WIN32
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
+    if (showConsole) {
+        AllocConsole();
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
 #endif
 }
 

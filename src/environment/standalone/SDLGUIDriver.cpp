@@ -61,6 +61,7 @@ void SDLGUIDriver::createWindow(const std::string& title) {
 }
 
 void SDLGUIDriver::eventLoop() {
+    // called from main thread
     while (true) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -89,32 +90,44 @@ void SDLGUIDriver::eventLoop() {
 }
 
 void SDLGUIDriver::onQuit() {
-    logger::verbose("Shutting down SDL driver");
+    // called from main thread
+    std::lock_guard<std::mutex> lock(driverMutex);
+    logger::verbose("Shutting down SDL");
+
     if (texture) {
         SDL_DestroyTexture(texture);
+        texture = nullptr;
     }
 
     if (renderer) {
         SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
     }
 
     if (window) {
         SDL_DestroyWindow(window);
+        window = nullptr;
     }
 
     SDL_Quit();
 }
 
 void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
+    // called from LVGL thread
     GUIDriver::blit(x1, y1, x2, y2, data);
 
-    SDL_UpdateTexture(texture, nullptr, this->data(), width() * sizeof(uint32_t));
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
+    // protect against parallel quit() calls
+    std::lock_guard<std::mutex> lock(driverMutex);
+    if (texture != nullptr && renderer != nullptr) {
+        SDL_UpdateTexture(texture, nullptr, this->data(), width() * sizeof(uint32_t));
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+        SDL_RenderPresent(renderer);
+    }
 }
 
 void SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
+    // called from LVGL thread
     x = mouseX;
     y = mouseY;
     pressed = mousePressed;

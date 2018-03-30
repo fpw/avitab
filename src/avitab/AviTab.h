@@ -22,6 +22,7 @@
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/avitab/apps/HeaderApp.h"
+#include "AppFunctions.h"
 
 namespace avitab {
 
@@ -30,8 +31,9 @@ public:
     AviTab(std::shared_ptr<Environment> environment);
     void startApp();
     void onShowTablet();
-    void disable();
-    virtual ~AviTab();
+    void stopApp();
+    ~AviTab();
+
 private:
     std::shared_ptr<Environment> env;
     std::shared_ptr<LVGLToolkit> guiLib;
@@ -41,7 +43,10 @@ private:
 
     std::shared_ptr<HeaderApp> headerApp;
 
+    std::shared_ptr<AppFunctions> appFunctions;
+
     void createLayout();
+    void cleanupLayout();
 };
 
 } /* namespace avitab */

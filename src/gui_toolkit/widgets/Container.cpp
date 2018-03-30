@@ -26,4 +26,8 @@ Container::Container(WidgetPtr parent):
     setObj(cont);
 }
 
+void Container::setLayoutRightColumns() {
+    lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
+}
+
 } /* namespace avitab */

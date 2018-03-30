@@ -23,6 +23,7 @@
 
 namespace avitab {
 
+bool LVGLToolkit::lvglIsInitialized = false;
 LVGLToolkit *LVGLToolkit::instance = nullptr;
 
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
@@ -31,15 +32,18 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
 {
     instance = this;
 
-    lv_init();
-    initDisplayDriver();
-    initInputDriver();
+    driver->init(getFrameWidth(), getFrameHeight());
+    if (!lvglIsInitialized) {
+        // LVGL does not support de-initialization so we can only do this once
+        lv_init();
+        initDisplayDriver();
+        initInputDriver();
+        lvglIsInitialized = true;
+    }
 }
 
 void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
-
-    driver->init(getFrameWidth(), getFrameHeight());
 
     lv_disp_drv_t lvDriver;
     lv_disp_drv_init(&lvDriver);
@@ -78,23 +82,24 @@ void LVGLToolkit::initInputDriver() {
 }
 
 void LVGLToolkit::createNativeWindow(const std::string& title) {
-    if (renderThread) {
-        throw std::domain_error("Tried to create another native window");
-    }
     driver->createWindow(title);
-    keepAlive = true;
-    renderThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
 
-    mainScreen = std::make_shared<Screen>();
+    if (!keepAlive) {
+        // if keepAlive if true, the window was hidden without us noticing
+        // so it's enough to re-create it without starting rendering again
+        mainScreen = std::make_shared<Screen>();
+        keepAlive = true;
+        renderThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
+    }
 }
 
 void LVGLToolkit::destroyNativeWindow() {
     if (renderThread) {
-        mainScreen.reset();
-
         keepAlive = false;
         renderThread->join();
-        renderThread.release();
+        renderThread.reset();
+
+        mainScreen.reset();
     }
 }
 
@@ -114,10 +119,12 @@ void LVGLToolkit::guiLoop() {
     using clock = std::chrono::high_resolution_clock;
     using namespace std::chrono_literals;
 
+    logger::verbose("LVGL thread has id %d", std::this_thread::get_id());
+
     while (keepAlive) {
         auto startAt = clock::now();
 
-        {
+        try {
             std::lock_guard<std::mutex> lock(guiMutex);
             // first run our owns tasks
             for (GUITask &task: pendingTasks) {
@@ -127,6 +134,9 @@ void LVGLToolkit::guiLoop() {
 
             // then the actual GUI's
             lv_task_handler();
+        } catch (const std::exception &e) {
+            logger::error("Exception in GUI: %s", e.what());
+            keepAlive = false;
         }
 
         auto endAt = clock::now();
@@ -140,6 +150,8 @@ void LVGLToolkit::guiLoop() {
             lv_tick_inc(incMs);
         }
     }
+
+    logger::verbose("LVGL thread destroyed");
 }
 
 void LVGLToolkit::runInGUI(std::function<void()> func) {

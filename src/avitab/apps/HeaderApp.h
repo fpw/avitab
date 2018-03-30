@@ -19,12 +19,19 @@
 #define SRC_AVITAB_APPS_HEADERAPP_H_
 
 #include "App.h"
+#include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/Timer.h"
 
 namespace avitab {
 
 class HeaderApp: public App {
 public:
-    HeaderApp(std::shared_ptr<Container> container);
+    HeaderApp(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container);
+private:
+    Timer tickTimer;
+    std::shared_ptr<Label> clockLabel;
+
+    bool onTick();
 };
 
 } /* namespace avitab */

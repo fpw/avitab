@@ -37,7 +37,7 @@ void Widget::setObj(lv_obj_t* obj) {
     lvObj = obj;
 }
 
-lv_obj_t* avitab::Widget::obj() {
+lv_obj_t* Widget::obj() {
     return lvObj;
 }
 

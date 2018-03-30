@@ -17,20 +17,32 @@
  */
 #include <memory>
 #include <thread>
-#include <chrono>
 #include "src/environment/standalone/StandAloneEnvironment.h"
 #include "src/avitab/AviTab.h"
 #include "src/Logger.h"
 
 int main() {
-    logger::init();
+    logger::init(false);
 
-    std::shared_ptr<avitab::StandAloneEnvironment> env = std::make_shared<avitab::StandAloneEnvironment>();
-    avitab::AviTab aviTab(env);
+    logger::verbose("Main thread has id %d", std::this_thread::get_id());
 
-    aviTab.startApp();
-    aviTab.onShowTablet();
+    // Using heap so we can debug deconstructors with log messages
+
+    auto env = std::make_shared<avitab::StandAloneEnvironment>();
+    auto aviTab = std::make_unique<avitab::AviTab>(env);
+
+    aviTab->startApp();
+    aviTab->onShowTablet();
+
+    // pauses until window closed
     env->eventLoop();
+
+    aviTab->stopApp();
+
+    aviTab.reset();
+    env.reset();
+
+    logger::verbose("Quitting main");
 
     return 0;
 }

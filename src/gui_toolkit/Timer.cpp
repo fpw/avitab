@@ -15,14 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "App.h"
+#include "Timer.h"
+#include <thread>
+#include "src/Logger.h"
 
 namespace avitab {
 
-App::App(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container):
-    appFunctions(functions),
-    uiContainer(container)
+Timer::Timer(TimerFunc callback, int periodMs):
+    func(callback)
 {
+    logger::verbose("Creating timer in thread %d", std::this_thread::get_id());
+    task = lv_task_create([] (void *ref) {
+        Timer *tmr = (Timer *)(ref);
+        bool wantContinue = tmr->func();
+        if (!wantContinue) {
+            tmr->stop();
+        }
+    }, periodMs, LV_TASK_PRIO_MID, this);
+}
+
+void Timer::stop() {
+    if (task) {
+        lv_task_del(task);
+        task = nullptr;
+    }
+}
+
+Timer::~Timer() {
+    logger::verbose("Destroying timer in thread %d", std::this_thread::get_id());
+    stop();
 }
 
 } /* namespace avitab */
