@@ -24,14 +24,15 @@ namespace avitab {
 void SDLGUIDriver::init(int width, int height) {
     logger::verbose("Initializing SDL driver...");
     GUIDriver::init(width, height);
-
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        throw std::runtime_error("Couldn't initialize SDL");
-    }
 }
 
 void SDLGUIDriver::createWindow(const std::string& title) {
     logger::verbose("Creating SDL window '%s', dimensions %dx%d", title.c_str(), width(), height());
+
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        throw std::runtime_error("Couldn't initialize SDL");
+    }
+
     window = SDL_CreateWindow(title.c_str(),
         SDL_WINDOWPOS_CENTERED_MASK, SDL_WINDOWPOS_CENTERED_MASK,
         width(), height(), 0);
@@ -59,7 +60,7 @@ void SDLGUIDriver::createWindow(const std::string& title) {
     SDL_UpdateTexture(texture, nullptr, data(), width() * sizeof(uint32_t));
 }
 
-void avitab::SDLGUIDriver::eventLoop() {
+void SDLGUIDriver::eventLoop() {
     while (true) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -88,6 +89,7 @@ void avitab::SDLGUIDriver::eventLoop() {
 }
 
 void SDLGUIDriver::onQuit() {
+    logger::verbose("Shutting down SDL driver");
     if (texture) {
         SDL_DestroyTexture(texture);
     }
@@ -112,7 +114,7 @@ void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const ui
     SDL_RenderPresent(renderer);
 }
 
-void avitab::SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
+void SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
     x = mouseX;
     y = mouseY;
     pressed = mousePressed;

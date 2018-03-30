@@ -28,8 +28,8 @@ int main() {
     std::shared_ptr<avitab::StandAloneEnvironment> env = std::make_shared<avitab::StandAloneEnvironment>();
     avitab::AviTab aviTab(env);
 
-    aviTab.enable();
-    aviTab.showTablet();
+    aviTab.startApp();
+    aviTab.onShowTablet();
     env->eventLoop();
 
     return 0;

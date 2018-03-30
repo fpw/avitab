@@ -45,7 +45,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
 PLUGIN_API int XPluginEnable(void) {
     try {
         if (aviTab) {
-            aviTab->enable();
+            aviTab->startApp();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginEnable: %s", e.what());

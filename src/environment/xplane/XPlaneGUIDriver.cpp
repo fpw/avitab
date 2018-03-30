@@ -146,7 +146,6 @@ bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
 }
 
 bool XPlaneGUIDriver::onRightClick(int x, int y, XPLMMouseStatus status) {
-    printf("reporting RIGHT %d %d -> %d\n", x, y, status);
     return false;
 }
 

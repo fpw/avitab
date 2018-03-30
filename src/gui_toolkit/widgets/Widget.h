@@ -15,19 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_ENVIRONMENT_GUILIBRARY_H_
-#define SRC_ENVIRONMENT_GUILIBRARY_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_WIDGET_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_WIDGET_H_
+
+#include <memory>
+#include <lvgl/lvgl.h>
 
 namespace avitab {
-
-class GUILibrary {
+class Widget {
 public:
-    virtual int getWindowWidth() = 0;
-    virtual int getWindowHeight() = 0;
+    using WidgetPtr = std::shared_ptr<Widget>;
 
-    virtual ~GUILibrary() = default;
+    Widget(WidgetPtr parent);
+
+    void setPosition(int x, int y);
+    void setDimensions(int width, int height);
+    void centerInParent();
+    int getWidth();
+    int getHeight();
+
+    virtual ~Widget() = default;
+
+protected:
+    void setObj(lv_obj_t *obj);
+    lv_obj_t *obj();
+    lv_obj_t *parentObj();
+private:
+    lv_obj_t *lvObj = nullptr;
+    WidgetPtr parent;
 };
-
 }
 
-#endif /* SRC_ENVIRONMENT_GUILIBRARY_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_WIDGET_H_ */

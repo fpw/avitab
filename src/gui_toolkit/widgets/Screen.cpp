@@ -15,30 +15,23 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "StandAloneEnvironment.h"
-#include "src/Logger.h"
+#include "Screen.h"
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment():
-    driver(std::make_shared<SDLGUIDriver>())
+Screen::Screen():
+    Widget(nullptr)
 {
+    lv_obj_t *screen = lv_obj_create(nullptr, nullptr);
+    setObj(screen);
 }
 
-void StandAloneEnvironment::eventLoop() {
-    if (driver) {
-        driver->eventLoop();
-    }
+void Screen::activate() {
+    lv_scr_load(obj());
 }
 
-std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
-    return std::make_shared<LVGLToolkit>(driver);
-}
-
-void StandAloneEnvironment::createMenu(const std::string& name) {
-}
-
-void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+Screen::~Screen() {
+    lv_obj_del(obj());
 }
 
 } /* namespace avitab */

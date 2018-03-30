@@ -15,30 +15,54 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "StandAloneEnvironment.h"
-#include "src/Logger.h"
+
+#include <stdexcept>
+#include "Widget.h"
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment():
-    driver(std::make_shared<SDLGUIDriver>())
+Widget::Widget(WidgetPtr parent):
+    parent(parent)
 {
 }
 
-void StandAloneEnvironment::eventLoop() {
-    if (driver) {
-        driver->eventLoop();
+void Widget::centerInParent() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_CENTER, 0, 0);
+}
+
+void Widget::setObj(lv_obj_t* obj) {
+    if (obj == nullptr) {
+        throw std::runtime_error("NULL object passed to setObj");
+    }
+    lvObj = obj;
+}
+
+lv_obj_t* avitab::Widget::obj() {
+    return lvObj;
+}
+
+lv_obj_t* Widget::parentObj() {
+    if (parent) {
+        return parent->obj();
+    } else {
+        return nullptr;
     }
 }
 
-std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
-    return std::make_shared<LVGLToolkit>(driver);
+void Widget::setPosition(int x, int y) {
+    lv_obj_set_pos(obj(), x, y);
 }
 
-void StandAloneEnvironment::createMenu(const std::string& name) {
+void Widget::setDimensions(int width, int height) {
+    lv_obj_set_size(obj(), width, height);
 }
 
-void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+int Widget::getWidth() {
+    return lv_obj_get_width(obj());
 }
 
-} /* namespace avitab */
+int Widget::getHeight() {
+    return lv_obj_get_height(obj());
+}
+
+} // namespace avitab

@@ -29,7 +29,7 @@ public:
     StandAloneEnvironment();
     void eventLoop();
 
-    std::shared_ptr<GUILibrary> createWindow(const std::string &title) override;
+    std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
 private:

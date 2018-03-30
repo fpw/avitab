@@ -15,30 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "StandAloneEnvironment.h"
-#include "src/Logger.h"
+#include "App.h"
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment():
-    driver(std::make_shared<SDLGUIDriver>())
+App::App(std::shared_ptr<Container> container):
+    uiContainer(container)
 {
-}
-
-void StandAloneEnvironment::eventLoop() {
-    if (driver) {
-        driver->eventLoop();
-    }
-}
-
-std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
-    return std::make_shared<LVGLToolkit>(driver);
-}
-
-void StandAloneEnvironment::createMenu(const std::string& name) {
-}
-
-void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
 }
 
 } /* namespace avitab */

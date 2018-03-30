@@ -15,30 +15,21 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "StandAloneEnvironment.h"
-#include "src/Logger.h"
+#include "Label.h"
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment():
-    driver(std::make_shared<SDLGUIDriver>())
+Label::Label(WidgetPtr parent, const std::string& title):
+    Widget(parent)
 {
+    lv_obj_t *label = lv_label_create(parentObj(), nullptr);
+    setObj(label);
+
+    setText(title);
 }
 
-void StandAloneEnvironment::eventLoop() {
-    if (driver) {
-        driver->eventLoop();
-    }
-}
-
-std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
-    return std::make_shared<LVGLToolkit>(driver);
-}
-
-void StandAloneEnvironment::createMenu(const std::string& name) {
-}
-
-void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+void Label::setText(const std::string& title) {
+    lv_label_set_text(obj(), title.c_str());
 }
 
 } /* namespace avitab */

@@ -15,17 +15,17 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "GUILibraryLVGL.h"
 #include <chrono>
 #include <functional>
 #include <lvgl/lvgl.h>
+#include "LVGLToolkit.h"
 #include "src/Logger.h"
 
 namespace avitab {
 
-GUILibraryLVGL *GUILibraryLVGL::instance = nullptr;
+LVGLToolkit *LVGLToolkit::instance = nullptr;
 
-GUILibraryLVGL::GUILibraryLVGL(std::shared_ptr<GUIDriver> drv):
+LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     driver(drv),
     keepAlive(false)
 {
@@ -36,8 +36,10 @@ GUILibraryLVGL::GUILibraryLVGL(std::shared_ptr<GUIDriver> drv):
     initInputDriver();
 }
 
-void GUILibraryLVGL::initDisplayDriver() {
+void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
+
+    driver->init(getFrameWidth(), getFrameHeight());
 
     lv_disp_drv_t lvDriver;
     lv_disp_drv_init(&lvDriver);
@@ -58,7 +60,7 @@ void GUILibraryLVGL::initDisplayDriver() {
     lv_disp_drv_register(&lvDriver);
 }
 
-void GUILibraryLVGL::initInputDriver() {
+void LVGLToolkit::initInputDriver() {
     lv_indev_drv_t inputDriver;
     lv_indev_drv_init(&inputDriver);
 
@@ -75,27 +77,57 @@ void GUILibraryLVGL::initInputDriver() {
     lv_indev_drv_register(&inputDriver);
 }
 
-void GUILibraryLVGL::startRenderThread() {
+void LVGLToolkit::createNativeWindow(const std::string& title) {
+    if (renderThread) {
+        throw std::domain_error("Tried to create another native window");
+    }
+    driver->createWindow(title);
     keepAlive = true;
-    renderThread = std::make_unique<std::thread>(&GUILibraryLVGL::renderLoop, this);
+    renderThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
+
+    mainScreen = std::make_shared<Screen>();
 }
 
-int GUILibraryLVGL::getWindowWidth() {
+void LVGLToolkit::destroyNativeWindow() {
+    if (renderThread) {
+        mainScreen.reset();
+
+        keepAlive = false;
+        renderThread->join();
+        renderThread.release();
+    }
+}
+
+int LVGLToolkit::getFrameWidth() {
     return LV_HOR_RES;
 }
 
-int GUILibraryLVGL::getWindowHeight() {
+int LVGLToolkit::getFrameHeight() {
     return LV_VER_RES;
 }
 
-void GUILibraryLVGL::renderLoop() {
+std::shared_ptr<Screen> &LVGLToolkit::screen() {
+    return mainScreen;
+}
+
+void LVGLToolkit::guiLoop() {
     using clock = std::chrono::high_resolution_clock;
     using namespace std::chrono_literals;
 
     while (keepAlive) {
         auto startAt = clock::now();
 
-        lv_task_handler();
+        {
+            std::lock_guard<std::mutex> lock(guiMutex);
+            // first run our owns tasks
+            for (GUITask &task: pendingTasks) {
+                task();
+            }
+            pendingTasks.clear();
+
+            // then the actual GUI's
+            lv_task_handler();
+        }
 
         auto endAt = clock::now();
         auto incMs = std::chrono::duration_cast<std::chrono::milliseconds>(endAt - startAt).count();
@@ -103,15 +135,20 @@ void GUILibraryLVGL::renderLoop() {
         std::this_thread::sleep_for(1ms);
         incMs++;
 
-        lv_tick_inc(incMs);
+        {
+            std::lock_guard<std::mutex> lock(guiMutex);
+            lv_tick_inc(incMs);
+        }
     }
 }
 
-GUILibraryLVGL::~GUILibraryLVGL() {
-    if (renderThread) {
-        keepAlive = false;
-        renderThread->join();
-    }
+void LVGLToolkit::runInGUI(std::function<void()> func) {
+    std::lock_guard<std::mutex> lock(guiMutex);
+    pendingTasks.push_back(func);
+}
+
+LVGLToolkit::~LVGLToolkit() {
+    destroyNativeWindow();
 }
 
 } /* namespace avitab */

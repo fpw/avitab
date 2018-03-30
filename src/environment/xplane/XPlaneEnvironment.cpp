@@ -17,7 +17,6 @@
  */
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
-#include "src/environment/gui_lvgl/GUILibraryLVGL.h"
 #include "src/Logger.h"
 
 namespace avitab {
@@ -25,18 +24,12 @@ namespace avitab {
 XPlaneEnvironment::XPlaneEnvironment() {
 }
 
-std::shared_ptr<GUILibrary> XPlaneEnvironment::createWindow(const std::string &title) {
+std::shared_ptr<LVGLToolkit> XPlaneEnvironment::createGUIToolkit() {
     std::shared_ptr<GUIDriver> driver = std::make_shared<XPlaneGUIDriver>();
-    std::shared_ptr<GUILibraryLVGL> gui = std::make_shared<GUILibraryLVGL>(driver);
-
-    driver->init(gui->getWindowWidth(), gui->getWindowHeight());
-    driver->createWindow(title);
-    gui->startRenderThread();
-
-    return gui;
+    return std::make_shared<LVGLToolkit>(driver);
 }
 
-void avitab::XPlaneEnvironment::createMenu(const std::string& name) {
+void XPlaneEnvironment::createMenu(const std::string& name) {
     XPLMMenuID pluginMenu = XPLMFindPluginsMenu();
     subMenuIdx = XPLMAppendMenuItem(pluginMenu, name.c_str(), nullptr, 0);
 

@@ -21,25 +21,47 @@
 namespace avitab {
 
 AviTab::AviTab(std::shared_ptr<Environment> environment):
-    env(environment)
+    env(environment),
+    guiLib(environment->createGUIToolkit())
 {
 }
 
-void AviTab::enable() {
-    logger::verbose("Starting AviTab %d.%d.%d",
-            AVITAB_VERSION_MAJOR, AVITAB_VERSION_MINOR, AVITAB_VERSION_PATCH);
+void AviTab::startApp() {
+    logger::verbose("Starting AviTab %s", AVITAB_VERSION_STR);
 
     env->createMenu("AviTab");
-    env->addMenuEntry("Show Tablet", std::bind(&AviTab::showTablet, this));
+    env->addMenuEntry("Show Tablet", std::bind(&AviTab::onShowTablet, this));
 }
 
-void AviTab::showTablet() {
+void AviTab::onShowTablet() {
     logger::info("Showing tablet");
-    guiLib = env->createWindow("AviTab");
+
+    guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
+    guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+}
+
+void AviTab::createLayout() {
+    // runs in GUI thread
+    auto screen = guiLib->screen();
+
+    headContainer = std::make_shared<Container>(screen);
+    headContainer->setPosition(0, 0);
+    headContainer->setDimensions(screen->getWidth(), 30);
+
+    centerContainer = std::make_shared<Container>(screen);
+    centerContainer->setPosition(0, headContainer->getHeight());
+    centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
+
+    headerApp = std::make_shared<HeaderApp>(headContainer);
+
+    screen->activate();
 }
 
 void AviTab::disable() {
     logger::verbose("Stopping AviTab");
+    headContainer.reset();
+    centerContainer.reset();
+    headerApp.reset();
     guiLib.reset();
 }
 

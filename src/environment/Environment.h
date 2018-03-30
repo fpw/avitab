@@ -18,10 +18,10 @@
 #ifndef SRC_ENVIRONMENT_ENVIRONMENT_H_
 #define SRC_ENVIRONMENT_ENVIRONMENT_H_
 
-#include "GUILibrary.h"
 #include <memory>
 #include <string>
 #include <functional>
+#include "src/gui_toolkit/LVGLToolkit.h"
 
 namespace avitab {
 
@@ -31,7 +31,7 @@ namespace avitab {
  */
 class Environment {
 public:
-    virtual std::shared_ptr<GUILibrary> createWindow(const std::string &title) = 0;
+    virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
 
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, std::function<void()> cb) = 0;
