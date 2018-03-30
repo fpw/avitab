@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(AviTab VERSION 0.0.1 DESCRIPTION "AviTab X-Plane plugin")
 
+
 configure_file(
   "${PROJECT_SOURCE_DIR}/config.h.in"
   "${PROJECT_BINARY_DIR}/config.h"

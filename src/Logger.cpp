@@ -25,7 +25,7 @@
 
 namespace {
 
-void log(const std::string& format, va_list args) {
+void log(const std::string format, va_list args) {
     char buf[2048];
     vsprintf(buf, format.c_str(), args);
     fputs(buf, stdout);
@@ -43,28 +43,28 @@ void logger::init() {
 #endif
 }
 
-void logger::verbose(const std::string& format, ...) {
+void logger::verbose(const std::string format, ...) {
     va_list args;
     va_start(args, format);
     log(format, args);
     va_end(args);
 }
 
-void logger::info(const std::string& format, ...) {
+void logger::info(const std::string format, ...) {
     va_list args;
     va_start(args, format);
     log(format, args);
     va_end(args);
 }
 
-void logger::warn(const std::string& format, ...) {
+void logger::warn(const std::string format, ...) {
     va_list args;
     va_start(args, format);
     log(format, args);
     va_end(args);
 }
 
-void logger::error(const std::string& format, ...) {
+void logger::error(const std::string format, ...) {
     va_list args;
     va_start(args, format);
     log(format, args);

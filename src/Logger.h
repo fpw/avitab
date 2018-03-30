@@ -23,10 +23,10 @@
 namespace logger {
     void init();
 
-    void verbose(const std::string& format, ...);
-    void info(const std::string& format, ...);
-    void warn(const std::string& format, ...);
-    void error(const std::string& format, ...);
+    void verbose(const std::string format, ...);
+    void info(const std::string format, ...);
+    void warn(const std::string format, ...);
+    void error(const std::string format, ...);
 }
 
 #endif /* SRC_LOGGER_H_ */

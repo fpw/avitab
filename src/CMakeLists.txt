@@ -33,8 +33,8 @@ install(TARGETS avitab_plugin
 
 # Standalone program
 find_package(SDL2 REQUIRED)
-add_executable(AviTab StandAlone.cpp Logger.cpp)
-target_link_libraries(AviTab
+add_executable(AviTab-standalone StandAlone.cpp Logger.cpp)
+target_link_libraries(AviTab-standalone
     ${CommonLibs}
     avitab_env_standalone
     -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
