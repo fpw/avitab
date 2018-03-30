@@ -90,7 +90,7 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         XPLMSetWindowGravity(window, 0, 1, 0, 0);
     }
 
-    // XPLMSetWindowResizingLimits(id, width, height, width, height);
+    XPLMSetWindowResizingLimits(window, width(), height(), width(), height());
     XPLMSetWindowTitle(window, title.c_str());
 }
 
@@ -118,11 +118,35 @@ void XPlaneGUIDriver::onDraw() {
     glEnd();
 }
 
+void XPlaneGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
+    x = mouseX;
+    y = mouseY;
+    pressed = mousePressed;
+}
+
 bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
-    return false;
+    int winX, winY, windowWidth, windowHeight;
+
+    switch (status) {
+    case xplm_MouseDown:
+        XPLMGetWindowGeometry(window, &winX, &winY, &windowWidth, &windowHeight);
+        mouseX = x - winX;
+        mouseY = winY - y;
+        mousePressed = true;
+        break;
+    case xplm_MouseDrag:
+        // dragging passes invalid coordinates in the current beta :-/
+        mousePressed = true;
+        break;
+    case xplm_MouseUp:
+        mousePressed = false;
+        break;
+    }
+    return true;
 }
 
 bool XPlaneGUIDriver::onRightClick(int x, int y, XPLMMouseStatus status) {
+    printf("reporting RIGHT %d %d -> %d\n", x, y, status);
     return false;
 }
 

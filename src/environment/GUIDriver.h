@@ -32,6 +32,7 @@ public:
     virtual void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
     virtual void fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);
     virtual void copy(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
+    virtual void readPointerState(int &x, int &y, bool &pressed) = 0;
 
     virtual ~GUIDriver() = default;
 protected:

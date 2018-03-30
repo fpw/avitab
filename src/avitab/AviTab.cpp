@@ -30,7 +30,7 @@ void AviTab::enable() {
             AVITAB_VERSION_MAJOR, AVITAB_VERSION_MINOR, AVITAB_VERSION_PATCH);
 
     env->createMenu("AviTab");
-    env->addMenuEntry("Show Tablet", [this] (){ showTablet(); });
+    env->addMenuEntry("Show Tablet", std::bind(&AviTab::showTablet, this));
 }
 
 void AviTab::showTablet() {

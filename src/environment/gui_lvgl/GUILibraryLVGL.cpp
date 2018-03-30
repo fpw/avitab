@@ -19,6 +19,7 @@
 #include <chrono>
 #include <functional>
 #include <lvgl/lvgl.h>
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -28,10 +29,15 @@ GUILibraryLVGL::GUILibraryLVGL(std::shared_ptr<GUIDriver> drv):
     driver(drv),
     keepAlive(false)
 {
-    static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
     instance = this;
 
     lv_init();
+    initDisplayDriver();
+    initInputDriver();
+}
+
+void GUILibraryLVGL::initDisplayDriver() {
+    static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
 
     lv_disp_drv_t lvDriver;
     lv_disp_drv_init(&lvDriver);
@@ -50,6 +56,23 @@ GUILibraryLVGL::GUILibraryLVGL(std::shared_ptr<GUIDriver> drv):
     };
 
     lv_disp_drv_register(&lvDriver);
+}
+
+void GUILibraryLVGL::initInputDriver() {
+    lv_indev_drv_t inputDriver;
+    lv_indev_drv_init(&inputDriver);
+
+    inputDriver.type = LV_INDEV_TYPE_POINTER;
+    inputDriver.read = [] (lv_indev_data_t *data) -> bool {
+        int x, y;
+        bool pressed;
+        instance->driver->readPointerState(x, y, pressed);
+        data->state = pressed ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+        data->point.x = x;
+        data->point.y = y;
+        return false;
+    };
+    lv_indev_drv_register(&inputDriver);
 }
 
 void GUILibraryLVGL::startRenderThread() {
@@ -76,10 +99,9 @@ void GUILibraryLVGL::renderLoop() {
 
         auto endAt = clock::now();
         auto incMs = std::chrono::duration_cast<std::chrono::milliseconds>(endAt - startAt).count();
-        if (incMs == 0) {
-            std::this_thread::sleep_for(1ms);
-            incMs = 1;
-        }
+
+        std::this_thread::sleep_for(1ms);
+        incMs++;
 
         lv_tick_inc(incMs);
     }

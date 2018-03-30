@@ -31,10 +31,13 @@ public:
 
     void init(int width, int height) override;
     void createWindow(const std::string &title) override;
+    void readPointerState(int &x, int &y, bool &pressed) override;
 private:
     DataRef<bool> isVrEnabled;
     int textureId = -1;
     XPLMWindowID window = nullptr;
+    int mouseX = 0, mouseY = 0;
+    bool mousePressed = false;
 
     void onDraw();
     bool onClick(int x, int y, XPLMMouseStatus status);

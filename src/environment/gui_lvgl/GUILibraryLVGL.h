@@ -42,6 +42,8 @@ private:
     std::unique_ptr<std::thread> renderThread;
     std::atomic_bool keepAlive;
 
+    void initDisplayDriver();
+    void initInputDriver();
     void renderLoop();
 };
 

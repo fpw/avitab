@@ -63,25 +63,44 @@ void avitab::SDLGUIDriver::eventLoop() {
     while (true) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if(event.type == SDL_QUIT) {
-                if (texture) {
-                    SDL_DestroyTexture(texture);
-                }
-
-                if (renderer) {
-                    SDL_DestroyRenderer(renderer);
-                }
-
-                if (window) {
-                    SDL_DestroyWindow(window);
-                }
-
-                SDL_Quit();
+            switch (event.type) {
+            case SDL_QUIT:
+                onQuit();
                 return;
+            case SDL_MOUSEMOTION:
+                mouseX = event.motion.x;
+                mouseY = event.motion.y;
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    mousePressed = true;
+                }
+                break;
+            case SDL_MOUSEBUTTONUP:
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    mousePressed = false;
+                }
+                break;
             }
         }
         SDL_WaitEvent(nullptr);
     }
+}
+
+void SDLGUIDriver::onQuit() {
+    if (texture) {
+        SDL_DestroyTexture(texture);
+    }
+
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
+
+    SDL_Quit();
 }
 
 void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
@@ -91,6 +110,12 @@ void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const ui
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
+}
+
+void avitab::SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
+    x = mouseX;
+    y = mouseY;
+    pressed = mousePressed;
 }
 
 } /* namespace avitab */
