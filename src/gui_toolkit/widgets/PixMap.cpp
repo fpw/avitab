@@ -15,37 +15,29 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "PDFViewer.h"
+#include "PixMap.h"
 #include "src/Logger.h"
 
 namespace avitab {
 
-PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "PDF Viewer"))
+PixMap::PixMap(WidgetPtr parent, const uint32_t* pix, int dataWidth, int dataHeight):
+    Widget(parent),
+    data(pix),
+    width(dataWidth),
+    height(dataHeight)
 {
-    auto job = api().createRasterJob("test.pdf");
+    lv_obj_t *obj = lv_img_create(parentObj(), nullptr);
 
-    int width = window->getContentWidth();
-    int height = window->getContentHeight();
+    image.header.format = LV_IMG_FORMAT_INTERNAL_RAW;
+    image.header.w = dataWidth;
+    image.header.h = dataHeight;
+    image.header.chroma_keyed = 0;
+    image.header.alpha_byte = 1;
+    image.pixel_map = reinterpret_cast<const uint8_t *>(pix);
 
-    rasterBuffer.resize(width * height);
-    job->setOutputBuf(rasterBuffer.data(), width, height);
+    lv_img_set_src(obj, &image);
 
-    std::promise<JobInfo> infoPromise;
-    std::future<JobInfo> infoFuture = infoPromise.get_future();
-    std::thread worker(RasterJob::rasterize, *job, std::move(infoPromise));
-
-    infoFuture.wait();
-    worker.join();
-
-    window->setBackgroundWhite();
-    pixMap = std::make_unique<PixMap>(window, rasterBuffer.data(), width, height);
-    pixMap->centerInParent();
-}
-
-void PDFViewer::setOnExit(ExitFunct onExit) {
-    window->setOnClose(onExit);
+    setObj(obj);
 }
 
 } /* namespace avitab */

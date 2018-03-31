@@ -19,8 +19,8 @@
 
 namespace avitab {
 
-MainMenu::MainMenu(std::shared_ptr<Container> container):
-    App(container),
+MainMenu::MainMenu(FuncsPtr appFuncs, ContPtr container):
+    App(appFuncs, container),
     pdfButton(container, "PDF Viewer")
 {
 }

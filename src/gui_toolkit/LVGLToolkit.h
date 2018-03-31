@@ -26,6 +26,8 @@
 #include <vector>
 #include "src/environment/GUIDriver.h"
 #include "src/gui_toolkit/widgets/Screen.h"
+#include "src/gui_toolkit/rasterizers/DocumentRasterizer.h"
+#include "src/gui_toolkit/rasterizers/RasterJob.h"
 
 namespace avitab {
 
@@ -36,6 +38,8 @@ public:
 
     void createNativeWindow(const std::string &title);
     void destroyNativeWindow();
+
+    std::unique_ptr<RasterJob> createRasterJob(const std::string &document);
 
     std::shared_ptr<Screen> &screen();
 
@@ -49,6 +53,7 @@ public:
 private:
     static bool lvglIsInitialized;
     static LVGLToolkit *instance;
+    DocumentRasterizer docRasterizer;
     std::mutex guiMutex;
     std::vector<GUITask> pendingTasks;
     std::shared_ptr<GUIDriver> driver;

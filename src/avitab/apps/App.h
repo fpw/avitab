@@ -21,14 +21,21 @@
 #include <memory>
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
+#include "AppFunctions.h"
 
 namespace avitab {
 
 class App {
 public:
-    App(std::shared_ptr<Container> container);
+    using FuncsPtr = AppFunctions *;
+    using ContPtr = std::shared_ptr<Container>;
+
+    App(FuncsPtr appFuncs, ContPtr container);
+protected:
+    AppFunctions &api();
 private:
-    std::shared_ptr<Container> uiContainer;
+    FuncsPtr funcs;
+    ContPtr uiContainer;
 };
 
 } /* namespace avitab */

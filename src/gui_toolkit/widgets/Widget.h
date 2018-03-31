@@ -31,6 +31,7 @@ public:
     void setPosition(int x, int y);
     void setDimensions(int width, int height);
     void centerInParent();
+    void setBackgroundWhite();
     int getWidth();
     int getHeight();
 
@@ -43,6 +44,7 @@ protected:
 private:
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;
+    lv_style_t styleMod;
 };
 }
 

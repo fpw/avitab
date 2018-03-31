@@ -20,8 +20,8 @@
 
 namespace avitab {
 
-HeaderApp::HeaderApp(std::shared_ptr<Container> container):
-    App(container),
+HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
+    App(appFuncs, container),
     clockLabel(container, ""),
     tickTimer(std::bind(&HeaderApp::onTick, this), 1000)
 {

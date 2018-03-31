@@ -15,26 +15,22 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_
 
-#include <functional>
-#include <string>
 #include "Widget.h"
 
 namespace avitab {
 
-class Window: public Widget {
+class PixMap: public Widget {
 public:
-    using CloseCallback = std::function<void()>;
-    Window(WidgetPtr parent, const std::string &title);
-    void setOnClose(CloseCallback cb);
-    int getContentWidth();
-    int getContentHeight();
+    PixMap(WidgetPtr parent, const uint32_t *pix, int dataWidth, int dataHeight);
 private:
-    CloseCallback closeCallbackFunc;
+    lv_img_t image;
+    const uint32_t *data = nullptr;
+    int width = 0, height = 0;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_ */

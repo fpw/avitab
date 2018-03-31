@@ -42,6 +42,15 @@ Window::Window(WidgetPtr parent, const std::string& title):
     setObj(win);
 }
 
+int Window::getContentWidth() {
+    return lv_win_get_width(obj());
+}
+
+int Window::getContentHeight() {
+    // TODO: Why is the constant subtraction necessary?
+    return getHeight() - lv_win_get_btn_size(obj()) - 25;
+}
+
 void Window::setOnClose(CloseCallback cb) {
     closeCallbackFunc = cb;
 }

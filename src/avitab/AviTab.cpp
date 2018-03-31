@@ -59,7 +59,7 @@ void AviTab::createLayout() {
     }
 
     if (!headerApp) {
-        headerApp = std::make_shared<HeaderApp>(headContainer);
+        headerApp = std::make_shared<HeaderApp>(this, headContainer);
     }
 
     if (!centerContainer) {
@@ -78,15 +78,19 @@ void AviTab::createLayout() {
 
 void AviTab::onShowMainMenu() {
     guiLib->executeLater([this] () {
-        auto mainMenu = std::make_shared<MainMenu>(centerContainer);
+        auto mainMenu = std::make_shared<MainMenu>(this, centerContainer);
         mainMenu->setPDFViewerCallback(std::bind(&AviTab::onShowPDFApp, this));
         centerApp = mainMenu;
     });
 }
 
+std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
+    return guiLib->createRasterJob(path);
+}
+
 void AviTab::onShowPDFApp() {
     guiLib->executeLater([this] () {
-        auto pdfApp = std::make_shared<PDFViewer>(centerContainer);
+        auto pdfApp = std::make_shared<PDFViewer>(this, centerContainer);
         pdfApp->setOnExit(std::bind(&AviTab::onShowMainMenu, this));
         centerApp = pdfApp;
     });

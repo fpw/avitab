@@ -21,16 +21,20 @@
 #include <memory>
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
+#include "src/avitab/apps/AppFunctions.h"
 #include "src/avitab/apps/App.h"
 
 namespace avitab {
 
-class AviTab {
+class AviTab: public AppFunctions {
 public:
     AviTab(std::shared_ptr<Environment> environment);
     void startApp();
     void onShowTablet();
     void stopApp();
+
+    std::unique_ptr<RasterJob> createRasterJob(const std::string &path) override;
+
     ~AviTab();
 
 private:

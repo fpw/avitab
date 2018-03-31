@@ -15,26 +15,21 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
+#ifndef SRC_AVITAB_APPS_APPFUNCTIONS_H_
+#define SRC_AVITAB_APPS_APPFUNCTIONS_H_
 
-#include <functional>
+#include <memory>
 #include <string>
-#include "Widget.h"
+#include "src/gui_toolkit/rasterizers/RasterJob.h"
 
 namespace avitab {
 
-class Window: public Widget {
+class AppFunctions {
 public:
-    using CloseCallback = std::function<void()>;
-    Window(WidgetPtr parent, const std::string &title);
-    void setOnClose(CloseCallback cb);
-    int getContentWidth();
-    int getContentHeight();
-private:
-    CloseCallback closeCallbackFunc;
+    virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
+    virtual ~AppFunctions() = default;
 };
 
-} /* namespace avitab */
+}
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_ */
+#endif /* SRC_AVITAB_APPS_APPFUNCTIONS_H_ */

@@ -44,6 +44,14 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     }
 }
 
+int LVGLToolkit::getFrameWidth() {
+    return LV_HOR_RES;
+}
+
+int LVGLToolkit::getFrameHeight() {
+    return LV_VER_RES;
+}
+
 void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
 
@@ -105,16 +113,12 @@ void LVGLToolkit::destroyNativeWindow() {
     }
 }
 
-int LVGLToolkit::getFrameWidth() {
-    return LV_HOR_RES;
-}
-
-int LVGLToolkit::getFrameHeight() {
-    return LV_VER_RES;
-}
-
 std::shared_ptr<Screen> &LVGLToolkit::screen() {
     return mainScreen;
+}
+
+std::unique_ptr<RasterJob> LVGLToolkit::createRasterJob(const std::string& document) {
+    return docRasterizer.createJob(document);
 }
 
 void LVGLToolkit::guiLoop() {
@@ -141,7 +145,6 @@ void LVGLToolkit::guiLoop() {
             lv_task_handler();
         } catch (const std::exception &e) {
             logger::error("Exception in GUI: %s", e.what());
-            keepAlive = false;
         }
 
         auto endAt = clock::now();

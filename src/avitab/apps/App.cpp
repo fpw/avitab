@@ -19,9 +19,17 @@
 
 namespace avitab {
 
-App::App(std::shared_ptr<Container> container):
+App::App(FuncsPtr appFuncs, ContPtr container):
+    funcs(appFuncs),
     uiContainer(container)
 {
+    if (!funcs) {
+        throw std::runtime_error("No API passed to app");
+    }
+}
+
+AppFunctions& App::api() {
+    return *funcs;
 }
 
 } /* namespace avitab */

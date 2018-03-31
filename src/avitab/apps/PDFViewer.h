@@ -18,8 +18,12 @@
 #ifndef SRC_AVITAB_APPS_PDFVIEWER_H_
 #define SRC_AVITAB_APPS_PDFVIEWER_H_
 
+#include <cstdint>
+#include <vector>
+#include <memory>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
 
 namespace avitab {
 
@@ -27,10 +31,13 @@ class PDFViewer: public App {
 public:
     using ExitFunct = std::function<void()>;
 
-    PDFViewer(std::shared_ptr<Container> container);
+    PDFViewer(FuncsPtr appFuncs, ContPtr container);
     void setOnExit(ExitFunct onExit);
 private:
-    Window window;
+    std::shared_ptr<Window> window;
+    std::unique_ptr<PixMap> pixMap;
+
+    std::vector<uint32_t> rasterBuffer;
 };
 
 } /* namespace avitab */

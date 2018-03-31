@@ -25,7 +25,7 @@ namespace avitab {
 
 class MainMenu: public App {
 public:
-    MainMenu(std::shared_ptr<Container> container);
+    MainMenu(FuncsPtr appFuncs, ContPtr container);
 
     void setPDFViewerCallback(std::function<void()> cb);
 
