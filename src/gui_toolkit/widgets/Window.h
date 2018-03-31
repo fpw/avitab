@@ -29,8 +29,8 @@ public:
     using CloseCallback = std::function<void()>;
     Window(WidgetPtr parent, const std::string &title);
     void setOnClose(CloseCallback cb);
+    void hideScrollbars();
     int getContentWidth();
-    int getContentHeight();
 private:
     CloseCallback closeCallbackFunc;
 };

@@ -25,6 +25,7 @@ namespace avitab {
 class PixMap: public Widget {
 public:
     PixMap(WidgetPtr parent, const uint32_t *pix, int dataWidth, int dataHeight);
+    void enablePanning();
 private:
     lv_img_t image;
     const uint32_t *data = nullptr;

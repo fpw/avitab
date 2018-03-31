@@ -22,15 +22,16 @@ namespace avitab {
 
 PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
     App(appFuncs, container),
-    window(std::make_shared<Window>(container, "PDF Viewer"))
+    window(std::make_shared<Window>(container, "PDF Viewer")),
+    rasterBuffer(std::make_shared<std::vector<uint32_t>>())
 {
+    window->hideScrollbars();
+
     auto job = api().createRasterJob("test.pdf");
 
     int width = window->getContentWidth();
-    int height = window->getContentHeight();
 
-    rasterBuffer.resize(width * height);
-    job->setOutputBuf(rasterBuffer.data(), width, height);
+    job->setOutputBuf(rasterBuffer, width);
 
     std::promise<JobInfo> infoPromise;
     std::future<JobInfo> infoFuture = infoPromise.get_future();
@@ -38,10 +39,12 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
 
     infoFuture.wait();
     worker.join();
+    JobInfo info = infoFuture.get();
 
     window->setBackgroundWhite();
-    pixMap = std::make_unique<PixMap>(window, rasterBuffer.data(), width, height);
+    pixMap = std::make_unique<PixMap>(window, rasterBuffer->data(), info.width, info.height);
     pixMap->centerInParent();
+    pixMap->enablePanning();
 }
 
 void PDFViewer::setOnExit(ExitFunct onExit) {

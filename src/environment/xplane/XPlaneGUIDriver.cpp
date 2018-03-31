@@ -126,6 +126,7 @@ void XPlaneGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
 
 bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
     int winX, winY, windowWidth, windowHeight;
+    XPLMGetWindowGeometry(window, &winX, &winY, &windowWidth, &windowHeight);
 
     switch (status) {
     case xplm_MouseDown:
@@ -135,7 +136,11 @@ bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
         mousePressed = true;
         break;
     case xplm_MouseDrag:
-        // dragging passes invalid coordinates in the current beta :-/
+        // dragging passes invalid coordinates in VR in the current beta :-/
+        if (!isVrEnabled) {
+            mouseX = x - winX;
+            mouseY = winY - y;
+        }
         mousePressed = true;
         break;
     case xplm_MouseUp:

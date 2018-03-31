@@ -18,13 +18,16 @@
 #ifndef SRC_GUI_TOOLKIT_RASTERIZERS_RASTERJOB_H_
 #define SRC_GUI_TOOLKIT_RASTERIZERS_RASTERJOB_H_
 
+#include <memory>
 #include <string>
 #include <future>
+#include <vector>
 #include <mupdf/fitz.h>
 
 namespace avitab {
 
 struct JobInfo {
+    int curPageNum;
     int pageCount;
     int width;
     int height;
@@ -32,8 +35,10 @@ struct JobInfo {
 
 class RasterJob {
 public:
+    using RasterBuf = std::shared_ptr<std::vector<uint32_t>>;
+
     RasterJob(fz_context *fzCtx, const std::string &path);
-    void setOutputBuf(uint32_t *buf, int width, int height);
+    void setOutputBuf(RasterBuf buf, int initialWidth);
     void rasterize(std::promise<JobInfo> result);
 
     ~RasterJob();
@@ -47,8 +52,9 @@ private:
     fz_page *page = nullptr;
     int curPage = -1;
 
-    uint32_t *outBuf = nullptr;
-    int outWidth = 0, outHeight = 0;
+    // Output parameters
+    RasterBuf outBuf;
+    int outWidth = -1;
 
     void doWork(JobInfo &info);
     void openDocument(JobInfo &info);

@@ -16,7 +16,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdexcept>
-#include <algorithm>
 #include "RasterJob.h"
 #include "src/Logger.h"
 
@@ -31,18 +30,18 @@ RasterJob::RasterJob(fz_context* fzCtx, const std::string& path):
     }
 }
 
-void RasterJob::setOutputBuf(uint32_t* buf, int width, int height) {
+void RasterJob::setOutputBuf(RasterBuf buf, int initialWidth) {
     if (!buf) {
         throw std::runtime_error("No buffer passed to RasterJob");
     }
     outBuf = buf;
-    outWidth = width;
-    outHeight = height;
+    outWidth = initialWidth;
 }
 
 void RasterJob::rasterize(std::promise<JobInfo> result) {
     try {
         JobInfo info;
+        info.curPageNum = 1;
         doWork(info);
         result.set_value(info);
     } catch (const std::exception &e) {
@@ -54,7 +53,7 @@ void RasterJob::rasterize(std::promise<JobInfo> result) {
 void RasterJob::doWork(JobInfo &info) {
     logger::info("Rasterizing '%s'", docPath.c_str());
     openDocument(info);
-    loadPage(1);
+    loadPage(info.curPageNum);
     fz_matrix scaleMatrix = calculateScale();
     rasterPage(info, scaleMatrix);
     logger::info("Done rasterizing");
@@ -119,17 +118,19 @@ void RasterJob::rasterPage(JobInfo &info, fz_matrix &scaleMatrix) {
     fz_pixmap *pix;
     fz_try(ctx) {
         pix = fz_new_pixmap_from_page(ctx, page, &scaleMatrix, fz_device_rgb(ctx), 1);
-        logger::verbose("buffer size: %dx%d", outWidth, outHeight);
         logger::verbose("raster size: %dx%d", pix->w, pix->h);
     } fz_catch(ctx) {
         throw std::runtime_error("Cannot render page: " + std::string(fz_caught_message(ctx)));
     }
 
-    int width = std::min(pix->w, outWidth);
-    int height = std::min(pix->h, outHeight);
+    int width = pix->w;
+    int height = pix->h;
+
+    outBuf->resize(width * height);
 
     logger::verbose("raster has alpha: %d", pix->alpha);
 
+    auto &outPix = *outBuf;
     for (int y = 0; y < height; y++) {
         uint8_t *ptr = &pix->samples[y * pix->stride];
         for (int x = 0; x < width; x++) {
@@ -139,12 +140,12 @@ void RasterJob::rasterPage(JobInfo &info, fz_matrix &scaleMatrix) {
             } else {
                 argb = 0xFF000000 | (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
             }
-            outBuf[y * outWidth + x] = argb;
+            outPix[y * outWidth + x] = argb;
             ptr += pix->n;
         }
     }
-    info.width = pix->w;
-    info.height = pix->h;
+    info.width = width;
+    info.height = height;
 
     fz_drop_pixmap(ctx, pix);
 }

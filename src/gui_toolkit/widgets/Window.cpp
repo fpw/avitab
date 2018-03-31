@@ -42,13 +42,12 @@ Window::Window(WidgetPtr parent, const std::string& title):
     setObj(win);
 }
 
-int Window::getContentWidth() {
-    return lv_win_get_width(obj());
+void avitab::Window::hideScrollbars() {
+    lv_win_set_sb_mode(obj(), LV_SB_MODE_OFF);
 }
 
-int Window::getContentHeight() {
-    // TODO: Why is the constant subtraction necessary?
-    return getHeight() - lv_win_get_btn_size(obj()) - 25;
+int Window::getContentWidth() {
+    return lv_win_get_width(obj());
 }
 
 void Window::setOnClose(CloseCallback cb) {

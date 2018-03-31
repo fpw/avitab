@@ -37,7 +37,7 @@ private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;
 
-    std::vector<uint32_t> rasterBuffer;
+    std::shared_ptr<std::vector<uint32_t>> rasterBuffer;
 };
 
 } /* namespace avitab */

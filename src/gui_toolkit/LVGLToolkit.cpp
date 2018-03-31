@@ -38,7 +38,7 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         lv_init();
         initDisplayDriver();
         initInputDriver();
-        lv_theme_t *theme = lv_theme_night_init(210, &lv_font_dejavu_20);
+        lv_theme_t *theme = lv_theme_night_init(210, LV_FONT_DEFAULT);
         lv_theme_set_current(theme);
         lvglIsInitialized = true;
     }

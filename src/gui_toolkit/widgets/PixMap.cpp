@@ -40,4 +40,8 @@ PixMap::PixMap(WidgetPtr parent, const uint32_t* pix, int dataWidth, int dataHei
     setObj(obj);
 }
 
+void PixMap::enablePanning() {
+    lv_obj_set_drag(obj(), true);
+}
+
 } /* namespace avitab */
