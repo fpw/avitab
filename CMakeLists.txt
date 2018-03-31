@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.9)
 project(AviTab VERSION 0.0.1 DESCRIPTION "AviTab X-Plane plugin")
 
 
