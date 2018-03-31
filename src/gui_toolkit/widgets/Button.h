@@ -18,9 +18,10 @@
 #ifndef SRC_GUI_TOOLKIT_WIDGETS_BUTTON_H_
 #define SRC_GUI_TOOLKIT_WIDGETS_BUTTON_H_
 
-#include "Widget.h"
 #include <functional>
 #include <vector>
+#include <string>
+#include "Widget.h"
 
 namespace avitab {
 

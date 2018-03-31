@@ -18,8 +18,9 @@
 #ifndef SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
 #define SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
 
-#include "Widget.h"
 #include <functional>
+#include <string>
+#include "Widget.h"
 
 namespace avitab {
 
