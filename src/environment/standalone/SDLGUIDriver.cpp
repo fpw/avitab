@@ -48,7 +48,7 @@ void SDLGUIDriver::createWindow(const std::string& title) {
     }
 
     texture = SDL_CreateTexture(renderer,
-        SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+        SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC,
         width(), height());
 
     if (!texture) {

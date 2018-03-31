@@ -30,13 +30,13 @@
 /* Horizontal and vertical resolution of the library.*/
 #define LV_HOR_RES          (800)
 #define LV_VER_RES          (480)
-#define LV_DPI              100
+#define LV_DPI              60
 
 /* Size of VDB (Virtual Display Buffer: the internal graphics buffer).
  * Required for buffered drawing, opacity and anti-aliasing
  * VDB makes the double buffering, you don't need to deal with it!
  * Typical size: ~1/10 screen */
-#define LV_VDB_SIZE         (20 * LV_HOR_RES)  /*Size of VDB in pixel count (1/10 screen size is good for first)*/
+#define LV_VDB_SIZE         (LV_VER_RES * LV_HOR_RES)  /*Size of VDB in pixel count (1/10 screen size is good for first)*/
 #define LV_VDB_ADR          0                  /*Place VDB to a specific address (e.g. in external RAM) (0: allocate automatically into RAM)*/
 
 /* Use two Virtual Display buffers (VDB) parallelize rendering and flushing (optional)
@@ -48,7 +48,7 @@
 #define LV_ANTIALIAS        1       /*1: Enable anti-aliasing*/
 
 /*Screen refresh settings*/
-#define LV_REFR_PERIOD      50    /*Screen refresh period in milliseconds*/
+#define LV_REFR_PERIOD       1    /*Screen refresh period in milliseconds*/
 #define LV_INV_FIFO_SIZE    32    /*The average count of objects on a screen */
 
 /*=================
@@ -56,7 +56,7 @@
  *=================*/
 
 /*Input device settings*/
-#define LV_INDEV_READ_PERIOD            50                     /*Input device read period in milliseconds*/
+#define LV_INDEV_READ_PERIOD            1                      /*Input device read period in milliseconds*/
 #define LV_INDEV_POINT_MARKER           0                      /*Mark the pressed points  (required: USE_LV_REAL_DRAW = 1)*/
 #define LV_INDEV_DRAG_LIMIT             10                     /*Drag threshold in pixels */
 #define LV_INDEV_DRAG_THROW             20                     /*Drag throw slow-down in [%]. Greater value means faster slow-down */
@@ -109,8 +109,8 @@
 #define USE_LV_FONT_SYMBOL_10              0
 
 #define USE_LV_FONT_DEJAVU_20              8
-#define USE_LV_FONT_DEJAVU_20_LATIN_SUP    0
-#define USE_LV_FONT_DEJAVU_20_CYRILLIC     0
+#define USE_LV_FONT_DEJAVU_20_LATIN_SUP    8
+#define USE_LV_FONT_DEJAVU_20_CYRILLIC     8
 #define USE_LV_FONT_SYMBOL_20              8
 
 #define USE_LV_FONT_DEJAVU_30              0
