@@ -15,19 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
+#ifndef SRC_AVITAB_APPS_PDFVIEWER_H_
+#define SRC_AVITAB_APPS_PDFVIEWER_H_
 
-#include "Widget.h"
+#include "App.h"
+#include "src/gui_toolkit/widgets/Window.h"
 
 namespace avitab {
 
-class Screen: public Widget {
+class PDFViewer: public App {
 public:
-    Screen();
-    void activate();
+    using ExitFunct = std::function<void()>;
+
+    PDFViewer(std::shared_ptr<Container> container);
+    void setOnExit(ExitFunct onExit);
+private:
+    Window window;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_ */
+#endif /* SRC_AVITAB_APPS_PDFVIEWER_H_ */

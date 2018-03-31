@@ -20,11 +20,11 @@
 
 namespace avitab {
 
-HeaderApp::HeaderApp(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container):
-    App(functions, container),
+HeaderApp::HeaderApp(std::shared_ptr<Container> container):
+    App(container),
+    clockLabel(container, ""),
     tickTimer(std::bind(&HeaderApp::onTick, this), 1000)
 {
-    clockLabel = std::make_shared<Label>(container, "");
     onTick();
 }
 
@@ -34,7 +34,7 @@ bool HeaderApp::onTick() {
 
     char buf[16];
     strftime(buf, sizeof(buf), "%H:%M", local);
-    clockLabel->setText(std::string(buf));
+    clockLabel.setText(std::string(buf));
     return true;
 }
 

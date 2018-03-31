@@ -26,10 +26,10 @@ namespace avitab {
 
 class HeaderApp: public App {
 public:
-    HeaderApp(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container);
+    HeaderApp(std::shared_ptr<Container> container);
 private:
+    Label clockLabel;
     Timer tickTimer;
-    std::shared_ptr<Label> clockLabel;
 
     bool onTick();
 };

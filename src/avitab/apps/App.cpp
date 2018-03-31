@@ -19,8 +19,7 @@
 
 namespace avitab {
 
-App::App(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container):
-    appFunctions(functions),
+App::App(std::shared_ptr<Container> container):
     uiContainer(container)
 {
 }

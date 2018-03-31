@@ -30,4 +30,8 @@ void Container::setLayoutRightColumns() {
     lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
 }
 
+void Container::setLayoutPretty() {
+    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
+}
+
 } /* namespace avitab */

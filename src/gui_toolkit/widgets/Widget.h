@@ -34,7 +34,7 @@ public:
     int getWidth();
     int getHeight();
 
-    virtual ~Widget() = default;
+    virtual ~Widget();
 
 protected:
     void setObj(lv_obj_t *obj);

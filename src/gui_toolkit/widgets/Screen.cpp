@@ -30,8 +30,4 @@ void Screen::activate() {
     lv_scr_load(obj());
 }
 
-Screen::~Screen() {
-    lv_obj_del(obj());
-}
-
 } /* namespace avitab */

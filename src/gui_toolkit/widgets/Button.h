@@ -15,19 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_BUTTON_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_BUTTON_H_
 
 #include "Widget.h"
+#include <functional>
+#include <vector>
 
 namespace avitab {
 
-class Screen: public Widget {
+class Button: public Widget {
 public:
-    Screen();
-    void activate();
+    using ButtonCallback = std::function<void()>;
+    Button(WidgetPtr parent, const std::string &text);
+
+    void setCallback(ButtonCallback cb);
+
+private:
+    ButtonCallback callbackFunc;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_BUTTON_H_ */

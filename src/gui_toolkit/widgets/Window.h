@@ -15,19 +15,23 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_
 
 #include "Widget.h"
+#include <functional>
 
 namespace avitab {
 
-class Screen: public Widget {
+class Window: public Widget {
 public:
-    Screen();
-    void activate();
+    using CloseCallback = std::function<void()>;
+    Window(WidgetPtr parent, const std::string &title);
+    void setOnClose(CloseCallback cb);
+private:
+    CloseCallback closeCallbackFunc;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_WINDOW_H_ */

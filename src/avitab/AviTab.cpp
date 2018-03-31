@@ -17,43 +17,16 @@
  */
 #include "AviTab.h"
 #include "src/Logger.h"
+#include "src/avitab/apps/PDFViewer.h"
+#include "src/avitab/apps/MainMenu.h"
+#include "src/avitab/apps/HeaderApp.h"
 
 namespace avitab {
-
-class AppFunctionsImpl: public AppFunctions {
-public:
-    AppFunctionsImpl(std::weak_ptr<Environment> envPtr, std::weak_ptr<LVGLToolkit> guiLib):
-        env(envPtr),
-        guiLib(guiLib)
-    {
-
-    }
-
-    Environment &environment() override {
-        if (auto e = env.lock()) {
-            return *e;
-        } else {
-            throw std::runtime_error("Environment expired");
-        }
-    }
-
-    LVGLToolkit &gui() override {
-        if (auto lv = guiLib.lock()) {
-            return *lv;
-        } else {
-            throw std::runtime_error("GUI toolkit expired");
-        }
-    }
-private:
-    std::weak_ptr<Environment> env;
-    std::weak_ptr<LVGLToolkit> guiLib;
-};
 
 AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
-    appFunctions = std::make_shared<AppFunctionsImpl>(env, guiLib);
 }
 
 void AviTab::startApp() {
@@ -86,17 +59,37 @@ void AviTab::createLayout() {
     }
 
     if (!headerApp) {
-        headerApp = std::make_shared<HeaderApp>(appFunctions, headContainer);
+        headerApp = std::make_shared<HeaderApp>(headContainer);
     }
 
     if (!centerContainer) {
         centerContainer = std::make_shared<Container>(screen);
         centerContainer->setPosition(0, headContainer->getHeight());
         centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
+        centerContainer->setLayoutPretty();
     }
 
+    if (!centerApp) {
+        onShowMainMenu();
+    }
 
     screen->activate();
+}
+
+void AviTab::onShowMainMenu() {
+    guiLib->executeLater([this] () {
+        auto mainMenu = std::make_shared<MainMenu>(centerContainer);
+        mainMenu->setPDFViewerCallback(std::bind(&AviTab::onShowPDFApp, this));
+        centerApp = mainMenu;
+    });
+}
+
+void AviTab::onShowPDFApp() {
+    guiLib->executeLater([this] () {
+        auto pdfApp = std::make_shared<PDFViewer>(centerContainer);
+        pdfApp->setOnExit(std::bind(&AviTab::onShowMainMenu, this));
+        centerApp = pdfApp;
+    });
 }
 
 void AviTab::stopApp() {

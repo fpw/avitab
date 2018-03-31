@@ -2,5 +2,7 @@ add_library(avitab_gui_lvgl_widgets
     Widget.cpp
     Screen.cpp
     Container.cpp
+    Window.cpp
     Label.cpp
+    Button.cpp
 )

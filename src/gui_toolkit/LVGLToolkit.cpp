@@ -38,6 +38,8 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         lv_init();
         initDisplayDriver();
         initInputDriver();
+        lv_theme_t *theme = lv_theme_night_init(210, &lv_font_dejavu_20);
+        lv_theme_set_current(theme);
         lvglIsInitialized = true;
     }
 }
@@ -89,15 +91,15 @@ void LVGLToolkit::createNativeWindow(const std::string& title) {
         // so it's enough to re-create it without starting rendering again
         mainScreen = std::make_shared<Screen>();
         keepAlive = true;
-        renderThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
+        guiThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
     }
 }
 
 void LVGLToolkit::destroyNativeWindow() {
-    if (renderThread) {
+    if (guiThread) {
         keepAlive = false;
-        renderThread->join();
-        renderThread.reset();
+        guiThread->join();
+        guiThread.reset();
 
         mainScreen.reset();
     }
@@ -127,10 +129,13 @@ void LVGLToolkit::guiLoop() {
         try {
             std::lock_guard<std::mutex> lock(guiMutex);
             // first run our owns tasks
-            for (GUITask &task: pendingTasks) {
+
+            // since a task could modify the task list, work on a copy
+            std::vector<GUITask> tasks = pendingTasks;
+            pendingTasks.clear();
+            for (GUITask &task: tasks) {
                 task();
             }
-            pendingTasks.clear();
 
             // then the actual GUI's
             lv_task_handler();
@@ -154,8 +159,12 @@ void LVGLToolkit::guiLoop() {
     logger::verbose("LVGL thread destroyed");
 }
 
-void LVGLToolkit::runInGUI(std::function<void()> func) {
+void LVGLToolkit::runInGUI(GUITask func) {
     std::lock_guard<std::mutex> lock(guiMutex);
+    executeLater(func);
+}
+
+void LVGLToolkit::executeLater(GUITask func) {
     pendingTasks.push_back(func);
 }
 

@@ -25,6 +25,7 @@ namespace avitab {
 class Container: public Widget {
 public:
     Container(WidgetPtr parent);
+    void setLayoutPretty();
     void setLayoutRightColumns();
 };
 

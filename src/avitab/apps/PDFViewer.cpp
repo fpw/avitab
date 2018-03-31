@@ -15,22 +15,18 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPFUNCTIONS_H_
-#define SRC_AVITAB_APPFUNCTIONS_H_
-
-#include "src/environment/Environment.h"
-#include "src/gui_toolkit/LVGLToolkit.h"
+#include "PDFViewer.h"
 
 namespace avitab {
 
-class AppFunctions {
-public:
-    virtual Environment &environment() = 0;
-    virtual LVGLToolkit &gui() = 0;
-
-    virtual ~AppFunctions() = default;
-};
-
+PDFViewer::PDFViewer(std::shared_ptr<Container> container):
+    App(container),
+    window(container, "PDF Viewer")
+{
 }
 
-#endif /* SRC_AVITAB_APPFUNCTIONS_H_ */
+void PDFViewer::setOnExit(ExitFunct onExit) {
+    window.setOnClose(onExit);
+}
+
+} /* namespace avitab */

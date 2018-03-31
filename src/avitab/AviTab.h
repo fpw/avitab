@@ -21,8 +21,7 @@
 #include <memory>
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
-#include "src/avitab/apps/HeaderApp.h"
-#include "AppFunctions.h"
+#include "src/avitab/apps/App.h"
 
 namespace avitab {
 
@@ -41,12 +40,14 @@ private:
     std::shared_ptr<Container> headContainer;
     std::shared_ptr<Container> centerContainer;
 
-    std::shared_ptr<HeaderApp> headerApp;
-
-    std::shared_ptr<AppFunctions> appFunctions;
+    std::shared_ptr<App> headerApp;
+    std::shared_ptr<App> centerApp;
 
     void createLayout();
     void cleanupLayout();
+
+    void onShowMainMenu();
+    void onShowPDFApp();
 };
 
 } /* namespace avitab */

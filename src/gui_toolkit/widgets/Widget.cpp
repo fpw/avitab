@@ -65,4 +65,8 @@ int Widget::getHeight() {
     return lv_obj_get_height(obj());
 }
 
+Widget::~Widget() {
+    lv_obj_del(obj());
+}
+
 } // namespace avitab

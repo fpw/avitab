@@ -19,17 +19,15 @@
 #define SRC_AVITAB_APPS_APP_H_
 
 #include <memory>
-#include <functional>
-#include "src/avitab/AppFunctions.h"
+#include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
 
 namespace avitab {
 
 class App {
 public:
-    App(std::weak_ptr<AppFunctions> functions, std::shared_ptr<Container> container);
+    App(std::shared_ptr<Container> container);
 private:
-    std::weak_ptr<AppFunctions> appFunctions;
     std::shared_ptr<Container> uiContainer;
 };
 

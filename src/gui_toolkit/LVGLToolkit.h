@@ -39,7 +39,11 @@ public:
 
     std::shared_ptr<Screen> &screen();
 
+    // call can be any task except for the GUI task
     void runInGUI(GUITask func);
+
+    // caller must be the GUI task
+    void executeLater(GUITask func);
 
     ~LVGLToolkit();
 private:
@@ -48,7 +52,7 @@ private:
     std::mutex guiMutex;
     std::vector<GUITask> pendingTasks;
     std::shared_ptr<GUIDriver> driver;
-    std::unique_ptr<std::thread> renderThread;
+    std::unique_ptr<std::thread> guiThread;
     std::atomic_bool keepAlive;
     std::shared_ptr<Screen> mainScreen;
 

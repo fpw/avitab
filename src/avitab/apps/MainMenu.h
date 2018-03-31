@@ -15,19 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
+#ifndef SRC_AVITAB_APPS_MAINMENU_H_
+#define SRC_AVITAB_APPS_MAINMENU_H_
 
-#include "Widget.h"
+#include "App.h"
+#include "src/gui_toolkit/widgets/Button.h"
 
 namespace avitab {
 
-class Screen: public Widget {
+class MainMenu: public App {
 public:
-    Screen();
-    void activate();
+    MainMenu(std::shared_ptr<Container> container);
+
+    void setPDFViewerCallback(std::function<void()> cb);
+
+private:
+    Button pdfButton;
+
+    void nullCallback();
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_ */
+#endif /* SRC_AVITAB_APPS_MAINMENU_H_ */
