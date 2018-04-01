@@ -130,12 +130,8 @@ void RasterJob::rasterPage(JobInfo &info, fz_matrix &scaleMatrix) {
     for (int y = 0; y < height; y++) {
         uint8_t *ptr = &pix->samples[y * pix->stride];
         for (int x = 0; x < width; x++) {
-            uint32_t argb;
-            if (pix->alpha) {
-                argb = (ptr[3] << 24) | (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
-            } else {
-                argb = 0xFF000000 | (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
-            }
+            uint32_t alphaMask = pix->alpha ? (ptr[3] << 24) : 0xFF000000;
+            uint32_t argb = alphaMask | (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
             outPix[y * outWidth + x] = argb;
             ptr += pix->n;
         }
