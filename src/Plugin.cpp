@@ -26,13 +26,12 @@ std::shared_ptr<avitab::Environment> environment;
 std::unique_ptr<avitab::AviTab> aviTab;
 
 PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescription) {
-    logger::init(true);
-
     strncpy(outName, "AviTab", 255);
     strncpy(outSignature, "org.solhost.folko.avitab", 255);
 
     try {
         environment = std::make_shared<avitab::XPlaneEnvironment>();
+        logger::init(environment->getProgramPath());
         strncpy(outDescription, "A tablet to help with navigation.", 255);
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStart: %s", e.what());

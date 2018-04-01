@@ -36,7 +36,7 @@ std::vector<DirEntry> readDirectory(const std::string &utf8Path);
 std::string realPath(const std::string &utf8Path);
 std::string getFileNameFromPath(const std::string &utf8Path);
 
-std::string getLocalTime();
+std::string getLocalTime(const std::string &format);
 
 }
 

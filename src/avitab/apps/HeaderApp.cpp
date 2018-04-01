@@ -29,7 +29,7 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
 }
 
 bool HeaderApp::onTick() {
-    std::string time = platform::getLocalTime();
+    std::string time = platform::getLocalTime("%H:%M");
     if (curLabel != time) {
         // to prevent rendering calls each second
         clockLabel.setText(time);

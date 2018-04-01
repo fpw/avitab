@@ -31,7 +31,7 @@ Button::Button(WidgetPtr parent, const std::string& text):
     setObj(button);
 }
 
-avitab::Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
+Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
     Widget(parent)
 {
     iconData = icon;

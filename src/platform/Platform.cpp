@@ -118,12 +118,12 @@ std::string getFileNameFromPath(const std::string& utf8Path) {
     return nativeToUTF8(base);
 }
 
-std::string getLocalTime() {
+std::string getLocalTime(const std::string &format) {
     time_t now = time(nullptr);
     tm *local = localtime(&now);
 
     char buf[16];
-    strftime(buf, sizeof(buf), "%H:%M", local);
+    strftime(buf, sizeof(buf), format.c_str(), local);
     return buf;
 }
 

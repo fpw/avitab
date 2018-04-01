@@ -17,58 +17,55 @@
  */
 #include <cstdarg>
 #include <cstdio>
+#include <fstream>
 #include "Logger.h"
-
-#ifdef _WIN32
-#   include <windows.h>
-#endif
+#include "src/platform/Platform.h"
 
 namespace {
 
+std::ofstream logFile;
+
 void log(const std::string format, va_list args) {
-    char buf[2048];
-    vsprintf(buf, format.c_str(), args);
-    fputs(buf, stdout);
-    fputs("\n", stdout);
-    fflush(stdout);
-}
-
-}
-
-void logger::init(bool showConsole) {
-#ifdef _WIN32
-    if (showConsole) {
-        AllocConsole();
-        freopen("CONOUT$", "w", stdout);
-        freopen("CONOUT$", "w", stderr);
+    if (logFile) {
+        char buf[2048];
+        vsprintf(buf, format.c_str(), args);
+        std::string timeStamp = platform::getLocalTime("%H:%M:%S");
+        logFile << timeStamp << " " << buf << std::endl;
+        std::flush(logFile);
     }
-#endif
+}
+
+}
+
+void logger::init(const std::string &path) {
+    logFile = std::ofstream(path + "log.txt");
+    info("AviTab logger initialized");
 }
 
 void logger::verbose(const std::string format, ...) {
     va_list args;
     va_start(args, format);
-    log(format, args);
+    log("v: " + format, args);
     va_end(args);
 }
 
 void logger::info(const std::string format, ...) {
     va_list args;
     va_start(args, format);
-    log(format, args);
+    log("i: " + format, args);
     va_end(args);
 }
 
 void logger::warn(const std::string format, ...) {
     va_list args;
     va_start(args, format);
-    log(format, args);
+    log("w: " + format, args);
     va_end(args);
 }
 
 void logger::error(const std::string format, ...) {
     va_list args;
     va_start(args, format);
-    log(format, args);
+    log("e: " + format, args);
     va_end(args);
 }

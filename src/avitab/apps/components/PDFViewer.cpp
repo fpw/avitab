@@ -46,16 +46,15 @@ void PDFViewer::updateJob() {
     // TODO: For now it's ok to do this synchronously
     std::promise<JobInfo> infoPromise;
     std::future<JobInfo> infoFuture = infoPromise.get_future();
-    std::thread worker(&RasterJob::rasterize, rasterJob.get(), std::move(infoPromise));
 
     try {
+        rasterJob->rasterize(std::move(infoPromise));
         JobInfo info = infoFuture.get();
         pixMap->draw(rasterBuffer->data(), info.width, info.height);
         pixMap->centerInParent();
     } catch (const std::exception &e) {
         logger::warn("Couldn't render page: %s", e.what());
     }
-    worker.join();
 }
 
 void PDFViewer::setupCallbacks() {

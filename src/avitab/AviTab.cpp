@@ -93,7 +93,7 @@ std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
     return guiLib->createRasterJob(path);
 }
 
-Icon avitab::AviTab::loadIcon(const std::string& path) {
+Icon AviTab::loadIcon(const std::string& path) {
     Icon icon;
     icon.data = std::make_shared<std::vector<uint32_t>>();
 
@@ -105,19 +105,28 @@ Icon avitab::AviTab::loadIcon(const std::string& path) {
     job->rasterize(std::move(infoPromise));
 
     // loading icons is so fast that we can do it synchronously
-    auto info = infoFuture.get();
-    icon.width = info.width;
-    icon.height = info.height;
+    try {
+        auto info = infoFuture.get();
+        icon.width = info.width;
+        icon.height = info.height;
+    } catch (const std::exception &e) {
+        logger::error("Couldn't raster icon: %s", e.what());
+        icon.width = 0;
+        icon.height = 0;
+    }
 
     return icon;
 }
 
-void avitab::AviTab::executeLater(std::function<void()> func) {
+void AviTab::executeLater(std::function<void()> func) {
     guiLib->executeLater(func);
 }
 
-std::string avitab::AviTab::getDataPath() {
+std::string AviTab::getDataPath() {
     return env->getProgramPath();
+}
+
+void AviTab::showErrorMessage(const std::string& error) {
 }
 
 void AviTab::stopApp() {

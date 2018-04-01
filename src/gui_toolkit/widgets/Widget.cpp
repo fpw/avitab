@@ -65,7 +65,7 @@ int Widget::getHeight() {
     return lv_obj_get_height(obj());
 }
 
-void avitab::Widget::setBackgroundWhite() {
+void Widget::setBackgroundWhite() {
     lv_style_copy(&styleMod, lv_obj_get_style(obj()));
     styleMod.body.main_color = LV_COLOR_WHITE;
     styleMod.body.grad_color = LV_COLOR_WHITE;
