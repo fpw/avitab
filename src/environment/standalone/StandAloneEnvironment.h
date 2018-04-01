@@ -26,15 +26,21 @@ namespace avitab {
 
 class StandAloneEnvironment: public Environment {
 public:
+    StandAloneEnvironment();
+
     void eventLoop();
 
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
+
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
 
+    std::string getProgramPath() override;
+
     virtual ~StandAloneEnvironment();
 private:
+    std::string ourPath;
     std::shared_ptr<SDLGUIDriver> driver;
 };
 

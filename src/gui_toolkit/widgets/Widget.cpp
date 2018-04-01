@@ -72,8 +72,20 @@ void avitab::Widget::setBackgroundWhite() {
     lv_img_set_style(obj(), &styleMod);
 }
 
+lv_img_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
+    lv_img_t res;
+    res.header.format = LV_IMG_FORMAT_INTERNAL_RAW;
+    res.header.w = width;
+    res.header.h = height;
+    res.header.chroma_keyed = 0;
+    res.header.alpha_byte = 1;
+    res.pixel_map = reinterpret_cast<const uint8_t *>(pix);
+    return res;
+}
+
 Widget::~Widget() {
     lv_obj_del(obj());
 }
 
 } // namespace avitab
+

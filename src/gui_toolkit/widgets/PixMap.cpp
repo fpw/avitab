@@ -28,13 +28,7 @@ PixMap::PixMap(WidgetPtr parent):
 }
 
 void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {
-    image.header.format = LV_IMG_FORMAT_INTERNAL_RAW;
-    image.header.w = dataWidth;
-    image.header.h = dataHeight;
-    image.header.chroma_keyed = 0;
-    image.header.alpha_byte = 1;
-    image.pixel_map = reinterpret_cast<const uint8_t *>(pix);
-
+    image = toLVImage(pix, dataWidth, dataHeight);
     lv_img_set_src(obj(), &image);
 }
 

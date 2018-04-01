@@ -15,10 +15,22 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <unistd.h>
+#include <SDL2/SDL.h>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 
 namespace avitab {
+
+StandAloneEnvironment::StandAloneEnvironment() {
+    char *path = SDL_GetBasePath();
+    if (path) {
+        ourPath = path;
+        SDL_free(path);
+    } else {
+        throw std::runtime_error("Couldn't find our path");
+    }
+}
 
 void StandAloneEnvironment::eventLoop() {
     if (driver) {
@@ -39,6 +51,10 @@ void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function
 }
 
 void StandAloneEnvironment::destroyMenu() {
+}
+
+std::string avitab::StandAloneEnvironment::getProgramPath() {
+    return ourPath;
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

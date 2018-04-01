@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 #include "Widget.h"
+#include "src/gui_toolkit/Icon.h"
 
 namespace avitab {
 
@@ -29,10 +30,13 @@ class Button: public Widget {
 public:
     using ButtonCallback = std::function<void()>;
     Button(WidgetPtr parent, const std::string &text);
+    Button(WidgetPtr parent, Icon icon, const std::string &caption);
 
     void setCallback(ButtonCallback cb);
 
 private:
+    Icon iconData;
+    lv_img_t iconImage;
     ButtonCallback callbackFunc;
 };
 

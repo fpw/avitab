@@ -29,21 +29,18 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
     // TODO are there PDFs with alpha masks on non-white background?
     window->setBackgroundWhite();
     window->hideScrollbars();
+    window->setOnClose([this] () { exit(); });
 
     pixMap->enablePanning();
 
-    loadDemo();
-}
+    setupCallbacks();
 
-void PDFViewer::setOnExit(ExitFunct onExit) {
-    window->setOnClose(onExit);
+    loadDemo();
 }
 
 void PDFViewer::loadDemo() {
     rasterJob = api().createRasterJob("test.pdf");
     rasterJob->setOutputBuf(rasterBuffer, window->getContentWidth());
-
-    setupCallbacks();
     updateJob();
 }
 

@@ -27,13 +27,19 @@ namespace avitab {
 
 class App {
 public:
+    using ExitFunct = std::function<void()>;
     using FuncsPtr = AppFunctions *;
     using ContPtr = std::shared_ptr<Container>;
 
     App(FuncsPtr appFuncs, ContPtr container);
+    void setOnExit(ExitFunct onExitFunct);
 protected:
     AppFunctions &api();
+    ContPtr getContainer();
+    void exit();
+    ExitFunct &getOnExit();
 private:
+    ExitFunct onExit;
     FuncsPtr funcs;
     ContPtr uiContainer;
 };

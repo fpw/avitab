@@ -31,6 +31,28 @@ Button::Button(WidgetPtr parent, const std::string& text):
     setObj(button);
 }
 
+avitab::Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
+    Widget(parent)
+{
+    iconData = icon;
+    iconImage = toLVImage(iconData.data->data(), iconData.width, iconData.height);
+
+    lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
+    lv_cont_set_fit(button, true, true);
+
+    lv_btn_set_style(button, LV_BTN_STYLE_REL, &lv_style_transp);
+    // lv_btn_set_style(button, LV_BTN_STYLE_PR, &lv_style_transp);
+
+    lv_obj_t *ico = lv_img_create(button, nullptr);
+    lv_img_set_src(ico, &iconImage);
+    lv_obj_set_click(ico, false);
+
+    lv_obj_t *label = lv_label_create(button, nullptr);
+    lv_label_set_text(label, caption.c_str());
+
+    setObj(button);
+}
+
 void Button::setCallback(ButtonCallback cb) {
     callbackFunc = cb;
     lv_obj_set_free_ptr(obj(), &callbackFunc);

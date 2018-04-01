@@ -30,10 +30,7 @@ namespace avitab {
 
 class PDFViewer: public App {
 public:
-    using ExitFunct = std::function<void()>;
-
     PDFViewer(FuncsPtr appFuncs, ContPtr container);
-    void setOnExit(ExitFunct onExit);
 private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;

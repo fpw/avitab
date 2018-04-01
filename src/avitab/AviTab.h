@@ -33,7 +33,11 @@ public:
     void onShowTablet();
     void stopApp();
 
+    // App API
     std::unique_ptr<RasterJob> createRasterJob(const std::string &path) override;
+    Icon loadIcon(const std::string &path) override;
+    void executeLater(std::function<void()> func) override;
+    std::string getDataPath() override;
 
     ~AviTab();
 
@@ -48,10 +52,9 @@ private:
     std::shared_ptr<App> centerApp;
 
     void createLayout();
+    void showMainMenu();
+    void showPDFViewer();
     void cleanupLayout();
-
-    void onShowMainMenu();
-    void onShowPDFApp();
 };
 
 } /* namespace avitab */

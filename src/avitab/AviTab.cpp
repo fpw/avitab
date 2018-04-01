@@ -19,6 +19,7 @@
 #include "src/Logger.h"
 #include "src/avitab/apps/PDFViewer.h"
 #include "src/avitab/apps/MainMenu.h"
+#include "src/avitab/apps/FileSelect.h"
 #include "src/avitab/apps/HeaderApp.h"
 
 namespace avitab {
@@ -70,30 +71,53 @@ void AviTab::createLayout() {
     }
 
     if (!centerApp) {
-        onShowMainMenu();
+        showMainMenu();
     }
 
     screen->activate();
 }
 
-void AviTab::onShowMainMenu() {
-    guiLib->executeLater([this] () {
-        auto mainMenu = std::make_shared<MainMenu>(this, centerContainer);
-        mainMenu->setPDFViewerCallback(std::bind(&AviTab::onShowPDFApp, this));
-        centerApp = mainMenu;
-    });
+void AviTab::showMainMenu() {
+    auto menu = std::make_shared<MainMenu>(this, centerContainer);
+    std::string root = env->getProgramPath() + "icons/";
+    menu->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showPDFViewer(); });
+    centerApp = menu;
+}
+
+void AviTab::showPDFViewer() {
+    centerApp = std::make_shared<FileSelect>(this, centerContainer);
+    centerApp->setOnExit([this] () { showMainMenu(); });
 }
 
 std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
     return guiLib->createRasterJob(path);
 }
 
-void AviTab::onShowPDFApp() {
-    guiLib->executeLater([this] () {
-        auto pdfApp = std::make_shared<PDFViewer>(this, centerContainer);
-        pdfApp->setOnExit(std::bind(&AviTab::onShowMainMenu, this));
-        centerApp = pdfApp;
-    });
+Icon avitab::AviTab::loadIcon(const std::string& path) {
+    Icon icon;
+    icon.data = std::make_shared<std::vector<uint32_t>>();
+
+    auto job = guiLib->createRasterJob(path);
+    job->setOutputBuf(icon.data, 64);
+
+    std::promise<JobInfo> infoPromise;
+    auto infoFuture = infoPromise.get_future();
+    job->rasterize(std::move(infoPromise));
+
+    // loading icons is so fast that we can do it synchronously
+    auto info = infoFuture.get();
+    icon.width = info.width;
+    icon.height = info.height;
+
+    return icon;
+}
+
+void avitab::AviTab::executeLater(std::function<void()> func) {
+    guiLib->executeLater(func);
+}
+
+std::string avitab::AviTab::getDataPath() {
+    return env->getProgramPath();
 }
 
 void AviTab::stopApp() {

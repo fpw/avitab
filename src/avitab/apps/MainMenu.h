@@ -18,21 +18,31 @@
 #ifndef SRC_AVITAB_APPS_MAINMENU_H_
 #define SRC_AVITAB_APPS_MAINMENU_H_
 
+#include <vector>
+#include <memory>
+#include <functional>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
 
 namespace avitab {
 
 class MainMenu: public App {
 public:
+    using Callback = std::function<void()>;
+    struct Entry {
+        std::shared_ptr<Button> button;
+        std::shared_ptr<PixMap> pixMap;
+        Callback callback;
+    };
+
     MainMenu(FuncsPtr appFuncs, ContPtr container);
 
-    void setPDFViewerCallback(std::function<void()> cb);
+    void addEntry(const std::string &name, const std::string &icon, Callback cb);
 
 private:
-    Button pdfButton;
-
-    void nullCallback();
+    std::vector<Entry> entries;
 };
 
 } /* namespace avitab */

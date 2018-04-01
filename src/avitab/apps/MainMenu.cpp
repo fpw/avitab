@@ -16,17 +16,27 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "MainMenu.h"
+#include "PDFViewer.h"
 
 namespace avitab {
 
 MainMenu::MainMenu(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    pdfButton(container, "PDF Viewer")
+    App(appFuncs, container)
 {
 }
 
-void MainMenu::setPDFViewerCallback(std::function<void()> cb) {
-    pdfButton.setCallback(cb);
+void MainMenu::addEntry(const std::string& name, const std::string& icon, Callback cb) {
+    Entry entry;
+    entry.callback = cb;
+    entry.button = std::make_shared<Button>(getContainer(), api().loadIcon(icon), name);
+
+    entries.push_back(entry);
+    size_t index = entries.size() - 1;
+    entry.button->setCallback([this, index] () {
+        api().executeLater([this, index] () {
+            entries[index].callback();
+        });
+    });
 }
 
 } /* namespace avitab */

@@ -80,3 +80,6 @@ const void* Window::symbolToLVSymbol(Symbol symbol) {
 }
 
 } /* namespace avitab */
+
+void Window::clearContent() {
+}

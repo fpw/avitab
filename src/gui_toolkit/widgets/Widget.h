@@ -41,6 +41,7 @@ protected:
     void setObj(lv_obj_t *obj);
     lv_obj_t *obj();
     lv_obj_t *parentObj();
+    lv_img_t toLVImage(const uint32_t *pix, int width, int height);
 private:
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;

@@ -32,4 +32,24 @@ AppFunctions& App::api() {
     return *funcs;
 }
 
+void App::setOnExit(ExitFunct onExitFunct) {
+    onExit = onExitFunct;
+}
+
+App::ExitFunct& App::getOnExit() {
+    return onExit;
+}
+
+void App::exit() {
+    funcs->executeLater([this] () {
+        if (onExit) {
+            onExit();
+        }
+    });
+}
+
+App::ContPtr App::getContainer() {
+    return uiContainer;
+}
+
 } /* namespace avitab */

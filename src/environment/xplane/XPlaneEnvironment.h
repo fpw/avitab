@@ -33,9 +33,12 @@ public:
     XPlaneEnvironment();
 
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
+
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
+
+    std::string getProgramPath() override;
 
     ~XPlaneEnvironment();
 private:

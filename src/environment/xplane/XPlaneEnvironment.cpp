@@ -65,6 +65,10 @@ void XPlaneEnvironment::destroyMenu() {
     }
 }
 
+std::string XPlaneEnvironment::getProgramPath() {
+    return "";
+}
+
 XPlaneEnvironment::~XPlaneEnvironment() {
     logger::verbose("~XPlaneEnvironment");
     destroyMenu();
