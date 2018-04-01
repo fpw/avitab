@@ -41,11 +41,9 @@ void RasterJob::setOutputBuf(RasterBuf buf, int initialWidth) {
 void RasterJob::rasterize(std::promise<JobInfo> result) {
     try {
         JobInfo info;
-        info.curPageNum = 1;
         doWork(info);
         result.set_value(info);
-    } catch (const std::exception &e) {
-        logger::warn("Rasterizer error: %s", e.what());
+    } catch (...) {
         result.set_exception(std::current_exception());
     }
 }
@@ -53,7 +51,7 @@ void RasterJob::rasterize(std::promise<JobInfo> result) {
 void RasterJob::doWork(JobInfo &info) {
     logger::info("Rasterizing '%s'", docPath.c_str());
     openDocument(info);
-    loadPage(info.curPageNum);
+    loadPage(requestedPage);
     fz_matrix scaleMatrix = calculateScale();
     rasterPage(info, scaleMatrix);
     logger::info("Done rasterizing");
@@ -71,8 +69,8 @@ void RasterJob::openDocument(JobInfo &info) {
     }
 
     fz_try(ctx) {
-        info.pageCount = fz_count_pages(ctx, doc);
-        logger::verbose("Document has %d pages", info.pageCount);
+        totalPages = fz_count_pages(ctx, doc);
+        logger::verbose("Document has %d pages", totalPages);
     } fz_catch(ctx) {
         fz_drop_document(ctx, doc);
         throw std::runtime_error("Cannot count pages: " + std::string(fz_caught_message(ctx)));
@@ -80,7 +78,8 @@ void RasterJob::openDocument(JobInfo &info) {
 }
 
 void RasterJob::loadPage(int pageNum) {
-    if (page != nullptr && curPage == pageNum) {
+    if (curPage == pageNum && page != nullptr) {
+        // we already loaded this page
         return;
     }
 
@@ -92,14 +91,11 @@ void RasterJob::loadPage(int pageNum) {
     }
 
     fz_try(ctx) {
-        int rawPage = pageNum - 1;
-        page = fz_load_page(ctx, doc, rawPage);
-        curPage = rawPage;
+        page = fz_load_page(ctx, doc, pageNum);
+        curPage = pageNum;
     } fz_catch(ctx) {
-        fz_drop_document(ctx, doc);
         throw std::runtime_error("Cannot load page: " + std::string(fz_caught_message(ctx)));
     }
-
 }
 
 fz_matrix RasterJob::calculateScale() {
@@ -144,13 +140,41 @@ void RasterJob::rasterPage(JobInfo &info, fz_matrix &scaleMatrix) {
             ptr += pix->n;
         }
     }
+    info.curPageNum = curPage;
+    info.pageCount = totalPages;
     info.width = width;
     info.height = height;
 
     fz_drop_pixmap(ctx, pix);
 }
 
+void RasterJob::prevPage() {
+    if (curPage > 0) {
+        requestedPage = curPage - 1;
+    }
+}
+
+void RasterJob::nextPage() {
+    if (curPage + 1 < totalPages) {
+        requestedPage = curPage + 1;
+    }
+}
+
+void RasterJob::zoomIn() {
+    if (outWidth < 2000) {
+        outWidth += 100;
+    }
+}
+
+void RasterJob::zoomOut() {
+    if (outWidth >= 200) {
+        outWidth -= 100;
+    }
+}
+
 RasterJob::~RasterJob() {
+    logger::verbose("~RasterJob");
+
     if (page) {
         fz_drop_page(ctx, page);
     }

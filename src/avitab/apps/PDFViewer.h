@@ -24,6 +24,7 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/rasterizers/RasterJob.h"
 
 namespace avitab {
 
@@ -37,7 +38,21 @@ private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;
 
+    std::unique_ptr<RasterJob> rasterJob;
     std::shared_ptr<std::vector<uint32_t>> rasterBuffer;
+
+    void setupCallbacks();
+    void onNext();
+    void onPrev();
+    void onPlus();
+    void onMinus();
+    void onLeft();
+    void onRight();
+    void onUp();
+    void onDown();
+
+    void loadDemo();
+    void updateJob();
 };
 
 } /* namespace avitab */

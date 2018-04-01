@@ -20,14 +20,14 @@
 
 namespace avitab {
 
-PixMap::PixMap(WidgetPtr parent, const uint32_t* pix, int dataWidth, int dataHeight):
-    Widget(parent),
-    data(pix),
-    width(dataWidth),
-    height(dataHeight)
+PixMap::PixMap(WidgetPtr parent):
+    Widget(parent)
 {
-    lv_obj_t *obj = lv_img_create(parentObj(), nullptr);
+    lv_obj_t *img = lv_img_create(parentObj(), nullptr);
+    setObj(img);
+}
 
+void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {
     image.header.format = LV_IMG_FORMAT_INTERNAL_RAW;
     image.header.w = dataWidth;
     image.header.h = dataHeight;
@@ -35,13 +35,39 @@ PixMap::PixMap(WidgetPtr parent, const uint32_t* pix, int dataWidth, int dataHei
     image.header.alpha_byte = 1;
     image.pixel_map = reinterpret_cast<const uint8_t *>(pix);
 
-    lv_img_set_src(obj, &image);
-
-    setObj(obj);
+    lv_img_set_src(obj(), &image);
 }
 
 void PixMap::enablePanning() {
     lv_obj_set_drag(obj(), true);
+}
+
+void PixMap::panLeft() {
+    int x = lv_obj_get_x(obj()) + image.header.w * PAN_FACTOR;
+    if (x < image.header.w / 2) {
+        lv_obj_set_x(obj(), x);
+    }
+}
+
+void PixMap::panUp() {
+    int y = lv_obj_get_y(obj()) + image.header.h * PAN_FACTOR;
+    if (y < image.header.h / 2) {
+        lv_obj_set_y(obj(), y);
+    }
+}
+
+void PixMap::panRight() {
+    int x = lv_obj_get_x(obj()) - image.header.w * PAN_FACTOR;
+    if (x > -image.header.h / 2) {
+        lv_obj_set_x(obj(), x);
+    }
+}
+
+void PixMap::panDown() {
+    int y = lv_obj_get_y(obj()) - image.header.h * PAN_FACTOR;
+    if (y > -image.header.w / 2) {
+        lv_obj_set_y(obj(), y);
+    }
 }
 
 } /* namespace avitab */

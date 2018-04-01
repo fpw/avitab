@@ -40,6 +40,10 @@ public:
     RasterJob(fz_context *fzCtx, const std::string &path);
     void setOutputBuf(RasterBuf buf, int initialWidth);
     void rasterize(std::promise<JobInfo> result);
+    void nextPage();
+    void prevPage();
+    void zoomIn();
+    void zoomOut();
 
     ~RasterJob();
 
@@ -51,10 +55,12 @@ private:
     fz_document *doc = nullptr;
     fz_page *page = nullptr;
     int curPage = -1;
+    int totalPages = 0;
 
     // Output parameters
     RasterBuf outBuf;
     int outWidth = -1;
+    int requestedPage = 0;
 
     void doWork(JobInfo &info);
     void openDocument(JobInfo &info);

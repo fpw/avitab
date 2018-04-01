@@ -24,12 +24,16 @@ namespace avitab {
 
 class PixMap: public Widget {
 public:
-    PixMap(WidgetPtr parent, const uint32_t *pix, int dataWidth, int dataHeight);
+    PixMap(WidgetPtr parent);
+    void draw(const uint32_t *pix, int dataWidth, int dataHeight);
     void enablePanning();
+    void panLeft();
+    void panRight();
+    void panUp();
+    void panDown();
 private:
+    float PAN_FACTOR = 0.1f;
     lv_img_t image;
-    const uint32_t *data = nullptr;
-    int width = 0, height = 0;
 };
 
 } /* namespace avitab */

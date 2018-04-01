@@ -20,19 +20,30 @@
 
 #include <functional>
 #include <string>
+#include <map>
 #include "Widget.h"
 
 namespace avitab {
 
 class Window: public Widget {
 public:
-    using CloseCallback = std::function<void()>;
+    using WindowCallback = std::function<void()>;
+    enum class Symbol {
+        CLOSE,
+        LEFT, RIGHT, UP, DOWN,
+        PREV, NEXT,
+        PLUS, MINUS,
+    };
+
     Window(WidgetPtr parent, const std::string &title);
-    void setOnClose(CloseCallback cb);
+    void setOnClose(WindowCallback cb);
     void hideScrollbars();
     int getContentWidth();
+    void addSymbol(Symbol smb, WindowCallback cb);
 private:
-    CloseCallback closeCallbackFunc;
+    std::map<Symbol, WindowCallback> callbacks;
+
+    const void *symbolToLVSymbol(Symbol symbol);
 };
 
 } /* namespace avitab */
