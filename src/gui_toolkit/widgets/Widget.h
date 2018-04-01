@@ -24,6 +24,14 @@
 namespace avitab {
 class Widget {
 public:
+    enum class Symbol {
+        NONE,
+        CLOSE,
+        LEFT, RIGHT, UP, DOWN,
+        PREV, NEXT,
+        PLUS, MINUS,
+        FILE, DIRECTORY,
+    };
     using WidgetPtr = std::shared_ptr<Widget>;
 
     Widget(WidgetPtr parent);
@@ -42,6 +50,7 @@ protected:
     lv_obj_t *obj();
     lv_obj_t *parentObj();
     lv_img_t toLVImage(const uint32_t *pix, int width, int height);
+    const void *symbolToLVSymbol(Symbol symbol);
 private:
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;

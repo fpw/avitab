@@ -17,10 +17,15 @@
  */
 #include "AviTab.h"
 #include "src/Logger.h"
-#include "src/avitab/apps/PDFViewer.h"
 #include "src/avitab/apps/MainMenu.h"
-#include "src/avitab/apps/FileSelect.h"
 #include "src/avitab/apps/HeaderApp.h"
+#include "src/avitab/apps/ChartsApp.h"
+#include <climits>
+
+#ifdef _WIN32
+#include <windows.h>
+#define realpath(N, R) _fullpath((R), (N), _MAX_PATH)
+#endif
 
 namespace avitab {
 
@@ -80,12 +85,12 @@ void AviTab::createLayout() {
 void AviTab::showMainMenu() {
     auto menu = std::make_shared<MainMenu>(this, centerContainer);
     std::string root = env->getProgramPath() + "icons/";
-    menu->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showPDFViewer(); });
+    menu->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
     centerApp = menu;
 }
 
-void AviTab::showPDFViewer() {
-    centerApp = std::make_shared<FileSelect>(this, centerContainer);
+void AviTab::showChartsApp() {
+    centerApp = std::make_shared<ChartsApp>(this, centerContainer);
     centerApp->setOnExit([this] () { showMainMenu(); });
 }
 
@@ -118,6 +123,19 @@ void avitab::AviTab::executeLater(std::function<void()> func) {
 
 std::string avitab::AviTab::getDataPath() {
     return env->getProgramPath();
+}
+
+std::string AviTab::ansiToUTF8(const std::string &in) {
+#ifdef _WIN32
+    wchar_t buf[PATH_MAX];
+    char res[PATH_MAX];
+
+    MultiByteToWideChar(CP_ACP, 0, in.c_str(), -1, buf, sizeof(buf));
+    WideCharToMultiByte(CP_UTF8, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
+    return res;
+#else
+    return in;
+#endif
 }
 
 void AviTab::stopApp() {

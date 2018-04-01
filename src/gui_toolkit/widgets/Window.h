@@ -28,22 +28,15 @@ namespace avitab {
 class Window: public Widget {
 public:
     using WindowCallback = std::function<void()>;
-    enum class Symbol {
-        CLOSE,
-        LEFT, RIGHT, UP, DOWN,
-        PREV, NEXT,
-        PLUS, MINUS,
-    };
 
     Window(WidgetPtr parent, const std::string &title);
     void setOnClose(WindowCallback cb);
     void hideScrollbars();
     int getContentWidth();
+    int getContentHeight();
     void addSymbol(Symbol smb, WindowCallback cb);
 private:
     std::map<Symbol, WindowCallback> callbacks;
-
-    const void *symbolToLVSymbol(Symbol symbol);
 };
 
 } /* namespace avitab */

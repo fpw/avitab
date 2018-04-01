@@ -38,6 +38,11 @@ protected:
     ContPtr getContainer();
     void exit();
     ExitFunct &getOnExit();
+
+    template<class T>
+    std::unique_ptr<T> startSubApp() {
+        return std::make_unique<T>(funcs, uiContainer);
+    }
 private:
     ExitFunct onExit;
     FuncsPtr funcs;

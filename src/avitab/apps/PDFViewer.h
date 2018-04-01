@@ -31,6 +31,7 @@ namespace avitab {
 class PDFViewer: public App {
 public:
     PDFViewer(FuncsPtr appFuncs, ContPtr container);
+    void showFile(const std::string &file);
 private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;

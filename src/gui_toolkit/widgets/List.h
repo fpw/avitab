@@ -15,23 +15,30 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_CHARTSAPP_H_
-#define SRC_AVITAB_APPS_CHARTSAPP_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_LIST_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_LIST_H_
 
-#include <memory>
-#include "App.h"
+#include <string>
+#include <functional>
+#include "Widget.h"
 
 namespace avitab {
 
-class ChartsApp: public App {
+class List: public Widget {
 public:
-    ChartsApp(FuncsPtr appFuncs, ContPtr container);
+    using ListCallback = std::function<void(int)>;
+
+    List(WidgetPtr parent);
+    void setCallback(ListCallback cb);
+    void add(const std::string &entry, int data);
+    void add(const std::string &entry, Symbol smb, int data);
+
+    void scrollUp();
+    void scrollDown();
 private:
-    std::shared_ptr<App> childApp;
-    void showFileSelect();
-    void onSelect(const std::string &file);
+    ListCallback onSelect;
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_AVITAB_APPS_CHARTSAPP_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_LIST_H_ */

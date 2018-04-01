@@ -38,6 +38,11 @@ int Window::getContentWidth() {
     return lv_win_get_width(obj());
 }
 
+int avitab::Window::getContentHeight() {
+    // TODO: Why do we have to subtract this constant?
+    return getHeight() - lv_win_get_btn_size(obj()) - 25;
+}
+
 void Window::setOnClose(WindowCallback cb) {
     addSymbol(Symbol::CLOSE, cb);
 }
@@ -64,22 +69,4 @@ void Window::addSymbol(Symbol smb, WindowCallback cb) {
     lv_obj_set_free_num(btn, static_cast<size_t>(smb));
 }
 
-const void* Window::symbolToLVSymbol(Symbol symbol) {
-    switch (symbol) {
-    case Symbol::CLOSE:     return SYMBOL_CLOSE;
-    case Symbol::LEFT:      return SYMBOL_LEFT;
-    case Symbol::RIGHT:     return SYMBOL_RIGHT;
-    case Symbol::UP:        return SYMBOL_UP;
-    case Symbol::DOWN:      return SYMBOL_DOWN;
-    case Symbol::PREV:      return SYMBOL_PREV;
-    case Symbol::NEXT:      return SYMBOL_NEXT;
-    case Symbol::PLUS:      return SYMBOL_PLUS;
-    case Symbol::MINUS:     return SYMBOL_MINUS;
-    default:                return nullptr;
-    }
-}
-
 } /* namespace avitab */
-
-void Window::clearContent() {
-}

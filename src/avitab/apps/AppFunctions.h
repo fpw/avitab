@@ -31,6 +31,7 @@ public:
     virtual Icon loadIcon(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
+    virtual std::string ansiToUTF8(const std::string &in) = 0;
     virtual ~AppFunctions() = default;
 };
 

@@ -34,17 +34,16 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
     pixMap->enablePanning();
 
     setupCallbacks();
-
-    loadDemo();
 }
 
-void PDFViewer::loadDemo() {
-    rasterJob = api().createRasterJob("test.pdf");
+void PDFViewer::showFile(const std::string& file) {
+    rasterJob = api().createRasterJob(api().ansiToUTF8(file));
     rasterJob->setOutputBuf(rasterBuffer, window->getContentWidth());
     updateJob();
 }
 
 void PDFViewer::updateJob() {
+    // TODO: For now it's ok to do this synchronously
     std::promise<JobInfo> infoPromise;
     std::future<JobInfo> infoFuture = infoPromise.get_future();
     std::thread worker(RasterJob::rasterize, rasterJob.get(), std::move(infoPromise));
@@ -60,14 +59,14 @@ void PDFViewer::updateJob() {
 }
 
 void PDFViewer::setupCallbacks() {
-    window->addSymbol(Window::Symbol::NEXT, std::bind(PDFViewer::onNext, this));
-    window->addSymbol(Window::Symbol::PREV, std::bind(PDFViewer::onPrev, this));
-    window->addSymbol(Window::Symbol::MINUS, std::bind(PDFViewer::onMinus, this));
-    window->addSymbol(Window::Symbol::PLUS, std::bind(PDFViewer::onPlus, this));
-    window->addSymbol(Window::Symbol::DOWN, std::bind(PDFViewer::onDown, this));
-    window->addSymbol(Window::Symbol::RIGHT, std::bind(PDFViewer::onRight, this));
-    window->addSymbol(Window::Symbol::LEFT, std::bind(PDFViewer::onLeft, this));
-    window->addSymbol(Window::Symbol::UP, std::bind(PDFViewer::onUp, this));
+    window->addSymbol(Widget::Symbol::NEXT, std::bind(PDFViewer::onNext, this));
+    window->addSymbol(Widget::Symbol::PREV, std::bind(PDFViewer::onPrev, this));
+    window->addSymbol(Widget::Symbol::MINUS, std::bind(PDFViewer::onMinus, this));
+    window->addSymbol(Widget::Symbol::PLUS, std::bind(PDFViewer::onPlus, this));
+    window->addSymbol(Widget::Symbol::DOWN, std::bind(PDFViewer::onDown, this));
+    window->addSymbol(Widget::Symbol::RIGHT, std::bind(PDFViewer::onRight, this));
+    window->addSymbol(Widget::Symbol::LEFT, std::bind(PDFViewer::onLeft, this));
+    window->addSymbol(Widget::Symbol::UP, std::bind(PDFViewer::onUp, this));
 }
 
 void PDFViewer::onNext() {

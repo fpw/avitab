@@ -6,4 +6,5 @@ add_library(avitab_gui_lvgl_widgets
     Label.cpp
     Button.cpp
     PixMap.cpp
+    List.cpp
 )

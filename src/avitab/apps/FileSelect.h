@@ -18,17 +18,44 @@
 #ifndef SRC_AVITAB_APPS_FILESELECT_H_
 #define SRC_AVITAB_APPS_FILESELECT_H_
 
+#include <functional>
+#include <string>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/List.h"
 
 namespace avitab {
 
 class FileSelect: public App {
 public:
+    using SelectCallback = std::function<void(const std::string &)>;
+
     FileSelect(FuncsPtr appFuncs, ContPtr container);
+    void setSelectCallback(SelectCallback cb);
 private:
+    struct Entry {
+        std::string name;
+        bool isDirectory;
+    };
+
     std::shared_ptr<Window> window;
+    std::shared_ptr<List> list;
+
+    std::string currentPath;
+    std::vector<Entry> currentEntries;
+    SelectCallback selectCallback;
+
     void showDirectory(const std::string &path);
+    std::vector<Entry> readDirectory(const std::string &path);
+    std::string toUTF8(const std::string &in);
+    void sortEntries();
+    void initListWidget();
+    void showCurrentEntries();
+    void onDown();
+    void onUp();
+
+    void onSelect(int data);
+    void upOneDirectory();
 };
 
 } /* namespace avitab */

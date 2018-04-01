@@ -83,6 +83,24 @@ lv_img_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
     return res;
 }
 
+const void* Widget::symbolToLVSymbol(Symbol symbol) {
+    switch (symbol) {
+    case Symbol::NONE:      return nullptr;
+    case Symbol::CLOSE:     return SYMBOL_CLOSE;
+    case Symbol::LEFT:      return SYMBOL_LEFT;
+    case Symbol::RIGHT:     return SYMBOL_RIGHT;
+    case Symbol::UP:        return SYMBOL_UP;
+    case Symbol::DOWN:      return SYMBOL_DOWN;
+    case Symbol::PREV:      return SYMBOL_PREV;
+    case Symbol::NEXT:      return SYMBOL_NEXT;
+    case Symbol::PLUS:      return SYMBOL_PLUS;
+    case Symbol::MINUS:     return SYMBOL_MINUS;
+    case Symbol::FILE:      return SYMBOL_FILE;
+    case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
+    default:                return nullptr;
+    }
+}
+
 Widget::~Widget() {
     lv_obj_del(obj());
 }
