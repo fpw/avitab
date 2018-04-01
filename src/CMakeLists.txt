@@ -3,6 +3,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 
 add_subdirectory(environment)
 add_subdirectory(gui_toolkit)
+add_subdirectory(platform)
 add_subdirectory(avitab)
 
 set(CommonLibs 
@@ -11,6 +12,7 @@ set(CommonLibs
 	-static-libstdc++
 
     avitab_main
+    avitab_platform
 )
 
 # X-Plane plugin

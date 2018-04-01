@@ -24,6 +24,7 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -37,20 +38,15 @@ public:
     void showDirectory(const std::string &path);
     std::string getCurrentPath();
 private:
-    struct Entry {
-        std::string name;
-        bool isDirectory;
-    };
-
     std::shared_ptr<Window> window;
     std::shared_ptr<List> list;
 
     std::regex filter;
     std::string currentPath;
-    std::vector<Entry> currentEntries;
+    std::vector<platform::DirEntry> currentEntries;
     SelectCallback selectCallback;
 
-    std::vector<Entry> readDirectory(const std::string &path);
+    void filterEntries();
     void sortEntries();
     void initListWidget();
     void showCurrentEntries();

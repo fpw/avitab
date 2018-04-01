@@ -37,11 +37,11 @@ void ChartsApp::showFileSelect() {
     childApp = std::move(fileSelect);
 }
 
-void ChartsApp::onSelect(const std::string& file) {
+void ChartsApp::onSelect(const std::string& nameUtf8) {
     currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
 
     auto pdfApp = startSubApp<PDFViewer>();
-    pdfApp->showFile(file);
+    pdfApp->showFile(nameUtf8);
     pdfApp->setOnExit([this] () { showFileSelect(); });
 
     childApp = std::move(pdfApp);

@@ -19,6 +19,7 @@
 #include <SDL2/SDL.h>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -54,7 +55,7 @@ void StandAloneEnvironment::destroyMenu() {
 }
 
 std::string avitab::StandAloneEnvironment::getProgramPath() {
-    return ourPath;
+    return platform::nativeToUTF8(ourPath);
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

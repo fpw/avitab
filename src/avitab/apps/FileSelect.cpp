@@ -15,24 +15,15 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "FileSelect.h"
 #include "src/Logger.h"
-#include <dirent.h>
-#include <sys/stat.h>
-#include <cstdlib>
-#include <climits>
-#include <algorithm>
-
-#ifdef _WIN32
-#include <windows.h>
-#define realpath(N, R) _fullpath((R), (N), _MAX_PATH)
-#endif
 
 namespace avitab {
 
 FileSelect::FileSelect(FuncsPtr appFuncs, ContPtr container):
     App(appFuncs, container),
-    window(std::make_shared<Window>(container, "Select a file")),
+    window(std::make_shared<Window>(container, "")),
     list(std::make_shared<List>(window))
 {
     window->setOnClose([this] () { exit(); });
@@ -58,54 +49,26 @@ void FileSelect::setFilterRegex(const std::string ext) {
 }
 
 void FileSelect::showDirectory(const std::string& path) {
-    logger::verbose("Showing '%s'", path.c_str());
+    window->setCaption("Select a chart in: " + platform::getFileNameFromPath(path));
     currentPath = path;
-    currentEntries = readDirectory(path);
+    currentEntries = platform::readDirectory(path);
+    filterEntries();
     sortEntries();
     showCurrentEntries();
 }
 
-std::vector<FileSelect::Entry> FileSelect::readDirectory(const std::string& path) {
-    std::vector<Entry> entries;
-
-    DIR *dir = opendir(path.c_str());
-    if (!dir) {
-        logger::verbose("Couldn't open directory '%s'", path.c_str());
-        return entries;
-    }
-
-    struct dirent *dirEntry;
-
-    while ((dirEntry = readdir(dir)) != nullptr) {
-        std::string name = dirEntry->d_name;
-
-        if (name.empty() || name[0] == '.') {
-            continue;
+void FileSelect::filterEntries() {
+    auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [this] (const auto &a) -> bool {
+        if (a.isDirectory) {
+            return false;
         }
-
-        std::string filePath = path + name;
-
-        struct stat fileStat;
-        if (stat(filePath.c_str(), &fileStat) != 0) {
-            logger::verbose("Couldn't stat '%s'", filePath.c_str());
-            continue;
-        }
-
-        Entry entry;
-        entry.name = name;
-        entry.isDirectory = S_ISDIR(fileStat.st_mode);
-
-        if (entry.isDirectory || std::regex_search(name, filter)) {
-            entries.push_back(entry);
-        }
-    }
-    closedir(dir);
-
-    return entries;
+        return !std::regex_search(a.utf8Name, filter);
+    });
+    currentEntries.erase(iter, std::end(currentEntries));
 }
 
 void FileSelect::sortEntries() {
-    std::sort(begin(currentEntries), end(currentEntries), [] (const Entry &a, const Entry &b) -> bool {
+    auto comparator = [] (const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
         if (a.isDirectory && !b.isDirectory) {
             return true;
         }
@@ -114,8 +77,10 @@ void FileSelect::sortEntries() {
             return false;
         }
 
-        return a.name < b.name;
-    });
+        return a.utf8Name < b.utf8Name;
+    };
+
+    std::sort(begin(currentEntries), end(currentEntries), comparator);
 }
 
 void FileSelect::showCurrentEntries() {
@@ -125,9 +90,9 @@ void FileSelect::showCurrentEntries() {
 
     list->add("Up one directory", Window::Symbol::LEFT, -1);
     for (size_t i = 0; i < currentEntries.size(); i++) {
-        Entry& entry = currentEntries[i];
+        auto &entry = currentEntries[i];
         Widget::Symbol smb = entry.isDirectory ? Window::Symbol::DIRECTORY : Window::Symbol::FILE;
-        list->add(api().ansiToUTF8(entry.name), smb, i);
+        list->add(entry.utf8Name, smb, i);
     }
 }
 
@@ -145,21 +110,19 @@ void FileSelect::onSelect(int data) {
         return;
     }
 
-    Entry &entry = currentEntries.at(data);
+    auto &entry = currentEntries.at(data);
     if (entry.isDirectory) {
-        showDirectory(currentPath + entry.name + "/");
+        showDirectory(currentPath + entry.utf8Name + "/");
     } else {
         if (selectCallback) {
-            selectCallback(currentPath + entry.name);
+            selectCallback(currentPath + entry.utf8Name);
         }
     }
 }
 
 void FileSelect::upOneDirectory() {
-    std::string upOne = currentPath + "../";
-    char realPath[PATH_MAX];
-    realpath(upOne.c_str(), realPath);
-    showDirectory(std::string(realPath) + "/");
+    std::string upOne = platform::realPath(currentPath +  "../") + "/";
+    showDirectory(upOne);
 }
 
 std::string FileSelect::getCurrentPath() {

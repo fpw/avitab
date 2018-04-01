@@ -19,6 +19,7 @@
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -73,7 +74,7 @@ void XPlaneEnvironment::destroyMenu() {
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
-    return path;
+    return platform::nativeToUTF8(path);
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

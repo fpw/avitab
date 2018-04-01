@@ -36,8 +36,8 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
     setupCallbacks();
 }
 
-void PDFViewer::showFile(const std::string& file) {
-    rasterJob = api().createRasterJob(api().ansiToUTF8(file));
+void PDFViewer::showFile(const std::string& nameUtf8) {
+    rasterJob = api().createRasterJob(nameUtf8);
     rasterJob->setOutputBuf(rasterBuffer, window->getContentWidth());
     updateJob();
 }

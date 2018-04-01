@@ -31,7 +31,7 @@ private:
     std::string currentPath;
 
     void showFileSelect();
-    void onSelect(const std::string &file);
+    void onSelect(const std::string &nameUtf8);
 };
 
 } /* namespace avitab */

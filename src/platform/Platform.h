@@ -15,25 +15,28 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_APPFUNCTIONS_H_
-#define SRC_AVITAB_APPS_APPFUNCTIONS_H_
+#ifndef SRC_PLATFORM_PLATFORM_H_
+#define SRC_PLATFORM_PLATFORM_H_
 
-#include <memory>
 #include <string>
-#include "src/gui_toolkit/rasterizers/RasterJob.h"
-#include "src/gui_toolkit/Icon.h"
+#include <vector>
 
-namespace avitab {
+namespace platform {
 
-class AppFunctions {
-public:
-    virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
-    virtual Icon loadIcon(const std::string &path) = 0;
-    virtual void executeLater(std::function<void()> func) = 0;
-    virtual std::string getDataPath() = 0;
-    virtual ~AppFunctions() = default;
+struct DirEntry {
+    std::string utf8Name;
+    bool isDirectory;
 };
+
+constexpr size_t getMaxPathLen();
+std::string nativeToUTF8(const std::string &native);
+std::string UTF8ToNative(const std::string &utf8);
+
+std::vector<DirEntry> readDirectory(const std::string &utf8Path);
+std::string realPath(const std::string &utf8Path);
+std::string getFileNameFromPath(const std::string &utf8Path);
+
 
 }
 
-#endif /* SRC_AVITAB_APPS_APPFUNCTIONS_H_ */
+#endif /* SRC_PLATFORM_PLATFORM_H_ */

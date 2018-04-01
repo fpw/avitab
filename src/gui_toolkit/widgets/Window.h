@@ -30,6 +30,7 @@ public:
     using WindowCallback = std::function<void()>;
 
     Window(WidgetPtr parent, const std::string &title);
+    void setCaption(const std::string &title);
     void setOnClose(WindowCallback cb);
     void hideScrollbars();
     int getContentWidth();

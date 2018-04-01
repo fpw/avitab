@@ -30,6 +30,10 @@ Window::Window(WidgetPtr parent, const std::string& title):
     setObj(win);
 }
 
+void Window::setCaption(const std::string& title) {
+    lv_win_set_title(obj(), title.c_str());
+}
+
 void avitab::Window::hideScrollbars() {
     lv_win_set_sb_mode(obj(), LV_SB_MODE_OFF);
 }
