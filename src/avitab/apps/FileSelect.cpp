@@ -53,6 +53,10 @@ void FileSelect::initListWidget() {
     list->setCallback([this] (int data) { onSelect(data); });
 }
 
+void FileSelect::setFilterRegex(const std::string ext) {
+    filter = std::regex(ext, std::regex_constants::ECMAScript | std::regex_constants::icase);
+}
+
 void FileSelect::showDirectory(const std::string& path) {
     logger::verbose("Showing '%s'", path.c_str());
     currentPath = path;
@@ -90,7 +94,10 @@ std::vector<FileSelect::Entry> FileSelect::readDirectory(const std::string& path
         Entry entry;
         entry.name = name;
         entry.isDirectory = S_ISDIR(fileStat.st_mode);
-        entries.push_back(entry);
+
+        if (entry.isDirectory || std::regex_search(name, filter)) {
+            entries.push_back(entry);
+        }
     }
     closedir(dir);
 

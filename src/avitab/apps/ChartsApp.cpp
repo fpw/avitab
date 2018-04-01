@@ -32,6 +32,7 @@ void ChartsApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
     fileSelect->setOnExit([this] () { exit(); });
     fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
+    fileSelect->setFilterRegex("\\.pdf$");
     fileSelect->showDirectory(currentPath);
     childApp = std::move(fileSelect);
 }

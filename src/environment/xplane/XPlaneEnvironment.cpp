@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <XPLM/XPLMPlugin.h>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
@@ -22,6 +23,12 @@
 namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
+    XPLMPluginID ourId = XPLMGetMyID();
+    char pathBuf[2048];
+    XPLMGetPluginInfo(ourId, nullptr, pathBuf, nullptr, nullptr);
+    char *pathPart = XPLMExtractFileAndPath(pathBuf);
+    path.assign(pathBuf, 0, pathPart - pathBuf);
+    path.append("/../");
 }
 
 std::shared_ptr<LVGLToolkit> XPlaneEnvironment::createGUIToolkit() {
@@ -66,7 +73,7 @@ void XPlaneEnvironment::destroyMenu() {
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
-    return "";
+    return path;
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

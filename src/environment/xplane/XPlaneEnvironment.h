@@ -42,6 +42,7 @@ public:
 
     ~XPlaneEnvironment();
 private:
+    std::string path;
     std::vector<MenuCallback> callbacks;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;

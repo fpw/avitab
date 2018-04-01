@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <string>
+#include <regex>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
@@ -32,6 +33,7 @@ public:
 
     FileSelect(FuncsPtr appFuncs, ContPtr container);
     void setSelectCallback(SelectCallback cb);
+    void setFilterRegex(const std::string regex);
     void showDirectory(const std::string &path);
     std::string getCurrentPath();
 private:
@@ -43,12 +45,12 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<List> list;
 
+    std::regex filter;
     std::string currentPath;
     std::vector<Entry> currentEntries;
     SelectCallback selectCallback;
 
     std::vector<Entry> readDirectory(const std::string &path);
-    std::string toUTF8(const std::string &in);
     void sortEntries();
     void initListWidget();
     void showCurrentEntries();
