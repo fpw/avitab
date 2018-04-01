@@ -153,7 +153,7 @@ void FileSelect::upOneDirectory() {
     std::string upOne = currentPath + "../";
     char realPath[PATH_MAX];
     realpath(upOne.c_str(), realPath);
-    showDirectory(std::string(realPath));
+    showDirectory(std::string(realPath) + "/");
 }
 
 } /* namespace avitab */
