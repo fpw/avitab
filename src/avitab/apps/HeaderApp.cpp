@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "HeaderApp.h"
-#include <ctime>
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -29,12 +29,12 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
 }
 
 bool HeaderApp::onTick() {
-    time_t now = time(nullptr);
-    tm *local = localtime(&now);
-
-    char buf[16];
-    strftime(buf, sizeof(buf), "%H:%M", local);
-    clockLabel.setText(std::string(buf));
+    std::string time = platform::getLocalTime();
+    if (curLabel != time) {
+        // to prevent rendering calls each second
+        clockLabel.setText(time);
+        curLabel = time;
+    }
     return true;
 }
 

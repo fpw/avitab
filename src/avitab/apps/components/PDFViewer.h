@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
-#include "App.h"
+#include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/rasterizers/RasterJob.h"

@@ -15,28 +15,36 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "MainMenu.h"
-#include "PDFViewer.h"
+#ifndef SRC_AVITAB_APPS_APPLAUNCHER_H_
+#define SRC_AVITAB_APPS_APPLAUNCHER_H_
+
+#include <vector>
+#include <memory>
+#include <functional>
+#include "App.h"
+#include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
 
 namespace avitab {
 
-MainMenu::MainMenu(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container)
-{
-}
+class AppLauncher: public App {
+public:
+    using Callback = std::function<void()>;
+    struct Entry {
+        std::shared_ptr<Button> button;
+        std::shared_ptr<PixMap> pixMap;
+        Callback callback;
+    };
 
-void MainMenu::addEntry(const std::string& name, const std::string& icon, Callback cb) {
-    Entry entry;
-    entry.callback = cb;
-    entry.button = std::make_shared<Button>(getContainer(), api().loadIcon(icon), name);
+    AppLauncher(FuncsPtr appFuncs, ContPtr container);
 
-    entries.push_back(entry);
-    size_t index = entries.size() - 1;
-    entry.button->setCallback([this, index] () {
-        api().executeLater([this, index] () {
-            entries[index].callback();
-        });
-    });
-}
+    void addEntry(const std::string &name, const std::string &icon, Callback cb);
+
+private:
+    std::vector<Entry> entries;
+};
 
 } /* namespace avitab */
+
+#endif /* SRC_AVITAB_APPS_APPLAUNCHER_H_ */

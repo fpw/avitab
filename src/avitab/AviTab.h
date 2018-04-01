@@ -52,7 +52,7 @@ private:
     std::shared_ptr<App> centerApp;
 
     void createLayout();
-    void showMainMenu();
+    void showAppLauncher();
     void showChartsApp();
     void cleanupLayout();
 };

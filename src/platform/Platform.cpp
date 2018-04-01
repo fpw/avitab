@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <ctime>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cstdlib>
@@ -115,6 +116,15 @@ std::string getFileNameFromPath(const std::string& utf8Path) {
     std::string nativePath = UTF8ToNative(utf8Path);
     std::string base = basename(&nativePath[0]);
     return nativeToUTF8(base);
+}
+
+std::string getLocalTime() {
+    time_t now = time(nullptr);
+    tm *local = localtime(&now);
+
+    char buf[16];
+    strftime(buf, sizeof(buf), "%H:%M", local);
+    return buf;
 }
 
 }

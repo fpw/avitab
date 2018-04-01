@@ -17,9 +17,9 @@
  */
 #include "AviTab.h"
 #include "src/Logger.h"
-#include "src/avitab/apps/MainMenu.h"
 #include "src/avitab/apps/HeaderApp.h"
 #include "src/avitab/apps/ChartsApp.h"
+#include "src/avitab/apps/AppLauncher.h"
 #include <climits>
 
 namespace avitab {
@@ -71,22 +71,22 @@ void AviTab::createLayout() {
     }
 
     if (!centerApp) {
-        showMainMenu();
+        showAppLauncher();
     }
 
     screen->activate();
 }
 
-void AviTab::showMainMenu() {
-    auto menu = std::make_shared<MainMenu>(this, centerContainer);
+void AviTab::showAppLauncher() {
+    auto launcher = std::make_shared<AppLauncher>(this, centerContainer);
     std::string root = env->getProgramPath() + "icons/";
-    menu->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
-    centerApp = menu;
+    launcher->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
+    centerApp = launcher;
 }
 
 void AviTab::showChartsApp() {
     centerApp = std::make_shared<ChartsApp>(this, centerContainer);
-    centerApp->setOnExit([this] () { showMainMenu(); });
+    centerApp->setOnExit([this] () { showAppLauncher(); });
 }
 
 std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {

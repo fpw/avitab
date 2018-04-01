@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "ChartsApp.h"
-#include "FileSelect.h"
-#include "PDFViewer.h"
+#include "src/avitab/apps/components/FileSelect.h"
+#include "src/avitab/apps/components/PDFViewer.h"
 
 namespace avitab {
 

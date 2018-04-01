@@ -21,7 +21,7 @@
 #include <functional>
 #include <string>
 #include <regex>
-#include "App.h"
+#include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/platform/Platform.h"

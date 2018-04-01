@@ -30,6 +30,7 @@ public:
 private:
     Label clockLabel;
     Timer tickTimer;
+    std::string curLabel;
 
     bool onTick();
 };
