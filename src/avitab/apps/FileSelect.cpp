@@ -41,7 +41,6 @@ FileSelect::FileSelect(FuncsPtr appFuncs, ContPtr container):
     window->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
 
     initListWidget();
-    showDirectory(api().getDataPath() + "charts/");
 }
 
 void FileSelect::setSelectCallback(SelectCallback cb) {
@@ -154,6 +153,10 @@ void FileSelect::upOneDirectory() {
     char realPath[PATH_MAX];
     realpath(upOne.c_str(), realPath);
     showDirectory(std::string(realPath) + "/");
+}
+
+std::string FileSelect::getCurrentPath() {
+    return currentPath;
 }
 
 } /* namespace avitab */

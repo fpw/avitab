@@ -28,6 +28,8 @@ public:
     ChartsApp(FuncsPtr appFuncs, ContPtr container);
 private:
     std::shared_ptr<App> childApp;
+    std::string currentPath;
+
     void showFileSelect();
     void onSelect(const std::string &file);
 };

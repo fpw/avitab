@@ -32,6 +32,8 @@ public:
 
     FileSelect(FuncsPtr appFuncs, ContPtr container);
     void setSelectCallback(SelectCallback cb);
+    void showDirectory(const std::string &path);
+    std::string getCurrentPath();
 private:
     struct Entry {
         std::string name;
@@ -45,7 +47,6 @@ private:
     std::vector<Entry> currentEntries;
     SelectCallback selectCallback;
 
-    void showDirectory(const std::string &path);
     std::vector<Entry> readDirectory(const std::string &path);
     std::string toUTF8(const std::string &in);
     void sortEntries();

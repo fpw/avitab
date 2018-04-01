@@ -33,6 +33,7 @@ public:
 
     App(FuncsPtr appFuncs, ContPtr container);
     void setOnExit(ExitFunct onExitFunct);
+    virtual ~App() = default;
 protected:
     AppFunctions &api();
     ContPtr getContainer();

@@ -24,6 +24,7 @@ namespace avitab {
 ChartsApp::ChartsApp(FuncsPtr appFuncs, ContPtr container):
     App(appFuncs, container)
 {
+    currentPath = api().getDataPath() + "charts/";
     showFileSelect();
 }
 
@@ -31,10 +32,13 @@ void ChartsApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
     fileSelect->setOnExit([this] () { exit(); });
     fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
+    fileSelect->showDirectory(currentPath);
     childApp = std::move(fileSelect);
 }
 
 void ChartsApp::onSelect(const std::string& file) {
+    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
+
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(file);
     pdfApp->setOnExit([this] () { showFileSelect(); });
