@@ -56,7 +56,17 @@ DataRef<bool>::operator bool() {
     }
 }
 
+template<>
+DataRef<float>::operator float() {
+    if (handle) {
+        return XPLMGetDataf(handle) != 0;
+    } else {
+        return overrideValue;
+    }
+}
+
 template class DataRef<int>;
 template class DataRef<bool>;
+template class DataRef<float>;
 
 }

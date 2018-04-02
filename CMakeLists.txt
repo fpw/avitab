@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(AviTab VERSION 0.0.1 DESCRIPTION "AviTab X-Plane plugin")
+project(AviTab VERSION 0.0.2 DESCRIPTION "AviTab X-Plane plugin")
 
 
 configure_file(

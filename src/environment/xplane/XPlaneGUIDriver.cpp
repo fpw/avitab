@@ -50,10 +50,10 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
 
     XPLMCreateWindow_t params;
     params.structSize = sizeof(params);
-    params.left = winLeft + 50;
-    params.right = winLeft + 50 + width();
-    params.bottom = winTop - height() - 50;
-    params.top = winTop - 50;
+    params.left = winLeft + 100;
+    params.right = winLeft + 100 + width();
+    params.top = winTop - 100;
+    params.bottom = winTop - 100 - height();
     params.visible = 1;
     params.refcon = this;
     params.drawWindowFunc = [] (XPLMWindowID id, void *ref) {
@@ -89,9 +89,19 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         XPLMSetWindowPositioningMode(window, xplm_WindowPositionFree, -1);
         XPLMSetWindowGravity(window, 0, 1, 0, 0);
     }
-
-    XPLMSetWindowResizingLimits(window, width(), height(), width(), height());
+/* Doesn't work in VR?
+    XPLMSetWindowResizingLimits(window,
+            width(), height(),
+            width(), height());
+*/
     XPLMSetWindowTitle(window, title.c_str());
+}
+
+void XPlaneGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
+    GUIDriver::blit(x1, y1, x2, y2, data);
+
+    std::lock_guard<std::mutex> lock(drawMutex);
+    needsRedraw = true;
 }
 
 void XPlaneGUIDriver::onDraw() {
@@ -100,21 +110,49 @@ void XPlaneGUIDriver::onDraw() {
         return;
     }
 
-    int x, y, windowWidth, windowHeight;
-    XPLMGetWindowGeometry(window, &x, &y, &windowWidth, &windowHeight);
-    XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
+    int decoration = 0;
+    if (isVrEnabled) {
+        // We're using a decorated window - in VR, X-Plane subtracts
+        // its decoration from our window geometry, resulting a smaller
+        // window. In non-VR, it doesn't do that.
+        decoration = 10;
+    }
+
+    int left, top, right, bottom;
+    XPLMGetWindowGeometry(window, &left, &top, &right, &bottom);
 
     XPLMBindTexture2d(textureId, 0);
 
-    glTexImage2D(GL_TEXTURE_2D, 0,
-            GL_RGBA, width(), height(), 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, data());
+    {
+        std::lock_guard<std::mutex> lock(drawMutex);
+            if (needsRedraw) {
+                glTexSubImage2D(GL_TEXTURE_2D, 0,
+                        0, 0,
+                        width(), height(),
+                        GL_BGRA, GL_UNSIGNED_BYTE, data());
+                needsRedraw = false;
+            }
+    }
 
+    XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
+
+    // our window has a negative y-axis while OpenGL has a positive one
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0); glVertex2f(x, y - height());
-    glTexCoord2f(0, -1); glVertex2f(x, y);
-    glTexCoord2f(1, -1); glVertex2f(x + width(), y);
-    glTexCoord2f(1, 0); glVertex2f(x + width(), y - height());
+        // map top left texture to bottom left vertex
+        glTexCoord2i(0, 1);
+        glVertex2i(left - decoration, bottom - decoration);
+
+        // map bottom left texture to top left vertex
+        glTexCoord2i(0, 0);
+        glVertex2i(left - decoration, top + decoration);
+
+        // map bottom right texture to top right vertex
+        glTexCoord2i(1, 0);
+        glVertex2i(right + decoration, top + decoration);
+
+        // map top right texture to bottom right vertex
+        glTexCoord2i(1, 1);
+        glVertex2i(right + decoration, bottom - decoration);
     glEnd();
 }
 
@@ -124,29 +162,83 @@ void XPlaneGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
     pressed = mousePressed;
 }
 
+bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
+    int bLeft, bTop, bRight, bBottom;
+    XPLMGetWindowGeometry(window, &bLeft, &bTop, &bRight, &bBottom);
+
+    if (bLeft == bRight || bTop == bBottom) {
+        px = -1;
+        py = -1;
+        return false;
+    }
+
+    // calculate the center of the window in boxels
+    int bCenterX = bLeft + (bRight - bLeft) / 2;
+    int bCenterY = bBottom + (bTop - bBottom) / 2;
+
+    // normalized vector from center to point
+    float vecX = (bx - bCenterX) / float(bRight - bLeft);
+    float vecY = (by - bCenterY) / float(bTop - bBottom);
+
+    // GUI center in pixels
+    int guiWidth = width();
+    int guiHeigt = height();
+    int pCenterX = guiWidth / 2;
+    int pCenterY = guiHeigt / 2;
+
+    // apply the vector to our center to get the coordinates in pixels
+    px = pCenterX + vecX * guiWidth;
+    py = pCenterY - vecY * guiHeigt;
+
+    /* It was hard to find the reason (mentioned above) for
+     * clicks having slighty invalid coordinates in VR,
+     * so I leave this debugging aid here in case this gets
+     * changed in X-Plane one day.
+    logger::warn("converting bx = %d, by = %d", bx, by);
+    logger::warn("center of window: %d %d", bCenterX, bCenterY);
+    logger::warn("vector from center to p = %2f %2f", vecX, vecY);
+    logger::warn("center of GUI: %d, %d", pCenterX, pCenterY);
+    logger::warn("result: %d, %d", px, py);
+    */
+
+    // check if it's inside the window
+    if (px >= 0 && px < guiWidth && py >= 0 && py < guiHeigt) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
-    int winX, winY, windowWidth, windowHeight;
-    XPLMGetWindowGeometry(window, &winX, &winY, &windowWidth, &windowHeight);
+    int guiX, guiY;
+    bool isInWindow = boxelToPixel(x, y, guiX, guiY);
 
     switch (status) {
     case xplm_MouseDown:
-        XPLMGetWindowGeometry(window, &winX, &winY, &windowWidth, &windowHeight);
-        mouseX = x - winX;
-        mouseY = winY - y;
-        mousePressed = true;
+        if (isInWindow) {
+            mousePressed = true;
+        }
         break;
     case xplm_MouseDrag:
         // dragging passes invalid coordinates in VR in the current beta :-/
-        if (!isVrEnabled) {
-            mouseX = x - winX;
-            mouseY = winY - y;
+        if (isVrEnabled) {
+            isInWindow = false;
         }
         mousePressed = true;
         break;
     case xplm_MouseUp:
         mousePressed = false;
         break;
+    default:
+        isInWindow = false;
     }
+
+    if (isInWindow) {
+        mouseX = guiX;
+        mouseY = guiY;
+    }
+
     return true;
 }
 
@@ -163,6 +255,11 @@ void XPlaneGUIDriver::onKey(char key, XPLMKeyFlags flags, char virtualKey, bool 
 
 XPLMCursorStatus XPlaneGUIDriver::getCursor(int x, int y) {
     return xplm_CursorDefault;
+}
+
+XPlaneGUIDriver::~XPlaneGUIDriver() {
+    GLuint gluId = textureId;
+    glDeleteTextures(1, &gluId);
 }
 
 } /* namespace avitab */

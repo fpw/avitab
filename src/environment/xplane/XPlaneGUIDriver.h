@@ -21,6 +21,7 @@
 #include <XPLM/XPLMGraphics.h>
 #include <XPLM/XPLMDisplay.h>
 #include <atomic>
+#include <mutex>
 #include "src/environment/GUIDriver.h"
 #include "DataRef.h"
 
@@ -33,12 +34,16 @@ public:
     void init(int width, int height) override;
     void createWindow(const std::string &title) override;
     void readPointerState(int &x, int &y, bool &pressed) override;
+    void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
+    ~XPlaneGUIDriver();
 private:
     DataRef<bool> isVrEnabled;
-    int textureId = -1;
+    int textureId = 0;
     XPLMWindowID window = nullptr;
     std::atomic_int mouseX {0}, mouseY {0};
     std::atomic_bool mousePressed {false};
+    std::mutex drawMutex;
+    bool needsRedraw = false;
 
     void onDraw();
     bool onClick(int x, int y, XPLMMouseStatus status);
@@ -46,6 +51,8 @@ private:
     void onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus);
     XPLMCursorStatus getCursor(int x, int y);
     bool onMouseWheel(int x, int y, int wheel, int clicks);
+
+    bool boxelToPixel(int bx, int by, int &px, int &py);
 };
 
 } /* namespace avitab */

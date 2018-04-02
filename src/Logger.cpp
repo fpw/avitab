@@ -31,7 +31,6 @@ void log(const std::string format, va_list args) {
         vsprintf(buf, format.c_str(), args);
         std::string timeStamp = platform::getLocalTime("%H:%M:%S");
         logFile << timeStamp << " " << buf << std::endl;
-        std::flush(logFile);
     }
 }
 
@@ -61,6 +60,9 @@ void logger::warn(const std::string format, ...) {
     va_start(args, format);
     log("w: " + format, args);
     va_end(args);
+    if (logFile) {
+        std::flush(logFile);
+    }
 }
 
 void logger::error(const std::string format, ...) {
@@ -68,4 +70,7 @@ void logger::error(const std::string format, ...) {
     va_start(args, format);
     log("e: " + format, args);
     va_end(args);
+    if (logFile) {
+        std::flush(logFile);
+    }
 }
