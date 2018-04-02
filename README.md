@@ -22,9 +22,23 @@ about the plane status or aid in navigation.
 * Optionally, you can assign a key for this command (I prefer the right-hand lower trigger)
 
 ## Usage
+
+### General
 When hovering over the edges of the tablet from a short distance, X-Plane will display green bars around the tablet.
 The _upper_ bar can be used to grab the window and move it around inside the cockpit. The other bars can be used to
 resize the tablet - however, resizing is _not supported_ so please do not try it.
+
+### Charts Viewer
+The charts viewer displays PDF files inside the charts/ subdirectory of the plugin directoy. You can add your
+charts there, including subdirectories.
+
+### Clipboard
+This app displays the textual contents of your clipboard, if any. This can be used to tranfer flight plans from
+a website into VR via your clipboard.
+
+### Clock
+The upper right of the tablet features a clock that displays your computer's time in case you are simulating
+a different time and still want to keep track of the real life outside.
 
 ## Limitations
 
