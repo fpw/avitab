@@ -98,7 +98,7 @@ void AviTab::showClipboardApp() {
     centerApp->setOnExit([this] () { showAppLauncher(); });
 }
 
-void avitab::AviTab::showAboutApp() {
+void AviTab::showAboutApp() {
     centerApp = std::make_shared<About>(this, centerContainer);
     centerApp->setOnExit([this] () { showAppLauncher(); });
 }

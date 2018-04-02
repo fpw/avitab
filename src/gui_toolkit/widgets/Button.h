@@ -37,6 +37,7 @@ public:
 private:
     Icon iconData;
     lv_img_t iconImage;
+    lv_style_t styleWhenPressed, styleWhenReleased;
     ButtonCallback callbackFunc;
 };
 

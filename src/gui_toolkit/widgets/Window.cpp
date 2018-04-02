@@ -43,8 +43,8 @@ int Window::getContentWidth() {
 }
 
 int avitab::Window::getContentHeight() {
-    // TODO: Why do we have to subtract this constant?
-    return getHeight() - lv_win_get_btn_size(obj()) - 25;
+    lv_win_ext_t *ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
+    return lv_obj_get_height(ext->page);
 }
 
 void Window::setOnClose(WindowCallback cb) {

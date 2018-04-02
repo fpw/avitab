@@ -24,24 +24,37 @@
 #include "Platform.h"
 #include "src/Logger.h"
 
-#define PATH_LEN_MAX 2048
+/*
+ * The purpose of this module is to put all platform (as in Posix or Win32)
+ * specific functions into a single module so that the rest of the application
+ * can stay 'clean'. It's mainly about file system related stuff: Windows
+ * returns ANSI strings when using the POSIX wrapper for file system access,
+ * but most libraries (such as mupdf) expect UTF8 strings when passing file
+ * names.
+ *
+ * The idea is to use UTF8 in AviTab as well, so these wrapper functions
+ * should always accept and return UTF8 strings.
+ */
+
+// The maximum length that WE support
+#define AVITAB_PATH_LEN_MAX 2048
 
 #ifdef _WIN32
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
-#   define realpath(N, R) _fullpath((R), (N), PATH_LEN_MAX)
+#   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
 #endif
 
 namespace platform {
 
 constexpr size_t getMaxPathLen() {
-    return PATH_LEN_MAX;
+    return AVITAB_PATH_LEN_MAX;
 }
 
 #ifdef _WIN32
 std::string nativeToUTF8(const std::string& native) {
-    wchar_t buf[PATH_LEN_MAX];
-    char res[PATH_LEN_MAX];
+    wchar_t buf[AVITAB_PATH_LEN_MAX];
+    char res[AVITAB_PATH_LEN_MAX];
 
     MultiByteToWideChar(CP_ACP, 0, native.c_str(), -1, buf, sizeof(buf));
     WideCharToMultiByte(CP_UTF8, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
@@ -55,8 +68,8 @@ std::string nativeToUTF8(const std::string& native) {
 
 #ifdef _WIN32
 std::string UTF8ToNative(const std::string& utf8) {
-    wchar_t buf[PATH_LEN_MAX];
-    char res[PATH_LEN_MAX];
+    wchar_t buf[AVITAB_PATH_LEN_MAX];
+    char res[AVITAB_PATH_LEN_MAX];
 
     MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, buf, sizeof(buf));
     WideCharToMultiByte(CP_ACP, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
@@ -107,7 +120,7 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 }
 
 std::string realPath(const std::string& utf8Path) {
-    char realPath[PATH_LEN_MAX];
+    char realPath[AVITAB_PATH_LEN_MAX];
     realpath(utf8Path.c_str(), realPath);
     return realPath;
 }

@@ -40,8 +40,11 @@ Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
     lv_cont_set_fit(button, true, true);
 
-    lv_btn_set_style(button, LV_BTN_STYLE_REL, &lv_style_transp);
-    // lv_btn_set_style(button, LV_BTN_STYLE_PR, &lv_style_transp);
+    lv_style_copy(&styleWhenReleased, lv_btn_get_style(button, LV_BTN_STYLE_REL));
+    lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));
+    styleWhenReleased.body.empty = true;
+    lv_btn_set_style(button, LV_BTN_STYLE_PR, &styleWhenPressed);
+    lv_btn_set_style(button, LV_BTN_STYLE_REL, &styleWhenReleased);
 
     lv_obj_t *ico = lv_img_create(button, nullptr);
     lv_img_set_src(ico, &iconImage);
