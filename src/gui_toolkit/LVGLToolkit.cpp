@@ -103,6 +103,14 @@ void LVGLToolkit::createNativeWindow(const std::string& title) {
     }
 }
 
+bool LVGLToolkit::hasNativeWindow() {
+    return driver->hasWindow();
+}
+
+void LVGLToolkit::pauseNativeWindow() {
+    driver->killWindow();
+}
+
 void LVGLToolkit::destroyNativeWindow() {
     if (guiThread) {
         keepAlive = false;

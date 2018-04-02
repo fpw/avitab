@@ -28,6 +28,8 @@ class GUIDriver {
 public:
     virtual void init(int width, int height);
     virtual void createWindow(const std::string &title) = 0;
+    virtual bool hasWindow() = 0;
+    virtual void killWindow() = 0;
 
     virtual void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
     virtual void fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);

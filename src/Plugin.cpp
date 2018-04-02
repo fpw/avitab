@@ -32,7 +32,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
     try {
         environment = std::make_shared<avitab::XPlaneEnvironment>();
         logger::init(environment->getProgramPath());
-        strncpy(outDescription, "A tablet to help with navigation.", 255);
+        strncpy(outDescription, "A tablet to help in VR.", 255);
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStart: %s", e.what());
         strncpy(outDescription, e.what(), 255);

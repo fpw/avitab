@@ -19,8 +19,10 @@
 #define SRC_ENVIRONMENT_XPLANE_XPLANEENVIRONMENT_H_
 
 #include <XPLM/XPLMMenus.h>
+#include <XPLM/XPLMUtilities.h>
 #include <memory>
 #include <vector>
+#include <map>
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "src/Environment/Environment.h"
 
@@ -29,21 +31,25 @@ namespace avitab {
 class XPlaneEnvironment: public Environment {
 public:
     using MenuCallback = std::function<void()>;
+    using CommandCallback = std::function<void()>;
 
     XPlaneEnvironment();
 
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
 
+    std::string getProgramPath() override;
+
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
 
-    std::string getProgramPath() override;
+    void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) override;
 
     ~XPlaneEnvironment();
 private:
     std::string path;
-    std::vector<MenuCallback> callbacks;
+    std::vector<MenuCallback> menuCallbacks;
+    std::map<XPLMCommandRef, CommandCallback> commandCallbacks;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;
 };

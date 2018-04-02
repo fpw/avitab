@@ -45,6 +45,10 @@ void XPlaneGUIDriver::init(int width, int height) {
 }
 
 void XPlaneGUIDriver::createWindow(const std::string &title) {
+    if (hasWindow()) {
+        killWindow();
+    }
+
     int winLeft, winTop, winRight, winBot;
     XPLMGetScreenBoundsGlobal(&winLeft, &winTop, &winRight, &winBot);
 
@@ -95,6 +99,21 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
             width(), height());
 */
     XPLMSetWindowTitle(window, title.c_str());
+}
+
+bool XPlaneGUIDriver::hasWindow() {
+    if (!window) {
+        return false;
+    } else {
+        return XPLMGetWindowIsVisible(window);
+    }
+}
+
+void XPlaneGUIDriver::killWindow() {
+    if (window) {
+        XPLMDestroyWindow(window);
+        window = nullptr;
+    }
 }
 
 void XPlaneGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {

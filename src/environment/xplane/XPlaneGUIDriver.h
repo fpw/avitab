@@ -33,12 +33,15 @@ public:
 
     void init(int width, int height) override;
     void createWindow(const std::string &title) override;
+    bool hasWindow() override;
+    void killWindow() override;
+
     void readPointerState(int &x, int &y, bool &pressed) override;
     void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
     ~XPlaneGUIDriver();
 private:
     DataRef<bool> isVrEnabled;
-    int textureId = 0;
+    int textureId = -1;
     XPLMWindowID window = nullptr;
     std::atomic_int mouseX {0}, mouseY {0};
     std::atomic_bool mousePressed {false};

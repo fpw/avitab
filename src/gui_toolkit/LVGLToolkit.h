@@ -37,6 +37,8 @@ public:
     LVGLToolkit(std::shared_ptr<GUIDriver> drv);
 
     void createNativeWindow(const std::string &title);
+    void pauseNativeWindow();
+    bool hasNativeWindow();
     void destroyNativeWindow();
 
     std::unique_ptr<RasterJob> createRasterJob(const std::string &document);

@@ -36,15 +36,20 @@ void AviTab::startApp() {
     logger::verbose("Starting AviTab %s", AVITAB_VERSION_STR);
 
     env->createMenu("AviTab");
-    env->addMenuEntry("Show Tablet", std::bind(&AviTab::onShowTablet, this));
+    env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
+    env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 }
 
-void AviTab::onShowTablet() {
-    logger::info("Showing tablet");
-
+void AviTab::toggleTablet() {
     try {
-        guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
-        guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+        if (!guiLib->hasNativeWindow()) {
+            logger::info("Showing tablet");
+            guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
+            guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+        } else {
+            logger::info("Hiding tablet");
+            guiLib->pauseNativeWindow();
+        }
     } catch (const std::exception &e) {
         logger::error("Exception in onShowTablet: %s", e.what());
     }

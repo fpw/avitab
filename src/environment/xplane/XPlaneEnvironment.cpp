@@ -59,9 +59,9 @@ void XPlaneEnvironment::createMenu(const std::string& name) {
 }
 
 void XPlaneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
-    callbacks.push_back(cb);
-    int idx = callbacks.size() - 1;
-    XPLMAppendMenuItem(subMenu, label.c_str(), &callbacks[idx], 0);
+    menuCallbacks.push_back(cb);
+    int idx = menuCallbacks.size() - 1;
+    XPLMAppendMenuItem(subMenu, label.c_str(), &menuCallbacks[idx], 0);
 }
 
 void XPlaneEnvironment::destroyMenu() {
@@ -71,6 +71,32 @@ void XPlaneEnvironment::destroyMenu() {
         XPLMRemoveMenuItem(XPLMFindPluginsMenu(), subMenuIdx);
         subMenuIdx = -1;
     }
+}
+
+void XPlaneEnvironment::createCommand(const std::string& name, const std::string& desc, std::function<void()> cb) {
+    XPLMCommandRef cmd = XPLMCreateCommand(name.c_str(), desc.c_str());
+    if (!cmd) {
+        throw std::runtime_error("Couldn't create command: " + name);
+    }
+
+    commandCallbacks.insert(std::pair<XPLMCommandRef, CommandCallback>(cmd, cb));
+
+    XPLMRegisterCommandHandler(cmd, [] (XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref) -> int {
+        if (phase != xplm_CommandBegin) {
+            return 1;
+        }
+        XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
+        if (!us) {
+            return 1;
+        }
+
+        CommandCallback f = us->commandCallbacks[cmd];
+        if (f) {
+            f();
+        }
+
+        return 1;
+    }, true, this);
 }
 
 std::string XPlaneEnvironment::getProgramPath() {

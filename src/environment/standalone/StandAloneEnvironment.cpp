@@ -54,6 +54,9 @@ void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function
 void StandAloneEnvironment::destroyMenu() {
 }
 
+void StandAloneEnvironment::createCommand(const std::string& name, const std::string& desc, std::function<void()> cb) {
+}
+
 std::string avitab::StandAloneEnvironment::getProgramPath() {
     return platform::nativeToUTF8(ourPath);
 }

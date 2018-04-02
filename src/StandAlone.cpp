@@ -32,7 +32,7 @@ int main() {
     auto aviTab = std::make_unique<avitab::AviTab>(env);
 
     aviTab->startApp();
-    aviTab->onShowTablet();
+    aviTab->toggleTablet();
 
     // pauses until window closed
     env->eventLoop();

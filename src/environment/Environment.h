@@ -33,11 +33,14 @@ class Environment {
 public:
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
 
+    virtual std::string getProgramPath() = 0;
+
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, std::function<void()> cb) = 0;
     virtual void destroyMenu() = 0;
 
-    virtual std::string getProgramPath() = 0;
+    virtual void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) = 0;
+
 
     virtual ~Environment() = default;
 };

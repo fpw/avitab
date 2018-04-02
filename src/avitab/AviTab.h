@@ -30,7 +30,7 @@ class AviTab: public AppFunctions {
 public:
     AviTab(std::shared_ptr<Environment> environment);
     void startApp();
-    void onShowTablet();
+    void toggleTablet();
     void stopApp();
 
     // App API

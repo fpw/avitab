@@ -60,6 +60,13 @@ void SDLGUIDriver::createWindow(const std::string& title) {
     SDL_UpdateTexture(texture, nullptr, data(), width() * sizeof(uint32_t));
 }
 
+bool SDLGUIDriver::hasWindow() {
+    return true;
+}
+
+void avitab::SDLGUIDriver::killWindow() {
+}
+
 void SDLGUIDriver::eventLoop() {
     // called from main thread
     while (true) {

@@ -30,6 +30,8 @@ class SDLGUIDriver: public GUIDriver {
 public:
     void init(int width, int height) override;
     void createWindow(const std::string &title) override;
+    bool hasWindow() override;
+    void killWindow() override;
 
     void eventLoop();
 
