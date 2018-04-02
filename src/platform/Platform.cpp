@@ -127,4 +127,26 @@ std::string getLocalTime(const std::string &format) {
     return buf;
 }
 
+#ifdef _WIN32
+std::string getClipboardContent() {
+    if (!OpenClipboard(NULL)) {
+        return "No clipboard access";
+    }
+
+    char *text = reinterpret_cast<char *>(GetClipboardData(CF_TEXT));
+
+    CloseClipboard();
+
+    if (!text) {
+        return "";
+    }
+
+    return text;
+}
+#else
+std::string getClipboardContent() {
+    return "Not supported on your platform";
+}
+#endif
+
 }

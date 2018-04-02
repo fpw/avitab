@@ -55,6 +55,7 @@ private:
     void createLayout();
     void showAppLauncher();
     void showChartsApp();
+    void showClipboardApp();
     void cleanupLayout();
 };
 

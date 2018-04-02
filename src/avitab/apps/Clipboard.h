@@ -15,30 +15,23 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_PLATFORM_PLATFORM_H_
-#define SRC_PLATFORM_PLATFORM_H_
+#ifndef SRC_AVITAB_APPS_CLIPBOARD_H_
+#define SRC_AVITAB_APPS_CLIPBOARD_H_
 
-#include <string>
-#include <vector>
+#include "App.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/Label.h"
 
-namespace platform {
+namespace avitab {
 
-struct DirEntry {
-    std::string utf8Name;
-    bool isDirectory;
+class Clipboard: public App {
+public:
+    Clipboard(FuncsPtr appFuncs, ContPtr container);
+private:
+    std::shared_ptr<Window> window;
+    std::shared_ptr<Label> label;
 };
 
-constexpr size_t getMaxPathLen();
-std::string nativeToUTF8(const std::string &native);
-std::string UTF8ToNative(const std::string &utf8);
+} /* namespace avitab */
 
-std::vector<DirEntry> readDirectory(const std::string &utf8Path);
-std::string realPath(const std::string &utf8Path);
-std::string getFileNameFromPath(const std::string &utf8Path);
-
-std::string getLocalTime(const std::string &format);
-std::string getClipboardContent();
-
-}
-
-#endif /* SRC_PLATFORM_PLATFORM_H_ */
+#endif /* SRC_AVITAB_APPS_CLIPBOARD_H_ */

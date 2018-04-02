@@ -20,6 +20,7 @@
 #include "src/avitab/apps/HeaderApp.h"
 #include "src/avitab/apps/ChartsApp.h"
 #include "src/avitab/apps/AppLauncher.h"
+#include "src/avitab/apps/Clipboard.h"
 #include <climits>
 
 namespace avitab {
@@ -81,11 +82,17 @@ void AviTab::showAppLauncher() {
     auto launcher = std::make_shared<AppLauncher>(this, centerContainer);
     std::string root = env->getProgramPath() + "icons/";
     launcher->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
+    launcher->addEntry("Clipboard", root + "if_clipboard_43705.png", [this] () { showClipboardApp(); });
     centerApp = launcher;
 }
 
 void AviTab::showChartsApp() {
     centerApp = std::make_shared<ChartsApp>(this, centerContainer);
+    centerApp->setOnExit([this] () { showAppLauncher(); });
+}
+
+void AviTab::showClipboardApp() {
+    centerApp = std::make_shared<Clipboard>(this, centerContainer);
     centerApp->setOnExit([this] () { showAppLauncher(); });
 }
 

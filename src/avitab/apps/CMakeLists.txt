@@ -4,5 +4,6 @@ add_library(avitab_apps
     HeaderApp.cpp
     AppLauncher.cpp
     ChartsApp.cpp
+    Clipboard.cpp
 )
 target_link_libraries(avitab_apps avitab_app_components)

@@ -15,30 +15,20 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_PLATFORM_PLATFORM_H_
-#define SRC_PLATFORM_PLATFORM_H_
+#include "Clipboard.h"
+#include "src/platform/Platform.h"
 
-#include <string>
-#include <vector>
+namespace avitab {
 
-namespace platform {
+Clipboard::Clipboard(FuncsPtr appFuncs, ContPtr container):
+    App(appFuncs, container),
+    window(std::make_shared<Window>(container, "Clipboard Viewer"))
 
-struct DirEntry {
-    std::string utf8Name;
-    bool isDirectory;
-};
+{
+    window->setOnClose([this] () { exit(); });
 
-constexpr size_t getMaxPathLen();
-std::string nativeToUTF8(const std::string &native);
-std::string UTF8ToNative(const std::string &utf8);
-
-std::vector<DirEntry> readDirectory(const std::string &utf8Path);
-std::string realPath(const std::string &utf8Path);
-std::string getFileNameFromPath(const std::string &utf8Path);
-
-std::string getLocalTime(const std::string &format);
-std::string getClipboardContent();
-
+    std::string content = platform::getClipboardContent();
+    label = std::make_shared<Label>(window, content);
 }
 
-#endif /* SRC_PLATFORM_PLATFORM_H_ */
+} /* namespace avitab */
