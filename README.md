@@ -48,3 +48,8 @@ a different time and still want to keep track of the real life outside.
 * PDFs containing [CJK fonts](https://en.wikipedia.org/wiki/List_of_CJK_fonts)
   or ancient fonts such [Linear B](https://en.wikipedia.org/wiki/Linear_B) are not supported.
   This is mainly due to font sizes - a version containing all fonts would be 40 Megabytes in size.
+
+## Donate
+If you like AviTab and want to support its further development, you can donate.
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=folke%2ewill%40gmail%2ecom&lc=US&item_name=AviTab&no_note=0&cn=Message%20to%20the%20developer%3a&no_shipping=1&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
