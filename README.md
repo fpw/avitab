@@ -15,7 +15,7 @@ about the plane status or aid in navigation.
 
 ## Installation
 
-* Download the latest release from the [release page](/fpw/avitab/releases/latest)
+* Download the latest release from the [release page](https://github.com/fpw/avitab/releases/latest)
 * Extract the archive and move the folder into your X-Plane/Resources/Plugins directory
 * Start X-Plane
 * Find a new menu inside the plugins directory to toggle the tablet
