@@ -61,10 +61,10 @@ void SDLGUIDriver::createWindow(const std::string& title) {
 }
 
 bool SDLGUIDriver::hasWindow() {
-    return true;
+    return false;
 }
 
-void avitab::SDLGUIDriver::killWindow() {
+void SDLGUIDriver::killWindow() {
 }
 
 void SDLGUIDriver::eventLoop() {

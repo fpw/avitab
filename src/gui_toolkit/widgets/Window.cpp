@@ -34,7 +34,7 @@ void Window::setCaption(const std::string& title) {
     lv_win_set_title(obj(), title.c_str());
 }
 
-void avitab::Window::hideScrollbars() {
+void Window::hideScrollbars() {
     lv_win_set_sb_mode(obj(), LV_SB_MODE_OFF);
 }
 
@@ -42,7 +42,7 @@ int Window::getContentWidth() {
     return lv_win_get_width(obj());
 }
 
-int avitab::Window::getContentHeight() {
+int Window::getContentHeight() {
     lv_win_ext_t *ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
     return lv_obj_get_height(ext->page);
 }
