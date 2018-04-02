@@ -21,6 +21,7 @@
 #include "src/avitab/apps/ChartsApp.h"
 #include "src/avitab/apps/AppLauncher.h"
 #include "src/avitab/apps/Clipboard.h"
+#include "src/avitab/apps/About.h"
 #include <climits>
 
 namespace avitab {
@@ -83,6 +84,7 @@ void AviTab::showAppLauncher() {
     std::string root = env->getProgramPath() + "icons/";
     launcher->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
     launcher->addEntry("Clipboard", root + "if_clipboard_43705.png", [this] () { showClipboardApp(); });
+    launcher->addEntry("About", root + "if_Help_1493288.png", [this] () { showAboutApp(); });
     centerApp = launcher;
 }
 
@@ -93,6 +95,11 @@ void AviTab::showChartsApp() {
 
 void AviTab::showClipboardApp() {
     centerApp = std::make_shared<Clipboard>(this, centerContainer);
+    centerApp->setOnExit([this] () { showAppLauncher(); });
+}
+
+void avitab::AviTab::showAboutApp() {
+    centerApp = std::make_shared<About>(this, centerContainer);
     centerApp->setOnExit([this] () { showAppLauncher(); });
 }
 
@@ -131,9 +138,6 @@ void AviTab::executeLater(std::function<void()> func) {
 
 std::string AviTab::getDataPath() {
     return env->getProgramPath();
-}
-
-void AviTab::showErrorMessage(const std::string& error) {
 }
 
 void AviTab::stopApp() {

@@ -38,7 +38,6 @@ public:
     Icon loadIcon(const std::string &path) override;
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
-    void showErrorMessage(const std::string &error) override;
 
     ~AviTab();
 
@@ -56,6 +55,7 @@ private:
     void showAppLauncher();
     void showChartsApp();
     void showClipboardApp();
+    void showAboutApp();
     void cleanupLayout();
 };
 

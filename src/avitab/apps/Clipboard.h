@@ -18,6 +18,7 @@
 #ifndef SRC_AVITAB_APPS_CLIPBOARD_H_
 #define SRC_AVITAB_APPS_CLIPBOARD_H_
 
+#include <memory>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Label.h"

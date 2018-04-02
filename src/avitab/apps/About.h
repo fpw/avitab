@@ -15,25 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_APPFUNCTIONS_H_
-#define SRC_AVITAB_APPS_APPFUNCTIONS_H_
+#ifndef SRC_AVITAB_APPS_ABOUT_H_
+#define SRC_AVITAB_APPS_ABOUT_H_
 
 #include <memory>
-#include <string>
-#include "src/gui_toolkit/rasterizers/RasterJob.h"
-#include "src/gui_toolkit/Icon.h"
+#include "App.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/Label.h"
 
 namespace avitab {
 
-class AppFunctions {
+class About: public App {
 public:
-    virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
-    virtual Icon loadIcon(const std::string &path) = 0;
-    virtual void executeLater(std::function<void()> func) = 0;
-    virtual std::string getDataPath() = 0;
-    virtual ~AppFunctions() = default;
+    About(FuncsPtr appFuncs, ContPtr container);
+private:
+    std::shared_ptr<Window> window;
+    std::shared_ptr<Label> label;
 };
 
-}
+} /* namespace avitab */
 
-#endif /* SRC_AVITAB_APPS_APPFUNCTIONS_H_ */
+#endif /* SRC_AVITAB_APPS_ABOUT_H_ */
