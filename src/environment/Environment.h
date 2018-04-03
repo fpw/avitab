@@ -23,6 +23,7 @@
 #include <functional>
 #include <mutex>
 #include <vector>
+#include "EnvData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
 
 namespace avitab {
@@ -47,6 +48,7 @@ public:
     // Can be called from any thread
     virtual std::string getProgramPath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
+    virtual EnvData getData(const std::string &dataRef) = 0;
 
     virtual ~Environment() = default;
 protected:

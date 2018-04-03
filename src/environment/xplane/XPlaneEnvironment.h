@@ -26,6 +26,7 @@
 #include <map>
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "src/Environment/Environment.h"
+#include "DataCache.h"
 
 namespace avitab {
 
@@ -43,9 +44,11 @@ public:
     // Can be called from any thread
     std::string getProgramPath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
+    EnvData getData(const std::string &dataRef) override;
 
     ~XPlaneEnvironment();
 private:
+    DataCache dataCache;
     std::string pluginPath;
     std::vector<MenuCallback> menuCallbacks;
     XPLMFlightLoopID flightLoopId = nullptr;

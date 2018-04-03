@@ -66,6 +66,10 @@ void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     registerEnvironmentCallback(cb, [] () {});
 }
 
+EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
+    return EnvData();
+}
+
 StandAloneEnvironment::~StandAloneEnvironment() {
     logger::verbose("~StandAloneEnvironment");
 }

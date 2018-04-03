@@ -129,7 +129,9 @@ std::string XPlaneEnvironment::getProgramPath() {
 
 void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     if (!flightLoopId) {
-        // register only on the first call then keep forever
+        // it seems the scheduling thread must be identical to the
+        // creating one, so let's create the loop here and keep it
+        // in our instance
         flightLoopId = createFlightLoop();
     }
 
@@ -148,6 +150,22 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
     // add a new callback right now - but this is safe since
     // they will have re-scheduled the loop due to our invariant.
     return 0;
+}
+
+EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
+    std::promise<EnvData> dataPromise;
+    auto futureData = dataPromise.get_future();
+
+    runInEnvironment([&dataPromise, &dataRef, this] () {
+        try {
+            dataPromise.set_value(dataCache.getData(dataRef));
+        } catch (...) {
+            // transfer exceptions across the threads
+            dataPromise.set_exception(std::current_exception());
+        }
+    });
+
+    return futureData.get();
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

@@ -40,6 +40,7 @@ public:
     // Can be called from any thread
     std::string getProgramPath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
+    EnvData getData(const std::string &dataRef) override;
 
     virtual ~StandAloneEnvironment();
 private:

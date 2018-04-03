@@ -38,6 +38,7 @@ public:
     Icon loadIcon(const std::string &path) override;
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
+    EnvData getDataRef(const std::string &dataRef);
 
     ~AviTab();
 

@@ -148,6 +148,10 @@ std::string AviTab::getDataPath() {
     return env->getProgramPath();
 }
 
+EnvData AviTab::getDataRef(const std::string& dataRef) {
+    return env->getData(dataRef);
+}
+
 void AviTab::stopApp() {
     env->destroyMenu();
     guiLib->destroyNativeWindow();

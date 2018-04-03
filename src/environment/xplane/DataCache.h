@@ -15,27 +15,27 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_APPFUNCTIONS_H_
-#define SRC_AVITAB_APPS_APPFUNCTIONS_H_
+#ifndef SRC_ENVIRONMENT_XPLANE_DATACACHE_H_
+#define SRC_ENVIRONMENT_XPLANE_DATACACHE_H_
 
-#include <memory>
+#include <map>
 #include <string>
-#include "src/gui_toolkit/rasterizers/RasterJob.h"
-#include "src/gui_toolkit/Icon.h"
+#include <XPLM/XPLMDataAccess.h>
 #include "src/environment/EnvData.h"
 
 namespace avitab {
 
-class AppFunctions {
+// This class may only be used by the environment thread
+class DataCache {
 public:
-    virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
-    virtual Icon loadIcon(const std::string &path) = 0;
-    virtual void executeLater(std::function<void()> func) = 0;
-    virtual std::string getDataPath() = 0;
-    virtual EnvData getDataRef(const std::string &dataRef) = 0;
-    virtual ~AppFunctions() = default;
+    EnvData getData(const std::string &dataRef);
+private:
+    std::map<std::string, XPLMDataRef> refCache;
+
+    XPLMDataRef createDataRef(const std::string &dataRef);
+    EnvData toEnvData(XPLMDataRef ref);
 };
 
-}
+} /* namespace avitab */
 
-#endif /* SRC_AVITAB_APPS_APPFUNCTIONS_H_ */
+#endif /* SRC_ENVIRONMENT_XPLANE_DATACACHE_H_ */
