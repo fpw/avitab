@@ -63,7 +63,7 @@ protected:
      * @param cb
      * @param onEmpty
      */
-    void registerEnvironmentCallback(EnvironmentCallback cb, std::function<void()> onEmpty);
+    void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
 };
 

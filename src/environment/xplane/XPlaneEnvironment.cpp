@@ -25,7 +25,11 @@
 namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
+    // Called by the X-Plane thread via StartPlugin
     pluginPath = getPluginPath();
+    flightLoopId = createFlightLoop();
+
+    XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
 
 std::string avitab::XPlaneEnvironment::getPluginPath() {
@@ -128,33 +132,12 @@ std::string XPlaneEnvironment::getProgramPath() {
 }
 
 void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
-    if (!flightLoopId) {
-        // it seems the scheduling thread must be identical to the
-        // creating one, so let's create the loop here and keep it
-        // in our instance
-        flightLoopId = createFlightLoop();
-    }
-
-    registerEnvironmentCallback(cb, /* onEmpty = */ [this] () {
-        // Invariant: If and only if there are no callbacks,
-        // the flight loop is not currently scheduled.
-        // According to the X-Plane documentation, the following code
-        // is thread-safe inside the SDK so we can call it from our threads.
-        XPLMScheduleFlightLoop(flightLoopId, -1, true);
-    });
+    registerEnvironmentCallback(cb);
 }
 
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
     runEnvironmentCallbacks();
-    // If someone adds a new callback between the above line and this return statement,
-    // we will get a deadlock because the return statement will unschedule
-    // the flight loop that was just scheduled by us in runInEnvironment.
-    // I believe this is a bug in the API design, see
-    // https://forums.x-plane.org/index.php?/forums/topic/145871-question-about-thread-safety-of-xplmscheduleflightloop/
-
-    // To work around this, the callers of runInEnvironment need to poll whether their
-    // task is actually being executed, see below in getData for an example
-    return 0;
+    return -1;
 }
 
 EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
@@ -170,18 +153,7 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
         }
     });
 
-    // this loop is required to work around a possible bug in the SDK, see the
-    // comment in onFlightLoop above
-    while (true) {
-        using namespace std::chrono_literals;
-        auto status = futureData.wait_for(3ms);
-
-        if (status == std::future_status::ready) {
-            return futureData.get();
-        } else {
-            XPLMScheduleFlightLoop(flightLoopId, -1, true);
-        }
-    }
+    return futureData.get();
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

@@ -63,7 +63,7 @@ std::string avitab::StandAloneEnvironment::getProgramPath() {
 
 void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     // the SDL loop always runs so we don't need the onEmpty callback
-    registerEnvironmentCallback(cb, [] () {});
+    registerEnvironmentCallback(cb);
 }
 
 EnvData StandAloneEnvironment::getData(const std::string& dataRef) {

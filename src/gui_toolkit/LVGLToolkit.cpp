@@ -142,7 +142,8 @@ void LVGLToolkit::guiLoop() {
             std::lock_guard<std::mutex> lock(guiMutex);
             // first run our owns tasks
 
-            // since a task could modify the task list, work on a copy
+            // since a task could modify the task list using executeLater,
+            // work on a copy
             std::vector<GUITask> tasks = pendingTasks;
             pendingTasks.clear();
             for (GUITask &task: tasks) {
