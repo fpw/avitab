@@ -135,7 +135,7 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 
     registerEnvironmentCallback(cb, /* onEmpty = */ [this] () {
         // Invariant: If and only if there are no callbacks,
-        // the flight loop is not scheduled.
+        // the flight loop is not currently scheduled.
         // According to the X-Plane documentation, the following code
         // is thread-safe inside the SDK.
         XPLMScheduleFlightLoop(flightLoopId, -1, true);
