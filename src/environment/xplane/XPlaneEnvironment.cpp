@@ -139,16 +139,21 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
         // Invariant: If and only if there are no callbacks,
         // the flight loop is not currently scheduled.
         // According to the X-Plane documentation, the following code
-        // is thread-safe inside the SDK.
+        // is thread-safe inside the SDK so we can call it from our threads.
         XPLMScheduleFlightLoop(flightLoopId, -1, true);
     });
 }
 
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
     runEnvironmentCallbacks();
-    // the mutex is not held anymore now so someone could
-    // add a new callback right now - but this is safe since
-    // they will have re-scheduled the loop due to our invariant.
+    // If someone adds a new callback between the above line and this return statement,
+    // we will get a deadlock because the return statement will unschedule
+    // the flight loop that was just scheduled by us in runInEnvironment.
+    // I believe this is a bug in the API design, see
+    // https://forums.x-plane.org/index.php?/forums/topic/145871-question-about-thread-safety-of-xplmscheduleflightloop/
+
+    // To work around this, the callers of runInEnvironment need to poll whether their
+    // task is actually being executed, see below in getData for an example
     return 0;
 }
 
@@ -165,7 +170,18 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
         }
     });
 
-    return futureData.get();
+    // this loop is required to work around a possible bug in the SDK, see the
+    // comment in onFlightLoop above
+    while (true) {
+        using namespace std::chrono_literals;
+        auto status = futureData.wait_for(3ms);
+
+        if (status == std::future_status::ready) {
+            return futureData.get();
+        } else {
+            XPLMScheduleFlightLoop(flightLoopId, -1, true);
+        }
+    }
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

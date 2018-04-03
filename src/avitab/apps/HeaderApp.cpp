@@ -25,6 +25,7 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
     clockLabel(container, ""),
     tickTimer(std::bind(&HeaderApp::onTick, this), 1000)
 {
+    container->setLayoutRightColumns();
     onTick();
 }
 
@@ -35,6 +36,7 @@ bool HeaderApp::onTick() {
         clockLabel.setText(time);
         curLabel = time;
     }
+
     return true;
 }
 

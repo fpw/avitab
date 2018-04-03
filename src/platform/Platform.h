@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdarg>
 
 namespace platform {
 
@@ -38,6 +39,9 @@ std::string getFileNameFromPath(const std::string &utf8Path);
 
 std::string getLocalTime(const std::string &format);
 std::string getClipboardContent();
+
+std::string formatStringArgs(const std::string format, va_list args);
+std::string formatString(const std::string format, ...);
 
 }
 

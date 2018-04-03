@@ -16,6 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Label.h"
+#include "src/platform/Platform.h"
+#include <cstdarg>
 
 namespace avitab {
 
@@ -30,6 +32,15 @@ Label::Label(WidgetPtr parent, const std::string& title):
 
 void Label::setText(const std::string& title) {
     lv_label_set_text(obj(), title.c_str());
+}
+
+void Label::setTextFormatted(const std::string& format, ...) {
+    va_list args;
+    va_start(args, format);
+    std::string formatted = platform::formatStringArgs(format, args);
+    va_end(args);
+
+    setText(formatted);
 }
 
 } /* namespace avitab */

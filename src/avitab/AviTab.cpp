@@ -66,7 +66,6 @@ void AviTab::createLayout() {
         headContainer = std::make_shared<Container>(screen);
         headContainer->setPosition(0, 0);
         headContainer->setDimensions(screen->getWidth(), 30);
-        headContainer->setLayoutRightColumns();
     }
 
     if (!headerApp) {

@@ -162,4 +162,19 @@ std::string getClipboardContent() {
 }
 #endif
 
+std::string formatStringArgs(const std::string format, va_list list) {
+    char buf[2048];
+    vsprintf(buf, format.c_str(), list);
+    return buf;
+}
+
+std::string formatString(const std::string format, ...) {
+    va_list args;
+    va_start(args, format);
+    std::string formatted = formatStringArgs(format, args);
+    va_end(args);
+
+    return formatted;
+}
+
 }
