@@ -4,7 +4,7 @@ add_library(avitab_env_standalone
 )
 
 target_link_libraries(avitab_env_standalone
-    avitab_gui_driver
+    avitab_environment
     avitab_gui_lvgl
     avitab_platform
 )

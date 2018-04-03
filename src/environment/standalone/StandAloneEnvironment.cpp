@@ -34,8 +34,8 @@ StandAloneEnvironment::StandAloneEnvironment() {
 }
 
 void StandAloneEnvironment::eventLoop() {
-    if (driver) {
-        driver->eventLoop();
+    while (driver->handleEvents()) {
+        runEnvironmentCallbacks();
     }
     driver.reset();
 }
@@ -48,17 +48,22 @@ std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
 void StandAloneEnvironment::createMenu(const std::string& name) {
 }
 
-void StandAloneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+void StandAloneEnvironment::addMenuEntry(const std::string& label, MenuCallback cb) {
 }
 
 void StandAloneEnvironment::destroyMenu() {
 }
 
-void StandAloneEnvironment::createCommand(const std::string& name, const std::string& desc, std::function<void()> cb) {
+void StandAloneEnvironment::createCommand(const std::string& name, const std::string& desc, CommandCallback cb) {
 }
 
 std::string avitab::StandAloneEnvironment::getProgramPath() {
     return platform::nativeToUTF8(ourPath);
+}
+
+void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
+    // the SDL loop always runs so we don't need the onEmpty callback
+    registerEnvironmentCallback(cb, [] () {});
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

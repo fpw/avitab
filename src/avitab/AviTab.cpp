@@ -33,6 +33,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
 }
 
 void AviTab::startApp() {
+    // runs in environment thread
     logger::verbose("Starting AviTab %s", AVITAB_VERSION_STR);
 
     env->createMenu("AviTab");
@@ -41,10 +42,12 @@ void AviTab::startApp() {
 }
 
 void AviTab::toggleTablet() {
+    // runs in environment thread
     try {
         if (!guiLib->hasNativeWindow()) {
             logger::info("Showing tablet");
             guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
+            // transfer program flow to GUI thread
             guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
         } else {
             logger::info("Hiding tablet");

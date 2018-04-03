@@ -30,15 +30,16 @@ public:
 
     void eventLoop();
 
+    // Must be called from the environment thread - do not call from GUI thread!
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
-
-    std::string getProgramPath() override;
-
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
-
     void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) override;
+
+    // Can be called from any thread
+    std::string getProgramPath() override;
+    void runInEnvironment(EnvironmentCallback cb) override;
 
     virtual ~StandAloneEnvironment();
 private:

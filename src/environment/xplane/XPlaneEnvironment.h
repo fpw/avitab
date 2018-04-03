@@ -20,6 +20,7 @@
 
 #include <XPLM/XPLMMenus.h>
 #include <XPLM/XPLMUtilities.h>
+#include <XPLM/XPLMProcessing.h>
 #include <memory>
 #include <vector>
 #include <map>
@@ -30,28 +31,31 @@ namespace avitab {
 
 class XPlaneEnvironment: public Environment {
 public:
-    using MenuCallback = std::function<void()>;
-    using CommandCallback = std::function<void()>;
-
     XPlaneEnvironment();
 
+    // Must be called from the environment thread - do not call from GUI thread!
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
-
-    std::string getProgramPath() override;
-
     void createMenu(const std::string &name) override;
-    void addMenuEntry(const std::string &label, std::function<void()> cb) override;
+    void addMenuEntry(const std::string &label, MenuCallback cb) override;
     void destroyMenu() override;
+    void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
 
-    void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) override;
+    // Can be called from any thread
+    std::string getProgramPath() override;
+    void runInEnvironment(EnvironmentCallback cb) override;
 
     ~XPlaneEnvironment();
 private:
-    std::string path;
+    std::string pluginPath;
     std::vector<MenuCallback> menuCallbacks;
+    XPLMFlightLoopID flightLoopId = nullptr;
     std::map<XPLMCommandRef, CommandCallback> commandCallbacks;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;
+
+    std::string getPluginPath();
+    XPLMFlightLoopID createFlightLoop();
+    float onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count);
 };
 
 } /* namespace avitab */

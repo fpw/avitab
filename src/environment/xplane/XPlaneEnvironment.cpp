@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <XPLM/XPLMPlugin.h>
+#include <stdexcept>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
@@ -24,12 +25,35 @@
 namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
+    pluginPath = getPluginPath();
+}
+
+std::string avitab::XPlaneEnvironment::getPluginPath() {
     XPLMPluginID ourId = XPLMGetMyID();
     char pathBuf[2048];
     XPLMGetPluginInfo(ourId, nullptr, pathBuf, nullptr, nullptr);
     char *pathPart = XPLMExtractFileAndPath(pathBuf);
-    path.assign(pathBuf, 0, pathPart - pathBuf);
-    path.append("/../");
+    return std::string(pathBuf, 0, pathPart - pathBuf) + "/../";
+}
+
+XPLMFlightLoopID XPlaneEnvironment::createFlightLoop() {
+    XPLMCreateFlightLoop_t loop;
+    loop.structSize = sizeof(XPLMCreateFlightLoop_t);
+    loop.phase = 0; // ignored according to docs
+    loop.refcon = this;
+    loop.callbackFunc = [] (float f1, float f2, int c, void *ref) -> float {
+        if (!ref) {
+            return 0;
+        }
+        auto *us = reinterpret_cast<XPlaneEnvironment *>(ref);
+        return us->onFlightLoop(f1, f2, c);
+    };
+
+    XPLMFlightLoopID id = XPLMCreateFlightLoop(&loop);
+    if (!id) {
+        throw std::runtime_error("Couldn't create flight loop");
+    }
+    return id;
 }
 
 std::shared_ptr<LVGLToolkit> XPlaneEnvironment::createGUIToolkit() {
@@ -58,7 +82,7 @@ void XPlaneEnvironment::createMenu(const std::string& name) {
     }
 }
 
-void XPlaneEnvironment::addMenuEntry(const std::string& label, std::function<void()> cb) {
+void XPlaneEnvironment::addMenuEntry(const std::string& label, MenuCallback cb) {
     menuCallbacks.push_back(cb);
     int idx = menuCallbacks.size() - 1;
     XPLMAppendMenuItem(subMenu, label.c_str(), &menuCallbacks[idx], 0);
@@ -73,7 +97,7 @@ void XPlaneEnvironment::destroyMenu() {
     }
 }
 
-void XPlaneEnvironment::createCommand(const std::string& name, const std::string& desc, std::function<void()> cb) {
+void XPlaneEnvironment::createCommand(const std::string& name, const std::string& desc, CommandCallback cb) {
     XPLMCommandRef cmd = XPLMCreateCommand(name.c_str(), desc.c_str());
     if (!cmd) {
         throw std::runtime_error("Couldn't create command: " + name);
@@ -100,10 +124,37 @@ void XPlaneEnvironment::createCommand(const std::string& name, const std::string
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
-    return platform::nativeToUTF8(path);
+    return platform::nativeToUTF8(pluginPath);
+}
+
+void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
+    if (!flightLoopId) {
+        // register only on the first call then keep forever
+        flightLoopId = createFlightLoop();
+    }
+
+    registerEnvironmentCallback(cb, /* onEmpty = */ [this] () {
+        // Invariant: If and only if there are no callbacks,
+        // the flight loop is not scheduled.
+        // According to the X-Plane documentation, the following code
+        // is thread-safe inside the SDK.
+        XPLMScheduleFlightLoop(flightLoopId, -1, true);
+    });
+}
+
+float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
+    runEnvironmentCallbacks();
+    // the mutex is not held anymore now so someone could
+    // add a new callback right now - but this is safe since
+    // they will have re-scheduled the loop due to our invariant.
+    return 0;
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {
+    if (flightLoopId) {
+        XPLMDestroyFlightLoop(flightLoopId);
+    }
+
     logger::verbose("~XPlaneEnvironment");
     destroyMenu();
 }

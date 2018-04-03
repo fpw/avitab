@@ -33,7 +33,7 @@ public:
     bool hasWindow() override;
     void killWindow() override;
 
-    void eventLoop();
+    bool handleEvents();
 
     void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
     void readPointerState(int &x, int &y, bool &pressed) override;

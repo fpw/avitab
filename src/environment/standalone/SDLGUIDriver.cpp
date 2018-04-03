@@ -67,33 +67,32 @@ bool SDLGUIDriver::hasWindow() {
 void SDLGUIDriver::killWindow() {
 }
 
-void SDLGUIDriver::eventLoop() {
+bool SDLGUIDriver::handleEvents() {
     // called from main thread
-    while (true) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_QUIT:
-                onQuit();
-                return;
-            case SDL_MOUSEMOTION:
-                mouseX = event.motion.x;
-                mouseY = event.motion.y;
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    mousePressed = true;
-                }
-                break;
-            case SDL_MOUSEBUTTONUP:
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    mousePressed = false;
-                }
-                break;
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_QUIT:
+            onQuit();
+            return false;
+        case SDL_MOUSEMOTION:
+            mouseX = event.motion.x;
+            mouseY = event.motion.y;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                mousePressed = true;
             }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                mousePressed = false;
+            }
+            break;
         }
-        SDL_WaitEvent(nullptr);
     }
+    SDL_WaitEventTimeout(nullptr, 100);
+    return true;
 }
 
 void SDLGUIDriver::onQuit() {
