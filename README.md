@@ -33,7 +33,7 @@ The charts viewer displays PDF files inside the charts/ subdirectory of the plug
 charts there, including subdirectories.
 
 ### Clipboard
-This app displays the textual contents of your clipboard, if any. This can be used to tranfer flight plans from
+This app displays the textual contents of your clipboard, if any. This can be used to transfer flight plans from
 a website into VR via your clipboard.
 
 ### Clock

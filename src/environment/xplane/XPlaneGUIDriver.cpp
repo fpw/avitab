@@ -201,13 +201,13 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
 
     // GUI center in pixels
     int guiWidth = width();
-    int guiHeigt = height();
+    int guiHeight = height();
     int pCenterX = guiWidth / 2;
-    int pCenterY = guiHeigt / 2;
+    int pCenterY = guiHeight / 2;
 
     // apply the vector to our center to get the coordinates in pixels
     px = pCenterX + vecX * guiWidth;
-    py = pCenterY - vecY * guiHeigt;
+    py = pCenterY - vecY * guiHeight;
 
     /* It was hard to find the reason (mentioned above) for
      * clicks having slighty invalid coordinates in VR,
@@ -221,7 +221,7 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
     */
 
     // check if it's inside the window
-    if (px >= 0 && px < guiWidth && py >= 0 && py < guiHeigt) {
+    if (px >= 0 && px < guiWidth && py >= 0 && py < guiHeight) {
         return true;
     } else {
         return false;
