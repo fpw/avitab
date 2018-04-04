@@ -13,28 +13,31 @@ set(CommonLibs
 
 # X-Plane plugin
 add_library(avitab_plugin SHARED Plugin.cpp Logger.cpp)
-if (WIN32)
+if(WIN32)
     target_link_libraries(avitab_plugin
         -static
         -static-libgcc
         -static-libstdc++
+        ${CommonLibs}
+        avitab_env_xplane
         XPLM_64
     )
-endif (WIN32)
+else()
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
 )
+endif()
 
 set_target_properties(avitab_plugin PROPERTIES PREFIX "")
 set_target_properties(avitab_plugin PROPERTIES OUTPUT_NAME "AviTab")
 set_target_properties(avitab_plugin PROPERTIES SUFFIX ".xpl")
 
-if (WIN32)
+if(WIN32)
 install(TARGETS avitab_plugin
     RUNTIME DESTINATION  "/Program Files (x86)/Steam/steamapps/common/X-Plane 11/Resources/plugins/AviTab/win_x64/"
 )
-endif (WIN32)
+endif(WIN32)
 
 # Standalone program
 find_package(SDL2 REQUIRED)
