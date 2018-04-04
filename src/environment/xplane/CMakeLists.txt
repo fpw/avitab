@@ -9,5 +9,14 @@ target_link_libraries(avitab_env_xplane
     avitab_gui_lvgl
     avitab_environment
     avitab_platform
-    opengl32
 )
+
+if(WIN32)
+    target_link_libraries(avitab_env_xplane
+        opengl32
+    )
+else()
+    target_link_libraries(avitab_env_xplane
+        GL
+    )
+endif(WIN32)
