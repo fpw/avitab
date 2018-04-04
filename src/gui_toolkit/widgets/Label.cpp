@@ -34,7 +34,7 @@ void Label::setText(const std::string& title) {
     lv_label_set_text(obj(), title.c_str());
 }
 
-void Label::setTextFormatted(const std::string& format, ...) {
+void Label::setTextFormatted(const std::string format, ...) {
     va_list args;
     va_start(args, format);
     std::string formatted = platform::formatStringArgs(format, args);

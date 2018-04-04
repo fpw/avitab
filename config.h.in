@@ -25,6 +25,8 @@
 #   define IBM 1
 #elif defined __linux
 #   define LIN 1
+#elif defined __APPLE__
+#   define APL 1
 #endif
 
 #define XPLM301

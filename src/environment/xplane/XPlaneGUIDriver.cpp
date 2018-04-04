@@ -17,8 +17,13 @@
  */
 #include <XPLM/XPLMGraphics.h>
 #include <XPLM/XPLMDisplay.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
+#endif
 #include <stdexcept>
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
