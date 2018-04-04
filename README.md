@@ -4,6 +4,8 @@ AviTab is a plugin for the [X-Plane](http://www.x-plane.com/) flight simulator.
 It displays a tablet like computer with a few apps in the cockpit. It is mainly
 used for flying in virtual reality.
 
+![](screenshots/notes.jpg)
+
 ## Purpose
 When flying in a simulator, one often needs to lookup details in PDF charts, plane manuals,
 checklists or other documents. Using a PDF reader breaks the immersion because the virtual aviator
