@@ -26,7 +26,7 @@
 #include <atomic>
 #include <map>
 #include "src/gui_toolkit/LVGLToolkit.h"
-#include "src/Environment/Environment.h"
+#include "src/environment/Environment.h"
 #include "DataCache.h"
 
 namespace avitab {
