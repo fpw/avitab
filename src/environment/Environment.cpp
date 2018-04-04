@@ -20,9 +20,16 @@
 
 namespace avitab {
 
+void Environment::start() {
+    std::lock_guard<std::mutex> lock(envMutex);
+    stopped = false;
+}
+
 void Environment::registerEnvironmentCallback(EnvironmentCallback cb) {
     std::lock_guard<std::mutex> lock(envMutex);
-    envCallbacks.push_back(cb);
+    if (!stopped) {
+        envCallbacks.push_back(cb);
+    }
 }
 
 void Environment::runEnvironmentCallbacks() {
@@ -35,8 +42,12 @@ void Environment::runEnvironmentCallbacks() {
     }
 }
 
-void Environment::clearEnvironmentCallbacks() {
+void Environment::stop() {
     std::lock_guard<std::mutex> lock(envMutex);
+    stopped = true;
+    for (auto &cb: envCallbacks) {
+        cb();
+    }
     envCallbacks.clear();
 }
 

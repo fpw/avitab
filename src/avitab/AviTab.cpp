@@ -27,6 +27,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
+    env->start();
 }
 
 void AviTab::startApp() {
@@ -145,10 +146,30 @@ void AviTab::onHomeButton() {
 }
 
 void AviTab::stopApp() {
+    // runs in environment thread
+
+    // This function is called by the environment
+    // and it will never call the environment callback
+    // again. If the GUI is currently waiting on an environment
+    // job to run, we would create a deadlock now. So for a proper
+    // shutdown, we must do the following:
+
+    // Tell the GUI to not execute more background jobs
+    // after the current ones have finished
+    guiLib->signalStop();
+
+    // Let the environment run its callbacks one last time,
+    // letting the GUI jobs finish to release the wait on the
+    // environment
+    env->stop();
+
+    // now that the GUI thread is guranteed to finish, we can
+    // do the rest of the cleanup
     env->destroyMenu();
+
+    // this will also join the GUI thread
     guiLib->destroyNativeWindow();
 
-    // now the GUI thread is stopped, we can do cleanup in the calling thread
     cleanupLayout();
 }
 

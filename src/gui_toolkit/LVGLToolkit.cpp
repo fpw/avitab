@@ -28,7 +28,7 @@ LVGLToolkit *LVGLToolkit::instance = nullptr;
 
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     driver(drv),
-    keepAlive(false)
+    guiActive(false)
 {
     instance = this;
 
@@ -94,11 +94,11 @@ void LVGLToolkit::initInputDriver() {
 void LVGLToolkit::createNativeWindow(const std::string& title) {
     driver->createWindow(title);
 
-    if (!keepAlive) {
+    if (!guiActive) {
         // if keepAlive if true, the window was hidden without us noticing
         // so it's enough to re-create it without starting rendering again
         mainScreen = std::make_shared<Screen>();
-        keepAlive = true;
+        guiActive = true;
         guiThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
     }
 }
@@ -111,12 +111,15 @@ void LVGLToolkit::pauseNativeWindow() {
     driver->killWindow();
 }
 
+void LVGLToolkit::signalStop() {
+    guiActive = false;
+}
+
 void LVGLToolkit::destroyNativeWindow() {
     if (guiThread) {
-        keepAlive = false;
+        guiActive = false;
         guiThread->join();
         guiThread.reset();
-
         mainScreen.reset();
     }
 }
@@ -135,7 +138,7 @@ void LVGLToolkit::guiLoop() {
 
     logger::verbose("LVGL thread has id %d", std::this_thread::get_id());
 
-    while (keepAlive) {
+    while (guiActive) {
         auto startAt = clock::now();
 
         try {
@@ -180,7 +183,9 @@ void LVGLToolkit::runInGUI(GUITask func) {
 }
 
 void LVGLToolkit::executeLater(GUITask func) {
-    pendingTasks.push_back(func);
+    if (guiActive) {
+        pendingTasks.push_back(func);
+    }
 }
 
 LVGLToolkit::~LVGLToolkit() {

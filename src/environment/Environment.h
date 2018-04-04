@@ -39,11 +39,13 @@ public:
     using EnvironmentCallback = std::function<void()>;
 
     // Must be called from the environment thread - do not call from GUI thread!
+    void start();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, MenuCallback cb) = 0;
     virtual void destroyMenu() = 0;
     virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback) = 0;
+    void stop();
 
     // Can be called from any thread
     virtual std::string getProgramPath() = 0;
@@ -65,7 +67,8 @@ protected:
      */
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
-    void clearEnvironmentCallbacks();
+private:
+    bool stopped = false;
 };
 
 }

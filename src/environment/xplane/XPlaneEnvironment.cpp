@@ -158,7 +158,6 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
 
 XPlaneEnvironment::~XPlaneEnvironment() {
     if (flightLoopId) {
-        clearEnvironmentCallbacks();
         XPLMDestroyFlightLoop(flightLoopId);
     }
 

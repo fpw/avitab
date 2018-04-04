@@ -39,6 +39,7 @@ public:
     void createNativeWindow(const std::string &title);
     void pauseNativeWindow();
     bool hasNativeWindow();
+    void signalStop();
     void destroyNativeWindow();
 
     std::unique_ptr<RasterJob> createRasterJob(const std::string &document);
@@ -60,7 +61,7 @@ private:
     std::vector<GUITask> pendingTasks;
     std::shared_ptr<GUIDriver> driver;
     std::unique_ptr<std::thread> guiThread;
-    std::atomic_bool keepAlive;
+    std::atomic_bool guiActive;
     std::shared_ptr<Screen> mainScreen;
 
     int getFrameWidth();
