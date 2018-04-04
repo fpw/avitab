@@ -21,6 +21,7 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/Timer.h"
+#include <array>
 
 namespace avitab {
 
@@ -28,11 +29,20 @@ class HeaderApp: public App {
 public:
     HeaderApp(FuncsPtr appFuncs, ContPtr container);
 private:
+    static constexpr int HOR_PADDING = 10;
     Label clockLabel;
+    Label fpsLabel;
     Timer tickTimer;
-    std::string curLabel;
+    std::string curTimeString;
+
+    std::array<float, 30> fpsRingBuffer;
+    int fpsRingCursor = 0;
 
     bool onTick();
+    void updateClock();
+    void updateFPS();
+    void pushFPSValue(float fps);
+    float getAverageFPS();
 };
 
 } /* namespace avitab */

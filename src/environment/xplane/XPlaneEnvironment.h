@@ -23,6 +23,7 @@
 #include <XPLM/XPLMProcessing.h>
 #include <memory>
 #include <vector>
+#include <atomic>
 #include <map>
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "src/Environment/Environment.h"
@@ -51,7 +52,7 @@ private:
     DataCache dataCache;
     std::string pluginPath;
     std::vector<MenuCallback> menuCallbacks;
-    XPLMFlightLoopID flightLoopId = nullptr;
+    std::atomic<XPLMFlightLoopID> flightLoopId { nullptr };
     std::map<XPLMCommandRef, CommandCallback> commandCallbacks;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;

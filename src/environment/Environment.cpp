@@ -35,4 +35,9 @@ void Environment::runEnvironmentCallbacks() {
     }
 }
 
+void Environment::clearEnvironmentCallbacks() {
+    std::lock_guard<std::mutex> lock(envMutex);
+    envCallbacks.clear();
+}
+
 }

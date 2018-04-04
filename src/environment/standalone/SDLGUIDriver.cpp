@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdexcept>
+#include <chrono>
 #include "SDLGUIDriver.h"
 #include "src/Logger.h"
 
@@ -120,6 +121,7 @@ void SDLGUIDriver::onQuit() {
 
 void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
     // called from LVGL thread
+    auto startAt = std::chrono::high_resolution_clock::now();
     GUIDriver::blit(x1, y1, x2, y2, data);
 
     // protect against parallel quit() calls
@@ -130,6 +132,12 @@ void SDLGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const ui
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
         SDL_RenderPresent(renderer);
     }
+    auto elapsed = std::chrono::high_resolution_clock::now() - startAt;
+    lastDrawTime = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+}
+
+uint32_t SDLGUIDriver::getLastDrawTime() {
+    return lastDrawTime;
 }
 
 void SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {

@@ -65,6 +65,7 @@ protected:
      */
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
+    void clearEnvironmentCallbacks();
 };
 
 }

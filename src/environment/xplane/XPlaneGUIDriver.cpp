@@ -93,11 +93,14 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         XPLMSetWindowPositioningMode(window, xplm_WindowPositionFree, -1);
         XPLMSetWindowGravity(window, 0, 1, 0, 0);
     }
-/* Doesn't work in VR?
-    XPLMSetWindowResizingLimits(window,
+
+    if (!isVrEnabled) {
+        // doesn't work in VR
+        XPLMSetWindowResizingLimits(window,
             width(), height(),
             width(), height());
-*/
+    }
+
     XPLMSetWindowTitle(window, title.c_str());
 }
 

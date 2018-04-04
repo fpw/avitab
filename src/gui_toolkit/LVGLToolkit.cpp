@@ -139,18 +139,24 @@ void LVGLToolkit::guiLoop() {
         auto startAt = clock::now();
 
         try {
-            std::lock_guard<std::mutex> lock(guiMutex);
-            // first run our owns tasks
+            // first run our own tasks
+            // To prevent race-conditions since a task could
+            // use the environment mutex or create new tasks,
+            // let's work on a copy. This also prevents
+            // deadlocks if a task decides to use the environment
+            // mutex by doing something in the environment
+            std::vector<GUITask> tasks;
+            {
+                std::lock_guard<std::mutex> lock(guiMutex);
+                tasks = pendingTasks;
+                pendingTasks.clear();
+            }
 
-            // since a task could modify the task list using executeLater,
-            // work on a copy
-            std::vector<GUITask> tasks = pendingTasks;
-            pendingTasks.clear();
             for (GUITask &task: tasks) {
                 task();
             }
 
-            // then the actual GUI's
+            // now run the actual GUI tasks, i.e. let LVGL do its animations etc.
             lv_task_handler();
         } catch (const std::exception &e) {
             logger::error("Exception in GUI: %s", e.what());
@@ -162,10 +168,7 @@ void LVGLToolkit::guiLoop() {
         std::this_thread::sleep_for(1ms);
         incMs++;
 
-        {
-            std::lock_guard<std::mutex> lock(guiMutex);
-            lv_tick_inc(incMs);
-        }
+        lv_tick_inc(incMs);
     }
 
     logger::verbose("LVGL thread destroyed");

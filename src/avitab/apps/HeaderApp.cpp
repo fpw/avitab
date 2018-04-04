@@ -15,29 +15,75 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "HeaderApp.h"
 #include "src/platform/Platform.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
 HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
     App(appFuncs, container),
     clockLabel(container, ""),
-    tickTimer(std::bind(&HeaderApp::onTick, this), 1000)
+    fpsLabel(container, ""),
+    tickTimer(std::bind(&HeaderApp::onTick, this), 100)
 {
-    container->setLayoutRightColumns();
     onTick();
 }
 
 bool HeaderApp::onTick() {
+    updateClock();
+    updateFPS();
+    return true;
+}
+
+void HeaderApp::updateClock() {
     std::string time = platform::getLocalTime("%H:%M");
-    if (curLabel != time) {
+    if (curTimeString != time) {
         // to prevent rendering calls each second
+        curTimeString = time;
         clockLabel.setText(time);
-        curLabel = time;
+        clockLabel.alignRightInParent(HOR_PADDING);
+    }
+}
+
+void HeaderApp::updateFPS() {
+    float lastFramePeriod = api().getDataRef("sim/operation/misc/frame_rate_period").floatValue;
+
+    if (lastFramePeriod > 0) {
+        pushFPSValue(1 / lastFramePeriod);
     }
 
-    return true;
+    if (fpsRingCursor % 10 == 0) {
+        float avgFps = getAverageFPS();
+        if (avgFps > 0) {
+            fpsLabel.setTextFormatted("%.0f FPS", avgFps);
+            fpsLabel.alignLeftInParent(HOR_PADDING);
+        }
+    }
+}
+
+void HeaderApp::pushFPSValue(float fps) {
+    fpsRingBuffer[fpsRingCursor++] = fps;
+    fpsRingCursor %= fpsRingBuffer.size();
+}
+
+float HeaderApp::getAverageFPS() {
+    float fpsSum = 0;
+    size_t count = 0;
+
+    std::for_each(std::begin(fpsRingBuffer), std::end(fpsRingBuffer), [&fpsSum, &count] (float f) {
+        if (f > 0) {
+            fpsSum += f;
+            count++;
+        }
+    });
+
+    if (count > 0) {
+        return fpsSum / count;
+    } else {
+        return 0;
+    }
 }
 
 } /* namespace avitab */

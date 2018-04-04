@@ -34,4 +34,8 @@ void Container::setLayoutPretty() {
     lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
 }
 
+void Container::setLayoutRow() {
+    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_M);
+}
+
 } /* namespace avitab */

@@ -27,6 +27,7 @@ public:
     Container(WidgetPtr parent);
     void setLayoutPretty();
     void setLayoutRightColumns();
+    void setLayoutRow();
 };
 
 } /* namespace avitab */

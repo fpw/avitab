@@ -19,6 +19,7 @@
 #define SRC_ENVIRONMENT_STANDALONE_STANDALONEENVIRONMENT_H_
 
 #include <memory>
+#include <map>
 #include "src/environment/Environment.h"
 #include "SDLGUIDriver.h"
 
@@ -29,6 +30,7 @@ public:
     StandAloneEnvironment();
 
     void eventLoop();
+    void setData(const std::string &dataRef, EnvData value);
 
     // Must be called from the environment thread - do not call from GUI thread!
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
@@ -46,6 +48,7 @@ public:
 private:
     std::string ourPath;
     std::shared_ptr<SDLGUIDriver> driver;
+    std::map<std::string, EnvData> simulatedData;
 };
 
 } /* namespace avitab */

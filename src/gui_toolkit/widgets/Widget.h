@@ -39,6 +39,8 @@ public:
     void setPosition(int x, int y);
     void setDimensions(int width, int height);
     void centerInParent();
+    void alignLeftInParent(int padLeft = 0);
+    void alignRightInParent(int padRight = 0);
     void setBackgroundWhite();
     int getWidth();
     int getHeight();

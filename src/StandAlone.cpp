@@ -22,15 +22,12 @@
 #include "src/Logger.h"
 
 int main() {
-    logger::verbose("Main thread has id %d", std::this_thread::get_id());
-
-    // Using heap so we can debug deconstructors with log messages
-
+    // Using the heap so we can debug deconstructors with log messages
     auto env = std::make_shared<avitab::StandAloneEnvironment>();
     logger::init(env->getProgramPath());
+    logger::verbose("Main thread has id %d", std::this_thread::get_id());
 
     auto aviTab = std::make_unique<avitab::AviTab>(env);
-
     aviTab->startApp();
     aviTab->toggleTablet();
 

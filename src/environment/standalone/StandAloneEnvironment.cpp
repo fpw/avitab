@@ -36,8 +36,16 @@ StandAloneEnvironment::StandAloneEnvironment() {
 void StandAloneEnvironment::eventLoop() {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();
+
+        EnvData frameData {};
+        frameData.floatValue = driver->getLastDrawTime() / 1000.0;
+        setData("sim/operation/misc/frame_rate_period", frameData);
     }
     driver.reset();
+}
+
+void StandAloneEnvironment::setData(const std::string& dataRef, EnvData value) {
+    simulatedData[dataRef] = value;
 }
 
 std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
@@ -67,7 +75,7 @@ void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 }
 
 EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
-    return EnvData();
+    return simulatedData[dataRef];
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

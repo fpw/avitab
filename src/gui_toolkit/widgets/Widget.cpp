@@ -26,10 +26,6 @@ Widget::Widget(WidgetPtr parent):
 {
 }
 
-void Widget::centerInParent() {
-    lv_obj_align(lvObj, nullptr, LV_ALIGN_CENTER, 0, 0);
-}
-
 void Widget::setObj(lv_obj_t* obj) {
     if (obj == nullptr) {
         throw std::runtime_error("NULL object passed to setObj");
@@ -55,6 +51,18 @@ void Widget::setPosition(int x, int y) {
 
 void Widget::setDimensions(int width, int height) {
     lv_obj_set_size(obj(), width, height);
+}
+
+void Widget::centerInParent() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_CENTER, 0, 0);
+}
+
+void Widget::alignLeftInParent(int padLeft) {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_LEFT_MID, padLeft, 0);
+}
+
+void Widget::alignRightInParent(int padRight) {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_RIGHT_MID, -padRight, 0);
 }
 
 int Widget::getWidth() {
@@ -106,4 +114,3 @@ Widget::~Widget() {
 }
 
 } // namespace avitab
-
