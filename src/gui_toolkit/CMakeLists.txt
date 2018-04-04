@@ -10,4 +10,5 @@ target_link_libraries(avitab_gui_lvgl
     avitab_gui_lvgl_widgets
     avitab_gui_rasterizers
     lvgl
+    pthread
 )

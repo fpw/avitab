@@ -7,21 +7,25 @@ add_subdirectory(platform)
 add_subdirectory(avitab)
 
 set(CommonLibs 
-	-static
-	-static-libgcc
-	-static-libstdc++
-
     avitab_main
     avitab_platform
 )
 
 # X-Plane plugin
 add_library(avitab_plugin SHARED Plugin.cpp Logger.cpp)
+if (WIN32)
+    target_link_libraries(avitab_plugin
+        -static
+        -static-libgcc
+        -static-libstdc++
+    )
+endif (WIN32)
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
     XPLM_64
 )
+
 set_target_properties(avitab_plugin PROPERTIES PREFIX "")
 set_target_properties(avitab_plugin PROPERTIES OUTPUT_NAME "AviTab")
 set_target_properties(avitab_plugin PROPERTIES SUFFIX ".xpl")
@@ -37,6 +41,18 @@ add_executable(AviTab-standalone StandAlone.cpp Logger.cpp)
 target_link_libraries(AviTab-standalone
     ${CommonLibs}
     avitab_env_standalone
-    -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
-    -Wl,--subsystem,windows
 )
+
+if(WIN32)
+    target_link_libraries(AviTab-standalone
+        -static
+        -static-libgcc
+        -static-libstdc++
+        -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
+        -Wl,--subsystem,windows
+    )
+else()
+    target_link_libraries(AviTab-standalone
+        ${SDL2_LIBRARIES}
+    )
+endif(WIN32)
