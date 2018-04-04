@@ -19,9 +19,9 @@
 
 namespace avitab {
 
-NotesApp::NotesApp(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "Notes")),
+NotesApp::NotesApp(FuncsPtr appFuncs):
+    App(appFuncs),
+    window(std::make_shared<Window>(getUIContainer(), "Notes")),
     textArea(std::make_shared<TextArea>(window, ""))
 {
     window->setOnClose([this] () { exit(); });

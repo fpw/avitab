@@ -32,7 +32,7 @@ class FileSelect: public App {
 public:
     using SelectCallback = std::function<void(const std::string &)>;
 
-    FileSelect(FuncsPtr appFuncs, ContPtr container);
+    FileSelect(FuncsPtr appFuncs);
     void setSelectCallback(SelectCallback cb);
     void setFilterRegex(const std::string regex);
     void showDirectory(const std::string &path);

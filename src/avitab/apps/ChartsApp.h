@@ -25,7 +25,8 @@ namespace avitab {
 
 class ChartsApp: public App {
 public:
-    ChartsApp(FuncsPtr appFuncs, ContPtr container);
+    ChartsApp(FuncsPtr appFuncs);
+    void show() override;
 private:
     std::shared_ptr<App> childApp;
     std::string currentPath;

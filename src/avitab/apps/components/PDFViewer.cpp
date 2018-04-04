@@ -20,9 +20,9 @@
 
 namespace avitab {
 
-PDFViewer::PDFViewer(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "PDF Viewer")),
+PDFViewer::PDFViewer(FuncsPtr appFuncs):
+    App(appFuncs),
+    window(std::make_shared<Window>(getUIContainer(), "PDF Viewer")),
     pixMap(std::make_unique<PixMap>(window)),
     rasterBuffer(std::make_shared<std::vector<uint32_t>>())
 {

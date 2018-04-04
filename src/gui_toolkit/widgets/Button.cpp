@@ -56,6 +56,28 @@ Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
     setObj(button);
 }
 
+Button::Button(WidgetPtr parent, Symbol smb):
+    Widget(parent)
+{
+    lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
+    lv_cont_set_fit(button, true, true);
+
+    lv_style_copy(&styleWhenReleased, lv_btn_get_style(button, LV_BTN_STYLE_REL));
+    lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));
+    styleWhenReleased.body.empty = true;
+    styleWhenReleased.body.border.part = LV_BORDER_NONE;
+    styleWhenPressed.body.empty = true;
+    styleWhenPressed.body.border.part = (lv_border_part_t) (LV_BORDER_LEFT | LV_BORDER_RIGHT);
+    lv_btn_set_style(button, LV_BTN_STYLE_PR, &styleWhenPressed);
+    lv_btn_set_style(button, LV_BTN_STYLE_REL, &styleWhenReleased);
+
+    lv_obj_t *ico = lv_img_create(button, nullptr);
+    lv_img_set_src(ico, symbolToLVSymbol(smb));
+    lv_obj_set_click(ico, false);
+
+    setObj(button);
+}
+
 void Button::setCallback(ButtonCallback cb) {
     callbackFunc = cb;
     lv_obj_set_free_ptr(obj(), &callbackFunc);

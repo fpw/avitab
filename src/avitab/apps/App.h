@@ -31,23 +31,25 @@ public:
     using FuncsPtr = AppFunctions *;
     using ContPtr = std::shared_ptr<Container>;
 
-    App(FuncsPtr appFuncs, ContPtr container);
+    App(FuncsPtr appFuncs);
     void setOnExit(ExitFunct onExitFunct);
+    ContPtr getUIContainer();
+    virtual void show();
+
     virtual ~App() = default;
 protected:
     AppFunctions &api();
-    ContPtr getContainer();
     void exit();
     ExitFunct &getOnExit();
 
     template<class T>
     std::unique_ptr<T> startSubApp() {
-        return std::make_unique<T>(funcs, uiContainer);
+        return std::make_unique<T>(funcs);
     }
 private:
-    ExitFunct onExit;
     FuncsPtr funcs;
     ContPtr uiContainer;
+    ExitFunct onExit;
 };
 
 } /* namespace avitab */

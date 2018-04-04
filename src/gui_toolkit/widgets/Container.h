@@ -29,6 +29,7 @@ public:
     void setLayoutRightColumns();
     void setLayoutRow();
     void setLayoutColumn();
+    void setFit(bool horiz, bool vert);
 };
 
 } /* namespace avitab */

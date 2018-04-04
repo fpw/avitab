@@ -45,6 +45,11 @@ lv_obj_t* Widget::parentObj() {
     }
 }
 
+void Widget::setParent(WidgetPtr newParent) {
+    parent = newParent;
+    lv_obj_set_parent(obj(), newParent->obj());
+}
+
 void Widget::setPosition(int x, int y) {
     lv_obj_set_pos(obj(), x, y);
 }
@@ -73,6 +78,10 @@ int Widget::getHeight() {
     return lv_obj_get_height(obj());
 }
 
+void Widget::setVisible(bool visible) {
+    lv_obj_set_hidden(obj(), !visible);
+}
+
 void Widget::setBackgroundWhite() {
     lv_style_copy(&styleMod, lv_obj_get_style(obj()));
     styleMod.body.main_color = LV_COLOR_WHITE;
@@ -91,6 +100,10 @@ lv_img_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
     return res;
 }
 
+void Widget::invalidate() {
+    lv_obj_invalidate(obj());
+}
+
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
     switch (symbol) {
     case Symbol::NONE:      return nullptr;
@@ -105,6 +118,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::MINUS:     return SYMBOL_MINUS;
     case Symbol::FILE:      return SYMBOL_FILE;
     case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
+    case Symbol::HOME:      return SYMBOL_HOME;
     default:                return nullptr;
     }
 }

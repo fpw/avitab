@@ -30,7 +30,7 @@ namespace avitab {
 
 class PDFViewer: public App {
 public:
-    PDFViewer(FuncsPtr appFuncs, ContPtr container);
+    PDFViewer(FuncsPtr appFuncs);
     void showFile(const std::string &nameUtf8);
 private:
     std::shared_ptr<Window> window;

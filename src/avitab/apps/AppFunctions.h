@@ -22,6 +22,7 @@
 #include <string>
 #include "src/gui_toolkit/rasterizers/RasterJob.h"
 #include "src/gui_toolkit/Icon.h"
+#include "src/gui_toolkit/widgets/Container.h"
 #include "src/environment/EnvData.h"
 
 namespace avitab {
@@ -33,6 +34,9 @@ public:
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
     virtual EnvData getDataRef(const std::string &dataRef) = 0;
+    virtual std::shared_ptr<Container> createGUIContainer() = 0;
+    virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
+    virtual void onHomeButton() = 0;
     virtual ~AppFunctions() = default;
 };
 

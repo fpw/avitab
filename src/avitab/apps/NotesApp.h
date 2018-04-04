@@ -27,7 +27,7 @@ namespace avitab {
 
 class NotesApp: public App {
 public:
-    NotesApp(FuncsPtr appFuncs, ContPtr container);
+    NotesApp(FuncsPtr appFuncs);
 private:
     std::shared_ptr<Window> window;
     std::shared_ptr<TextArea> textArea;

@@ -16,26 +16,40 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "AppLauncher.h"
+#include "ChartsApp.h"
+#include "NotesApp.h"
+#include "Clipboard.h"
+#include "About.h"
 
 namespace avitab {
 
-AppLauncher::AppLauncher(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container)
+AppLauncher::AppLauncher(FuncsPtr appFuncs):
+    App(appFuncs)
 {
-    container->setLayoutPretty();
+    getUIContainer()->setLayoutPretty();
+    std::string root = api().getDataPath() + "icons/";
+
+    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png");
+    addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
+    addEntry<Clipboard>("Clipboard", root + "if_clipboard_43705.png");
+    addEntry<About>("About", root + "if_Help_1493288.png");
 }
 
-void AppLauncher::addEntry(const std::string& name, const std::string& icon, Callback cb) {
-    Entry entry;
-    entry.callback = cb;
-    entry.button = std::make_shared<Button>(getContainer(), api().loadIcon(icon), name);
+template<typename T>
+void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
+    auto app = startSubApp<T>();
+    app->setOnExit([this] () {
+        this->show();
+    });
 
+    Entry entry;
+    entry.app = std::move(app);
+    entry.button = std::make_shared<Button>(getUIContainer(), api().loadIcon(icon), name);
     entries.push_back(entry);
+
     size_t index = entries.size() - 1;
     entry.button->setCallback([this, index] () {
-        api().executeLater([this, index] () {
-            entries[index].callback();
-        });
+        entries[index].app->show();
     });
 }
 

@@ -27,7 +27,7 @@ namespace avitab {
 
 class Clipboard: public App {
 public:
-    Clipboard(FuncsPtr appFuncs, ContPtr container);
+    Clipboard(FuncsPtr appFuncs);
 private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;

@@ -18,11 +18,7 @@
 #include "AviTab.h"
 #include "src/Logger.h"
 #include "src/avitab/apps/HeaderApp.h"
-#include "src/avitab/apps/ChartsApp.h"
 #include "src/avitab/apps/AppLauncher.h"
-#include "src/avitab/apps/Clipboard.h"
-#include "src/avitab/apps/NotesApp.h"
-#include "src/avitab/apps/About.h"
 #include <climits>
 
 namespace avitab {
@@ -63,23 +59,14 @@ void AviTab::createLayout() {
     // runs in GUI thread
     auto screen = guiLib->screen();
 
-    if (!headContainer) {
-        headContainer = std::make_shared<Container>(screen);
-        headContainer->setPosition(0, 0);
-        headContainer->setDimensions(screen->getWidth(), 30);
-    }
-
     if (!headerApp) {
-        headerApp = std::make_shared<HeaderApp>(this, headContainer);
+        headerApp = std::make_shared<HeaderApp>(this);
+        headContainer = headerApp->getUIContainer();
+        headContainer->setParent(screen);
+        headContainer->setVisible(true);
     }
 
-    if (!centerContainer) {
-        centerContainer = std::make_shared<Container>(screen);
-        centerContainer->setPosition(0, headContainer->getHeight());
-        centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
-    }
-
-    if (!centerApp) {
+    if (!launcherApp) {
         showAppLauncher();
     }
 
@@ -87,33 +74,29 @@ void AviTab::createLayout() {
 }
 
 void AviTab::showAppLauncher() {
-    auto launcher = std::make_shared<AppLauncher>(this, centerContainer);
-    std::string root = env->getProgramPath() + "icons/";
-    launcher->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
-    launcher->addEntry("Notes", root + "if_txt2_3783.png", [this] () { showNotesApp(); });
-    launcher->addEntry("Clipboard", root + "if_clipboard_43705.png", [this] () { showClipboardApp(); });
-    launcher->addEntry("About", root + "if_Help_1493288.png", [this] () { showAboutApp(); });
-    centerApp = launcher;
+    if (!launcherApp) {
+        launcherApp = std::make_shared<AppLauncher>(this);;
+    }
+    launcherApp->show();
 }
 
-void AviTab::showChartsApp() {
-    centerApp = std::make_shared<ChartsApp>(this, centerContainer);
-    centerApp->setOnExit([this] () { showAppLauncher(); });
+std::shared_ptr<Container> AviTab::createGUIContainer() {
+    auto screen = guiLib->screen();
+    auto container = std::make_shared<Container>(screen);
+    container->setPosition(0, 30);
+    container->setVisible(false);
+    container->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+    return container;
 }
 
-void AviTab::showClipboardApp() {
-    centerApp = std::make_shared<Clipboard>(this, centerContainer);
-    centerApp->setOnExit([this] () { showAppLauncher(); });
-}
+void AviTab::showGUIContainer(std::shared_ptr<Container> container) {
+    if (centerContainer) {
+        centerContainer->setVisible(false);
+    }
 
-void AviTab::showNotesApp() {
-    centerApp = std::make_shared<NotesApp>(this, centerContainer);
-    centerApp->setOnExit([this] () { showAppLauncher(); });
-}
-
-void AviTab::showAboutApp() {
-    centerApp = std::make_shared<About>(this, centerContainer);
-    centerApp->setOnExit([this] () { showAppLauncher(); });
+    centerContainer = container;
+    centerContainer->setParent(guiLib->screen());
+    centerContainer->setVisible(true);
 }
 
 std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
@@ -155,6 +138,10 @@ std::string AviTab::getDataPath() {
 
 EnvData AviTab::getDataRef(const std::string& dataRef) {
     return env->getData(dataRef);
+}
+
+void AviTab::onHomeButton() {
+    showAppLauncher();
 }
 
 void AviTab::stopApp() {

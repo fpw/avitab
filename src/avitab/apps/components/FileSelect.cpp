@@ -21,9 +21,9 @@
 
 namespace avitab {
 
-FileSelect::FileSelect(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "")),
+FileSelect::FileSelect(FuncsPtr appFuncs):
+    App(appFuncs),
+    window(std::make_shared<Window>(getUIContainer(), "")),
     list(std::make_shared<List>(window))
 {
     window->setOnClose([this] () { exit(); });

@@ -22,12 +22,20 @@
 
 namespace avitab {
 
-HeaderApp::HeaderApp(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    clockLabel(container, ""),
-    fpsLabel(container, ""),
+HeaderApp::HeaderApp(FuncsPtr appFuncs):
+    App(appFuncs),
     tickTimer(std::bind(&HeaderApp::onTick, this), 100)
 {
+    auto container = getUIContainer();
+    container->setPosition(0, 0);
+    container->setDimensions(container->getWidth(), 30);
+    clockLabel = std::make_shared<Label>(container, ""),
+    fpsLabel = std::make_shared<Label>(container, ""),
+
+    homeButton = std::make_shared<Button>(container, Widget::Symbol::HOME);
+    homeButton->setCallback([this] () { api().onHomeButton(); });
+    homeButton->centerInParent();
+
     onTick();
 }
 
@@ -42,8 +50,8 @@ void HeaderApp::updateClock() {
     if (curTimeString != time) {
         // to prevent rendering calls each second
         curTimeString = time;
-        clockLabel.setText(time);
-        clockLabel.alignRightInParent(HOR_PADDING);
+        clockLabel->setText(time);
+        clockLabel->alignRightInParent(HOR_PADDING);
     }
 }
 
@@ -57,8 +65,8 @@ void HeaderApp::updateFPS() {
     if (fpsRingCursor % 10 == 0) {
         float avgFps = getAverageFPS();
         if (avgFps > 0) {
-            fpsLabel.setTextFormatted("%.0f FPS", avgFps);
-            fpsLabel.alignLeftInParent(HOR_PADDING);
+            fpsLabel->setTextFormatted("%.0f FPS", avgFps);
+            fpsLabel->alignLeftInParent(HOR_PADDING);
         }
     }
 }

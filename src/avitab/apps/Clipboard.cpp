@@ -20,9 +20,9 @@
 
 namespace avitab {
 
-Clipboard::Clipboard(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "Clipboard Viewer"))
+Clipboard::Clipboard(FuncsPtr appFuncs):
+    App(appFuncs),
+    window(std::make_shared<Window>(getUIContainer(), "Clipboard Viewer"))
 {
     window->setOnClose([this] () { exit(); });
 

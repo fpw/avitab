@@ -31,6 +31,7 @@ public:
     using ButtonCallback = std::function<void()>;
     Button(WidgetPtr parent, const std::string &text);
     Button(WidgetPtr parent, Icon icon, const std::string &caption);
+    Button(WidgetPtr parent, Symbol smb);
 
     void setCallback(ButtonCallback cb);
 

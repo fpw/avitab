@@ -31,11 +31,13 @@ public:
         PREV, NEXT,
         PLUS, MINUS,
         FILE, DIRECTORY,
+        HOME,
     };
     using WidgetPtr = std::shared_ptr<Widget>;
 
     Widget(WidgetPtr parent);
 
+    void setParent(WidgetPtr newParent);
     void setPosition(int x, int y);
     void setDimensions(int width, int height);
     void centerInParent();
@@ -44,6 +46,8 @@ public:
     void setBackgroundWhite();
     int getWidth();
     int getHeight();
+    void setVisible(bool visible);
+    void invalidate();
 
     // For internal use by other widgets
     lv_obj_t *obj();

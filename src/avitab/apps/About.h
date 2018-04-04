@@ -27,7 +27,7 @@ namespace avitab {
 
 class About: public App {
 public:
-    About(FuncsPtr appFuncs, ContPtr container);
+    About(FuncsPtr appFuncs);
 private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;

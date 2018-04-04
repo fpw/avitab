@@ -32,7 +32,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
 
-std::string avitab::XPlaneEnvironment::getPluginPath() {
+std::string XPlaneEnvironment::getPluginPath() {
     XPLMPluginID ourId = XPLMGetMyID();
     char pathBuf[2048];
     XPLMGetPluginInfo(ourId, nullptr, pathBuf, nullptr, nullptr);

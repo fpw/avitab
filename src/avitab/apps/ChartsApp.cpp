@@ -21,11 +21,17 @@
 
 namespace avitab {
 
-ChartsApp::ChartsApp(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container)
+ChartsApp::ChartsApp(FuncsPtr appFuncs):
+    App(appFuncs)
 {
     currentPath = api().getDataPath() + "charts/";
     showFileSelect();
+}
+
+void ChartsApp::show() {
+    if (childApp) {
+        childApp->show();
+    }
 }
 
 void ChartsApp::showFileSelect() {
@@ -42,9 +48,13 @@ void ChartsApp::onSelect(const std::string& nameUtf8) {
 
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(nameUtf8);
-    pdfApp->setOnExit([this] () { showFileSelect(); });
+    pdfApp->setOnExit([this] () {
+        showFileSelect();
+        childApp->show();
+    });
 
     childApp = std::move(pdfApp);
+    childApp->show();
 }
 
 } /* namespace avitab */

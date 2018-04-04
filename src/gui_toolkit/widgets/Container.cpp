@@ -42,4 +42,8 @@ void Container::setLayoutColumn() {
     lv_cont_set_layout(obj(), LV_LAYOUT_COL_M);
 }
 
+void Container::setFit(bool horiz, bool vert) {
+    lv_cont_set_fit(obj(), horiz, vert);
+}
+
 } /* namespace avitab */

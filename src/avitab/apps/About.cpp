@@ -19,9 +19,9 @@
 
 namespace avitab {
 
-About::About(FuncsPtr appFuncs, ContPtr container):
-    App(appFuncs, container),
-    window(std::make_shared<Window>(container, "About AviTab")),
+About::About(FuncsPtr appFuncs):
+    App(appFuncs),
+    window(std::make_shared<Window>(getUIContainer(), "About AviTab")),
     label(std::make_shared<Label>(window, ""))
 {
     window->setOnClose([this] () { exit(); });

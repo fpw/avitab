@@ -24,7 +24,6 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/Label.h"
-#include "src/gui_toolkit/widgets/PixMap.h"
 
 namespace avitab {
 
@@ -32,17 +31,16 @@ class AppLauncher: public App {
 public:
     using Callback = std::function<void()>;
     struct Entry {
+        std::shared_ptr<App> app;
         std::shared_ptr<Button> button;
-        std::shared_ptr<PixMap> pixMap;
-        Callback callback;
     };
 
-    AppLauncher(FuncsPtr appFuncs, ContPtr container);
-
-    void addEntry(const std::string &name, const std::string &icon, Callback cb);
-
+    AppLauncher(FuncsPtr appFuncs);
 private:
     std::vector<Entry> entries;
+
+    template<typename T>
+    void addEntry(const std::string &name, const std::string &icon);
 };
 
 } /* namespace avitab */

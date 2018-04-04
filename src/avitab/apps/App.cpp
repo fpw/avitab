@@ -19,13 +19,13 @@
 
 namespace avitab {
 
-App::App(FuncsPtr appFuncs, ContPtr container):
-    funcs(appFuncs),
-    uiContainer(container)
+App::App(FuncsPtr appFuncs):
+    funcs(appFuncs)
 {
     if (!funcs) {
         throw std::runtime_error("No API passed to app");
     }
+    uiContainer = funcs->createGUIContainer();
 }
 
 AppFunctions& App::api() {
@@ -36,8 +36,16 @@ void App::setOnExit(ExitFunct onExitFunct) {
     onExit = onExitFunct;
 }
 
+App::ContPtr App::getUIContainer() {
+    return uiContainer;
+}
+
 App::ExitFunct& App::getOnExit() {
     return onExit;
+}
+
+void App::show() {
+    api().showGUIContainer(uiContainer);
 }
 
 void App::exit() {
@@ -46,10 +54,6 @@ void App::exit() {
             onExit();
         }
     });
-}
-
-App::ContPtr App::getContainer() {
-    return uiContainer;
 }
 
 } /* namespace avitab */

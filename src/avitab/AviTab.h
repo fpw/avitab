@@ -39,6 +39,9 @@ public:
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
     EnvData getDataRef(const std::string &dataRef) override;
+    std::shared_ptr<Container> createGUIContainer() override;
+    void showGUIContainer(std::shared_ptr<Container> container) override;
+    void onHomeButton() override;
 
     ~AviTab();
 
@@ -50,14 +53,10 @@ private:
     std::shared_ptr<Container> centerContainer;
 
     std::shared_ptr<App> headerApp;
-    std::shared_ptr<App> centerApp;
+    std::shared_ptr<App> launcherApp;
 
     void createLayout();
     void showAppLauncher();
-    void showChartsApp();
-    void showClipboardApp();
-    void showAboutApp();
-    void showNotesApp();
     void cleanupLayout();
 };
 

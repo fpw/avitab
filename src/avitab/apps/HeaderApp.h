@@ -20,6 +20,7 @@
 
 #include "App.h"
 #include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/Timer.h"
 #include <array>
 
@@ -27,11 +28,12 @@ namespace avitab {
 
 class HeaderApp: public App {
 public:
-    HeaderApp(FuncsPtr appFuncs, ContPtr container);
+    HeaderApp(FuncsPtr appFuncs);
 private:
     static constexpr int HOR_PADDING = 10;
-    Label clockLabel;
-    Label fpsLabel;
+    std::shared_ptr<Label> clockLabel;
+    std::shared_ptr<Label> fpsLabel;
+    std::shared_ptr<Button> homeButton;
     Timer tickTimer;
     std::string curTimeString;
 
