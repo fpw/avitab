@@ -21,8 +21,10 @@
 #define AVITAB_VERSION_PATCH @AviTab_VERSION_PATCH@
 #define AVITAB_VERSION_STR "@AviTab_VERSION_MAJOR@.@AviTab_VERSION_MINOR@.@AviTab_VERSION_PATCH@"
 
-#ifdef _WIN32
+#if defined _WIN32
 #   define IBM 1
+#elif defined __linux
+#   define LIN 1
 #endif
 
 #define XPLM301
