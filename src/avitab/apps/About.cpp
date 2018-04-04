@@ -35,7 +35,7 @@ About::About(FuncsPtr appFuncs):
             "Icon if_Airport_22906 copyright by Icons-Land\n"
             "Icon if_clipboard_43705 copyright by Iconshock\n"
             "Icon if_Help_1493288 copyright by GlyphLab\n"
-            "Icon if_starthere_18227 copyright by Everaldo Coelho\n";
+            "Icons if_starthere_18227 and if_txt2_3783 copyright by Everaldo Coelho\n";
 
     label->setText(aboutText);
 }
