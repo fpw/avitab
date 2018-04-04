@@ -14,7 +14,12 @@ include_directories("/usr/local/include")
 link_directories("/usr/local/lib")
 
 include_directories("/opt/XSDK/CHeaders")
-link_directories("/opt/XSDK/Libraries/Win")
+
+if(WIN32)
+    link_directories("/opt/XSDK/Libraries/Win")
+elseif(APPLE)
+    link_directories("/opt/XSDK/Libraries/Mac")
+endif()
 
 include(lvgl.cmake)
 add_library(lvgl ${lvgl_sources})

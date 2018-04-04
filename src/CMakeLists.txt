@@ -18,12 +18,12 @@ if (WIN32)
         -static
         -static-libgcc
         -static-libstdc++
+        XPLM_64
     )
 endif (WIN32)
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
-    XPLM_64
 )
 
 set_target_properties(avitab_plugin PROPERTIES PREFIX "")
