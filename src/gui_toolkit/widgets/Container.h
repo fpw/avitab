@@ -28,6 +28,7 @@ public:
     void setLayoutPretty();
     void setLayoutRightColumns();
     void setLayoutRow();
+    void setLayoutColumn();
 };
 
 } /* namespace avitab */

@@ -6,5 +6,6 @@ add_library(avitab_apps
     ChartsApp.cpp
     Clipboard.cpp
     About.cpp
+    NotesApp.cpp
 )
 target_link_libraries(avitab_apps avitab_app_components)

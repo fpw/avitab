@@ -21,6 +21,7 @@
 #include "src/avitab/apps/ChartsApp.h"
 #include "src/avitab/apps/AppLauncher.h"
 #include "src/avitab/apps/Clipboard.h"
+#include "src/avitab/apps/NotesApp.h"
 #include "src/avitab/apps/About.h"
 #include <climits>
 
@@ -76,7 +77,6 @@ void AviTab::createLayout() {
         centerContainer = std::make_shared<Container>(screen);
         centerContainer->setPosition(0, headContainer->getHeight());
         centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - headContainer->getHeight());
-        centerContainer->setLayoutPretty();
     }
 
     if (!centerApp) {
@@ -90,6 +90,7 @@ void AviTab::showAppLauncher() {
     auto launcher = std::make_shared<AppLauncher>(this, centerContainer);
     std::string root = env->getProgramPath() + "icons/";
     launcher->addEntry("Charts", root + "if_Airport_22906.png", [this] () { showChartsApp(); });
+    launcher->addEntry("Notes", root + "if_txt2_3783.png", [this] () { showNotesApp(); });
     launcher->addEntry("Clipboard", root + "if_clipboard_43705.png", [this] () { showClipboardApp(); });
     launcher->addEntry("About", root + "if_Help_1493288.png", [this] () { showAboutApp(); });
     centerApp = launcher;
@@ -102,6 +103,11 @@ void AviTab::showChartsApp() {
 
 void AviTab::showClipboardApp() {
     centerApp = std::make_shared<Clipboard>(this, centerContainer);
+    centerApp->setOnExit([this] () { showAppLauncher(); });
+}
+
+void AviTab::showNotesApp() {
+    centerApp = std::make_shared<NotesApp>(this, centerContainer);
     centerApp->setOnExit([this] () { showAppLauncher(); });
 }
 

@@ -22,6 +22,7 @@ namespace avitab {
 AppLauncher::AppLauncher(FuncsPtr appFuncs, ContPtr container):
     App(appFuncs, container)
 {
+    container->setLayoutPretty();
 }
 
 void AppLauncher::addEntry(const std::string& name, const std::string& icon, Callback cb) {

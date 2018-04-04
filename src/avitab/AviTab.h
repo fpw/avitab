@@ -57,6 +57,7 @@ private:
     void showChartsApp();
     void showClipboardApp();
     void showAboutApp();
+    void showNotesApp();
     void cleanupLayout();
 };
 

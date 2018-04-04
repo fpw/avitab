@@ -26,8 +26,9 @@ Window::Window(WidgetPtr parent, const std::string& title):
     lv_obj_t *win = lv_win_create(parentObj(), nullptr);
     lv_win_set_title(win, title.c_str());
     lv_obj_set_free_ptr(win, this);
-
     setObj(win);
+
+    setDimensions(parent->getWidth(), parent->getHeight() - 10);
 }
 
 void Window::setCaption(const std::string& title) {

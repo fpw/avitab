@@ -7,4 +7,6 @@ add_library(avitab_gui_lvgl_widgets
     Button.cpp
     PixMap.cpp
     List.cpp
+    TextArea.cpp
+    Keyboard.cpp
 )
