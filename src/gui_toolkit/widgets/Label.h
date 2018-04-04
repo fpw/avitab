@@ -27,7 +27,7 @@ class Label: public Widget {
 public:
     Label(WidgetPtr parent, const std::string &title);
     void setText(const std::string &title);
-    void setTextFormatted(const std::string &format, ...);
+    void setTextFormatted(const std::string format, ...);
 };
 
 } /* namespace avitab */
