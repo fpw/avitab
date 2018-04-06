@@ -48,8 +48,8 @@ private:
     void onRight();
     void onUp();
     void onDown();
+    void onRotate();
 
-    void loadDemo();
     void updateJob();
 };
 

@@ -44,6 +44,7 @@ public:
     void prevPage();
     void zoomIn();
     void zoomOut();
+    void rotateRight();
 
     ~RasterJob();
 
@@ -61,11 +62,12 @@ private:
     RasterBuf outBuf;
     int outWidth = -1;
     int requestedPage = 0;
+    int rotateAngle = 0;
 
     void doWork(JobInfo &info);
     void openDocument(JobInfo &info);
     void loadPage(int pageNum);
-    fz_matrix calculateScale();
+    fz_matrix calculateTransformation();
     void rasterPage(JobInfo &info, fz_matrix &scaleMatrix);
 
 };

@@ -52,7 +52,7 @@ void RasterJob::doWork(JobInfo &info) {
     logger::info("Rasterizing '%s'", docPath.c_str());
     openDocument(info);
     loadPage(requestedPage);
-    fz_matrix scaleMatrix = calculateScale();
+    fz_matrix scaleMatrix = calculateTransformation();
     rasterPage(info, scaleMatrix);
     logger::info("Done rasterizing");
 }
@@ -98,15 +98,24 @@ void RasterJob::loadPage(int pageNum) {
     }
 }
 
-fz_matrix RasterJob::calculateScale() {
+fz_matrix RasterJob::calculateTransformation() {
     fz_rect pageRect;
     fz_bound_page(ctx, page, &pageRect);
 
     float width = pageRect.x1 - pageRect.x0;
-    float scale = outWidth / width;
+    float height = pageRect.y1 - pageRect.y0;
+    float scale;
+
+    if (rotateAngle == 0 || rotateAngle == 180) {
+        scale = outWidth / width;
+    } else {
+        scale = outWidth / height;
+    }
 
     fz_matrix ctm;
     fz_scale(&ctm, scale, scale);
+    fz_pre_rotate(&ctm, rotateAngle);
+
     return ctm;
 }
 
@@ -166,6 +175,10 @@ void RasterJob::zoomOut() {
     if (outWidth >= 200) {
         outWidth -= 100;
     }
+}
+
+void RasterJob::rotateRight() {
+    rotateAngle = (rotateAngle + 90) % 360;
 }
 
 RasterJob::~RasterJob() {

@@ -66,6 +66,7 @@ void PDFViewer::setupCallbacks() {
     window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onRight, this));
     window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onLeft, this));
     window->addSymbol(Widget::Symbol::UP, std::bind(&PDFViewer::onUp, this));
+    window->addSymbol(Widget::Symbol::ROTATE, std::bind(&PDFViewer::onRotate, this));
 }
 
 void PDFViewer::onNext() {
@@ -110,6 +111,13 @@ void PDFViewer::onUp() {
 
 void PDFViewer::onDown() {
     pixMap->panDown();
+}
+
+void PDFViewer::onRotate() {
+    if (rasterJob) {
+        rasterJob->rotateRight();
+        updateJob();
+    }
 }
 
 } /* namespace avitab */

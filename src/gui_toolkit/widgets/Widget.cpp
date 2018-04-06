@@ -112,6 +112,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::RIGHT:     return SYMBOL_RIGHT;
     case Symbol::UP:        return SYMBOL_UP;
     case Symbol::DOWN:      return SYMBOL_DOWN;
+    case Symbol::ROTATE:    return SYMBOL_LOOP;
     case Symbol::PREV:      return SYMBOL_PREV;
     case Symbol::NEXT:      return SYMBOL_NEXT;
     case Symbol::PLUS:      return SYMBOL_PLUS;
