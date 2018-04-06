@@ -57,8 +57,11 @@ void MessageBox::addButton(const std::string& caption, Callback cb) {
 }
 
 MessageBox::~MessageBox() {
-    for (const char *str: buttons) {
-        free((void *) str);
+    if (!buttons.empty()) {
+        for (size_t i = 0; i < buttons.size() - 1; i++) {
+            free((void *) buttons[i]);
+            buttons[i] = "";
+        }
     }
 }
 
