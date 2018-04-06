@@ -22,7 +22,7 @@ elseif(APPLE)
 endif()
 
 
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 include(lvgl.cmake)
 add_library(lvgl ${lvgl_sources})
 
