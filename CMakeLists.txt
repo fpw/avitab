@@ -21,6 +21,8 @@ elseif(APPLE)
     link_directories("/opt/XSDK/Libraries/Mac")
 endif()
 
+
+set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 include(lvgl.cmake)
 add_library(lvgl ${lvgl_sources})
 

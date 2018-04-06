@@ -26,6 +26,7 @@ else()
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
+    -fPIC
 )
 endif()
 
