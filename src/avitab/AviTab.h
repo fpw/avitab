@@ -38,6 +38,7 @@ public:
     Icon loadIcon(const std::string &path) override;
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
+    std::string getAirplanePath() override;
     EnvData getDataRef(const std::string &dataRef) override;
     std::shared_ptr<Container> createGUIContainer() override;
     void showGUIContainer(std::shared_ptr<Container> container) override;

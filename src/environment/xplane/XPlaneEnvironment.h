@@ -42,6 +42,7 @@ public:
     void destroyMenu() override;
     void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
     void destroyCommands() override;
+    std::string getAirplanePath() override;
 
     // Can be called from any thread
     std::string getProgramPath() override;

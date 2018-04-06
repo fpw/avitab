@@ -36,6 +36,8 @@ std::string UTF8ToNative(const std::string &utf8);
 std::vector<DirEntry> readDirectory(const std::string &utf8Path);
 std::string realPath(const std::string &utf8Path);
 std::string getFileNameFromPath(const std::string &utf8Path);
+std::string getDirNameFromPath(const std::string &utf8Path);
+bool fileExists(const std::string &utf8Path);
 
 std::string getLocalTime(const std::string &format);
 std::string getClipboardContent();

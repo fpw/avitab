@@ -9,4 +9,5 @@ add_library(avitab_gui_lvgl_widgets
     List.cpp
     TextArea.cpp
     Keyboard.cpp
+    MessageBox.cpp
 )

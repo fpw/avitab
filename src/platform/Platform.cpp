@@ -131,6 +131,18 @@ std::string getFileNameFromPath(const std::string& utf8Path) {
     return nativeToUTF8(base);
 }
 
+std::string getDirNameFromPath(const std::string& utf8Path) {
+    std::string nativePath = UTF8ToNative(utf8Path);
+    std::string dir = dirname(&nativePath[0]);
+    return nativeToUTF8(dir);
+}
+
+bool fileExists(const std::string& utf8Path) {
+    std::string nativePath = UTF8ToNative(utf8Path);
+    struct stat fileStat;
+    return (stat(nativePath.c_str(), &fileStat) == 0);
+}
+
 std::string getLocalTime(const std::string &format) {
     time_t now = time(nullptr);
     tm *local = localtime(&now);

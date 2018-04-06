@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <XPLM/XPLMPlugin.h>
+#include <XPLM/XPLMPlanes.h>
 #include <stdexcept>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
@@ -140,6 +141,14 @@ void XPlaneEnvironment::destroyCommands() {
         XPLMUnregisterCommandHandler(iter.first, handleCommand, true, this);
     }
     commandHandlers.clear();
+}
+
+std::string XPlaneEnvironment::getAirplanePath() {
+    char file[512];
+    char path[512];
+    XPLMGetNthAircraftModel(0, file, path);
+    std::string pluginPath = platform::nativeToUTF8(path);
+    return platform::getDirNameFromPath(pluginPath) + "/";
 }
 
 std::string XPlaneEnvironment::getProgramPath() {

@@ -68,6 +68,10 @@ void StandAloneEnvironment::createCommand(const std::string& name, const std::st
 void StandAloneEnvironment::destroyCommands() {
 }
 
+std::string avitab::StandAloneEnvironment::getAirplanePath() {
+    return "";
+}
+
 std::string avitab::StandAloneEnvironment::getProgramPath() {
     return platform::nativeToUTF8(ourPath);
 }

@@ -33,6 +33,7 @@ public:
     virtual Icon loadIcon(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
+    virtual std::string getAirplanePath() = 0;
     virtual EnvData getDataRef(const std::string &dataRef) = 0;
     virtual std::shared_ptr<Container> createGUIContainer() = 0;
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;

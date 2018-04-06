@@ -46,6 +46,7 @@ public:
     virtual void destroyMenu() = 0;
     virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback) = 0;
     virtual void destroyCommands() = 0;
+    virtual std::string getAirplanePath() = 0;
     void stop();
 
     // Can be called from any thread

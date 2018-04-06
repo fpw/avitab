@@ -137,6 +137,10 @@ std::string AviTab::getDataPath() {
     return env->getProgramPath();
 }
 
+std::string AviTab::getAirplanePath() {
+    return env->getAirplanePath();
+}
+
 EnvData AviTab::getDataRef(const std::string& dataRef) {
     return env->getData(dataRef);
 }
