@@ -121,6 +121,7 @@ void LVGLToolkit::destroyNativeWindow() {
         guiThread->join();
         guiThread.reset();
         mainScreen.reset();
+        driver->killWindow();
     }
 }
 
