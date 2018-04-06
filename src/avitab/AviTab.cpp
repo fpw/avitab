@@ -166,6 +166,7 @@ void AviTab::stopApp() {
     // now that the GUI thread is guranteed to finish, we can
     // do the rest of the cleanup
     env->destroyMenu();
+    env->destroyCommands();
 
     // this will also join the GUI thread
     guiLib->destroyNativeWindow();

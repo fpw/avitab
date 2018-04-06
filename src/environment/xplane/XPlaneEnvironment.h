@@ -41,6 +41,7 @@ public:
     void addMenuEntry(const std::string &label, MenuCallback cb) override;
     void destroyMenu() override;
     void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
+    void destroyCommands() override;
 
     // Can be called from any thread
     std::string getProgramPath() override;
@@ -49,17 +50,24 @@ public:
 
     ~XPlaneEnvironment();
 private:
+    struct RegisteredCommand {
+        CommandCallback callback;
+        bool inBefore;
+        void *refCon;
+    };
+
     DataCache dataCache;
     std::string pluginPath;
     std::vector<MenuCallback> menuCallbacks;
     std::atomic<XPLMFlightLoopID> flightLoopId { nullptr };
-    std::map<XPLMCommandRef, CommandCallback> commandCallbacks;
+    std::map<XPLMCommandRef, RegisteredCommand> commandHandlers;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;
 
     std::string getPluginPath();
     XPLMFlightLoopID createFlightLoop();
     float onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count);
+    static int handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref);
 };
 
 } /* namespace avitab */

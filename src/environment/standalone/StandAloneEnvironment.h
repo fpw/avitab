@@ -38,6 +38,7 @@ public:
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
     void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) override;
+    void destroyCommands() override;
 
     // Can be called from any thread
     std::string getProgramPath() override;

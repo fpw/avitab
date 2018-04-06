@@ -107,24 +107,39 @@ void XPlaneEnvironment::createCommand(const std::string& name, const std::string
         throw std::runtime_error("Couldn't create command: " + name);
     }
 
-    commandCallbacks.insert(std::pair<XPLMCommandRef, CommandCallback>(cmd, cb));
+    RegisteredCommand cmdInfo;
+    cmdInfo.callback = cb;
+    cmdInfo.inBefore = true;
+    cmdInfo.refCon = this;
 
-    XPLMRegisterCommandHandler(cmd, [] (XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref) -> int {
-        if (phase != xplm_CommandBegin) {
-            return 1;
-        }
-        XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-        if (!us) {
-            return 1;
-        }
+    commandHandlers.insert(std::make_pair(cmd, cmdInfo));
 
-        CommandCallback f = us->commandCallbacks[cmd];
-        if (f) {
-            f();
-        }
+    XPLMRegisterCommandHandler(cmd, handleCommand, true, this);
+}
 
+int XPlaneEnvironment::handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void* ref) {
+    if (phase != xplm_CommandBegin) {
         return 1;
-    }, true, this);
+    }
+
+    XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
+    if (!us) {
+        return 1;
+    }
+
+    CommandCallback f = us->commandHandlers[cmd].callback;
+    if (f) {
+        f();
+    }
+
+    return 1;
+}
+
+void XPlaneEnvironment::destroyCommands() {
+    for (auto &iter: commandHandlers) {
+        XPLMUnregisterCommandHandler(iter.first, handleCommand, true, this);
+    }
+    commandHandlers.clear();
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
