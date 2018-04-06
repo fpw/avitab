@@ -40,7 +40,7 @@ void MessageBox::addButton(const std::string& caption, Callback cb) {
 
     callbacks.push_back(cb);
 
-    lv_mbox_add_btns(obj(), (const char **) &buttons[0], nullptr);
+    lv_mbox_add_btns(obj(), &buttons[0], nullptr);
     lv_mbox_set_action(obj(), [] (lv_obj_t *btn, const char *txt) -> lv_res_t {
         lv_obj_t *mbox = lv_mbox_get_from_btn(btn);
         MessageBox *us = reinterpret_cast<MessageBox *>(lv_obj_get_free_ptr(mbox));
