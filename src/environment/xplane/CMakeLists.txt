@@ -15,8 +15,12 @@ if(WIN32)
     target_link_libraries(avitab_env_xplane
         opengl32
     )
-else()
+elseif(LINUX)
     target_link_libraries(avitab_env_xplane
         GL
     )
-endif(WIN32)
+elseif(APPLE)
+    target_link_libraries(avitab_env_xplane
+        "-framework OpengL"
+    )
+endif()
