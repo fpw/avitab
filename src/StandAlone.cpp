@@ -22,7 +22,7 @@
 #include "src/Logger.h"
 
 int main() {
-    // Using the heap so we can debug deconstructors with log messages
+    // Using the heap so we can debug destructors with log messages
     auto env = std::make_shared<avitab::StandAloneEnvironment>();
     logger::init(env->getProgramPath());
     logger::verbose("Main thread has id %d", std::this_thread::get_id());

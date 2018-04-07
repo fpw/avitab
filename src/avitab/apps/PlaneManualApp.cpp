@@ -49,6 +49,7 @@ PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
             showFileSelect();
             childApp->show();
         });
+        errorMsg->centerInParent();
     } else {
         showFileSelect();
     }

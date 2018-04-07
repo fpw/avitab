@@ -28,7 +28,7 @@ Window::Window(WidgetPtr parent, const std::string& title):
     lv_obj_set_free_ptr(win, this);
     setObj(win);
 
-    setDimensions(parent->getWidth(), parent->getHeight() - 10);
+    setDimensions(parent->getWidth(), parent->getHeight());
 }
 
 void Window::setCaption(const std::string& title) {
@@ -45,7 +45,7 @@ int Window::getContentWidth() {
 
 int Window::getContentHeight() {
     lv_win_ext_t *ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
-    return lv_obj_get_height(ext->page);
+    return lv_obj_get_height(ext->page) - 25;
 }
 
 void Window::setOnClose(WindowCallback cb) {
