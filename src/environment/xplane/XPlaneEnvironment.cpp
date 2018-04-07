@@ -27,7 +27,7 @@ namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
     // Called by the X-Plane thread via StartPlugin
-    pluginPath = getPluginPath();
+    pluginPath = platform::nativeToUTF8(getPluginPath());
     flightLoopId = createFlightLoop();
 
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
@@ -152,7 +152,7 @@ std::string XPlaneEnvironment::getAirplanePath() {
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
-    return platform::nativeToUTF8(pluginPath);
+    return pluginPath;
 }
 
 void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {

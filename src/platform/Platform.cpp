@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <climits>
 #include <libgen.h>
+#include <regex>
 #include "Platform.h"
 #include "src/Logger.h"
 
@@ -59,6 +60,11 @@ std::string nativeToUTF8(const std::string& native) {
     MultiByteToWideChar(CP_ACP, 0, native.c_str(), -1, buf, sizeof(buf));
     WideCharToMultiByte(CP_UTF8, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
     return res;
+}
+#elif defined __APPLE__
+std::string nativeToUTF8(const std::string& native) {
+    auto root = std::regex_replace(native, std::regex("^OS X:"), ":");
+    return std::regex_replace(root, std::regex(":"), "/");
 }
 #else
 std::string nativeToUTF8(const std::string& native) {
