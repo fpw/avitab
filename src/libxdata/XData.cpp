@@ -28,13 +28,6 @@ XData::XData(const std::string& dataRootPath):
     xplaneRoot(dataRootPath)
 {
     navDataPath = determineNavDataPath();
-    log << "Reading nav data from " << navDataPath << std::endl;
-
-    try {
-        load();
-    } catch (const std::exception &e) {
-        log << e.what() << std::endl;
-    }
 }
 
 std::string XData::determineNavDataPath() {
@@ -46,16 +39,9 @@ std::string XData::determineNavDataPath() {
 }
 
 void XData::load() {
-    log << "Loading airports..." << std::endl;
     loadAirports();
-
-    log << "Loading fixes..." << std::endl;
     loadFixes();
-
-    log << "Loading navaids..." << std::endl;
     loadNavaids();
-
-    log << "Loading airways..." << std::endl;
     loadAirways();
 }
 

@@ -19,6 +19,8 @@
 #define SRC_AVITAB_AVITAB_H_
 
 #include <memory>
+#include <future>
+#include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/avitab/apps/AppFunctions.h"
@@ -56,6 +58,9 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<App> launcherApp;
 
+    std::future<std::shared_ptr<xdata::XData>> navDataFuture;
+
+    std::shared_ptr<xdata::XData> loadNavData();
     void createLayout();
     void showAppLauncher();
     void cleanupLayout();

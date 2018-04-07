@@ -29,9 +29,17 @@ XPlaneEnvironment::XPlaneEnvironment() {
     // Called by the X-Plane thread via StartPlugin
     pluginPath = platform::nativeToUTF8(getPluginPath());
     flightLoopId = createFlightLoop();
-    xplaneData = std::make_shared<xdata::XData>("");
+
+    std::string rootPath = platform::nativeToUTF8(getXPlanePath());
+    xplaneData = std::make_shared<xdata::XData>(rootPath);
 
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
+}
+
+std::string XPlaneEnvironment::getXPlanePath() {
+    char buf[2048];
+    XPLMGetSystemPath(buf);
+    return buf;
 }
 
 std::string XPlaneEnvironment::getPluginPath() {

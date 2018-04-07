@@ -114,7 +114,9 @@ void BaseParser::skip(char c) {
 void BaseParser::skipWhiteSpace() {
     char c;
     do {
-        lineStream >> c;
+        if (!(lineStream >> c)) {
+            return;
+        }
     } while (std::isspace(c));
     lineStream.putback(c);
 }

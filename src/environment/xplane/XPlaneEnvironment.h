@@ -70,6 +70,7 @@ private:
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;
 
+    std::string getXPlanePath();
     std::string getPluginPath();
     XPLMFlightLoopID createFlightLoop();
     float onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count);

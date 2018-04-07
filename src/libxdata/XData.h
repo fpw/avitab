@@ -20,7 +20,6 @@
 
 #include <string>
 #include <ostream>
-#include <iostream>
 #include "src/libxdata/loaders/objects/AirportData.h"
 #include "src/libxdata/loaders/objects/FixData.h"
 #include "src/libxdata/loaders/objects/NavaidData.h"
@@ -32,8 +31,6 @@ class XData {
 public:
     XData(const std::string &dataRootPath);
     void load();
-
-    static constexpr std::ostream &log = std::cout;
 private:
     std::string xplaneRoot;
     std::string navDataPath;

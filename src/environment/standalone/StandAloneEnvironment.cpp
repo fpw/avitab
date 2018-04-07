@@ -33,11 +33,7 @@ StandAloneEnvironment::StandAloneEnvironment() {
         throw std::runtime_error("Couldn't find our path");
     }
 
-    try {
-        xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
-    } catch (const std::exception &e) {
-        logger::error("Couldn't load xplane data: %s", e.what());
-    }
+    xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {
@@ -53,13 +49,13 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
         break;
     case platform::Platform::LINUX:
         installFilePath = getenv("HOME");
-        installFilePath += "/.x-plane/";
+        installFilePath += "/.x-plane";
         break;
     }
 
     std::string installFile = platform::nativeToUTF8(installFilePath + "/x-plane_install_11.txt");
     if (!platform::fileExists(installFile.c_str())) {
-        throw std::runtime_error("Can't find X-Plane installation pointer at " + installFile);
+        return "";
     }
 
     std::ifstream file(platform::UTF8ToNative(installFile));

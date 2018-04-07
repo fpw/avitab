@@ -15,11 +15,12 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <climits>
+#include <future>
 #include "AviTab.h"
 #include "src/Logger.h"
 #include "src/avitab/apps/HeaderApp.h"
 #include "src/avitab/apps/AppLauncher.h"
-#include <climits>
 
 namespace avitab {
 
@@ -27,11 +28,22 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
+    // runs in environment thread, called by PluginStart
     env->start();
+
+    navDataFuture = std::async(std::launch::async, &AviTab::loadNavData, this);
+}
+
+std::shared_ptr<xdata::XData> AviTab::loadNavData() {
+    auto data = env->getXPlaneData();
+    logger::info("Loading data...");
+    data->load();
+    logger::info("Done loading");
+    return data;
 }
 
 void AviTab::startApp() {
-    // runs in environment thread
+    // runs in environment thread, called by PluginEnable
     logger::verbose("Starting AviTab %s", AVITAB_VERSION_STR);
 
     env->createMenu("AviTab");
@@ -40,7 +52,7 @@ void AviTab::startApp() {
 }
 
 void AviTab::toggleTablet() {
-    // runs in environment thread
+    // runs in environment thread, called by menu or command
     try {
         if (!guiLib->hasNativeWindow()) {
             logger::info("Showing tablet");
@@ -150,7 +162,7 @@ void AviTab::onHomeButton() {
 }
 
 void AviTab::stopApp() {
-    // runs in environment thread
+    // runs in environment thread, called by PluginDisable
 
     // This function is called by the environment
     // and it will never call the environment callback
@@ -186,6 +198,7 @@ void AviTab::cleanupLayout() {
 }
 
 AviTab::~AviTab() {
+    // runs in environment thread, destroy by PluginStop
     logger::verbose("~AviTab");
 }
 
