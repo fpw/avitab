@@ -79,7 +79,7 @@ void XData::loadNavaids() {
     using namespace std::placeholders;
 
     NavaidLoader loader(navDataPath + "earth_nav.dat");
-    loader.setAcceptor(std::bind(&onNavaidLoaded, this, _1));
+    loader.setAcceptor(std::bind(&XData::onNavaidLoaded, this, _1));
     loader.loadNavaids();
 }
 
@@ -87,7 +87,7 @@ void xdata::XData::loadAirways() {
     using namespace std::placeholders;
 
     AirwayLoader loader(navDataPath + "earth_awy.dat");
-    loader.setAcceptor(std::bind(&onAirwayLoaded, this, _1));
+    loader.setAcceptor(std::bind(&XData::onAirwayLoaded, this, _1));
     loader.loadAirways();
 }
 
