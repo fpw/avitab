@@ -1,6 +1,7 @@
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 
+add_subdirectory(libxdata)
 add_subdirectory(environment)
 add_subdirectory(gui_toolkit)
 add_subdirectory(platform)

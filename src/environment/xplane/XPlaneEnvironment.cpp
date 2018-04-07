@@ -29,6 +29,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
     // Called by the X-Plane thread via StartPlugin
     pluginPath = platform::nativeToUTF8(getPluginPath());
     flightLoopId = createFlightLoop();
+    xplaneData = std::make_shared<xdata::XData>("");
 
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
@@ -178,6 +179,10 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
     });
 
     return futureData.get();
+}
+
+std::shared_ptr<xdata::XData> XPlaneEnvironment::getXPlaneData() {
+    return xplaneData;
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

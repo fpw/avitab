@@ -9,6 +9,7 @@ target_link_libraries(avitab_env_xplane
     avitab_gui_lvgl
     avitab_environment
     avitab_platform
+    xdata_main
 )
 
 if(WIN32)

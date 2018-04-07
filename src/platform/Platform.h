@@ -29,6 +29,14 @@ struct DirEntry {
     bool isDirectory;
 };
 
+enum class Platform {
+    LINUX,
+    WINDOWS,
+    MAC
+};
+
+Platform getPlatform();
+
 constexpr size_t getMaxPathLen();
 std::string nativeToUTF8(const std::string &native);
 std::string UTF8ToNative(const std::string &utf8);

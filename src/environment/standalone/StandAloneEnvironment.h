@@ -45,12 +45,16 @@ public:
     std::string getProgramPath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
+    std::shared_ptr<xdata::XData> getXPlaneData() override;
 
     virtual ~StandAloneEnvironment();
 private:
     std::string ourPath;
     std::shared_ptr<SDLGUIDriver> driver;
+    std::shared_ptr<xdata::XData> xplaneData;
     std::map<std::string, EnvData> simulatedData;
+
+    std::string findXPlaneInstallationPath();
 };
 
 } /* namespace avitab */

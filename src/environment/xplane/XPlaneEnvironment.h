@@ -48,6 +48,7 @@ public:
     std::string getProgramPath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
+    std::shared_ptr<xdata::XData> getXPlaneData() override;
 
     ~XPlaneEnvironment();
 private:
@@ -57,8 +58,12 @@ private:
         void *refCon;
     };
 
+    // Cached data
     DataCache dataCache;
     std::string pluginPath;
+    std::shared_ptr<xdata::XData> xplaneData;
+
+    // State
     std::vector<MenuCallback> menuCallbacks;
     std::atomic<XPLMFlightLoopID> flightLoopId { nullptr };
     std::map<XPLMCommandRef, RegisteredCommand> commandHandlers;

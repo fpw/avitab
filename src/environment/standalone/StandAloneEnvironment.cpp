@@ -17,6 +17,7 @@
  */
 #include <unistd.h>
 #include <SDL2/SDL.h>
+#include <fstream>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -31,6 +32,40 @@ StandAloneEnvironment::StandAloneEnvironment() {
     } else {
         throw std::runtime_error("Couldn't find our path");
     }
+
+    try {
+        xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
+    } catch (const std::exception &e) {
+        logger::error("Couldn't load xplane data: %s", e.what());
+    }
+}
+
+std::string StandAloneEnvironment::findXPlaneInstallationPath() {
+    std::string installFilePath;
+
+    switch (platform::getPlatform()) {
+    case platform::Platform::WINDOWS:
+        installFilePath = getenv("LOCALAPPDATA");
+        break;
+    case platform::Platform::MAC:
+        installFilePath = getenv("HOME");
+        installFilePath += "/Library/Preferences";
+        break;
+    case platform::Platform::LINUX:
+        installFilePath = getenv("HOME");
+        installFilePath += "/.x-plane/";
+        break;
+    }
+
+    std::string installFile = platform::nativeToUTF8(installFilePath + "/x-plane_install_11.txt");
+    if (!platform::fileExists(installFile.c_str())) {
+        throw std::runtime_error("Can't find X-Plane installation pointer at " + installFile);
+    }
+
+    std::ifstream file(platform::UTF8ToNative(installFile));
+    std::string installDir;
+    std::getline(file, installDir);
+    return installDir;
 }
 
 void StandAloneEnvironment::eventLoop() {
@@ -83,6 +118,10 @@ void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 
 EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
     return simulatedData[dataRef];
+}
+
+std::shared_ptr<xdata::XData> avitab::StandAloneEnvironment::getXPlaneData() {
+    return xplaneData;
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

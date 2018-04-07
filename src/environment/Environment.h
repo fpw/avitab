@@ -23,6 +23,7 @@
 #include <functional>
 #include <mutex>
 #include <vector>
+#include "src/libxdata/XData.h"
 #include "EnvData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
 
@@ -53,6 +54,7 @@ public:
     virtual std::string getProgramPath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual EnvData getData(const std::string &dataRef) = 0;
+    virtual std::shared_ptr<xdata::XData> getXPlaneData() = 0;
 
     virtual ~Environment() = default;
 protected:

@@ -48,6 +48,18 @@
 
 namespace platform {
 
+platform::Platform getPlatform() {
+#ifdef _WIN32
+    return Platform::WINDOWS;
+#elif defined __linux__
+    return Platform::LINUX;
+#elif defined __APPLE__
+    return Platform::MAC;
+#else
+#   error "Unknown platform"
+#endif
+}
+
 constexpr size_t getMaxPathLen() {
     return AVITAB_PATH_LEN_MAX;
 }
