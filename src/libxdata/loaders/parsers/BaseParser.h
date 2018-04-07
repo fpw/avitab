@@ -22,6 +22,7 @@
 #include <string>
 #include <functional>
 #include <sstream>
+#include <iosfwd>
 
 namespace xdata {
 
@@ -44,6 +45,7 @@ public:
 private:
     std::ifstream stream;
     std::istringstream lineStream;
+    std::istream &getLine(std::string &str);
 };
 
 } /* namespace xdata */

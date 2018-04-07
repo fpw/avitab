@@ -35,12 +35,12 @@ BaseParser::BaseParser(const std::string& file):
 std::string BaseParser::parseHeader() {
     std::string line;
 
-    std::getline(stream, line);
+    getLine(line);
     if (line != "A" && line != "I") {
         throw std::runtime_error("Unknown file format: " + line);
     }
 
-    std::getline(stream, line);
+    getLine(line);
 
     std::istringstream lineStr(line);
     int version;
@@ -69,7 +69,7 @@ std::string BaseParser::restOfLine() {
     skipWhiteSpace();
 
     std::string rest;
-    std::getline(lineStream, rest);
+    getLine(rest);
     return rest;
 }
 
@@ -117,6 +117,33 @@ void BaseParser::skipWhiteSpace() {
         lineStream >> c;
     } while (std::isspace(c));
     lineStream.putback(c);
+}
+
+std::istream& BaseParser::getLine(std::string& str) {
+    stream.clear();
+
+    std::istream::sentry se(stream, true);
+    std::streambuf *sbuf = stream.rdbuf();
+
+    while (true) {
+        int c = sbuf->sbumpc();
+        switch (c) {
+        case '\n':
+            return stream;
+        case '\r':
+            if (sbuf->sgetc() == '\n') {
+                sbuf->sbumpc();
+            }
+            return stream;
+        case std::streambuf::traits_type::eof():
+            if (str.empty()) {
+                stream.setstate(std::ios::eofbit);
+            }
+            return stream;
+        default:
+            str += static_cast<char>(c);
+        }
+    }
 }
 
 } /* namespace xdata */
