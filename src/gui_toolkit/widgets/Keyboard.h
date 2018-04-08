@@ -30,6 +30,7 @@ public:
     Keyboard(WidgetPtr parent, WidgetPtr target);
     void setOnCancel(Callback cb);
     void setOnOk(Callback cb);
+    void hideEnterKey();
 private:
     WidgetPtr targetText;
     Callback onCancel;

@@ -48,6 +48,7 @@ void AirportApp::resetLayout() {
     searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 5);
 
     keys = std::make_shared<Keyboard>(searchPage, searchField);
+    keys->hideEnterKey();
     keys->setOnCancel([this] () { searchField->setText(""); });
     keys->setOnOk([this] () { onCodeEntered(searchField->getText()); });
     keys->setPosition(-5, searchPage->getContentHeight() - 90);
