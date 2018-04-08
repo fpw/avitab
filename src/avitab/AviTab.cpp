@@ -29,22 +29,8 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     guiLib(environment->createGUIToolkit())
 {
     // runs in environment thread, called by PluginStart
+    env->loadNavWorldBackground();
     env->start();
-
-    navDataFuture = std::async(std::launch::async, &AviTab::loadNavData, this);
-}
-
-std::shared_ptr<xdata::XData> AviTab::loadNavData() {
-    auto data = env->getXPlaneData();
-    logger::info("Loading nav data...");
-    data->load();
-    logger::info("Nav data ready");
-    return data;
-}
-
-bool AviTab::isNavDataReady() {
-    auto state = navDataFuture.wait_for(std::chrono::seconds(0));
-    return state == std::future_status::ready;
 }
 
 void AviTab::startApp() {
@@ -77,17 +63,19 @@ void AviTab::createLayout() {
     // runs in GUI thread
     auto screen = guiLib->screen();
 
-    if (!isNavDataReady()) {
+    if (!env->isNavWorldReady()) {
+        if (!loadLabel) {
+            loadLabel = std::make_shared<Label>(screen, "Loading nav data...");
+            loadLabel->centerInParent();
+            screen->activate();
+        }
+
         // try again later
         guiLib->executeLater(std::bind(&AviTab::createLayout, this));
         return;
     }
 
-    try {
-        navWorld = navDataFuture.get()->getWorld();
-    } catch (const std::exception &e) {
-        logger::error("Error loading nav data: %s", e.what());
-    }
+    loadLabel.reset();
 
     if (!headerApp) {
         headerApp = std::make_shared<HeaderApp>(this);
@@ -159,7 +147,7 @@ Icon AviTab::loadIcon(const std::string& path) {
 }
 
 std::shared_ptr<xdata::World> AviTab::getNavWorld() {
-    return navWorld;
+    return env->getNavWorld();
 }
 
 void AviTab::executeLater(std::function<void()> func) {

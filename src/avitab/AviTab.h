@@ -23,6 +23,7 @@
 #include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
+#include "src/gui_toolkit/widgets/Label.h"
 #include "src/avitab/apps/AppFunctions.h"
 #include "src/avitab/apps/App.h"
 
@@ -53,6 +54,7 @@ public:
 private:
     std::shared_ptr<Environment> env;
     std::shared_ptr<LVGLToolkit> guiLib;
+    std::shared_ptr<Label> loadLabel;
 
     std::shared_ptr<Container> headContainer;
     std::shared_ptr<Container> centerContainer;
@@ -60,10 +62,6 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<App> launcherApp;
 
-    std::future<std::shared_ptr<xdata::XData>> navDataFuture;
-    std::shared_ptr<xdata::World> navWorld;
-
-    std::shared_ptr<xdata::XData> loadNavData();
     bool isNavDataReady();
 
     void createLayout();

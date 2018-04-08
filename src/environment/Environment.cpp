@@ -17,8 +17,38 @@
  */
 
 #include "Environment.h"
+#include "src/Logger.h"
 
 namespace avitab {
+
+void Environment::loadNavWorldBackground() {
+    navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
+}
+
+std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
+    auto data = getXPlaneData();
+    logger::info("Loading nav data...");
+    data->load();
+    logger::info("Nav data ready");
+    return data->getWorld();
+}
+
+bool Environment::isNavWorldReady() {
+    auto state = navWorldFuture.wait_for(std::chrono::seconds(0));
+    return state == std::future_status::ready;
+}
+
+std::shared_ptr<xdata::World> Environment::getNavWorld() {
+    if (!navWorldLoadAttempted) {
+        navWorldLoadAttempted = true;
+        try {
+            navWorld = navWorldFuture.get();
+        } catch (const std::exception &e) {
+            logger::error("Couldn't load nav data: %s", e.what());
+        }
+    }
+    return navWorld;
+}
 
 void Environment::start() {
     std::lock_guard<std::mutex> lock(envMutex);

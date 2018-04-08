@@ -23,6 +23,8 @@
 #include <functional>
 #include <mutex>
 #include <vector>
+#include <future>
+#include <atomic>
 #include "src/libxdata/XData.h"
 #include "EnvData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
@@ -41,6 +43,8 @@ public:
 
     // Must be called from the environment thread - do not call from GUI thread!
     void start();
+    void loadNavWorldBackground();
+    bool isNavWorldReady();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, MenuCallback cb) = 0;
@@ -54,8 +58,8 @@ public:
     virtual std::string getProgramPath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual EnvData getData(const std::string &dataRef) = 0;
-    virtual std::shared_ptr<xdata::XData> getXPlaneData() = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
+    std::shared_ptr<xdata::World> getNavWorld();
 
     virtual ~Environment() = default;
 protected:
@@ -72,8 +76,15 @@ protected:
      */
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
+    virtual std::shared_ptr<xdata::XData> getXPlaneData() = 0;
 private:
+    std::shared_future<std::shared_ptr<xdata::World>> navWorldFuture;
+    std::shared_ptr<xdata::World> navWorld;
+    std::atomic_bool navWorldLoadAttempted {false};
+
     bool stopped = false;
+
+    std::shared_ptr<xdata::World> loadNavWorldAsync();
 };
 
 }
