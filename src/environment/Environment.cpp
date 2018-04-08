@@ -28,7 +28,7 @@ void Environment::loadNavWorldBackground() {
 std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
     auto data = getXPlaneData();
     logger::info("Loading nav data...");
-    // data->load();
+    data->load();
     logger::info("Nav data ready");
     return data->getWorld();
 }
