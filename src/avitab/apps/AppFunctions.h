@@ -40,6 +40,7 @@ public:
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
     virtual void onHomeButton() = 0;
     virtual std::shared_ptr<xdata::World> getNavWorld() = 0;
+    virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual ~AppFunctions() = default;
 };
 

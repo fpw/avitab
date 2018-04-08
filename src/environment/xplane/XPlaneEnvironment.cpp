@@ -17,6 +17,7 @@
  */
 #include <XPLM/XPLMPlugin.h>
 #include <XPLM/XPLMPlanes.h>
+#include <XPLM/XPLMScenery.h>
 #include <stdexcept>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
@@ -184,6 +185,18 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
             // transfer exceptions across the threads
             dataPromise.set_exception(std::current_exception());
         }
+    });
+
+    return futureData.get();
+}
+
+double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
+    std::promise<double> dataPromise;
+    auto futureData = dataPromise.get_future();
+
+    runInEnvironment([&dataPromise, &lat, &lon, this] () {
+        double variation = XPLMGetMagneticVariation(lat, lon);
+        dataPromise.set_value(variation);
     });
 
     return futureData.get();

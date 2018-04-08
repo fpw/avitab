@@ -15,38 +15,30 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_RADIONAVAID_H_
+#define SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_RADIONAVAID_H_
 
-#include <string>
 #include <memory>
-#include "src/libxdata/world/models/Location.h"
-#include "src/libxdata/world/models/navaids/NavAid.h"
+#include "src/libxdata/world/models/Frequency.h"
+#include "ILSLocalizer.h"
 
 namespace xdata {
 
-class Runway {
+class RadioNavaid {
 public:
-    Runway(const std::string &name);
-    void setWidth(float w);
-    void setLocation(const Location &loc);
+    RadioNavaid(Frequency frq, int range);
+    const Frequency &getFrequency() const;
+    int getRange() const;
 
-    const std::string &getName() const;
-    float getWidth() const;
-    void attachILSData(std::shared_ptr<NavAid> ils);
-    Location getLocation() const;
-
-    // Optional, can return nullptr
-    std::shared_ptr<NavAid> getILSData() const;
+    void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
+    std::shared_ptr<ILSLocalizer> getILSLocalizer();
 private:
-    std::string name;
-    Location location;
-    float width = 0; // meters
+    Frequency frequency;
+    int range;
 
-    // optional
-    std::shared_ptr<NavAid> ils;
+    std::shared_ptr<ILSLocalizer> ils;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_RADIONAVAID_H_ */

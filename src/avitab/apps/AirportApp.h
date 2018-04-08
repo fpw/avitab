@@ -45,7 +45,7 @@ private:
     void fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
 
     std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);
-    std::string toATCString(const std::string &name, const xdata::Frequency &frq);
+    std::string toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type);
 
     std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
 };

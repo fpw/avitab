@@ -40,8 +40,8 @@ void Airport::setRegion(std::shared_ptr<Region> region) {
     this->region = region;
 }
 
-void Airport::setFrequency(ATCFrequency which, const Frequency &frq) {
-    atcFrequencies.insert(std::make_pair(which, frq));
+void Airport::addATCFrequency(ATCFrequency which, const Frequency &frq) {
+    atcFrequencies[which].push_back(frq);
 }
 
 void Airport::addRunway(const Runway& rwy) {
@@ -56,8 +56,16 @@ const std::string& Airport::getName() const {
     return name;
 }
 
-const Frequency& Airport::getATCFrequency(ATCFrequency type) {
+const std::vector<Frequency> &Airport::getATCFrequencies(ATCFrequency type) {
     return atcFrequencies[type];
+}
+
+void Airport::attachILSData(const std::string& rwyName, std::shared_ptr<NavAid> ils) {
+    auto rwy = runways.find(rwyName);
+    if (rwy == runways.end()) {
+        throw std::runtime_error("Adding ILS to non-existing runway, " + id + " " + ils->getID());
+    }
+    rwy->second.attachILSData(ils);
 }
 
 void xdata::Airport::forEachRunway(std::function<void(const Runway&)> f) {

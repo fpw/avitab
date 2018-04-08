@@ -15,51 +15,17 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdexcept>
-#include "Runway.h"
+#include "ILSLocalizer.h"
 
 namespace xdata {
 
-Runway::Runway(const std::string& name):
-    name(name)
+ILSLocalizer::ILSLocalizer(double rwyHeading):
+    runwayHeading(rwyHeading)
 {
 }
 
-void Runway::setWidth(float w) {
-    this->width = w;
-}
-
-void Runway::setLocation(const Location &loc) {
-    this->location = loc;
-}
-
-const std::string& Runway::getName() const {
-    return name;
-}
-
-float Runway::getWidth() const {
-    return width;
-}
-
-void Runway::attachILSData(std::shared_ptr<NavAid> ils) {
-    auto radioInfo = ils->getRadioInfo();
-    if (!radioInfo) {
-        throw std::runtime_error("Attached ILS without radio info");
-    }
-
-    if (!radioInfo->getILSLocalizer()) {
-        throw std::runtime_error("Attached ILS without ILS info");
-    }
-
-    this->ils = ils;
-}
-
-std::shared_ptr<NavAid> Runway::getILSData() const {
-    return ils;
-}
-
-Location Runway::getLocation() const {
-    return location;
+double ILSLocalizer::getRunwayHeading() const {
+    return runwayHeading;
 }
 
 } /* namespace xdata */

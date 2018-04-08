@@ -15,51 +15,30 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdexcept>
-#include "Runway.h"
+#include "RadioNavaid.h"
 
 namespace xdata {
 
-Runway::Runway(const std::string& name):
-    name(name)
+RadioNavaid::RadioNavaid(Frequency frq, int range):
+    frequency(frq),
+    range(range)
 {
 }
 
-void Runway::setWidth(float w) {
-    this->width = w;
+const Frequency& RadioNavaid::getFrequency() const {
+    return frequency;
 }
 
-void Runway::setLocation(const Location &loc) {
-    this->location = loc;
+int RadioNavaid::getRange() const {
+    return range;
 }
 
-const std::string& Runway::getName() const {
-    return name;
-}
-
-float Runway::getWidth() const {
-    return width;
-}
-
-void Runway::attachILSData(std::shared_ptr<NavAid> ils) {
-    auto radioInfo = ils->getRadioInfo();
-    if (!radioInfo) {
-        throw std::runtime_error("Attached ILS without radio info");
-    }
-
-    if (!radioInfo->getILSLocalizer()) {
-        throw std::runtime_error("Attached ILS without ILS info");
-    }
-
+void RadioNavaid::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
     this->ils = ils;
 }
 
-std::shared_ptr<NavAid> Runway::getILSData() const {
+std::shared_ptr<ILSLocalizer> RadioNavaid::getILSLocalizer() {
     return ils;
-}
-
-Location Runway::getLocation() const {
-    return location;
 }
 
 } /* namespace xdata */

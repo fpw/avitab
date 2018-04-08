@@ -46,6 +46,7 @@ public:
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
     std::shared_ptr<xdata::XData> getXPlaneData() override;
+    double getMagneticVariation(double lat, double lon) override;
 
     virtual ~StandAloneEnvironment();
 private:

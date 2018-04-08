@@ -55,6 +55,7 @@ public:
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual EnvData getData(const std::string &dataRef) = 0;
     virtual std::shared_ptr<xdata::XData> getXPlaneData() = 0;
+    virtual double getMagneticVariation(double lat, double lon) = 0;
 
     virtual ~Environment() = default;
 protected:

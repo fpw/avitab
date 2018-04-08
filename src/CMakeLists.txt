@@ -23,17 +23,17 @@ if(WIN32)
         avitab_env_xplane
         XPLM_64
     )
-elseif(LINUX)
-target_link_libraries(avitab_plugin
-    ${CommonLibs}
-    avitab_env_xplane
-    -fPIC
-)
 elseif(APPLE)
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
     "-framework XPLM"
+)
+elseif(UNIX)
+target_link_libraries(avitab_plugin
+    ${CommonLibs}
+    avitab_env_xplane
+    -fPIC
 )
 endif()
 

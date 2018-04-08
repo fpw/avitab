@@ -15,38 +15,34 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_
+#define SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_
 
 #include <string>
 #include <memory>
 #include "src/libxdata/world/models/Location.h"
-#include "src/libxdata/world/models/navaids/NavAid.h"
+#include "src/libxdata/world/models/Region.h"
+#include "RadioNavaid.h"
 
 namespace xdata {
 
-class Runway {
+class NavAid {
 public:
-    Runway(const std::string &name);
-    void setWidth(float w);
-    void setLocation(const Location &loc);
+    NavAid(Location loc, const std::string &id, std::shared_ptr<Region> region);
+    void attachRadioInfo(std::shared_ptr<RadioNavaid> radio);
 
-    const std::string &getName() const;
-    float getWidth() const;
-    void attachILSData(std::shared_ptr<NavAid> ils);
-    Location getLocation() const;
-
-    // Optional, can return nullptr
-    std::shared_ptr<NavAid> getILSData() const;
+    const std::string &getID() const;
+    std::shared_ptr<Region> getRegion() const;
+    std::shared_ptr<RadioNavaid> getRadioInfo() const;
 private:
-    std::string name;
     Location location;
-    float width = 0; // meters
+    std::string id;
+    std::shared_ptr<Region> region;
 
-    // optional
-    std::shared_ptr<NavAid> ils;
+    // Optional
+    std::shared_ptr<RadioNavaid> radioInfo;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_ */

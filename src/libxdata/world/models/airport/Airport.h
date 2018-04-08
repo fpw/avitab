@@ -21,10 +21,12 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <vector>
 #include <functional>
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
+#include "src/libxdata/world/models/navaids/NavAid.h"
 #include "Runway.h"
 
 namespace xdata {
@@ -48,14 +50,15 @@ public:
     // Optional
     void setLocation(const Location &loc);
     void setRegion(std::shared_ptr<Region> region);
-    void setFrequency(ATCFrequency which, const Frequency &frq);
+    void addATCFrequency(ATCFrequency which, const Frequency &frq);
     void addRunway(const Runway &rwy);
 
     const std::string& getID() const;
     const std::string& getName() const;
-    const Frequency &getATCFrequency(ATCFrequency type);
+    const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
 
     void forEachRunway(std::function<void(const Runway &)> f);
+    void attachILSData(const std::string &rwy, std::shared_ptr<NavAid> ils);
 
 private:
     std::string id; // either ICAO code or X + fictional id
@@ -65,7 +68,7 @@ private:
 
     // Optional
     std::shared_ptr<Region> region;
-    std::map<ATCFrequency, Frequency> atcFrequencies;
+    std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
     std::map<std::string, Runway> runways;
 };
 

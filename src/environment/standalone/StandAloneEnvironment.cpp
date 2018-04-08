@@ -107,6 +107,10 @@ std::string avitab::StandAloneEnvironment::getProgramPath() {
     return platform::nativeToUTF8(ourPath);
 }
 
+double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
+    return 0;
+}
+
 void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     // the SDL loop always runs so we don't need the onEmpty callback
     registerEnvironmentCallback(cb);

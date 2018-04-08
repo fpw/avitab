@@ -26,6 +26,7 @@
 #include "src/libxdata/loaders/objects/NavaidData.h"
 #include "src/libxdata/loaders/objects/AirwayData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
+#include "src/libxdata/world/models/navaids/NavAid.h"
 #include "src/libxdata/world/models/Region.h"
 
 namespace xdata {

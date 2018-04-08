@@ -46,6 +46,7 @@ public:
     void showGUIContainer(std::shared_ptr<Container> container) override;
     void onHomeButton() override;
     std::shared_ptr<xdata::World> getNavWorld() override;
+    double getMagneticVariation(double lat, double lon) override;
 
     ~AviTab();
 
@@ -63,6 +64,8 @@ private:
     std::shared_ptr<xdata::World> navWorld;
 
     std::shared_ptr<xdata::XData> loadNavData();
+    bool isNavDataReady();
+
     void createLayout();
     void showAppLauncher();
     void cleanupLayout();

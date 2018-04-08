@@ -16,6 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "AirportApp.h"
+#include <sstream>
+#include <iomanip>
 
 namespace avitab {
 
@@ -48,6 +50,12 @@ void AirportApp::resetLayout() {
 
 void AirportApp::onCodeEntered(const std::string& code) {
     auto world = api().getNavWorld();
+
+    if (!world) {
+        searchLabel->setText("No navigation data available, check plugin's log.txt");
+        return;
+    }
+
     auto airport = world->findAirportByID(code);
 
     if (airport) {
@@ -74,29 +82,48 @@ void AirportApp::fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdat
 
 std::string AirportApp::toATCInfo(std::shared_ptr<xdata::Airport> airport) {
     std::string text = "ATC Frequencies:\n";
-    text += toATCString("    Recorded Messages", airport->getATCFrequency(xdata::Airport::ATCFrequency::RECORDED));
-    text += toATCString("    UniCom", airport->getATCFrequency(xdata::Airport::ATCFrequency::UNICOM));
-    text += toATCString("    Delivery", airport->getATCFrequency(xdata::Airport::ATCFrequency::CLD));
-    text += toATCString("    Ground", airport->getATCFrequency(xdata::Airport::ATCFrequency::GND));
-    text += toATCString("    Tower", airport->getATCFrequency(xdata::Airport::ATCFrequency::TWR));
-    text += toATCString("    Approach", airport->getATCFrequency(xdata::Airport::ATCFrequency::APP));
-    text += toATCString("    Departure", airport->getATCFrequency(xdata::Airport::ATCFrequency::DEP));
+    text += toATCString("    Recorded Messages", airport, xdata::Airport::ATCFrequency::RECORDED);
+    text += toATCString("    UniCom", airport, xdata::Airport::ATCFrequency::UNICOM);
+    text += toATCString("    Delivery", airport, xdata::Airport::ATCFrequency::CLD);
+    text += toATCString("    Ground", airport, xdata::Airport::ATCFrequency::GND);
+    text += toATCString("    Tower", airport, xdata::Airport::ATCFrequency::TWR);
+    text += toATCString("    Approach", airport, xdata::Airport::ATCFrequency::APP);
+    text += toATCString("    Departure", airport, xdata::Airport::ATCFrequency::DEP);
     return text;
 }
 
-std::string AirportApp::toATCString(const std::string& name, const xdata::Frequency& frq) {
-    if (!frq) {
-        return "";
+std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type) {
+    std::string res;
+    auto &freqs = airport->getATCFrequencies(type);
+    for (auto &frq: freqs) {
+        res += name + ": " + frq.getDescription() + ", " + frq.getFrequencyString() + "\n";
     }
-    return name + ": " + frq.getDescription() + ", " + frq.getFrequencyString() + "\n";
+    return res;
 }
 
 std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
-    std::string text = "Runways:\n";
-    airport->forEachRunway([&text] (const xdata::Runway &rwy) {
-        text += "    " + rwy.getName() + "\n";
+    std::stringstream str;
+    str << std::fixed << std::setprecision(0);
+
+    str << "Runways:\n";
+    airport->forEachRunway([this, &str] (const xdata::Runway &rwy) {
+        str << "    Runway " + rwy.getName();
+        auto ils = rwy.getILSData();
+        if (ils) {
+            double heading = ils->getRadioInfo()->getILSLocalizer()->getRunwayHeading();
+            if (heading < 0) {
+                heading = 360 + heading;
+            }
+            str << " with " << ils->getRadioInfo()->getFrequency().getDescription();
+            str << ", ID " << ils->getID();
+            str << " on " << ils->getRadioInfo()->getFrequency().getFrequencyString();
+            str << ", heading " << heading << "°";
+        } else {
+            str << " without ILS";
+        }
+        str << "\n";
     });
-    return text;
+    return str.str();
 }
 
 } /* namespace avitab */

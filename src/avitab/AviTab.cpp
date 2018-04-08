@@ -36,15 +36,15 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
 
 std::shared_ptr<xdata::XData> AviTab::loadNavData() {
     auto data = env->getXPlaneData();
-    logger::info("Loading data...");
-    try {
-        data->load();
-    } catch (const std::exception &e) {
-        logger::error("Error loading nav data: %s", e.what());
-        throw e;
-    }
-    logger::info("Done loading");
+    logger::info("Loading nav data...");
+    data->load();
+    logger::info("Nav data ready");
     return data;
+}
+
+bool AviTab::isNavDataReady() {
+    auto state = navDataFuture.wait_for(std::chrono::seconds(0));
+    return state == std::future_status::ready;
 }
 
 void AviTab::startApp() {
@@ -76,6 +76,18 @@ void AviTab::toggleTablet() {
 void AviTab::createLayout() {
     // runs in GUI thread
     auto screen = guiLib->screen();
+
+    if (!isNavDataReady()) {
+        // try again later
+        guiLib->executeLater(std::bind(&AviTab::createLayout, this));
+        return;
+    }
+
+    try {
+        navWorld = navDataFuture.get()->getWorld();
+    } catch (const std::exception &e) {
+        logger::error("Error loading nav data: %s", e.what());
+    }
 
     if (!headerApp) {
         headerApp = std::make_shared<HeaderApp>(this);
@@ -147,9 +159,6 @@ Icon AviTab::loadIcon(const std::string& path) {
 }
 
 std::shared_ptr<xdata::World> AviTab::getNavWorld() {
-    if (!navWorld) {
-        navWorld = navDataFuture.get()->getWorld();
-    }
     return navWorld;
 }
 
@@ -167,6 +176,10 @@ std::string AviTab::getAirplanePath() {
 
 EnvData AviTab::getDataRef(const std::string& dataRef) {
     return env->getData(dataRef);
+}
+
+double AviTab::getMagneticVariation(double lat, double lon) {
+    return env->getMagneticVariation(lat, lon);
 }
 
 void AviTab::onHomeButton() {
