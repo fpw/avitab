@@ -78,6 +78,10 @@ void Widget::alignInTopLeft() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
 }
 
+void Widget::alignInTopRight() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+}
+
 int Widget::getWidth() {
     return lv_obj_get_width(obj());
 }
@@ -110,6 +114,14 @@ lv_img_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
 
 void Widget::invalidate() {
     lv_obj_invalidate(obj());
+}
+
+int Widget::getX() {
+    return lv_obj_get_x(obj());
+}
+
+int Widget::getY() {
+    return lv_obj_get_y(obj());
 }
 
 const void* Widget::symbolToLVSymbol(Symbol symbol) {

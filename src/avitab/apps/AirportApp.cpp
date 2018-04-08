@@ -30,22 +30,27 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 void AirportApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
     searchPage = tabs->addTab(tabs, "Search");
-    searchPage->setLayoutCenterColumns();
+    // searchPage->setLayoutCenterColumns();
 
-    resetButton = std::make_shared<Button>(searchPage, "Clear Tabs");
+    resetButton = std::make_shared<Button>(searchPage, "Close Tabs");
     resetButton->setCallback([this] () {
         api().executeLater([this] () {
             resetLayout();
         });
     });
+    resetButton->alignInTopRight();
 
-    searchLabel = std::make_shared<Label>(searchPage, "Enter an ICAO code such as EDHL:");
     searchField = std::make_shared<TextArea>(searchPage, "");
+    searchField->setPosition(0, resetButton->getY());
+    searchField->setDimensions(searchField->getWidth(), 30);
+
+    searchLabel = std::make_shared<Label>(searchPage, "Enter an ICAO code such as EDHL");
+    searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 5);
 
     keys = std::make_shared<Keyboard>(searchPage, searchField);
     keys->setOnCancel([this] () { searchField->setText(""); });
     keys->setOnOk([this] () { onCodeEntered(searchField->getText()); });
-    keys->alignInBottomCenter();
+    keys->setPosition(-5, searchPage->getContentHeight() - 90);
 }
 
 void AirportApp::onCodeEntered(const std::string& code) {

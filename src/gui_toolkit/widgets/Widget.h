@@ -44,10 +44,13 @@ public:
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);
     void alignInTopLeft();
+    void alignInTopRight();
     void alignInBottomCenter();
     void setBackgroundWhite();
     int getWidth();
     int getHeight();
+    int getX();
+    int getY();
     void setVisible(bool visible);
     void invalidate();
 
