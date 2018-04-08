@@ -21,9 +21,17 @@ namespace avitab {
 
 AirportApp::AirportApp(FuncsPtr appFuncs):
     App(appFuncs),
-    window(std::make_shared<Window>(getUIContainer(), "Airport Information"))
+    window(std::make_shared<Window>(getUIContainer(), "Airport Information")),
+    textArea(std::make_shared<TextArea>(window, ""))
 {
     window->setOnClose([this] () { exit(); });
+
+    keys = std::make_shared<Keyboard>(window, textArea);
+    keys->setOnCancel([this] () { textArea->setText(""); });
+    keys->setOnOk([this] () { onCodeEntered(textArea->getText()); });
+}
+
+void AirportApp::onCodeEntered(const std::string& code) {
 }
 
 } /* namespace avitab */

@@ -30,7 +30,10 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
 
     lv_kb_set_hide_action(keys, [] (lv_obj_t *ref) -> lv_res_t {
         Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_free_ptr(ref));
-        if (ref) {
+        if (us) {
+            if (us->onCancel) {
+                us->onCancel();
+            }
             lv_kb_set_ta(ref, us->targetText->obj());
         }
         return LV_RES_OK;
@@ -38,7 +41,10 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
 
     lv_kb_set_ok_action(keys, [] (lv_obj_t *ref) -> lv_res_t {
         Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_free_ptr(ref));
-        if (ref) {
+        if (us) {
+            if (us->onOk) {
+                us->onOk();
+            }
             lv_kb_set_ta(ref, us->targetText->obj());
         }
         return LV_RES_OK;
@@ -49,5 +55,12 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
     setObj(keys);
 }
 
+void Keyboard::setOnCancel(Callback cb) {
+    onCancel = cb;
+}
+
+void Keyboard::setOnOk(Callback cb) {
+    onOk = cb;
+}
 
 } /* namespace avitab */

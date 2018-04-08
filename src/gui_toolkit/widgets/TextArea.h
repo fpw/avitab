@@ -27,6 +27,7 @@ class TextArea: public Widget {
 public:
     TextArea(WidgetPtr parent, const std::string &text);
     void setText(const std::string &text);
+    std::string getText();
 };
 
 } /* namespace avitab */

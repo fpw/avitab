@@ -33,6 +33,8 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<TextArea> textArea;
     std::shared_ptr<Keyboard> keys;
+
+    void onCodeEntered(const std::string &code);
 };
 
 } /* namespace avitab */

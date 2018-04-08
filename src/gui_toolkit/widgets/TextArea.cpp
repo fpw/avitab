@@ -31,4 +31,8 @@ void TextArea::setText(const std::string& text) {
     lv_ta_set_text(obj(), text.c_str());
 }
 
+std::string TextArea::getText() {
+    return lv_ta_get_text(obj());
+}
+
 } /* namespace avitab */

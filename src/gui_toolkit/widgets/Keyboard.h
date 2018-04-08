@@ -18,15 +18,22 @@
 #ifndef SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
 #define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
 
+#include <functional>
 #include "Widget.h"
 
 namespace avitab {
 
 class Keyboard: public Widget {
 public:
+    using Callback = std::function<void()>;
+
     Keyboard(WidgetPtr parent, WidgetPtr target);
+    void setOnCancel(Callback cb);
+    void setOnOk(Callback cb);
 private:
     WidgetPtr targetText;
+    Callback onCancel;
+    Callback onOk;
 };
 
 } /* namespace avitab */
