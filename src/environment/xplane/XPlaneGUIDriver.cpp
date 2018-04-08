@@ -248,10 +248,6 @@ bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
         }
         break;
     case xplm_MouseDrag:
-        // dragging passes invalid coordinates in VR in the current beta :-/
-        if (isVrEnabled) {
-            isInWindow = false;
-        }
         mousePressed = true;
         break;
     case xplm_MouseUp:
