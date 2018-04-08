@@ -15,32 +15,37 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
-
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+#include "Airport.h"
 
 namespace xdata {
 
-class XData {
-public:
-    XData(const std::string &dataRootPath);
-    void load();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::unique_ptr<World> world;
+Airport::Airport(const std::string& airportId):
+    id(airportId)
+{
+}
 
-    std::string determineNavDataPath();
+void Airport::setName(const std::string& name) {
+    this->name = name;
+}
 
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
-};
+void Airport::setElevation(int elevation) {
+    this->elevation = elevation;
+}
+
+void Airport::setLocation(const Location& loc) {
+    this->location = loc;
+}
+
+void Airport::setRegion(std::shared_ptr<Region> region) {
+    this->region = region;
+}
+
+void Airport::setFrequency(ATCFrequency which, const Frequency &frq) {
+    atcFrequencies.insert(std::make_pair(which, frq));
+}
+
+void Airport::addRunway(const Runway& rwy) {
+    runways.insert(std::make_pair(rwy.getName(), rwy));
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_XDATA_H_ */

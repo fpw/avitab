@@ -15,32 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#ifndef SRC_AVITAB_APPS_AIRPORTAPP_H_
+#define SRC_AVITAB_APPS_AIRPORTAPP_H_
 
-#include <string>
 #include <memory>
-#include "src/libxdata/world/World.h"
+#include "App.h"
+#include "src/gui_toolkit/widgets/TextArea.h"
+#include "src/gui_toolkit/widgets/Keyboard.h"
+#include "src/gui_toolkit/widgets/Window.h"
 
-namespace xdata {
+namespace avitab {
 
-class XData {
+class AirportApp: public App {
 public:
-    XData(const std::string &dataRootPath);
-    void load();
+    AirportApp(FuncsPtr appFuncs);
 private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::unique_ptr<World> world;
-
-    std::string determineNavDataPath();
-
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
+    std::shared_ptr<Window> window;
+    std::shared_ptr<TextArea> textArea;
+    std::shared_ptr<Keyboard> keys;
 };
 
-} /* namespace xdata */
+} /* namespace avitab */
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+#endif /* SRC_AVITAB_APPS_AIRPORTAPP_H_ */

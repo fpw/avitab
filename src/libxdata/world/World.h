@@ -15,39 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
-#define SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
+#ifndef SRC_LIBXDATA_WORLD_WORLD_H_
+#define SRC_LIBXDATA_WORLD_WORLD_H_
 
+#include <map>
 #include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include <memory>
 #include "src/libxdata/loaders/objects/AirportData.h"
+#include "src/libxdata/loaders/objects/FixData.h"
+#include "src/libxdata/loaders/objects/NavaidData.h"
+#include "src/libxdata/loaders/objects/AirwayData.h"
+#include "src/libxdata/world/models/airport/Airport.h"
+#include "src/libxdata/world/models/Region.h"
 
 namespace xdata {
 
-class AirportLoader {
+class World {
 public:
-    using Acceptor = std::function<void(const AirportData &)>;
-
-    AirportLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadAirports();
+    void onAirportLoaded(const AirportData &port);
+    void onFixLoaded(const FixData &fix);
+    void onNavaidLoaded(const NavaidData &navaid);
+    void onAirwayLoaded(const AirwayData &airway);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
-    AirportData curPort;
+    std::map<std::string, std::shared_ptr<Region>> regions;
+    std::map<std::string, std::shared_ptr<Airport>> airports;
 
-    void parseLine();
-    void startAirport();
-    void parseRunway();
-    bool parseRunwayEnd(AirportData::RunwayEnd &end);
-    void parseMetaData();
-    void parseFrequency(int code);
-    void finishAirport();
+    std::shared_ptr<Region> createOrFindRegion(const std::string &id);
+    std::shared_ptr<Airport> createOrFindAirport(const std::string &id);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_ */
+#endif /* SRC_LIBXDATA_WORLD_WORLD_H_ */

@@ -37,7 +37,12 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
 std::shared_ptr<xdata::XData> AviTab::loadNavData() {
     auto data = env->getXPlaneData();
     logger::info("Loading data...");
-    data->load();
+    try {
+        data->load();
+    } catch (const std::exception &e) {
+        logger::error("Error loading nav data: %s", e.what());
+        throw e;
+    }
     logger::info("Done loading");
     return data;
 }

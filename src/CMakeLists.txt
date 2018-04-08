@@ -43,7 +43,7 @@ set_target_properties(avitab_plugin PROPERTIES SUFFIX ".xpl")
 
 if(WIN32)
 install(TARGETS avitab_plugin
-    RUNTIME DESTINATION  "/Program Files (x86)/Steam/steamapps/common/X-Plane 11/Resources/plugins/AviTab/win_x64/"
+    RUNTIME DESTINATION  "/Users/rme/Desktop/X-Plane 11/Resources/plugins/AviTab/win_x64/"
 )
 endif(WIN32)
 

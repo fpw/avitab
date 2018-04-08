@@ -16,16 +16,17 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "XData.h"
+#include "src/platform/Platform.h"
 #include "src/libxdata/loaders/AirportLoader.h"
 #include "src/libxdata/loaders/FixLoader.h"
 #include "src/libxdata/loaders/NavaidLoader.h"
 #include "src/libxdata/loaders/AirwayLoader.h"
-#include "src/platform/Platform.h"
 
 namespace xdata {
 
 XData::XData(const std::string& dataRootPath):
-    xplaneRoot(dataRootPath)
+    xplaneRoot(dataRootPath),
+    world(std::make_unique<World>())
 {
     navDataPath = determineNavDataPath();
 }
@@ -49,7 +50,7 @@ void XData::loadAirports() {
     using namespace std::placeholders;
 
     AirportLoader loader(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
-    loader.setAcceptor(std::bind(&XData::onAirportLoaded, this, _1));
+    loader.setAcceptor(std::bind(&World::onAirportLoaded, world.get(), _1));
     loader.loadAirports();
 }
 
@@ -57,7 +58,7 @@ void XData::loadFixes() {
     using namespace std::placeholders;
 
     FixLoader loader(navDataPath + "earth_fix.dat");
-    loader.setAcceptor(std::bind(&XData::onFixLoaded, this, _1));
+    loader.setAcceptor(std::bind(&World::onFixLoaded, world.get(), _1));
     loader.loadFixes();
 }
 
@@ -65,7 +66,7 @@ void XData::loadNavaids() {
     using namespace std::placeholders;
 
     NavaidLoader loader(navDataPath + "earth_nav.dat");
-    loader.setAcceptor(std::bind(&XData::onNavaidLoaded, this, _1));
+    loader.setAcceptor(std::bind(&World::onNavaidLoaded, world.get(), _1));
     loader.loadNavaids();
 }
 
@@ -73,20 +74,8 @@ void xdata::XData::loadAirways() {
     using namespace std::placeholders;
 
     AirwayLoader loader(navDataPath + "earth_awy.dat");
-    loader.setAcceptor(std::bind(&XData::onAirwayLoaded, this, _1));
+    loader.setAcceptor(std::bind(&World::onAirwayLoaded, world.get(), _1));
     loader.loadAirways();
-}
-
-void XData::onAirportLoaded(const AirportData &port) {
-}
-
-void XData::onFixLoaded(const FixData& fix) {
-}
-
-void XData::onNavaidLoaded(const NavaidData& navaid) {
-}
-
-void XData::onAirwayLoaded(const AirwayData& airway) {
 }
 
 } /* namespace xdata */

@@ -1,5 +1,11 @@
 add_subdirectory("loaders")
+add_subdirectory("world")
+
 add_library(xdata_main
     XData.cpp
 )
-target_link_libraries(xdata_main xdata_loaders)
+
+target_link_libraries(xdata_main
+    xdata_loaders
+    xdata_world
+)

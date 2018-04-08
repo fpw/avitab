@@ -26,8 +26,31 @@ namespace xdata {
 
 struct AirportData {
     struct Frequency {
+        /**
+         * 50: ATC - Recorded: AWOS, ASOS or ATIS
+         * 51: ATC - Unicom: Unicom, CTAF or Radio
+         * 52: ATC - CLD: Clearance Delivery
+         * 53: ATC - GND: Ground
+         * 54: ATC - TWR: Tower
+         * 55: ATC - APP: Approach
+         * 56: ATC - DEP: Departure
+         */
+        int code;
         std::string desc;
         int frq;
+    };
+
+    struct RunwayEnd {
+        std::string name;
+        double latitude;
+        double longitude;
+        float displace; // meters
+    };
+
+    struct RunwayData {
+        float width; // meters
+        int surfaceType;
+        std::vector<RunwayEnd> ends;
     };
 
     std::string id;
@@ -42,6 +65,7 @@ struct AirportData {
     std::string country;
 
     std::vector<Frequency> frequencies;
+    std::vector<RunwayData> runways;
 };
 
 } /* namespace xdata */

@@ -15,9 +15,9 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "AirportLoader.h"
 #include "src/libxdata/loaders/objects/AirportData.h"
-#include <iostream>
 
 namespace xdata {
 
@@ -51,6 +51,9 @@ void AirportLoader::parseLine() {
         finishAirport();
         startAirport();
         break;
+    case 100:
+        parseRunway();
+        break;
     case 1302:
         parseMetaData();
         break;
@@ -61,7 +64,7 @@ void AirportLoader::parseLine() {
     case 54:
     case 55:
     case 56:
-        parseFrequency();
+        parseFrequency(rowCode);
         break;
     case 99:
         finishAirport();
@@ -75,6 +78,43 @@ void AirportLoader::startAirport() {
     parser.parseInt(); // not required;
     curPort.id = parser.parseWord();
     curPort.name = parser.restOfLine();
+}
+
+void AirportLoader::parseRunway() {
+    AirportData::RunwayData rwy;
+
+    rwy.width = parser.parseDouble();
+    rwy.surfaceType = parser.parseInt();
+    parser.parseInt(); // shoulder
+    parser.parseDouble(); // smoothness
+    parser.parseInt(); // center lights
+    parser.parseInt(); // edge lights
+    parser.parseInt(); // autogen signs
+
+    AirportData::RunwayEnd end;
+    while (parseRunwayEnd(end)) {
+        rwy.ends.push_back(end);
+    }
+    curPort.runways.push_back(rwy);
+}
+
+bool AirportLoader::parseRunwayEnd(AirportData::RunwayEnd &end) {
+    std::string firstWord = parser.parseWord();
+    if (firstWord.empty()) {
+        return false;
+    }
+
+    end.name = firstWord;
+    end.latitude = parser.parseDouble();
+    end.longitude = parser.parseDouble();
+    end.displace = parser.parseDouble();
+    parser.parseDouble(); // overrun length
+    parser.parseInt(); // markings
+    parser.parseInt(); // approach lights
+    parser.parseInt(); // touchdown lights
+    parser.parseInt(); // REIL lights
+
+    return true;
 }
 
 void AirportLoader::parseMetaData() {
@@ -93,8 +133,9 @@ void AirportLoader::parseMetaData() {
     }
 }
 
-void AirportLoader::parseFrequency() {
+void AirportLoader::parseFrequency(int code) {
     AirportData::Frequency entry;
+    entry.code = code;
     entry.frq = parser.parseInt();
     entry.desc = parser.restOfLine();
     curPort.frequencies.push_back(entry);

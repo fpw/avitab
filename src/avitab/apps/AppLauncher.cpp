@@ -21,6 +21,7 @@
 #include "Clipboard.h"
 #include "About.h"
 #include "PlaneManualApp.h"
+#include "AirportApp.h"
 
 namespace avitab {
 
@@ -30,7 +31,8 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     getUIContainer()->setLayoutPretty();
     std::string root = api().getDataPath() + "icons/";
 
-    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png");
+    addEntry<ChartsApp>("Charts", root + "if_starthere_18227.png");
+    addEntry<AirportApp>("Airports", root + "if_Airport_22906.png");
     addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png");
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
     addEntry<Clipboard>("Clipboard", root + "if_clipboard_43705.png");

@@ -69,7 +69,7 @@ std::string BaseParser::restOfLine() {
     skipWhiteSpace();
 
     std::string rest;
-    getLine(rest);
+    std::getline(lineStream, rest);
     return rest;
 }
 

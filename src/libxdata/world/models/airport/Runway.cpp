@@ -15,32 +15,29 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
-
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+#include "Runway.h"
 
 namespace xdata {
 
-class XData {
-public:
-    XData(const std::string &dataRootPath);
-    void load();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::unique_ptr<World> world;
+Runway::Runway(const std::string& name):
+    name(name)
+{
+}
 
-    std::string determineNavDataPath();
+void Runway::setLength(float len) {
+    this->length = len;
+}
 
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
-};
+void Runway::setWidth(float w) {
+    this->width = w;
+}
+
+void Runway::setLocation(const Location &loc) {
+    this->location = loc;
+}
+
+const std::string& Runway::getName() const {
+    return name;
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_XDATA_H_ */

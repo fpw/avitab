@@ -15,32 +15,29 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_FREQUENCY_H_
+#define SRC_LIBXDATA_WORLD_MODELS_FREQUENCY_H_
 
 #include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class XData {
+class Frequency {
 public:
-    XData(const std::string &dataRootPath);
-    void load();
+    enum class Unit {
+        NONE,
+        MHZ,
+        KHZ
+    };
+
+    Frequency() = default;
+    Frequency(int frq, Unit unit, const std::string &desc);
 private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::unique_ptr<World> world;
-
-    std::string determineNavDataPath();
-
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
+    int frequency = 0;
+    Unit unit = Unit::NONE;
+    std::string description;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_FREQUENCY_H_ */

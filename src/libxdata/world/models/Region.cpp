@@ -15,32 +15,21 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
-
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+#include "Region.h"
 
 namespace xdata {
 
-class XData {
-public:
-    XData(const std::string &dataRootPath);
-    void load();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::unique_ptr<World> world;
+Region::Region(const std::string& regionId):
+    id(regionId)
+{
+}
 
-    std::string determineNavDataPath();
+const std::string& Region::getId() const {
+    return id;
+}
 
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
-};
+void Region::setName(const std::string& name) {
+    this->name = name;
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_XDATA_H_ */
