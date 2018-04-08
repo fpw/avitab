@@ -15,33 +15,22 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_TABGROUP_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_TABGROUP_H_
 
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+#include "Widget.h"
+#include "Page.h"
 
-namespace xdata {
+namespace avitab {
 
-class XData {
+class TabGroup: public Widget {
 public:
-    XData(const std::string &dataRootPath);
-    void load();
-    std::shared_ptr<World> getWorld();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::shared_ptr<World> world;
-
-    std::string determineNavDataPath();
-
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
+    TabGroup(WidgetPtr parent);
+    std::shared_ptr<Page> addTab(WidgetPtr tabs, const std::string &title);
+    void showTab(WidgetPtr tab);
+    void clear();
 };
 
-} /* namespace xdata */
+} /* namespace avitab */
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_TABGROUP_H_ */

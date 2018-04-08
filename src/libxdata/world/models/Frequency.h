@@ -32,6 +32,10 @@ public:
 
     Frequency() = default;
     Frequency(int frq, Unit unit, const std::string &desc);
+    std::string getFrequencyString() const;
+    const std::string &getDescription() const;
+
+    operator bool() const;
 private:
     int frequency = 0;
     Unit unit = Unit::NONE;

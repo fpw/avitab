@@ -70,6 +70,14 @@ void Widget::alignRightInParent(int padRight) {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_RIGHT_MID, -padRight, 0);
 }
 
+void Widget::alignInBottomCenter() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+}
+
+void Widget::alignInTopLeft() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
+}
+
 int Widget::getWidth() {
     return lv_obj_get_width(obj());
 }
@@ -124,8 +132,19 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     }
 }
 
+void Widget::setManagedObj(lv_obj_t* obj) {
+    managed = true;
+    lvObj = obj;
+}
+
+void Widget::setManaged() {
+    managed = true;
+}
+
 Widget::~Widget() {
-    lv_obj_del(obj());
+    if (!managed) {
+        lv_obj_del(obj());
+    }
 }
 
 } // namespace avitab

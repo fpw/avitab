@@ -43,6 +43,8 @@ public:
     void centerInParent();
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);
+    void alignInTopLeft();
+    void alignInBottomCenter();
     void setBackgroundWhite();
     int getWidth();
     int getHeight();
@@ -50,6 +52,8 @@ public:
     void invalidate();
 
     // For internal use by other widgets
+    void setManagedObj(lv_obj_t *obj);
+    void setManaged();
     lv_obj_t *obj();
     lv_obj_t *parentObj();
 
@@ -61,6 +65,7 @@ protected:
     const void *symbolToLVSymbol(Symbol symbol);
 
 private:
+    bool managed = false;
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;
     lv_style_t styleMod;

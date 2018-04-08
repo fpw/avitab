@@ -26,7 +26,7 @@ namespace xdata {
 
 XData::XData(const std::string& dataRootPath):
     xplaneRoot(dataRootPath),
-    world(std::make_unique<World>())
+    world(std::make_shared<World>())
 {
     navDataPath = determineNavDataPath();
 }
@@ -37,6 +37,10 @@ std::string XData::determineNavDataPath() {
     } else {
         return xplaneRoot + "Resources/default data/";
     }
+}
+
+std::shared_ptr<World> XData::getWorld() {
+    return world;
 }
 
 void XData::load() {

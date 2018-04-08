@@ -26,15 +26,14 @@ namespace xdata {
 class Runway {
 public:
     Runway(const std::string &name);
-    void setLength(float len);
     void setWidth(float w);
     void setLocation(const Location &loc);
 
     const std::string &getName() const;
+    float getWidth() const;
 private:
     std::string name;
     Location location;
-    float length = 0; // meters
     float width = 0; // meters
 };
 

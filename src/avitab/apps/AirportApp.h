@@ -22,7 +22,10 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
 #include "src/gui_toolkit/widgets/Keyboard.h"
-#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/TabGroup.h"
+#include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/Page.h"
+#include "src/gui_toolkit/widgets/Button.h"
 
 namespace avitab {
 
@@ -30,11 +33,21 @@ class AirportApp: public App {
 public:
     AirportApp(FuncsPtr appFuncs);
 private:
-    std::shared_ptr<Window> window;
-    std::shared_ptr<TextArea> textArea;
+    std::shared_ptr<Button> resetButton;
+    std::shared_ptr<Label> searchLabel;
+    std::shared_ptr<TabGroup> tabs;
+    std::shared_ptr<Page> searchPage;
+    std::shared_ptr<TextArea> searchField;
     std::shared_ptr<Keyboard> keys;
 
+    void resetLayout();
     void onCodeEntered(const std::string &code);
+    void fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
+
+    std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);
+    std::string toATCString(const std::string &name, const xdata::Frequency &frq);
+
+    std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
 };
 
 } /* namespace avitab */

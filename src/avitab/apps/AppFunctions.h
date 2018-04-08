@@ -24,6 +24,7 @@
 #include "src/gui_toolkit/Icon.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/environment/EnvData.h"
+#include "src/libxdata/world/World.h"
 
 namespace avitab {
 
@@ -38,6 +39,7 @@ public:
     virtual std::shared_ptr<Container> createGUIContainer() = 0;
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
     virtual void onHomeButton() = 0;
+    virtual std::shared_ptr<xdata::World> getNavWorld() = 0;
     virtual ~AppFunctions() = default;
 };
 

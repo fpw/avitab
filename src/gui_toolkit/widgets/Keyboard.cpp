@@ -50,8 +50,6 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
         return LV_RES_OK;
     });
 
-    lv_obj_set_size(keys, lv_obj_get_width(parentObj()), lv_obj_get_height(parentObj()) / 2);
-    lv_obj_align(keys, parentObj(), LV_ALIGN_IN_BOTTOM_MID, 0, 0);
     setObj(keys);
 }
 

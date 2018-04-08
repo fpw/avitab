@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <functional>
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
@@ -49,6 +50,13 @@ public:
     void setRegion(std::shared_ptr<Region> region);
     void setFrequency(ATCFrequency which, const Frequency &frq);
     void addRunway(const Runway &rwy);
+
+    const std::string& getID() const;
+    const std::string& getName() const;
+    const Frequency &getATCFrequency(ATCFrequency type);
+
+    void forEachRunway(std::function<void(const Runway &)> f);
+
 private:
     std::string id; // either ICAO code or X + fictional id
     std::string name;

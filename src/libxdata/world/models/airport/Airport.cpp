@@ -48,4 +48,22 @@ void Airport::addRunway(const Runway& rwy) {
     runways.insert(std::make_pair(rwy.getName(), rwy));
 }
 
+const std::string& Airport::getID() const {
+    return id;
+}
+
+const std::string& Airport::getName() const {
+    return name;
+}
+
+const Frequency& Airport::getATCFrequency(ATCFrequency type) {
+    return atcFrequencies[type];
+}
+
+void xdata::Airport::forEachRunway(std::function<void(const Runway&)> f) {
+    for (auto &rwy: runways) {
+        f(rwy.second);
+    }
+}
+
 } /* namespace xdata */

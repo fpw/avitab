@@ -10,4 +10,6 @@ add_library(avitab_gui_lvgl_widgets
     TextArea.cpp
     Keyboard.cpp
     MessageBox.cpp
+    TabGroup.cpp
+    Page.cpp
 )

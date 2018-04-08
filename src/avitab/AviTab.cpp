@@ -146,6 +146,13 @@ Icon AviTab::loadIcon(const std::string& path) {
     return icon;
 }
 
+std::shared_ptr<xdata::World> AviTab::getNavWorld() {
+    if (!navWorld) {
+        navWorld = navDataFuture.get()->getWorld();
+    }
+    return navWorld;
+}
+
 void AviTab::executeLater(std::function<void()> func) {
     guiLib->executeLater(func);
 }

@@ -15,33 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_
 
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+#include "Widget.h"
 
-namespace xdata {
+namespace avitab {
 
-class XData {
+class Page: public Widget {
 public:
-    XData(const std::string &dataRootPath);
-    void load();
-    std::shared_ptr<World> getWorld();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::shared_ptr<World> world;
+    Page(WidgetPtr parent);
+    Page(WidgetPtr parent, lv_obj_t *page);
 
-    std::string determineNavDataPath();
-
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
+    int getContentWidth();
+    int getContentHeight();
+    void setFit(bool horz, bool vert);
+    void setLayoutCenterColumns();
 };
 
-} /* namespace xdata */
+} /* namespace avitab */
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_ */

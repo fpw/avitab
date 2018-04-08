@@ -45,6 +45,7 @@ public:
     std::shared_ptr<Container> createGUIContainer() override;
     void showGUIContainer(std::shared_ptr<Container> container) override;
     void onHomeButton() override;
+    std::shared_ptr<xdata::World> getNavWorld() override;
 
     ~AviTab();
 
@@ -59,6 +60,7 @@ private:
     std::shared_ptr<App> launcherApp;
 
     std::future<std::shared_ptr<xdata::XData>> navDataFuture;
+    std::shared_ptr<xdata::World> navWorld;
 
     std::shared_ptr<xdata::XData> loadNavData();
     void createLayout();

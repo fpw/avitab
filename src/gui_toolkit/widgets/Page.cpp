@@ -15,33 +15,37 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#include "Page.h"
 
-#include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
+namespace avitab {
 
-namespace xdata {
+Page::Page(WidgetPtr parent):
+    Widget(parent)
+{
+    lv_obj_t *page = lv_page_create(parentObj(), nullptr);
+    setObj(page);
+}
 
-class XData {
-public:
-    XData(const std::string &dataRootPath);
-    void load();
-    std::shared_ptr<World> getWorld();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::shared_ptr<World> world;
+Page::Page(WidgetPtr parent, lv_obj_t *page):
+    Widget(parent)
+{
+    setManagedObj(page);
+}
 
-    std::string determineNavDataPath();
+int Page::getContentWidth() {
+    return lv_obj_get_width(lv_page_get_scrl(obj()));
+}
 
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
-};
+int Page::getContentHeight() {
+    return lv_obj_get_height(lv_page_get_scrl(obj()));
+}
 
-} /* namespace xdata */
+void Page::setFit(bool horz, bool vert) {
+    lv_page_set_scrl_fit(obj(), horz, vert);
+}
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+void Page::setLayoutCenterColumns() {
+    lv_page_set_scrl_layout(obj(), LV_LAYOUT_CENTER);
+}
+
+} /* namespace avitab */

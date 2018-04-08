@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <algorithm>
 #include "World.h"
 
 namespace xdata {
@@ -69,6 +70,19 @@ void World::onNavaidLoaded(const NavaidData& navaid) {
 }
 
 void World::onAirwayLoaded(const AirwayData& airway) {
+}
+
+std::shared_ptr<Airport> World::findAirportByID(const std::string& id) {
+    std::string cleanId = id;
+    for (auto &c: cleanId) c = toupper(c);
+    cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
+
+    auto it = airports.find(cleanId);
+    if (it == airports.end()) {
+        return nullptr;
+    } else {
+        return it->second;
+    }
 }
 
 std::shared_ptr<Region> World::createOrFindRegion(const std::string& id) {

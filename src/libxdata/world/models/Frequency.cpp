@@ -26,4 +26,24 @@ Frequency::Frequency(int frq, Unit unit, const std::string& desc):
 {
 }
 
+const std::string& Frequency::getDescription() const {
+    return description;
+}
+
+std::string Frequency::getFrequencyString() const {
+    if (unit == Unit::MHZ) {
+        int beforeDot = frequency / 100;
+        int afterDot = frequency % 100;
+        return std::to_string(beforeDot) + "." + std::to_string(afterDot) + " MHz";
+    } else if (unit == Unit::KHZ) {
+        return std::to_string(frequency) + " kHz";
+    } else {
+        return "<unit error>";
+    }
+}
+
+Frequency::operator bool() const {
+    return unit != Unit::NONE;
+}
+
 } /* namespace xdata */

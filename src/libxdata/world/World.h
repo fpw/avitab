@@ -36,6 +36,9 @@ public:
     void onFixLoaded(const FixData &fix);
     void onNavaidLoaded(const NavaidData &navaid);
     void onAirwayLoaded(const AirwayData &airway);
+
+    std::shared_ptr<Airport> findAirportByID(const std::string &id);
+
 private:
     std::map<std::string, std::shared_ptr<Region>> regions;
     std::map<std::string, std::shared_ptr<Airport>> airports;

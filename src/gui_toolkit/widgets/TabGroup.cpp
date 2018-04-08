@@ -15,29 +15,38 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Runway.h"
+#include "TabGroup.h"
 
-namespace xdata {
+namespace avitab {
 
-Runway::Runway(const std::string& name):
-    name(name)
+TabGroup::TabGroup(WidgetPtr parent):
+    Widget(parent)
 {
+    lv_obj_t *tabs = lv_tabview_create(parentObj(), nullptr);
+
+    setObj(tabs);
 }
 
-void Runway::setWidth(float w) {
-    this->width = w;
+std::shared_ptr<Page> TabGroup::addTab(WidgetPtr tabs, const std::string &title) {
+    lv_obj_t *page = lv_tabview_add_tab(obj(), title.c_str());
+
+    auto pageWidget = std::make_shared<Page>(tabs, page);
+    return pageWidget;
 }
 
-void Runway::setLocation(const Location &loc) {
-    this->location = loc;
+void TabGroup::showTab(WidgetPtr tab) {
+    size_t cnt = lv_tabview_get_tab_count(obj());
+    for (size_t i = 0; i < cnt; i++) {
+        lv_obj_t *cur = lv_tabview_get_tab(obj(), i);
+        if (cur == tab->obj()) {
+            lv_tabview_set_tab_act(obj(), i, true);
+            break;
+        }
+    }
 }
 
-const std::string& Runway::getName() const {
-    return name;
+void TabGroup::clear() {
+    lv_obj_clean(obj());
 }
 
-float Runway::getWidth() const {
-    return width;
-}
-
-} /* namespace xdata */
+} /* namespace avitab */
