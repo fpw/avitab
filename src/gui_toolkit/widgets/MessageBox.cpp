@@ -31,6 +31,7 @@ MessageBox::MessageBox(WidgetPtr parent, const std::string &title):
     setObj(mbox);
 
     // invariant: the last entry of buttons is always an empty string
+    lv_obj_set_width(mbox, lv_obj_get_width(parentObj()) / 2);
     buttons.push_back("");
 }
 
