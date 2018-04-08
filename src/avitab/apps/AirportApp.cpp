@@ -117,7 +117,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
             str << " with " << ils->getRadioInfo()->getFrequency().getDescription();
             str << ", ID " << ils->getID();
             str << " on " << ils->getRadioInfo()->getFrequency().getFrequencyString();
-            str << ", heading " << heading << "°";
+            str << ", heading " << heading << " degrees";
         } else {
             str << " without ILS";
         }
