@@ -59,9 +59,9 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
 
     XPLMCreateWindow_t params;
     params.structSize = sizeof(params);
-    params.left = winLeft + 100;
+    params.left = winLeft + 100 ;
     params.right = winLeft + 100 + width();
-    params.top = winTop - 100;
+    params.top = winTop - 100 ;
     params.bottom = winTop - 100 - height();
     params.visible = 1;
     params.refcon = this;
@@ -84,7 +84,12 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         return reinterpret_cast<XPlaneGUIDriver *>(ref)->onMouseWheel(x, y, wheel, clicks);
     };
     params.layer = xplm_WindowLayerFloatingWindows;
-    params.decorateAsFloatingWindow = xplm_WindowDecorationRoundRectangle;
+
+    if (isVrEnabled) {
+        params.decorateAsFloatingWindow = xplm_WindowDecorationSelfDecoratedResizable;
+    } else {
+        params.decorateAsFloatingWindow = xplm_WindowDecorationRoundRectangle;
+    }
 
     window = XPLMCreateWindowEx(&params);
 
@@ -137,14 +142,6 @@ void XPlaneGUIDriver::onDraw() {
         return;
     }
 
-    int decoration = 0;
-    if (isVrEnabled) {
-        // We're using a decorated window - in VR, X-Plane subtracts
-        // its decoration from our window geometry, resulting a smaller
-        // window. In non-VR, it doesn't do that.
-        decoration = 10;
-    }
-
     int left, top, right, bottom;
     XPLMGetWindowGeometry(window, &left, &top, &right, &bottom);
 
@@ -167,19 +164,19 @@ void XPlaneGUIDriver::onDraw() {
     glBegin(GL_QUADS);
         // map top left texture to bottom left vertex
         glTexCoord2i(0, 1);
-        glVertex2i(left - decoration, bottom - decoration);
+        glVertex2i(left, bottom);
 
         // map bottom left texture to top left vertex
         glTexCoord2i(0, 0);
-        glVertex2i(left - decoration, top + decoration);
+        glVertex2i(left, top);
 
         // map bottom right texture to top right vertex
         glTexCoord2i(1, 0);
-        glVertex2i(right + decoration, top + decoration);
+        glVertex2i(right, top);
 
         // map top right texture to bottom right vertex
         glTexCoord2i(1, 1);
-        glVertex2i(right + decoration, bottom - decoration);
+        glVertex2i(right, bottom);
     glEnd();
 }
 
@@ -222,6 +219,7 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
      * so I leave this debugging aid here in case this gets
      * changed in X-Plane one day.
     logger::warn("converting bx = %d, by = %d", bx, by);
+    logger::warn("width of window: %d, %d", bRight - bLeft, bTop - bBottom);
     logger::warn("center of window: %d %d", bCenterX, bCenterY);
     logger::warn("vector from center to p = %2f %2f", vecX, vecY);
     logger::warn("center of GUI: %d, %d", pCenterX, pCenterY);

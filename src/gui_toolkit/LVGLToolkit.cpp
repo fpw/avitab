@@ -164,9 +164,12 @@ void LVGLToolkit::guiLoop() {
                 task();
             }
 
-            int wheel = driver->getWheelDirection();
-            if (wheel != 0 && onMouseWheel) {
-                onMouseWheel(wheel);
+            int dir = driver->getWheelDirection();
+            if (dir != 0 && onMouseWheel) {
+                int x, y;
+                bool pressed;
+                driver->readPointerState(x, y, pressed);
+                onMouseWheel(dir, x, y);
             }
 
             // now run the actual GUI tasks, i.e. let LVGL do its animations etc.

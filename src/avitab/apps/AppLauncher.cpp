@@ -54,8 +54,15 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
 
     size_t index = entries.size() - 1;
     entry.button->setCallback([this, index] () {
-        entries[index].app->show();
+        auto app = entries[index].app;
+        setSubApp(app);
+        app->show();
     });
+}
+
+void AppLauncher::forceShow() {
+    releaseSubApp();
+    show();
 }
 
 } /* namespace avitab */

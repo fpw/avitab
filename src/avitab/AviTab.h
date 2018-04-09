@@ -25,7 +25,7 @@
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/avitab/apps/AppFunctions.h"
-#include "src/avitab/apps/App.h"
+#include "src/avitab/apps/AppLauncher.h"
 
 namespace avitab {
 
@@ -60,7 +60,7 @@ private:
     std::shared_ptr<Container> centerContainer;
 
     std::shared_ptr<App> headerApp;
-    std::shared_ptr<App> launcherApp;
+    std::shared_ptr<AppLauncher> appLauncher;
 
     bool isNavDataReady();
 

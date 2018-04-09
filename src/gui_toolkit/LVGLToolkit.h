@@ -34,7 +34,7 @@ namespace avitab {
 class LVGLToolkit {
 public:
     using GUITask = std::function<void()>;
-    using MouseWheelCallback = std::function<void(int)>;
+    using MouseWheelCallback = std::function<void(int, int, int)>;
 
     LVGLToolkit(std::shared_ptr<GUIDriver> drv);
 

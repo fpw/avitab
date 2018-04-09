@@ -41,9 +41,9 @@ void AviTab::startApp() {
     env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 
-    guiLib->setMouseWheelCallback([this] (int dir) {
-        if (launcherApp) {
-            launcherApp->onMouseWheel(dir);
+    guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
+        if (appLauncher) {
+            appLauncher->onMouseWheel(dir, x, y);
         }
     });
 }
@@ -90,7 +90,7 @@ void AviTab::createLayout() {
         headContainer->setVisible(true);
     }
 
-    if (!launcherApp) {
+    if (!appLauncher) {
         showAppLauncher();
     }
 
@@ -98,10 +98,10 @@ void AviTab::createLayout() {
 }
 
 void AviTab::showAppLauncher() {
-    if (!launcherApp) {
-        launcherApp = std::make_shared<AppLauncher>(this);;
+    if (!appLauncher) {
+        appLauncher = std::make_shared<AppLauncher>(this);;
     }
-    launcherApp->show();
+    appLauncher->forceShow();
 }
 
 std::shared_ptr<Container> AviTab::createGUIContainer() {

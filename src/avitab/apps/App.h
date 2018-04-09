@@ -35,7 +35,7 @@ public:
     void setOnExit(ExitFunct onExitFunct);
     ContPtr getUIContainer();
     virtual void show();
-    virtual void onMouseWheel(int dir);
+    virtual void onMouseWheel(int dir, int x, int y);
 
     virtual ~App() = default;
 protected:
@@ -55,6 +55,7 @@ protected:
         return std::make_shared<T>(funcs);
     }
 
+    void setSubApp(std::shared_ptr<App> app);
     void releaseSubApp();
 
 private:

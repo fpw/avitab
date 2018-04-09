@@ -32,6 +32,7 @@ class PDFViewer: public App {
 public:
     PDFViewer(FuncsPtr appFuncs);
     void showFile(const std::string &nameUtf8);
+    void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;

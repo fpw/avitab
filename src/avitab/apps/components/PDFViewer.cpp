@@ -120,4 +120,12 @@ void PDFViewer::onRotate() {
     }
 }
 
+void PDFViewer::onMouseWheel(int dir, int x, int y) {
+    if (dir > 0) {
+        onPlus();
+    } else if (dir < 0) {
+        onMinus();
+    }
+}
+
 } /* namespace avitab */

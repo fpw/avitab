@@ -36,6 +36,8 @@ public:
     };
 
     AppLauncher(FuncsPtr appFuncs);
+    void forceShow();
+
 private:
     std::vector<Entry> entries;
 

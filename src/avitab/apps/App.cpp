@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "App.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -52,9 +53,9 @@ void App::show() {
     }
 }
 
-void App::onMouseWheel(int dir) {
+void App::onMouseWheel(int dir, int x, int y) {
     if (subApp) {
-        subApp->onMouseWheel(dir);
+        subApp->onMouseWheel(dir, x, y);
     }
 }
 
@@ -64,6 +65,10 @@ void App::exit() {
             onExit();
         }
     });
+}
+
+void App::setSubApp(std::shared_ptr<App> app) {
+    subApp = app;
 }
 
 void App::releaseSubApp() {
