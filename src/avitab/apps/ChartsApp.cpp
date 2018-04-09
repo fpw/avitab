@@ -43,6 +43,7 @@ void ChartsApp::onSelect(const std::string& nameUtf8) {
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(nameUtf8);
     pdfApp->setOnExit([this] () {
+        releaseSubApp();
         showFileSelect();
         show();
     });
