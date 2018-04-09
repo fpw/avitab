@@ -18,6 +18,8 @@
 #include "AirportApp.h"
 #include <sstream>
 #include <iomanip>
+#include <limits>
+#include <cmath>
 
 namespace avitab {
 
@@ -110,20 +112,30 @@ std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xda
 std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     std::stringstream str;
     str << std::fixed << std::setprecision(0);
+    double magneticVariation = std::numeric_limits<double>::quiet_NaN();
 
     str << "Runways:\n";
-    airport->forEachRunway([this, &str] (const xdata::Runway &rwy) {
+    airport->forEachRunway([this, &str, &magneticVariation] (const xdata::Runway &rwy) {
         str << "    Runway " + rwy.getName();
         auto ils = rwy.getILSData();
         if (ils) {
             double heading = ils->getRadioInfo()->getILSLocalizer()->getRunwayHeading();
+
+            if (std::isnan(magneticVariation)) {
+                xdata::Location rwyLoc = rwy.getLocation();
+                magneticVariation = api().getMagneticVariation(rwyLoc.latitude, rwyLoc.longitude);
+            }
+
+            heading += magneticVariation;
+
             if (heading < 0) {
                 heading = 360 + heading;
             }
+
             str << " with " << ils->getRadioInfo()->getFrequency().getDescription();
             str << ", ID " << ils->getID();
             str << " on " << ils->getRadioInfo()->getFrequency().getFrequencyString();
-            str << ", heading " << heading << " degrees";
+            str << ", CRS " << heading << " degrees magnetic";
         } else {
             str << " without ILS";
         }
