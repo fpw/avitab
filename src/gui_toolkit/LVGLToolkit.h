@@ -34,8 +34,11 @@ namespace avitab {
 class LVGLToolkit {
 public:
     using GUITask = std::function<void()>;
+    using MouseWheelCallback = std::function<void(int)>;
+
     LVGLToolkit(std::shared_ptr<GUIDriver> drv);
 
+    void setMouseWheelCallback(MouseWheelCallback cb);
     void createNativeWindow(const std::string &title);
     void pauseNativeWindow();
     bool hasNativeWindow();
@@ -56,6 +59,7 @@ public:
 private:
     static bool lvglIsInitialized;
     static LVGLToolkit *instance;
+    MouseWheelCallback onMouseWheel;
     DocumentRasterizer docRasterizer;
     std::mutex guiMutex;
     std::vector<GUITask> pendingTasks;

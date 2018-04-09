@@ -270,7 +270,17 @@ bool XPlaneGUIDriver::onRightClick(int x, int y, XPLMMouseStatus status) {
 }
 
 bool XPlaneGUIDriver::onMouseWheel(int x, int y, int wheel, int clicks) {
+    int px, py;
+    if (boxelToPixel(x, y, px, py)) {
+        mouseWheel = clicks;
+    }
     return false;
+}
+
+int XPlaneGUIDriver::getWheelDirection() {
+    int val = mouseWheel;
+    mouseWheel = 0;
+    return val;
 }
 
 void XPlaneGUIDriver::onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus) {

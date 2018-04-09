@@ -46,20 +46,15 @@ PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
                 getUIContainer(),
                 "Put your plane's manuals into the 'manuals' folder inside your aircraft folder.");
         errorMsg->addButton("Ok", [this] () {
-            showFileSelect();
-            childApp->show();
+            api().executeLater([this] () {
+                errorMsg.reset();
+                showFileSelect();
+                show();
+            });
         });
         errorMsg->centerInParent();
     } else {
         showFileSelect();
-    }
-}
-
-void PlaneManualApp::show() {
-    if (childApp) {
-        childApp->show();
-    } else {
-        App::show();
     }
 }
 
@@ -69,21 +64,19 @@ void PlaneManualApp::showFileSelect() {
     fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg)$");
     fileSelect->showDirectory(currentPath);
-    childApp = std::move(fileSelect);
 }
 
 void PlaneManualApp::onSelect(const std::string& nameUtf8) {
-    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
+    currentPath = platform::getDirNameFromPath(nameUtf8) + "/";
 
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(nameUtf8);
     pdfApp->setOnExit([this] () {
         showFileSelect();
-        childApp->show();
+        show();
     });
 
-    childApp = std::move(pdfApp);
-    childApp->show();
+    pdfApp->show();
 }
 
 } /* namespace avitab */

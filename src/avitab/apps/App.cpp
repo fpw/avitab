@@ -45,7 +45,17 @@ App::ExitFunct& App::getOnExit() {
 }
 
 void App::show() {
-    api().showGUIContainer(uiContainer);
+    if (subApp) {
+        subApp->show();
+    } else {
+        api().showGUIContainer(uiContainer);
+    }
+}
+
+void App::onMouseWheel(int dir) {
+    if (subApp) {
+        subApp->onMouseWheel(dir);
+    }
 }
 
 void App::exit() {
@@ -54,6 +64,10 @@ void App::exit() {
             onExit();
         }
     });
+}
+
+void App::releaseSubApp() {
+    subApp.reset();
 }
 
 } /* namespace avitab */

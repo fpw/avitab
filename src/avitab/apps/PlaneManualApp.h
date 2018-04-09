@@ -26,10 +26,8 @@ namespace avitab {
 class PlaneManualApp: public App {
 public:
     PlaneManualApp(FuncsPtr appFuncs);
-    void show() override;
 private:
     std::shared_ptr<MessageBox> errorMsg;
-    std::shared_ptr<App> childApp;
     std::string currentPath;
 
     void showFileSelect();

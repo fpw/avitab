@@ -35,6 +35,7 @@ public:
     void setOnExit(ExitFunct onExitFunct);
     ContPtr getUIContainer();
     virtual void show();
+    virtual void onMouseWheel(int dir);
 
     virtual ~App() = default;
 protected:
@@ -43,13 +44,25 @@ protected:
     ExitFunct &getOnExit();
 
     template<class T>
-    std::unique_ptr<T> startSubApp() {
-        return std::make_unique<T>(funcs);
+    std::shared_ptr<T> startSubApp() {
+        auto child = std::make_shared<T>(funcs);
+        subApp = child;
+        return child;
     }
+
+    template<class T>
+    std::shared_ptr<T> createSubApp() {
+        return std::make_shared<T>(funcs);
+    }
+
+    void releaseSubApp();
+
 private:
     FuncsPtr funcs;
     ContPtr uiContainer;
     ExitFunct onExit;
+
+    std::shared_ptr<App> subApp;
 };
 
 } /* namespace avitab */

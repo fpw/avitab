@@ -133,6 +133,10 @@ std::unique_ptr<RasterJob> LVGLToolkit::createRasterJob(const std::string& docum
     return docRasterizer.createJob(document);
 }
 
+void LVGLToolkit::setMouseWheelCallback(MouseWheelCallback cb) {
+    onMouseWheel = cb;
+}
+
 void LVGLToolkit::guiLoop() {
     using clock = std::chrono::high_resolution_clock;
     using namespace std::chrono_literals;
@@ -158,6 +162,11 @@ void LVGLToolkit::guiLoop() {
 
             for (GUITask &task: tasks) {
                 task();
+            }
+
+            int wheel = driver->getWheelDirection();
+            if (wheel != 0 && onMouseWheel) {
+                onMouseWheel(wheel);
             }
 
             // now run the actual GUI tasks, i.e. let LVGL do its animations etc.

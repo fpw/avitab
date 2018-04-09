@@ -18,6 +18,7 @@
 #include "ChartsApp.h"
 #include "src/avitab/apps/components/FileSelect.h"
 #include "src/avitab/apps/components/PDFViewer.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -28,33 +29,25 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     showFileSelect();
 }
 
-void ChartsApp::show() {
-    if (childApp) {
-        childApp->show();
-    }
-}
-
 void ChartsApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
     fileSelect->setOnExit([this] () { exit(); });
     fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg)$");
     fileSelect->showDirectory(currentPath);
-    childApp = std::move(fileSelect);
 }
 
 void ChartsApp::onSelect(const std::string& nameUtf8) {
-    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
+    currentPath = platform::getDirNameFromPath(nameUtf8) + "/";
 
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(nameUtf8);
     pdfApp->setOnExit([this] () {
         showFileSelect();
-        childApp->show();
+        show();
     });
 
-    childApp = std::move(pdfApp);
-    childApp->show();
+    pdfApp->show();
 }
 
 } /* namespace avitab */

@@ -40,6 +40,12 @@ void AviTab::startApp() {
     env->createMenu("AviTab");
     env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
+
+    guiLib->setMouseWheelCallback([this] (int dir) {
+        if (launcherApp) {
+            launcherApp->onMouseWheel(dir);
+        }
+    });
 }
 
 void AviTab::toggleTablet() {

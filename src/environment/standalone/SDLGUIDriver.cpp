@@ -147,4 +147,8 @@ void SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
     pressed = mousePressed;
 }
 
+int SDLGUIDriver::getWheelDirection() {
+    return 0;
+}
+
 } /* namespace avitab */

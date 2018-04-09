@@ -38,6 +38,9 @@ public:
 
     void readPointerState(int &x, int &y, bool &pressed) override;
     void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
+
+    int getWheelDirection() override;
+
     ~XPlaneGUIDriver();
 private:
     DataRef<bool> isVrEnabled;
@@ -45,6 +48,7 @@ private:
     XPLMWindowID window = nullptr;
     std::atomic_int mouseX {0}, mouseY {0};
     std::atomic_bool mousePressed {false};
+    std::atomic_int mouseWheel {0};
     std::mutex drawMutex;
     bool needsRedraw = false;
 

@@ -41,13 +41,14 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
 
 template<typename T>
 void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
-    auto app = startSubApp<T>();
+    auto app = createSubApp<T>();
     app->setOnExit([this] () {
+        releaseSubApp();
         this->show();
     });
 
     Entry entry;
-    entry.app = std::move(app);
+    entry.app = app;
     entry.button = std::make_shared<Button>(getUIContainer(), api().loadIcon(icon), name);
     entries.push_back(entry);
 
