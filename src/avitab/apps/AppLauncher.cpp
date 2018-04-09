@@ -22,6 +22,7 @@
 #include "About.h"
 #include "PlaneManualApp.h"
 #include "AirportApp.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -41,28 +42,27 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
 
 template<typename T>
 void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
-    auto app = createSubApp<T>();
+    auto app = startSubApp<T>();
     app->setOnExit([this] () {
-        releaseSubApp();
         this->show();
     });
 
     Entry entry;
-    entry.app = app;
+    entry.app = std::move(app);
     entry.button = std::make_shared<Button>(getUIContainer(), api().loadIcon(icon), name);
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;
     entry.button->setCallback([this, index] () {
-        auto app = entries[index].app;
-        setSubApp(app);
-        app->show();
+        activeApp = entries[index].app;
+        activeApp->show();
     });
 }
 
-void AppLauncher::forceShow() {
-    releaseSubApp();
-    show();
+void AppLauncher::onMouseWheel(int dir, int x, int y) {
+    if (activeApp) {
+        activeApp->onMouseWheel(dir, x, y);
+    }
 }
 
 } /* namespace avitab */

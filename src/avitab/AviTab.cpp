@@ -101,7 +101,7 @@ void AviTab::showAppLauncher() {
     if (!appLauncher) {
         appLauncher = std::make_shared<AppLauncher>(this);;
     }
-    appLauncher->forceShow();
+    appLauncher->show();
 }
 
 std::shared_ptr<Container> AviTab::createGUIContainer() {

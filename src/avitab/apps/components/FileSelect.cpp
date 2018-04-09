@@ -17,7 +17,6 @@
  */
 #include <algorithm>
 #include "FileSelect.h"
-#include "src/Logger.h"
 
 namespace avitab {
 

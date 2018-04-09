@@ -44,26 +44,15 @@ protected:
     ExitFunct &getOnExit();
 
     template<class T>
-    std::shared_ptr<T> startSubApp() {
-        auto child = std::make_shared<T>(funcs);
-        subApp = child;
+    std::unique_ptr<T> startSubApp() {
+        auto child = std::make_unique<T>(funcs);
         return child;
     }
-
-    template<class T>
-    std::shared_ptr<T> createSubApp() {
-        return std::make_shared<T>(funcs);
-    }
-
-    void setSubApp(std::shared_ptr<App> app);
-    void releaseSubApp();
 
 private:
     FuncsPtr funcs;
     ContPtr uiContainer;
     ExitFunct onExit;
-
-    std::shared_ptr<App> subApp;
 };
 
 } /* namespace avitab */

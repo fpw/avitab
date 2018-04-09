@@ -46,17 +46,10 @@ App::ExitFunct& App::getOnExit() {
 }
 
 void App::show() {
-    if (subApp) {
-        subApp->show();
-    } else {
-        api().showGUIContainer(uiContainer);
-    }
+    api().showGUIContainer(uiContainer);
 }
 
 void App::onMouseWheel(int dir, int x, int y) {
-    if (subApp) {
-        subApp->onMouseWheel(dir, x, y);
-    }
 }
 
 void App::exit() {
@@ -65,14 +58,6 @@ void App::exit() {
             onExit();
         }
     });
-}
-
-void App::setSubApp(std::shared_ptr<App> app) {
-    subApp = app;
-}
-
-void App::releaseSubApp() {
-    subApp.reset();
 }
 
 } /* namespace avitab */

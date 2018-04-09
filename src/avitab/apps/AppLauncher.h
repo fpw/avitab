@@ -36,10 +36,10 @@ public:
     };
 
     AppLauncher(FuncsPtr appFuncs);
-    void forceShow();
-
+    void onMouseWheel(int dir, int x, int y) override;
 private:
     std::vector<Entry> entries;
+    std::shared_ptr<App> activeApp;
 
     template<typename T>
     void addEntry(const std::string &name, const std::string &icon);

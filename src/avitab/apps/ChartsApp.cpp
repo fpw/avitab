@@ -29,12 +29,19 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     showFileSelect();
 }
 
+void ChartsApp::show() {
+    if (childApp) {
+        childApp->show();
+    }
+}
+
 void ChartsApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
     fileSelect->setOnExit([this] () { exit(); });
     fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg)$");
     fileSelect->showDirectory(currentPath);
+    childApp = std::move(fileSelect);
 }
 
 void ChartsApp::onSelect(const std::string& nameUtf8) {
@@ -43,12 +50,18 @@ void ChartsApp::onSelect(const std::string& nameUtf8) {
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showFile(nameUtf8);
     pdfApp->setOnExit([this] () {
-        releaseSubApp();
         showFileSelect();
-        show();
+        childApp->show();
     });
 
-    pdfApp->show();
+    childApp = std::move(pdfApp);
+    childApp->show();
+}
+
+void ChartsApp::onMouseWheel(int dir, int x, int y) {
+    if (childApp) {
+        childApp->onMouseWheel(dir, x, y);
+    }
 }
 
 } /* namespace avitab */

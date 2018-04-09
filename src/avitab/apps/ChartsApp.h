@@ -26,8 +26,11 @@ namespace avitab {
 class ChartsApp: public App {
 public:
     ChartsApp(FuncsPtr appFuncs);
+    void show() override;
+    void onMouseWheel(int dir, int x, int y) override;
 private:
     std::string currentPath;
+    std::shared_ptr<App> childApp;
 
     void showFileSelect();
     void onSelect(const std::string &nameUtf8);
