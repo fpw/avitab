@@ -31,9 +31,11 @@ target_link_libraries(avitab_plugin
 )
 elseif(UNIX)
 target_link_libraries(avitab_plugin
+    -static-libgcc
+    -static-libstdc++
+    -fPIC
     ${CommonLibs}
     avitab_env_xplane
-    -fPIC
 )
 endif()
 
