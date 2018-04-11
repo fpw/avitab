@@ -140,6 +140,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::FILE:      return SYMBOL_FILE;
     case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
     case Symbol::HOME:      return SYMBOL_HOME;
+    case Symbol::COPY:      return SYMBOL_COPY;
     default:                return nullptr;
     }
 }

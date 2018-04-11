@@ -4,9 +4,8 @@ add_library(avitab_apps
     HeaderApp.cpp
     AppLauncher.cpp
     ChartsApp.cpp
-    Clipboard.cpp
-    About.cpp
     NotesApp.cpp
+    About.cpp
     PlaneManualApp.cpp
     AirportApp.cpp
 )

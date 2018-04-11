@@ -32,6 +32,7 @@ public:
         PLUS, MINUS,
         FILE, DIRECTORY,
         HOME,
+        COPY,
     };
     using WidgetPtr = std::shared_ptr<Widget>;
 

@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "NotesApp.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -25,6 +26,10 @@ NotesApp::NotesApp(FuncsPtr appFuncs):
     textArea(std::make_shared<TextArea>(window, ""))
 {
     window->setOnClose([this] () { exit(); });
+
+    window->addSymbol(Widget::Symbol::COPY, [this] () {
+        textArea->setText(platform::getClipboardContent());
+    });
 
     textArea->setDimensions(window->getContentWidth(), window->getContentHeight());
     keys = std::make_shared<Keyboard>(window, textArea);
