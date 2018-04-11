@@ -53,6 +53,8 @@ private:
     bool needsRedraw = false;
 
     void onDraw();
+    void renderWindowTexture(int left, int top, int right, int bottom);
+    void correctRatio(int left, int top, int &right, int &bottom);
     bool onClick(int x, int y, XPLMMouseStatus status);
     bool onRightClick(int x, int y, XPLMMouseStatus status);
     void onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus);

@@ -104,13 +104,6 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         XPLMSetWindowGravity(window, 0, 1, 0, 0);
     }
 
-    if (!isVrEnabled) {
-        // doesn't work in VR
-        XPLMSetWindowResizingLimits(window,
-            width(), height(),
-            width(), height());
-    }
-
     XPLMSetWindowTitle(window, title.c_str());
 }
 
@@ -160,6 +153,27 @@ void XPlaneGUIDriver::onDraw() {
 
     XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
 
+    correctRatio(left, top, right, bottom);
+    renderWindowTexture(left, top, right, bottom);
+}
+
+void XPlaneGUIDriver::correctRatio(int left, int top, int& right, int& bottom) {
+    int xWinWidth = right - left;
+    int xWinHeight = top - bottom;
+
+    float ourRatio = (float) height() / width();
+
+    if (xWinWidth * ourRatio <= xWinHeight) {
+        xWinHeight = xWinWidth * ourRatio;
+    } else {
+        xWinWidth = xWinHeight / ourRatio;
+    }
+
+    right = left + xWinWidth;
+    bottom = top - xWinHeight;
+}
+
+void XPlaneGUIDriver::renderWindowTexture(int left, int top, int right, int bottom) {
     // our window has a negative y-axis while OpenGL has a positive one
     glBegin(GL_QUADS);
         // map top left texture to bottom left vertex
@@ -190,6 +204,8 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
     int bLeft, bTop, bRight, bBottom;
     XPLMGetWindowGeometry(window, &bLeft, &bTop, &bRight, &bBottom);
 
+    correctRatio(bLeft, bTop, bRight, bBottom);
+
     if (bLeft == bRight || bTop == bBottom) {
         px = -1;
         py = -1;
@@ -213,18 +229,6 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
     // apply the vector to our center to get the coordinates in pixels
     px = pCenterX + vecX * guiWidth;
     py = pCenterY - vecY * guiHeight;
-
-    /* It was hard to find the reason (mentioned above) for
-     * clicks having slighty invalid coordinates in VR,
-     * so I leave this debugging aid here in case this gets
-     * changed in X-Plane one day.
-    logger::warn("converting bx = %d, by = %d", bx, by);
-    logger::warn("width of window: %d, %d", bRight - bLeft, bTop - bBottom);
-    logger::warn("center of window: %d %d", bCenterX, bCenterY);
-    logger::warn("vector from center to p = %2f %2f", vecX, vecY);
-    logger::warn("center of GUI: %d, %d", pCenterX, pCenterY);
-    logger::warn("result: %d, %d", px, py);
-    */
 
     // check if it's inside the window
     if (px >= 0 && px < guiWidth && py >= 0 && py < guiHeight) {
