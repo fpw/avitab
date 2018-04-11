@@ -102,6 +102,13 @@ void World::onNavaidLoaded(const NavaidData& navaid) {
 void World::onAirwayLoaded(const AirwayData& airway) {
 }
 
+void World::onMetarLoaded(const MetarData& metar) {
+    auto airport = findAirportByID(metar.icaoCode);
+    if (airport) {
+        airport->setCurrentMetar(metar.timestamp, metar.metar);
+    }
+}
+
 std::shared_ptr<Airport> World::findAirportByID(const std::string& id) {
     std::string cleanId = id;
     for (auto &c: cleanId) c = toupper(c);

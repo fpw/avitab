@@ -124,6 +124,9 @@ std::shared_ptr<xdata::XData> avitab::StandAloneEnvironment::getXPlaneData() {
     return xplaneData;
 }
 
+void StandAloneEnvironment::reloadMetar() {
+}
+
 StandAloneEnvironment::~StandAloneEnvironment() {
     logger::verbose("~StandAloneEnvironment");
 }

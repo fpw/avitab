@@ -21,6 +21,8 @@
 #include "src/libxdata/loaders/FixLoader.h"
 #include "src/libxdata/loaders/NavaidLoader.h"
 #include "src/libxdata/loaders/AirwayLoader.h"
+#include "src/libxdata/loaders/MetarLoader.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -48,6 +50,7 @@ void XData::load() {
     loadFixes();
     loadNavaids();
     loadAirways();
+    loadMetar();
 }
 
 void XData::loadAirports() {
@@ -80,6 +83,23 @@ void xdata::XData::loadAirways() {
     AirwayLoader loader(navDataPath + "earth_awy.dat");
     loader.setAcceptor(std::bind(&World::onAirwayLoaded, world.get(), _1));
     loader.loadAirways();
+}
+
+void XData::loadMetar() {
+    using namespace std::placeholders;
+
+    try {
+        MetarLoader loader(xplaneRoot + "METAR.rwx");
+        loader.setAcceptor(std::bind(&World::onMetarLoaded, world.get(), _1));
+        loader.loadMetar();
+    } catch (const std::exception &e) {
+        // metar is optional, so only log
+        logger::warn("Error parsing METAR: %s", e.what());
+    }
+}
+
+void XData::reloadMetar() {
+    loadMetar();
 }
 
 } /* namespace xdata */

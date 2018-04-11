@@ -46,8 +46,8 @@ private:
 
     std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);
     std::string toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type);
-
     std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
+    std::string toWeatherInfo(std::shared_ptr<xdata::Airport> airport);
 };
 
 } /* namespace avitab */

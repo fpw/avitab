@@ -206,6 +206,10 @@ std::shared_ptr<xdata::XData> XPlaneEnvironment::getXPlaneData() {
     return xplaneData;
 }
 
+void XPlaneEnvironment::reloadMetar() {
+    xplaneData->reloadMetar();
+}
+
 XPlaneEnvironment::~XPlaneEnvironment() {
     if (flightLoopId) {
         XPLMDestroyFlightLoop(flightLoopId);

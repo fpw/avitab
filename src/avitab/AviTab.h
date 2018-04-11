@@ -48,6 +48,7 @@ public:
     void onHomeButton() override;
     std::shared_ptr<xdata::World> getNavWorld() override;
     double getMagneticVariation(double lat, double lon) override;
+    void reloadMetar() override;
 
     ~AviTab();
 
@@ -61,8 +62,6 @@ private:
 
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
-
-    bool isNavDataReady();
 
     void createLayout();
     void showAppLauncher();

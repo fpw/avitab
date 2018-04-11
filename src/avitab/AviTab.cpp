@@ -176,6 +176,12 @@ double AviTab::getMagneticVariation(double lat, double lon) {
     return env->getMagneticVariation(lat, lon);
 }
 
+void AviTab::reloadMetar() {
+    logger::info("Reloading METAR...");
+    env->reloadMetar();
+    logger::info("Done METAR");
+}
+
 void AviTab::onHomeButton() {
     showAppLauncher();
 }

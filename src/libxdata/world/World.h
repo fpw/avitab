@@ -25,6 +25,7 @@
 #include "src/libxdata/loaders/objects/FixData.h"
 #include "src/libxdata/loaders/objects/NavaidData.h"
 #include "src/libxdata/loaders/objects/AirwayData.h"
+#include "src/libxdata/loaders/objects/MetarData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/NavAid.h"
 #include "src/libxdata/world/models/Region.h"
@@ -37,6 +38,7 @@ public:
     void onFixLoaded(const FixData &fix);
     void onNavaidLoaded(const NavaidData &navaid);
     void onAirwayLoaded(const AirwayData &airway);
+    void onMetarLoaded(const MetarData &metar);
 
     std::shared_ptr<Airport> findAirportByID(const std::string &id);
 

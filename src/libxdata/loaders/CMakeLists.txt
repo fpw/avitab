@@ -4,6 +4,7 @@ add_library(xdata_loaders
     FixLoader.cpp
     NavaidLoader.cpp
     AirwayLoader.cpp
+    MetarLoader.cpp
 )
 target_link_libraries(xdata_loaders xdata_parsers)
 

@@ -52,10 +52,13 @@ public:
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
     void addRunway(const Runway &rwy);
+    void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getID() const;
     const std::string& getName() const;
     const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
+    const std::string &getMetarTimestamp() const;
+    const std::string &getMetarString() const;
 
     void forEachRunway(std::function<void(const Runway &)> f);
     void attachILSData(const std::string &rwy, std::shared_ptr<NavAid> ils);
@@ -70,6 +73,7 @@ private:
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
     std::map<std::string, Runway> runways;
+    std::string metarTimestamp, metarString;
 };
 
 } /* namespace xdata */

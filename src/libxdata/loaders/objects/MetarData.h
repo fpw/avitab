@@ -15,35 +15,19 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_XDATA_H_
-#define SRC_LIBXDATA_XDATA_H_
+#ifndef SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_
+#define SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_
 
 #include <string>
-#include <memory>
-#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class XData {
-public:
-    XData(const std::string &dataRootPath);
-    void load();
-    void reloadMetar();
-    std::shared_ptr<World> getWorld();
-private:
-    std::string xplaneRoot;
-    std::string navDataPath;
-    std::shared_ptr<World> world;
-
-    std::string determineNavDataPath();
-
-    void loadAirports();
-    void loadFixes();
-    void loadNavaids();
-    void loadAirways();
-    void loadMetar();
+struct MetarData {
+    std::string icaoCode;
+    std::string timestamp;
+    std::string metar;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_XDATA_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_ */

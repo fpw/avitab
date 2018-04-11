@@ -77,36 +77,39 @@ void AirportApp::onCodeEntered(const std::string& code) {
 }
 
 void AirportApp::fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
-    std::string text;
+    std::stringstream str;
 
-    text += airport->getName() + "\n";
-    text += toATCInfo(airport);
-    text += "\n";
-    text += toRunwayInfo(airport);
+    str << airport->getName() + "\n";
+    str << toATCInfo(airport);
+    str << "\n";
+    str << toRunwayInfo(airport);
+    str << "\n";
+    str << toWeatherInfo(airport);
 
-    Label label(page, text);
+    Label label(page, str.str());
     label.setManaged();
 }
 
 std::string AirportApp::toATCInfo(std::shared_ptr<xdata::Airport> airport) {
-    std::string text = "ATC Frequencies:\n";
-    text += toATCString("    Recorded Messages", airport, xdata::Airport::ATCFrequency::RECORDED);
-    text += toATCString("    UniCom", airport, xdata::Airport::ATCFrequency::UNICOM);
-    text += toATCString("    Delivery", airport, xdata::Airport::ATCFrequency::CLD);
-    text += toATCString("    Ground", airport, xdata::Airport::ATCFrequency::GND);
-    text += toATCString("    Tower", airport, xdata::Airport::ATCFrequency::TWR);
-    text += toATCString("    Approach", airport, xdata::Airport::ATCFrequency::APP);
-    text += toATCString("    Departure", airport, xdata::Airport::ATCFrequency::DEP);
-    return text;
+    std::stringstream str;
+    str << "ATC Frequencies\n";
+    str << toATCString("    Recorded Messages", airport, xdata::Airport::ATCFrequency::RECORDED);
+    str << toATCString("    UniCom", airport, xdata::Airport::ATCFrequency::UNICOM);
+    str << toATCString("    Delivery", airport, xdata::Airport::ATCFrequency::CLD);
+    str << toATCString("    Ground", airport, xdata::Airport::ATCFrequency::GND);
+    str << toATCString("    Tower", airport, xdata::Airport::ATCFrequency::TWR);
+    str << toATCString("    Approach", airport, xdata::Airport::ATCFrequency::APP);
+    str << toATCString("    Departure", airport, xdata::Airport::ATCFrequency::DEP);
+    return str.str();
 }
 
 std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type) {
-    std::string res;
+    std::stringstream str;
     auto &freqs = airport->getATCFrequencies(type);
     for (auto &frq: freqs) {
-        res += name + ": " + frq.getDescription() + ", " + frq.getFrequencyString() + "\n";
+        str << name + ": " + frq.getDescription() + ", " + frq.getFrequencyString() + "\n";
     }
-    return res;
+    return str.str();
 }
 
 std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
@@ -114,7 +117,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     str << std::fixed << std::setprecision(0);
     double magneticVariation = std::numeric_limits<double>::quiet_NaN();
 
-    str << "Runways:\n";
+    str << "Runways\n";
     airport->forEachRunway([this, &str, &magneticVariation] (const xdata::Runway &rwy) {
         str << "    Runway " + rwy.getName();
         auto ils = rwy.getILSData();
@@ -142,6 +145,30 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         str << "\n";
     });
     return str.str();
+}
+
+std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
+    const auto &timestamp = airport->getMetarTimestamp();
+    const auto &metar = airport->getMetarString();
+
+    if (timestamp.empty() || metar.empty()) {
+        return "No weather information available";
+    }
+
+    std::stringstream str;
+    str << "Weather, updated " << timestamp << "\n";
+    int lineChars = 0;
+    for (auto c: metar) {
+        if (lineChars >= 50 && std::isspace(c)) {
+            str << "\n";
+            lineChars = 0;
+        } else {
+            str << c;
+            lineChars++;
+        }
+    }
+    return str.str() + "\n";
+
 }
 
 } /* namespace avitab */

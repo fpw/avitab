@@ -60,6 +60,7 @@ public:
     virtual EnvData getData(const std::string &dataRef) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     std::shared_ptr<xdata::World> getNavWorld();
+    virtual void reloadMetar() = 0;
 
     virtual ~Environment() = default;
 protected:

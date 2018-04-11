@@ -48,6 +48,11 @@ void Airport::addRunway(const Runway& rwy) {
     runways.insert(std::make_pair(rwy.getName(), rwy));
 }
 
+void Airport::setCurrentMetar(const std::string& timestamp, const std::string& metar) {
+    metarTimestamp = timestamp;
+    metarString = metar;
+}
+
 const std::string& Airport::getID() const {
     return id;
 }
@@ -72,6 +77,14 @@ void xdata::Airport::forEachRunway(std::function<void(const Runway&)> f) {
     for (auto &rwy: runways) {
         f(rwy.second);
     }
+}
+
+const std::string& Airport::getMetarTimestamp() const {
+    return metarTimestamp;
+}
+
+const std::string& Airport::getMetarString() const {
+    return metarString;
 }
 
 } /* namespace xdata */
