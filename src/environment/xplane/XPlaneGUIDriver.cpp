@@ -19,7 +19,6 @@
 #include <XPLM/XPLMDisplay.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
-#include <OpenGl/glext.h>
 #else
 #include <GL/gl.h>
 #include <GL/glext.h>

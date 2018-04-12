@@ -11,15 +11,13 @@ add_definitions("-include ${PROJECT_BINARY_DIR}/config.h")
 include_directories("${PROJECT_SOURCE_DIR}")
 
 include_directories("/usr/local/include")
-link_directories("/usr/local/lib")
 
 include_directories("/opt/XSDK/CHeaders")
 
 if(WIN32)
     link_directories("/opt/XSDK/Libraries/Win")
-elseif(APPLE)
-    link_directories("/opt/XSDK/Libraries/Mac")
-endif()
+    link_directories("/usr/local/lib")
+endif(WIN32)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
