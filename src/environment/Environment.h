@@ -45,7 +45,6 @@ public:
     // Must be called from the environment thread - do not call from GUI thread!
     void loadConfig();
     std::shared_ptr<Config> getConfig();
-    void start();
     void loadNavWorldInBackground();
     bool isNavWorldReady();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
@@ -55,7 +54,8 @@ public:
     virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback) = 0;
     virtual void destroyCommands() = 0;
     virtual std::string getAirplanePath() = 0;
-    void stop();
+    void pauseEnvironmentJobs();
+    void resumeEnvironmentJobs();
 
     // Can be called from any thread
     virtual std::string getProgramPath() = 0;

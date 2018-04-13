@@ -69,7 +69,7 @@ std::shared_ptr<xdata::World> Environment::getNavWorld() {
     return navWorld;
 }
 
-void Environment::start() {
+void Environment::resumeEnvironmentJobs() {
     std::lock_guard<std::mutex> lock(envMutex);
     stopped = false;
 }
@@ -91,7 +91,7 @@ void Environment::runEnvironmentCallbacks() {
     }
 }
 
-void Environment::stop() {
+void Environment::pauseEnvironmentJobs() {
     std::lock_guard<std::mutex> lock(envMutex);
     stopped = true;
     for (auto &cb: envCallbacks) {

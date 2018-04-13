@@ -32,7 +32,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
-    env->start();
+    env->resumeEnvironmentJobs();
 }
 
 void AviTab::startApp() {
@@ -204,7 +204,7 @@ void AviTab::stopApp() {
     // Let the environment run its callbacks one last time,
     // letting the GUI jobs finish to release the wait on the
     // environment
-    env->stop();
+    env->pauseEnvironmentJobs();
 
     // now that the GUI thread is guranteed to finish, we can
     // do the rest of the cleanup
