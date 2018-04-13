@@ -17,6 +17,7 @@
  */
 #include <memory>
 #include <thread>
+#include <iostream>
 #include "src/environment/standalone/StandAloneEnvironment.h"
 #include "src/avitab/AviTab.h"
 #include "src/Logger.h"
@@ -24,6 +25,8 @@
 int main() {
     // Using the heap so we can debug destructors with log messages
     auto env = std::make_shared<avitab::StandAloneEnvironment>();
+    env->loadConfig();
+    logger::setStdOut(env->getConfig()->getBool("/AviTab/logToStdOut"));
     logger::init(env->getProgramPath());
     logger::verbose("Main thread has id %d", std::this_thread::get_id());
 

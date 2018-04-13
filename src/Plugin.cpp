@@ -31,9 +31,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
 
     try {
         environment = std::make_shared<avitab::XPlaneEnvironment>();
+        environment->loadConfig();
+        logger::setStdOut(environment->getConfig()->getBool("/AviTab/logToStdOut"));
         logger::init(environment->getProgramPath());
         strncpy(outDescription, "A tablet to help in VR.", 255);
     } catch (const std::exception &e) {
+        try {
+            environment.reset();
+        } catch (...) {
+            logger::error("Environment exception while destroying");
+        }
         logger::error("Exception in XPluginStart: %s", e.what());
         strncpy(outDescription, e.what(), 255);
         return 0;

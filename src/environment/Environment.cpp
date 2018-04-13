@@ -18,15 +18,24 @@
 
 #include "Environment.h"
 #include "src/Logger.h"
+#include "json/json.hpp"
 
 namespace avitab {
 
-void Environment::loadNavWorldBackground() {
+void Environment::loadNavWorldInBackground() {
     navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
 }
 
+void Environment::loadConfig() {
+    config = std::make_unique<Config>(getProgramPath() + "/config.json");
+}
+
+std::shared_ptr<Config> Environment::getConfig() {
+    return config;
+}
+
 std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
-    auto data = getXPlaneData();
+    auto data = getNavData();
     logger::info("Loading nav data...");
     try {
         data->load();
@@ -39,6 +48,11 @@ std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
 }
 
 bool Environment::isNavWorldReady() {
+    if (!navWorldFuture.valid()) {
+        // loading not requested
+        return true;
+    }
+
     auto state = navWorldFuture.wait_for(std::chrono::seconds(0));
     return state == std::future_status::ready;
 }

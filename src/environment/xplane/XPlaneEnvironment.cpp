@@ -202,7 +202,7 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
     return futureData.get();
 }
 
-std::shared_ptr<xdata::XData> XPlaneEnvironment::getXPlaneData() {
+std::shared_ptr<xdata::XData> XPlaneEnvironment::getNavData() {
     return xplaneData;
 }
 

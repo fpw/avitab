@@ -48,7 +48,7 @@ public:
     std::string getProgramPath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
-    std::shared_ptr<xdata::XData> getXPlaneData() override;
+    std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
 

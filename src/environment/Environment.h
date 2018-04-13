@@ -26,14 +26,15 @@
 #include <future>
 #include <atomic>
 #include "src/libxdata/XData.h"
-#include "EnvData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
+#include "EnvData.h"
+#include "Config.h"
 
 namespace avitab {
 
 /**
  * This interface defines methods to interact with the environment
- * of the application, i.e. X-Plane or the stand-alone variant.
+ * of the application, e.g. X-Plane or the stand-alone variant.
  */
 class Environment {
 public:
@@ -42,8 +43,10 @@ public:
     using EnvironmentCallback = std::function<void()>;
 
     // Must be called from the environment thread - do not call from GUI thread!
+    void loadConfig();
+    std::shared_ptr<Config> getConfig();
     void start();
-    void loadNavWorldBackground();
+    void loadNavWorldInBackground();
     bool isNavWorldReady();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
     virtual void createMenu(const std::string &name) = 0;
@@ -64,21 +67,18 @@ public:
 
     virtual ~Environment() = default;
 protected:
-    std::mutex envMutex;
-    std::vector<EnvironmentCallback> envCallbacks;
-
     /**
-     * Stores a callback in the pending callbacks queue and calls the
-     * onEmpty functor if the queue was empty prior to adding.
-     * The functor is called while still holding the lock.
-     * This can be used to resume an executor.
-     * @param cb
-     * @param onEmpty
+     * Stores a callback in the pending callbacks queue to
+     * be executed by the environment thread.
+     * @param cb the callback to enqueue
      */
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
-    virtual std::shared_ptr<xdata::XData> getXPlaneData() = 0;
+    virtual std::shared_ptr<xdata::XData> getNavData() = 0;
 private:
+    std::shared_ptr<Config> config;
+    std::mutex envMutex;
+    std::vector<EnvironmentCallback> envCallbacks;
     std::shared_future<std::shared_ptr<xdata::World>> navWorldFuture;
     std::shared_ptr<xdata::World> navWorld;
     std::atomic_bool navWorldLoadAttempted {false};

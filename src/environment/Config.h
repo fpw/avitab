@@ -15,19 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LOGGER_H_
-#define SRC_LOGGER_H_
+#ifndef SRC_ENVIRONMENT_CONFIG_H_
+#define SRC_ENVIRONMENT_CONFIG_H_
 
 #include <string>
+#include <memory>
+#include "json/json_fwd.hpp"
 
-namespace logger {
-    void init(const std::string &path);
-    void setStdOut(bool logToStdOut);
+namespace avitab {
 
-    void verbose(const std::string format, ...);
-    void info(const std::string format, ...);
-    void warn(const std::string format, ...);
-    void error(const std::string format, ...);
-}
+class Config {
+public:
+    Config(const std::string &configFile);
 
-#endif /* SRC_LOGGER_H_ */
+    std::string getString(const std::string &pointer);
+    bool getBool(const std::string &pointer);
+private:
+    std::shared_ptr<nlohmann::json> config;
+};
+
+} /* namespace avitab */
+
+#endif /* SRC_ENVIRONMENT_CONFIG_H_ */

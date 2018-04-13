@@ -29,7 +29,9 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     guiLib(environment->createGUIToolkit())
 {
     // runs in environment thread, called by PluginStart
-    env->loadNavWorldBackground();
+    if (env->getConfig()->getBool("/AviTab/loadNavData")) {
+        env->loadNavWorldInBackground();
+    }
     env->start();
 }
 

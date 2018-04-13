@@ -120,7 +120,7 @@ EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
     return simulatedData[dataRef];
 }
 
-std::shared_ptr<xdata::XData> avitab::StandAloneEnvironment::getXPlaneData() {
+std::shared_ptr<xdata::XData> avitab::StandAloneEnvironment::getNavData() {
     return xplaneData;
 }
 

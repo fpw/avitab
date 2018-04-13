@@ -18,27 +18,39 @@
 #include <cstdarg>
 #include <cstdio>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include "Logger.h"
 #include "src/platform/Platform.h"
 
 namespace {
 
 std::ofstream logFile;
+bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
     if (logFile) {
         char buf[2048];
         vsprintf(buf, format.c_str(), args);
-        std::string timeStamp = platform::getLocalTime("%H:%M:%S");
-        logFile << timeStamp << " " << buf << std::endl;
+
+        std::stringstream logStr;
+        logStr << platform::getLocalTime("%H:%M:%S") << " " << buf;
+        logFile << logStr.str() << std::endl;
+        if (toStdOut) {
+            std::cout << logStr.str() << std::endl;
+        }
     }
 }
 
 }
 
 void logger::init(const std::string &path) {
-    logFile = std::ofstream(path + "log.txt");
+    logFile = std::ofstream(path + "AviTab.log");
     info("AviTab logger initialized");
+}
+
+void logger::setStdOut(bool logToStdOut) {
+    toStdOut = logToStdOut;
 }
 
 void logger::verbose(const std::string format, ...) {

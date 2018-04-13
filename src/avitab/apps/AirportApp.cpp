@@ -60,7 +60,7 @@ void AirportApp::onCodeEntered(const std::string& code) {
     auto world = api().getNavWorld();
 
     if (!world) {
-        searchLabel->setText("No navigation data available, check plugin's log.txt");
+        searchLabel->setText("No navigation data available, check AviTab.log");
         return;
     }
 
