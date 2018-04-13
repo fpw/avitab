@@ -44,8 +44,8 @@ void XPlaneGUIDriver::init(int width, int height) {
     glTexImage2D(GL_TEXTURE_2D, 0,
             GL_RGBA, this->width(), this->height(), 0,
             GL_BGRA, GL_UNSIGNED_BYTE, data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void XPlaneGUIDriver::createWindow(const std::string &title) {
@@ -141,13 +141,13 @@ void XPlaneGUIDriver::onDraw() {
 
     {
         std::lock_guard<std::mutex> lock(drawMutex);
-            if (needsRedraw) {
-                glTexSubImage2D(GL_TEXTURE_2D, 0,
-                        0, 0,
-                        width(), height(),
-                        GL_BGRA, GL_UNSIGNED_BYTE, data());
-                needsRedraw = false;
-            }
+        if (needsRedraw) {
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                    0, 0,
+                    width(), height(),
+                    GL_BGRA, GL_UNSIGNED_BYTE, data());
+            needsRedraw = false;
+        }
     }
 
     XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
@@ -237,7 +237,6 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
     }
 }
 
-
 bool XPlaneGUIDriver::onClick(int x, int y, XPLMMouseStatus status) {
     int guiX, guiY;
     bool isInWindow = boxelToPixel(x, y, guiX, guiY);
@@ -274,6 +273,7 @@ bool XPlaneGUIDriver::onMouseWheel(int x, int y, int wheel, int clicks) {
     int px, py;
     if (boxelToPixel(x, y, px, py)) {
         mouseWheel = clicks;
+        return true;
     }
     return false;
 }
