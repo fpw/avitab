@@ -46,7 +46,7 @@ private:
     SDL_Texture *texture = nullptr;
     std::atomic<uint32_t> lastDrawTime {0};
 
-    std::atomic_int mouseX {0}, mouseY {0};
+    std::atomic_int mouseX {0}, mouseY {0}, wheelDir {0};
     bool mousePressed {false};
 
     void onQuit();

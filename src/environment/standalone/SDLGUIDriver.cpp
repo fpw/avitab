@@ -90,6 +90,11 @@ bool SDLGUIDriver::handleEvents() {
                 mousePressed = false;
             }
             break;
+        case SDL_MOUSEWHEEL:
+            mouseX = event.wheel.x;
+            mouseY = event.wheel.y;
+            wheelDir = event.wheel.y < 0 ? -1 : 1;
+            break;
         }
     }
     SDL_WaitEventTimeout(nullptr, 100);
@@ -148,7 +153,9 @@ void SDLGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
 }
 
 int SDLGUIDriver::getWheelDirection() {
-    return 0;
+    int dir = wheelDir;
+    wheelDir = 0;
+    return dir;
 }
 
 } /* namespace avitab */

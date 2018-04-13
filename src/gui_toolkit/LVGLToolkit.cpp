@@ -147,7 +147,10 @@ void LVGLToolkit::guiLoop() {
         auto startAt = clock::now();
 
         try {
-            // first run our own tasks
+            // first run the actual GUI tasks, i.e. let LVGL do its animations etc.
+            lv_task_handler();
+
+            // then run our own tasks
             // To prevent race-conditions since a task could
             // use the environment mutex or create new tasks,
             // let's work on a copy. This also prevents
@@ -171,9 +174,6 @@ void LVGLToolkit::guiLoop() {
                 driver->readPointerState(x, y, pressed);
                 onMouseWheel(dir, x, y);
             }
-
-            // now run the actual GUI tasks, i.e. let LVGL do its animations etc.
-            lv_task_handler();
         } catch (const std::exception &e) {
             logger::error("Exception in GUI: %s", e.what());
         }

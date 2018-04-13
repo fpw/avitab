@@ -272,6 +272,8 @@ bool XPlaneGUIDriver::onRightClick(int x, int y, XPLMMouseStatus status) {
 bool XPlaneGUIDriver::onMouseWheel(int x, int y, int wheel, int clicks) {
     int px, py;
     if (boxelToPixel(x, y, px, py)) {
+        mouseX = px;
+        mouseY = py;
         mouseWheel = clicks;
         return true;
     }
