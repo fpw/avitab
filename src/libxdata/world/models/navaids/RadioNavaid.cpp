@@ -33,12 +33,4 @@ int RadioNavaid::getRange() const {
     return range;
 }
 
-void RadioNavaid::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
-    this->ils = ils;
-}
-
-std::shared_ptr<ILSLocalizer> RadioNavaid::getILSLocalizer() {
-    return ils;
-}
-
 } /* namespace xdata */

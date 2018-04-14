@@ -24,7 +24,11 @@
 namespace xdata {
 
 struct FixData {
+    /**
+     * Fix ID, unique only within region
+     */
     std::string id;
+
     double latitude = std::numeric_limits<double>::quiet_NaN();
     double longitude = std::numeric_limits<double>::quiet_NaN();
 

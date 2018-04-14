@@ -19,9 +19,13 @@
 
 namespace xdata {
 
-ILSLocalizer::ILSLocalizer(double rwyHeading):
-    runwayHeading(rwyHeading)
+ILSLocalizer::ILSLocalizer(Frequency frq, int range):
+    RadioNavaid(frq, range)
 {
+}
+
+void ILSLocalizer::setRunwayHeading(double heading) {
+    runwayHeading = heading;
 }
 
 double ILSLocalizer::getRunwayHeading() const {

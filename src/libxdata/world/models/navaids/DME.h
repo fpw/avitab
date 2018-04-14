@@ -15,34 +15,18 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_
-#define SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_DME_H_
+#define SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_DME_H_
 
-#include <string>
-#include <memory>
-#include "src/libxdata/world/models/Location.h"
-#include "src/libxdata/world/models/Region.h"
 #include "RadioNavaid.h"
 
 namespace xdata {
 
-class NavAid {
+class DME: public RadioNavaid {
 public:
-    NavAid(Location loc, const std::string &id, std::shared_ptr<Region> region);
-    void attachRadioInfo(std::shared_ptr<RadioNavaid> radio);
-
-    const std::string &getID() const;
-    std::shared_ptr<Region> getRegion() const;
-    std::shared_ptr<RadioNavaid> getRadioInfo() const;
-private:
-    Location location;
-    std::string id;
-    std::shared_ptr<Region> region;
-
-    // Optional
-    std::shared_ptr<RadioNavaid> radioInfo;
+    DME(Frequency frq, int range);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_NAVAID_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_DME_H_ */

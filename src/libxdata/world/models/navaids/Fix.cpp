@@ -15,39 +15,43 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-
-#include <string>
-#include <memory>
-#include "src/libxdata/world/models/Location.h"
+#include "Fix.h"
 
 namespace xdata {
 
-class Fix;
+Fix::Fix(std::shared_ptr<Region> region, std::string id, Location loc):
+    region(region),
+    id(id),
+    location(loc)
+{
+}
 
-class Runway {
-public:
-    Runway(const std::string &name);
-    void setWidth(float w);
-    void setLocation(const Location &loc);
+const std::string& Fix::getID() const {
+    return id;
+}
 
-    const std::string &getName() const;
-    float getWidth() const;
-    void attachILSData(std::weak_ptr<Fix> ils);
-    Location getLocation() const;
+std::shared_ptr<Region> Fix::getRegion() const {
+    return region;
+}
 
-    // Optional, can return nullptr
-    std::shared_ptr<Fix> getILSData() const;
-private:
-    std::string name;
-    Location location;
-    float width = 0; // meters
+void Fix::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
+    ilsLoc = ils;
+}
 
-    // optional
-    std::weak_ptr<Fix> ils;
-};
+void Fix::attachNDB(std::shared_ptr<NDB> ndbInfo) {
+    ndb = ndbInfo;
+}
+
+void Fix::attachDME(std::shared_ptr<DME> dmeInfo) {
+    dme = dmeInfo;
+}
+
+void Fix::attachVOR(std::shared_ptr<VOR> vorInfo) {
+    vor = vorInfo;
+}
+
+std::shared_ptr<ILSLocalizer> Fix::getILSLocalizer() const {
+    return ilsLoc;
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */

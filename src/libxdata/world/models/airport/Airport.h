@@ -26,10 +26,11 @@
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
-#include "src/libxdata/world/models/navaids/NavAid.h"
 #include "Runway.h"
 
 namespace xdata {
+
+class Fix;
 
 class Airport {
 public:
@@ -61,7 +62,7 @@ public:
     const std::string &getMetarString() const;
 
     void forEachRunway(std::function<void(const Runway &)> f);
-    void attachILSData(const std::string &rwy, std::shared_ptr<NavAid> ils);
+    void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
 
 private:
     std::string id; // either ICAO code or X + fictional id

@@ -21,9 +21,16 @@
 #include <sstream>
 #include "World.h"
 #include "src/libxdata/world/models/navaids/ILSLocalizer.h"
-
+#include "src/libxdata/world/models/navaids/NDB.h"
+#include "src/libxdata/world/models/navaids/VOR.h"
+#include "src/libxdata/world/models/navaids/DME.h"
+#include "src/Logger.h"
 
 namespace xdata {
+
+World::World()
+{
+}
 
 void World::onAirportLoaded(const AirportData& port) {
     auto airport = createOrFindAirport(port.id);
@@ -67,14 +74,14 @@ void World::onAirportLoaded(const AirportData& port) {
     }
 }
 
-void World::onFixLoaded(const FixData& fix) {
-}
-
 void World::onNavaidLoaded(const NavaidData& navaid) {
-    Location location(navaid.latitude, navaid.longitude);
-    auto region = createOrFindRegion(navaid.icaoRegion);
-
-    auto nav = std::make_shared<NavAid>(location, navaid.id, region);
+    auto fix = findFixByRegionAndID(navaid.icaoRegion, navaid.id);
+    if (!fix) {
+        Location location(navaid.latitude, navaid.longitude);
+        auto region = createOrFindRegion(navaid.icaoRegion);
+        fix = std::make_shared<Fix>(region, navaid.id, location);
+        fixes.insert(std::make_pair(navaid.id, fix));
+    }
 
     if (navaid.type == NavaidData::Type::ILS_LOC) {
         std::istringstream rwyAndDesc(navaid.name);
@@ -83,23 +90,55 @@ void World::onNavaidLoaded(const NavaidData& navaid) {
         rwyAndDesc >> rwy;
         rwyAndDesc >> desc;
         Frequency ilsFrq = Frequency(navaid.radio, Frequency::Unit::MHZ, desc);
-        auto radio = std::make_shared<RadioNavaid>(ilsFrq, navaid.range);
-        auto ils = std::make_shared<ILSLocalizer>(navaid.bearing);
-        radio->attachILSLocalizer(ils);
-        nav->attachRadioInfo(radio);
+        auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
+        ils->setRunwayHeading(navaid.bearing);
+        fix->attachILSLocalizer(ils);
 
         auto airport = findAirportByID(navaid.terminalRegion);
         if (airport) {
             try {
-                airport->attachILSData(rwy, nav);
+                airport->attachILSData(rwy, fix);
             } catch (...) {
                 // ignore mismatch of AIRAC vs apt.data
             }
         }
+    } else if (navaid.type == NavaidData::Type::NDB) {
+        Frequency ndbFrq = Frequency(navaid.radio, Frequency::Unit::KHZ, navaid.name);
+        auto ndb = std::make_shared<NDB>(ndbFrq, navaid.range);
+        fix->attachNDB(ndb);
+    } else if (navaid.type == NavaidData::Type::VOR) {
+        Frequency vorFrq = Frequency(navaid.radio, Frequency::Unit::MHZ, navaid.name);
+        auto vor = std::make_shared<VOR>(vorFrq, navaid.range);
+        fix->attachVOR(vor);
+    } else if (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP) {
+        Frequency dmeFreq = Frequency(navaid.radio, Frequency::Unit::MHZ, navaid.name);
+        auto dme = std::make_shared<DME>(dmeFreq, navaid.range);
+        fix->attachDME(dme);
+    }
+}
+
+void World::onFixLoaded(const FixData& fix) {
+    if (fix.terminalAreaId == "ENRT") {
+        auto fixModel = findFixByRegionAndID(fix.icaoRegion, fix.id);
+        if (fixModel) {
+            logger::warn("Fix already present: %s in %s", fix.id.c_str(), fix.icaoRegion.c_str());
+        }
+
+        auto region = createOrFindRegion(fix.icaoRegion);
+        Location loc(fix.latitude, fix.longitude);
+
+        fixModel = std::make_shared<Fix>(region, fix.id, loc);
+        fixes.insert(std::make_pair(fix.id, fixModel));
     }
 }
 
 void World::onAirwayLoaded(const AirwayData& airway) {
+    auto fromFix = findFixByRegionAndID(airway.beginIcaoRegion, airway.beginID);
+    auto toFix = findFixByRegionAndID(airway.endIcaoRegion, airway.endID);
+
+    if (!fromFix || !toFix) {
+        logger::warn("Skipping airway %s from %s to %s", airway.name.c_str(), airway.beginID.c_str(), airway.endID.c_str());
+    }
 }
 
 void World::onMetarLoaded(const MetarData& metar) {
@@ -130,6 +169,18 @@ std::shared_ptr<Region> World::createOrFindRegion(const std::string& id) {
         return ptr;
     }
     return iter->second;
+}
+
+std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, const std::string& id) {
+    auto range = fixes.equal_range(id);
+
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second->getRegion()->getId() == region) {
+            return it->second;
+        }
+    }
+
+    return nullptr;
 }
 
 std::shared_ptr<Airport> World::createOrFindAirport(const std::string& id) {

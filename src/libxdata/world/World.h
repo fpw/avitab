@@ -27,13 +27,14 @@
 #include "src/libxdata/loaders/objects/AirwayData.h"
 #include "src/libxdata/loaders/objects/MetarData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
-#include "src/libxdata/world/models/navaids/NavAid.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Region.h"
 
 namespace xdata {
 
 class World {
 public:
+    World();
     void onAirportLoaded(const AirportData &port);
     void onFixLoaded(const FixData &fix);
     void onNavaidLoaded(const NavaidData &navaid);
@@ -41,10 +42,15 @@ public:
     void onMetarLoaded(const MetarData &metar);
 
     std::shared_ptr<Airport> findAirportByID(const std::string &id);
+    std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id);
 
 private:
+    // Unique IDs
     std::map<std::string, std::shared_ptr<Region>> regions;
     std::map<std::string, std::shared_ptr<Airport>> airports;
+
+    // Unique only within region
+    std::multimap<std::string, std::shared_ptr<Fix>> fixes;
 
     std::shared_ptr<Region> createOrFindRegion(const std::string &id);
     std::shared_ptr<Airport> createOrFindAirport(const std::string &id);

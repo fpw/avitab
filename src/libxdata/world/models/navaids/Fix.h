@@ -15,39 +15,43 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
+#define SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
 
 #include <string>
 #include <memory>
 #include "src/libxdata/world/models/Location.h"
+#include "src/libxdata/world/models/Region.h"
+#include "NDB.h"
+#include "DME.h"
+#include "VOR.h"
+#include "ILSLocalizer.h"
 
 namespace xdata {
 
-class Fix;
-
-class Runway {
+class Fix {
 public:
-    Runway(const std::string &name);
-    void setWidth(float w);
-    void setLocation(const Location &loc);
+    Fix(std::shared_ptr<Region> region, std::string id, Location loc);
+    const std::string &getID() const;
+    std::shared_ptr<Region> getRegion() const;
 
-    const std::string &getName() const;
-    float getWidth() const;
-    void attachILSData(std::weak_ptr<Fix> ils);
-    Location getLocation() const;
-
-    // Optional, can return nullptr
-    std::shared_ptr<Fix> getILSData() const;
+    void attachNDB(std::shared_ptr<NDB> ndbInfo);
+    void attachDME(std::shared_ptr<DME> dmeInfo);
+    void attachVOR(std::shared_ptr<VOR> vorInfo);
+    void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
+    std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
 private:
-    std::string name;
+    std::shared_ptr<Region> region;
+    std::string id;
     Location location;
-    float width = 0; // meters
 
-    // optional
-    std::weak_ptr<Fix> ils;
+    // Optional
+    std::shared_ptr<NDB> ndb;
+    std::shared_ptr<DME> dme;
+    std::shared_ptr<VOR> vor;
+    std::shared_ptr<ILSLocalizer> ilsLoc;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_ */

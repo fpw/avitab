@@ -1,5 +1,8 @@
 add_library(xdata_models_navaids
-    NavAid.cpp
+    Fix.cpp
     RadioNavaid.cpp
     ILSLocalizer.cpp
+    NDB.cpp
+    DME.cpp
+    VOR.cpp
 )

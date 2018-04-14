@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Airport.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 
 namespace xdata {
 
@@ -65,11 +66,12 @@ const std::vector<Frequency> &Airport::getATCFrequencies(ATCFrequency type) {
     return atcFrequencies[type];
 }
 
-void Airport::attachILSData(const std::string& rwyName, std::shared_ptr<NavAid> ils) {
+void Airport::attachILSData(const std::string& rwyName, std::weak_ptr<Fix> ils) {
     auto rwy = runways.find(rwyName);
     if (rwy == runways.end()) {
-        throw std::runtime_error("Adding ILS to non-existing runway, " + id + " " + ils->getID());
+        throw std::runtime_error("Adding ILS to non-existing runway");
     }
+
     rwy->second.attachILSData(ils);
 }
 

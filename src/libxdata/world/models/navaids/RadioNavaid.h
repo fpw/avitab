@@ -20,7 +20,6 @@
 
 #include <memory>
 #include "src/libxdata/world/models/Frequency.h"
-#include "ILSLocalizer.h"
 
 namespace xdata {
 
@@ -29,14 +28,9 @@ public:
     RadioNavaid(Frequency frq, int range);
     const Frequency &getFrequency() const;
     int getRange() const;
-
-    void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
-    std::shared_ptr<ILSLocalizer> getILSLocalizer();
 private:
     Frequency frequency;
     int range;
-
-    std::shared_ptr<ILSLocalizer> ils;
 };
 
 } /* namespace xdata */

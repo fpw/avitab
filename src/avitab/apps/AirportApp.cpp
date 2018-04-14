@@ -139,7 +139,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         str << "    Runway " + rwy.getName();
         auto ils = rwy.getILSData();
         if (ils) {
-            double heading = ils->getRadioInfo()->getILSLocalizer()->getRunwayHeading();
+            double heading = ils->getILSLocalizer()->getRunwayHeading();
 
             if (std::isnan(magneticVariation)) {
                 xdata::Location rwyLoc = rwy.getLocation();
@@ -152,9 +152,9 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
                 heading = 360 + heading;
             }
 
-            str << " with " << ils->getRadioInfo()->getFrequency().getDescription();
+            str << " with " << ils->getILSLocalizer()->getFrequency().getDescription();
             str << ", ID " << ils->getID();
-            str << " on " << ils->getRadioInfo()->getFrequency().getFrequencyString();
+            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
             str << ", CRS " << heading << " degrees magnetic";
         } else {
             str << " without ILS";

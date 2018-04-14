@@ -15,39 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-
-#include <string>
-#include <memory>
-#include "src/libxdata/world/models/Location.h"
+#include "VOR.h"
 
 namespace xdata {
 
-class Fix;
-
-class Runway {
-public:
-    Runway(const std::string &name);
-    void setWidth(float w);
-    void setLocation(const Location &loc);
-
-    const std::string &getName() const;
-    float getWidth() const;
-    void attachILSData(std::weak_ptr<Fix> ils);
-    Location getLocation() const;
-
-    // Optional, can return nullptr
-    std::shared_ptr<Fix> getILSData() const;
-private:
-    std::string name;
-    Location location;
-    float width = 0; // meters
-
-    // optional
-    std::weak_ptr<Fix> ils;
-};
+VOR::VOR(Frequency frq, int range):
+    RadioNavaid(frq, range)
+{
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */

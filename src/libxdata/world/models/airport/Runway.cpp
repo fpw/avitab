@@ -17,6 +17,7 @@
  */
 #include <stdexcept>
 #include "Runway.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 
 namespace xdata {
 
@@ -41,21 +42,17 @@ float Runway::getWidth() const {
     return width;
 }
 
-void Runway::attachILSData(std::shared_ptr<NavAid> ils) {
-    auto radioInfo = ils->getRadioInfo();
-    if (!radioInfo) {
-        throw std::runtime_error("Attached ILS without radio info");
-    }
-
-    if (!radioInfo->getILSLocalizer()) {
-        throw std::runtime_error("Attached ILS without ILS info");
+void Runway::attachILSData(std::weak_ptr<Fix> ils) {
+    auto loc = ils.lock();
+    if (!loc->getILSLocalizer()) {
+        throw std::runtime_error("Adding ILS fix without ILS data");
     }
 
     this->ils = ils;
 }
 
-std::shared_ptr<NavAid> Runway::getILSData() const {
-    return ils;
+std::shared_ptr<Fix> Runway::getILSData() const {
+    return ils.lock();
 }
 
 Location Runway::getLocation() const {

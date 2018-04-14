@@ -18,14 +18,17 @@
 #ifndef SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_ILSLOCALIZER_H_
 #define SRC_LIBXDATA_WORLD_MODELS_NAVAIDS_ILSLOCALIZER_H_
 
+#include "RadioNavaid.h"
+
 namespace xdata {
 
-class ILSLocalizer {
+class ILSLocalizer: public RadioNavaid {
 public:
-    ILSLocalizer(double rwyHeading);
+    ILSLocalizer(Frequency frq, int range);
+    void setRunwayHeading(double heading);
     double getRunwayHeading() const;
 private:
-    double runwayHeading;
+    double runwayHeading = 0;
 };
 
 } /* namespace xdata */

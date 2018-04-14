@@ -15,31 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "NavAid.h"
+#include "DME.h"
 
 namespace xdata {
 
-NavAid::NavAid(Location loc, const std::string& id, std::shared_ptr<Region> region):
-    location(loc),
-    id(id),
-    region(region)
+DME::DME(Frequency frq, int range):
+    RadioNavaid(frq, range)
 {
-}
-
-const std::string& NavAid::getID() const {
-    return id;
-}
-
-std::shared_ptr<Region> NavAid::getRegion() const {
-    return region;
-}
-
-void NavAid::attachRadioInfo(std::shared_ptr<RadioNavaid> radio) {
-    radioInfo = radio;
-}
-
-std::shared_ptr<RadioNavaid> NavAid::getRadioInfo() const {
-    return radioInfo;
 }
 
 } /* namespace xdata */
