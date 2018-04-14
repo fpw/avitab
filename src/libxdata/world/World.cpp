@@ -139,6 +139,27 @@ void World::onAirwayLoaded(const AirwayData& airway) {
     if (!fromFix || !toFix) {
         logger::warn("Skipping airway %s from %s to %s", airway.name.c_str(), airway.beginID.c_str(), airway.endID.c_str());
     }
+
+    Airway::Level level;
+    switch (airway.level) {
+    case AirwayData::AltitudeLevel::LOW:    level = Airway::Level::Lower; break;
+    case AirwayData::AltitudeLevel::HIGH:   level = Airway::Level::Upper; break;
+    default:                                throw std::runtime_error("Invalid airway level");
+    }
+
+    auto awy = createOrFindAirway(airway.name, level);
+    switch (airway.dirRestriction) {
+    case AirwayData::DirectionRestriction::FORWARD:
+        fromFix->connectTo(awy, toFix);
+        break;
+    case AirwayData::DirectionRestriction::BACKWARD:
+        toFix->connectTo(awy, fromFix);
+        break;
+    case AirwayData::DirectionRestriction::NONE:
+        fromFix->connectTo(awy, toFix);
+        toFix->connectTo(awy, fromFix);
+        break;
+    }
 }
 
 void World::onMetarLoaded(const MetarData& metar) {
@@ -191,6 +212,21 @@ std::shared_ptr<Airport> World::createOrFindAirport(const std::string& id) {
         return ptr;
     }
     return iter->second;
+}
+
+std::shared_ptr<Airway> World::createOrFindAirway(const std::string& name, Airway::Level lvl) {
+    auto range = airways.equal_range(name);
+
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second->getLevel() == lvl) {
+            return it->second;
+        }
+    }
+
+    // not found -> insert
+    auto awy = std::make_shared<Airway>(name, lvl);
+    airways.insert(std::make_pair(name, awy));
+    return awy;
 }
 
 } /* namespace xdata */

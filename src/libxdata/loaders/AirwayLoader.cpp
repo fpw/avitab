@@ -17,6 +17,7 @@
  */
 #include "AirwayLoader.h"
 #include <iostream>
+#include <sstream>
 
 namespace xdata {
 
@@ -64,7 +65,12 @@ void AirwayLoader::parseLine() {
     awy.name = parser.parseWord();
 
     if (!awy.name.empty()) {
-        acceptor(awy);
+        std::stringstream nameStream(awy.name);
+        std::string name;
+        while (std::getline(nameStream, name, '-')) {
+            awy.name = name;
+            acceptor(awy);
+        }
     }
 }
 

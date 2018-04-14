@@ -18,10 +18,13 @@
 #ifndef SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
 #define SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
 
-#include <string>
+#include <tuple>
 #include <memory>
+#include <utility>
+#include <vector>
 #include "src/libxdata/world/models/Location.h"
 #include "src/libxdata/world/models/Region.h"
+#include "src/libxdata/world/models/Airway.h"
 #include "NDB.h"
 #include "DME.h"
 #include "VOR.h"
@@ -35,15 +38,20 @@ public:
     const std::string &getID() const;
     std::shared_ptr<Region> getRegion() const;
 
+    void connectTo(std::weak_ptr<Airway> via, std::weak_ptr<Fix> to);
+
     void attachNDB(std::shared_ptr<NDB> ndbInfo);
     void attachDME(std::shared_ptr<DME> dmeInfo);
     void attachVOR(std::shared_ptr<VOR> vorInfo);
     void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
     std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
 private:
+    using Connection = std::tuple<std::weak_ptr<Airway>, std::weak_ptr<Fix>>;
+
     std::shared_ptr<Region> region;
     std::string id;
     Location location;
+    std::vector<Connection> connections;
 
     // Optional
     std::shared_ptr<NDB> ndb;

@@ -29,6 +29,7 @@
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Region.h"
+#include "src/libxdata/world/models/Airway.h"
 
 namespace xdata {
 
@@ -51,9 +52,11 @@ private:
 
     // Unique only within region
     std::multimap<std::string, std::shared_ptr<Fix>> fixes;
+    std::multimap<std::string, std::shared_ptr<Airway>> airways;
 
     std::shared_ptr<Region> createOrFindRegion(const std::string &id);
     std::shared_ptr<Airport> createOrFindAirport(const std::string &id);
+    std::shared_ptr<Airway> createOrFindAirway(const std::string &name, Airway::Level lvl);
 };
 
 } /* namespace xdata */

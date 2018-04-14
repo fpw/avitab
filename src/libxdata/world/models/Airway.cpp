@@ -15,48 +15,22 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Fix.h"
+#include "Airway.h"
 
 namespace xdata {
 
-Fix::Fix(std::shared_ptr<Region> region, std::string id, Location loc):
-    region(region),
-    id(id),
-    location(loc)
+Airway::Airway(const std::string& name, Level lvl):
+    name(name),
+    level(lvl)
 {
 }
 
-const std::string& Fix::getID() const {
-    return id;
+const std::string& Airway::getName() const {
+    return name;
 }
 
-std::shared_ptr<Region> Fix::getRegion() const {
-    return region;
-}
-
-void Fix::connectTo(std::weak_ptr<Airway> via, std::weak_ptr<Fix> to) {
-    Connection con = std::make_tuple(via, to);
-    connections.push_back(con);
-}
-
-void Fix::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
-    ilsLoc = ils;
-}
-
-void Fix::attachNDB(std::shared_ptr<NDB> ndbInfo) {
-    ndb = ndbInfo;
-}
-
-void Fix::attachDME(std::shared_ptr<DME> dmeInfo) {
-    dme = dmeInfo;
-}
-
-void Fix::attachVOR(std::shared_ptr<VOR> vorInfo) {
-    vor = vorInfo;
-}
-
-std::shared_ptr<ILSLocalizer> Fix::getILSLocalizer() const {
-    return ilsLoc;
+Airway::Level Airway::getLevel() const {
+    return level;
 }
 
 } /* namespace xdata */

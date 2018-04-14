@@ -5,6 +5,7 @@ add_library(xdata_models
     Region.cpp
     Location.cpp
     Frequency.cpp
+    Airway.cpp
 )
 
 target_link_libraries(xdata_models
