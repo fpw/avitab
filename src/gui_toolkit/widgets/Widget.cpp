@@ -82,6 +82,10 @@ void Widget::alignInTopRight() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 }
 
+void Widget::alignLeftOf(WidgetPtr base) {
+    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_LEFT_MID, 0, 0);
+}
+
 int Widget::getWidth() {
     return lv_obj_get_width(obj());
 }
@@ -135,6 +139,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::ROTATE:    return SYMBOL_LOOP;
     case Symbol::PREV:      return SYMBOL_PREV;
     case Symbol::NEXT:      return SYMBOL_NEXT;
+    case Symbol::PAUSE:     return SYMBOL_PAUSE;
     case Symbol::PLUS:      return SYMBOL_PLUS;
     case Symbol::MINUS:     return SYMBOL_MINUS;
     case Symbol::FILE:      return SYMBOL_FILE;

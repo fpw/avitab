@@ -207,4 +207,19 @@ std::string formatString(const std::string format, ...) {
     return formatted;
 }
 
+void controlMediaPlayer(MediaControl ctrl) {
+#ifdef _WIN32
+    uint8_t key = 0;
+    switch (ctrl) {
+    case MediaControl::MEDIA_PAUSE: key = VK_MEDIA_PLAY_PAUSE; break;
+    case MediaControl::MEDIA_NEXT:  key = VK_MEDIA_NEXT_TRACK; break;
+    case MediaControl::MEDIA_PREV:  key = VK_MEDIA_PREV_TRACK; break;
+    }
+    UINT scanCode = MapVirtualKeyA(key, 0);
+
+    keybd_event(key, scanCode, KEYEVENTF_EXTENDEDKEY, 0);
+    keybd_event(key, scanCode, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+#endif
+}
+
 }

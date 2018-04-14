@@ -37,6 +37,18 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     homeButton->centerInParent();
 
     onTick();
+
+    pauseButton = std::make_shared<Button>(container, Widget::Symbol::PAUSE);
+    pauseButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PAUSE); });
+    pauseButton->alignLeftOf(clockLabel);
+
+    nextButton = std::make_shared<Button>(container, Widget::Symbol::NEXT);
+    nextButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
+    nextButton->alignLeftOf(pauseButton);
+
+    prevButton = std::make_shared<Button>(container, Widget::Symbol::PREV);
+    prevButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PREV); });
+    prevButton->alignLeftOf(nextButton);
 }
 
 bool HeaderApp::onTick() {

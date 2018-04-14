@@ -28,7 +28,7 @@ public:
         NONE,
         CLOSE,
         LEFT, RIGHT, UP, DOWN, ROTATE,
-        PREV, NEXT,
+        PREV, NEXT, PAUSE,
         PLUS, MINUS,
         FILE, DIRECTORY,
         HOME,
@@ -47,6 +47,7 @@ public:
     void alignInTopLeft();
     void alignInTopRight();
     void alignInBottomCenter();
+    void alignLeftOf(WidgetPtr base);
     void setBackgroundWhite();
     int getWidth();
     int getHeight();

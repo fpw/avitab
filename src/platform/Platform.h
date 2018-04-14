@@ -29,6 +29,12 @@ struct DirEntry {
     bool isDirectory;
 };
 
+enum class MediaControl {
+    MEDIA_PAUSE,
+    MEDIA_PREV,
+    MEDIA_NEXT
+};
+
 enum class Platform {
     LINUX,
     WINDOWS,
@@ -52,6 +58,8 @@ std::string getClipboardContent();
 
 std::string formatStringArgs(const std::string format, va_list args);
 std::string formatString(const std::string format, ...);
+
+void controlMediaPlayer(MediaControl ctrl);
 
 }
 
