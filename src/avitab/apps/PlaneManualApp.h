@@ -18,7 +18,9 @@
 #ifndef SRC_AVITAB_APPS_PLANEMANUALAPP_H_
 #define SRC_AVITAB_APPS_PLANEMANUALAPP_H_
 
+#include <vector>
 #include "App.h"
+#include "src/platform/Platform.h"
 #include "src/gui_toolkit/widgets/MessageBox.h"
 
 namespace avitab {
@@ -34,7 +36,7 @@ private:
     std::shared_ptr<App> childApp;
 
     void showFileSelect();
-    void onSelect(const std::string &nameUtf8);
+    void onSelect(const std::vector<platform::DirEntry> &entries, size_t i);
 };
 
 } /* namespace avitab */

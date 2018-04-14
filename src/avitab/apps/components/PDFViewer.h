@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <memory>
 #include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
@@ -32,23 +33,28 @@ class PDFViewer: public App {
 public:
     PDFViewer(FuncsPtr appFuncs);
     void showFile(const std::string &nameUtf8);
+    void showDirectory(const std::vector<std::string> &fileNamesUtf8, size_t startIndex);
     void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;
 
+    std::vector<std::string> fileNames;
+    size_t fileIndex = 0;
+
     std::unique_ptr<RasterJob> rasterJob;
     std::shared_ptr<std::vector<uint32_t>> rasterBuffer;
 
     void setupCallbacks();
-    void onNext();
-    void onPrev();
+    void onNextPage();
+    void onPrevPage();
+    void onNextFile();
+    void onPrevFile();
     void onPlus();
     void onMinus();
-    void onLeft();
-    void onRight();
     void onRotate();
 
+    void createJob();
     void updateJob();
 };
 

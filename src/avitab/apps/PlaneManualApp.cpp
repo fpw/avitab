@@ -66,17 +66,24 @@ void PlaneManualApp::show() {
 void PlaneManualApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
     fileSelect->setOnExit([this] () { exit(); });
-    fileSelect->setSelectCallback([this] (const std::string &f) { onSelect(f); });
+    fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
+        onSelect(entries, i);
+    });
     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg)$");
     fileSelect->showDirectory(currentPath);
     childApp = std::move(fileSelect);
 }
 
-void PlaneManualApp::onSelect(const std::string& nameUtf8) {
-    currentPath = platform::getDirNameFromPath(nameUtf8) + "/";
+void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t i) {
+    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
+
+    std::vector<std::string> files;
+    for (auto &entry: entries) {
+        files.push_back(currentPath + entry.utf8Name);
+    }
 
     auto pdfApp = startSubApp<PDFViewer>();
-    pdfApp->showFile(nameUtf8);
+    pdfApp->showDirectory(files, i);
     pdfApp->setOnExit([this] () {
         showFileSelect();
         childApp->show();

@@ -37,7 +37,22 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
 }
 
 void PDFViewer::showFile(const std::string& nameUtf8) {
-    rasterJob = api().createRasterJob(nameUtf8);
+    fileNames.clear();
+    fileNames.push_back(nameUtf8);
+    fileIndex = 0;
+
+    createJob();
+}
+
+void PDFViewer::showDirectory(const std::vector<std::string>& fileNamesUtf8, size_t startIndex) {
+    fileNames = fileNamesUtf8;
+    fileIndex = startIndex;
+
+    createJob();
+}
+
+void PDFViewer::createJob() {
+    rasterJob = api().createRasterJob(fileNames[fileIndex]);
     rasterJob->setOutputBuf(rasterBuffer, window->getContentWidth());
     updateJob();
 }
@@ -58,23 +73,43 @@ void PDFViewer::updateJob() {
 }
 
 void PDFViewer::setupCallbacks() {
-    //window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNext, this));
-    //window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrev, this));
+    window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNextFile, this));
+    window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrevFile, this));
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&PDFViewer::onMinus, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&PDFViewer::onPlus, this));
-    window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onNext, this));
-    window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onPrev, this));
+    window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onNextPage, this));
+    window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onPrevPage, this));
     window->addSymbol(Widget::Symbol::ROTATE, std::bind(&PDFViewer::onRotate, this));
 }
 
-void PDFViewer::onNext() {
+void PDFViewer::onNextFile() {
+    if (fileIndex < fileNames.size() - 1) {
+        fileIndex++;
+    } else {
+        fileIndex = 0;
+    }
+    logger::info("Showing file %d of %d", fileIndex + 1, fileNames.size());
+    createJob();
+}
+
+void PDFViewer::onPrevFile() {
+    if (fileIndex > 0) {
+        fileIndex--;
+    } else {
+        fileIndex = fileNames.size() - 1;
+    }
+    logger::info("Showing file %d of %d", fileIndex + 1, fileNames.size());
+    createJob();
+}
+
+void PDFViewer::onNextPage() {
     if (rasterJob) {
         rasterJob->nextPage();
         updateJob();
     }
 }
 
-void PDFViewer::onPrev() {
+void PDFViewer::onPrevPage() {
     if (rasterJob) {
         rasterJob->prevPage();
         updateJob();
@@ -93,14 +128,6 @@ void PDFViewer::onMinus() {
         rasterJob->zoomOut();
         updateJob();
     }
-}
-
-void PDFViewer::onLeft() {
-    pixMap->panLeft();
-}
-
-void PDFViewer::onRight() {
-    pixMap->panRight();
 }
 
 void PDFViewer::onRotate() {

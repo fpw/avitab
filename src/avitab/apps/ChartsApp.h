@@ -19,6 +19,8 @@
 #define SRC_AVITAB_APPS_CHARTSAPP_H_
 
 #include <memory>
+#include <vector>
+#include "src/platform/Platform.h"
 #include "App.h"
 
 namespace avitab {
@@ -33,7 +35,7 @@ private:
     std::shared_ptr<App> childApp;
 
     void showFileSelect();
-    void onSelect(const std::string &nameUtf8);
+    void onSelect(const std::vector<platform::DirEntry> &entries, size_t i);
 };
 
 } /* namespace avitab */

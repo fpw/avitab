@@ -30,7 +30,7 @@ namespace avitab {
 
 class FileSelect: public App {
 public:
-    using SelectCallback = std::function<void(const std::string &)>;
+    using SelectCallback = std::function<void(const std::vector<platform::DirEntry> &, size_t)>;
 
     FileSelect(FuncsPtr appFuncs);
     void setSelectCallback(SelectCallback cb);

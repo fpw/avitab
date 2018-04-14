@@ -114,7 +114,7 @@ void FileSelect::onSelect(int data) {
         showDirectory(currentPath + entry.utf8Name + "/");
     } else {
         if (selectCallback) {
-            selectCallback(currentPath + entry.utf8Name);
+            selectCallback(currentEntries, data);
         }
     }
 }
