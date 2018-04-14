@@ -58,7 +58,7 @@ bool Environment::isNavWorldReady() {
 }
 
 std::shared_ptr<xdata::World> Environment::getNavWorld() {
-    if (!navWorldLoadAttempted) {
+    if (!navWorldLoadAttempted && navWorldFuture.valid()) {
         navWorldLoadAttempted = true;
         try {
             navWorld = navWorldFuture.get();
