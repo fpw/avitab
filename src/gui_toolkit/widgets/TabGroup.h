@@ -27,8 +27,13 @@ class TabGroup: public Widget {
 public:
     TabGroup(WidgetPtr parent);
     std::shared_ptr<Page> addTab(WidgetPtr tabs, const std::string &title);
+    size_t getTabIndex(WidgetPtr tab);
     void showTab(WidgetPtr tab);
+    void delTab(WidgetPtr tab);
+    void setActiveTab(size_t i);
+    void removeTab(size_t i);
     void clear();
+private:
 };
 
 } /* namespace avitab */

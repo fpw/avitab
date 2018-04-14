@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Button.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -80,12 +81,12 @@ Button::Button(WidgetPtr parent, Symbol smb):
 
 void Button::setCallback(ButtonCallback cb) {
     callbackFunc = cb;
-    lv_obj_set_free_ptr(obj(), &callbackFunc);
+    lv_obj_set_free_ptr(obj(), this);
 
     lv_btn_set_action(obj(), LV_BTN_ACTION_CLICK, [] (lv_obj_t *obj) -> lv_res_t {
-        ButtonCallback *cb = reinterpret_cast<ButtonCallback *>(lv_obj_get_free_ptr(obj));
-        if (cb) {
-            (*cb)();
+        Button *us = reinterpret_cast<Button *>(lv_obj_get_free_ptr(obj));
+        if (us->callbackFunc) {
+            us->callbackFunc(*us);
         }
         return LV_RES_OK;
     });

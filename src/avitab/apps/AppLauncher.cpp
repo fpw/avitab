@@ -51,7 +51,7 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;
-    entry.button->setCallback([this, index] () {
+    entry.button->setCallback([this, index] (const Button &) {
         activeApp = entries[index].app;
         activeApp->show();
     });

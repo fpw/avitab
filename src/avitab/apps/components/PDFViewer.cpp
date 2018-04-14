@@ -58,14 +58,12 @@ void PDFViewer::updateJob() {
 }
 
 void PDFViewer::setupCallbacks() {
-    window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNext, this));
-    window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrev, this));
+    //window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNext, this));
+    //window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrev, this));
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&PDFViewer::onMinus, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&PDFViewer::onPlus, this));
-    window->addSymbol(Widget::Symbol::DOWN, std::bind(&PDFViewer::onDown, this));
-    window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onRight, this));
-    window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onLeft, this));
-    window->addSymbol(Widget::Symbol::UP, std::bind(&PDFViewer::onUp, this));
+    window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onNext, this));
+    window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onPrev, this));
     window->addSymbol(Widget::Symbol::ROTATE, std::bind(&PDFViewer::onRotate, this));
 }
 
@@ -103,14 +101,6 @@ void PDFViewer::onLeft() {
 
 void PDFViewer::onRight() {
     pixMap->panRight();
-}
-
-void PDFViewer::onUp() {
-    pixMap->panUp();
-}
-
-void PDFViewer::onDown() {
-    pixMap->panDown();
 }
 
 void PDFViewer::onRotate() {

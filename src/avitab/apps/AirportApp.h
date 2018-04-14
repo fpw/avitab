@@ -19,6 +19,7 @@
 #define SRC_AVITAB_APPS_AIRPORTAPP_H_
 
 #include <memory>
+#include <vector>
 #include "App.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
 #include "src/gui_toolkit/widgets/Keyboard.h"
@@ -33,16 +34,22 @@ class AirportApp: public App {
 public:
     AirportApp(FuncsPtr appFuncs);
 private:
-    std::shared_ptr<Button> resetButton;
+    struct TabPage {
+        std::shared_ptr<Page> page;
+        std::shared_ptr<Button> closeButton;
+    };
+    std::vector<TabPage> pages;
+
     std::shared_ptr<Label> searchLabel;
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Page> searchPage;
     std::shared_ptr<TextArea> searchField;
     std::shared_ptr<Keyboard> keys;
 
+    void removeTab(const Button &closeButton);
     void resetLayout();
     void onCodeEntered(const std::string &code);
-    void fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
+    void fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
 
     std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);
     std::string toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type);

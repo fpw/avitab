@@ -47,8 +47,6 @@ private:
     void onMinus();
     void onLeft();
     void onRight();
-    void onUp();
-    void onDown();
     void onRotate();
 
     void updateJob();

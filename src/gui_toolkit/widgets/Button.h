@@ -28,13 +28,12 @@ namespace avitab {
 
 class Button: public Widget {
 public:
-    using ButtonCallback = std::function<void()>;
+    using ButtonCallback = std::function<void(const Button &)>;
     Button(WidgetPtr parent, const std::string &text);
     Button(WidgetPtr parent, Icon icon, const std::string &caption);
     Button(WidgetPtr parent, Symbol smb);
 
     void setCallback(ButtonCallback cb);
-
 private:
     Icon iconData;
     lv_img_t iconImage;

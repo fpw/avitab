@@ -17,6 +17,7 @@
  */
 #include <string>
 #include "TabGroup.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -36,14 +37,50 @@ std::shared_ptr<Page> TabGroup::addTab(WidgetPtr tabs, const std::string &title)
 }
 
 void TabGroup::showTab(WidgetPtr tab) {
+    setActiveTab(getTabIndex(tab));
+}
+
+void TabGroup::delTab(WidgetPtr tab) {
+    removeTab(getTabIndex(tab));
+}
+
+size_t TabGroup::getTabIndex(WidgetPtr tab) {
     size_t cnt = lv_tabview_get_tab_count(obj());
     for (size_t i = 0; i < cnt; i++) {
         lv_obj_t *cur = lv_tabview_get_tab(obj(), i);
         if (cur == tab->obj()) {
-            lv_tabview_set_tab_act(obj(), i, true);
-            break;
+            return i;
         }
     }
+    throw std::runtime_error("Tab not part of tab group");
+}
+
+void TabGroup::setActiveTab(size_t i) {
+    lv_tabview_set_tab_act(obj(), i, true);
+}
+
+void TabGroup::removeTab(size_t i) {
+    lv_tabview_ext_t *ext = reinterpret_cast<lv_tabview_ext_t *>(lv_obj_get_ext_attr(obj()));
+
+    lv_mem_free(ext->tab_name_ptr[i]);
+    if (ext->tab_cnt > 0) {
+        for (uint16_t j = i; j < ext->tab_cnt; j++) {
+            ext->tab_name_ptr[j] = ext->tab_name_ptr[j + 1];
+        }
+        ext->tab_name_ptr = (const char **) lv_mem_realloc(ext->tab_name_ptr, sizeof(char *) * (ext->tab_cnt));
+        ext->tab_cnt--;
+    }
+    lv_btnm_set_map(ext->btns, ext->tab_name_ptr);
+
+    lv_obj_t *page = lv_tabview_get_tab(obj(), i);
+    lv_obj_del(page);
+
+    lv_style_t * style_tabs = lv_obj_get_style(ext->btns);
+    lv_coord_t indic_width = (lv_obj_get_width(obj()) - style_tabs->body.padding.inner * (ext->tab_cnt - 1) - 2 * style_tabs->body.padding.hor) / ext->tab_cnt;
+    lv_obj_set_width(ext->indic, indic_width);
+    lv_obj_set_x(ext->indic, indic_width * ext->tab_cur + style_tabs->body.padding.inner * ext->tab_cur + style_tabs->body.padding.hor);
+
+    setActiveTab(0);
 }
 
 void TabGroup::clear() {

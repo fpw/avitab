@@ -33,7 +33,7 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     fpsLabel = std::make_shared<Label>(container, ""),
 
     homeButton = std::make_shared<Button>(container, Widget::Symbol::HOME);
-    homeButton->setCallback([this] () { api().onHomeButton(); });
+    homeButton->setCallback([this] (const Button &) { api().onHomeButton(); });
     homeButton->centerInParent();
 
     onTick();

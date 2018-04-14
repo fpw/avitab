@@ -15,11 +15,12 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "AirportApp.h"
 #include <sstream>
 #include <iomanip>
 #include <limits>
 #include <cmath>
+#include "AirportApp.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -34,16 +35,8 @@ void AirportApp::resetLayout() {
     searchPage = tabs->addTab(tabs, "Search");
     // searchPage->setLayoutCenterColumns();
 
-    resetButton = std::make_shared<Button>(searchPage, "Close Tabs");
-    resetButton->setCallback([this] () {
-        api().executeLater([this] () {
-            resetLayout();
-        });
-    });
-    resetButton->alignInTopRight();
-
     searchField = std::make_shared<TextArea>(searchPage, "");
-    searchField->setPosition(0, resetButton->getY());
+    searchField->alignInTopLeft();
     searchField->setDimensions(searchField->getWidth(), 30);
 
     searchLabel = std::make_shared<Label>(searchPage, "Enter an ICAO code such as EDHL");
@@ -66,17 +59,41 @@ void AirportApp::onCodeEntered(const std::string& code) {
 
     auto airport = world->findAirportByID(code);
 
-    if (airport) {
-        auto tab = tabs->addTab(tabs, airport->getID());
-        fillPage(tab, airport);
-        tabs->showTab(tab);
-        searchLabel->setText("");
-    } else {
+    if (!airport) {
         searchLabel->setText("Not found!");
+        return;
+    }
+
+    searchLabel->setText("");
+
+    TabPage page;
+    page.page = tabs->addTab(tabs, airport->getID());
+    page.closeButton = std::make_shared<Button>(page.page, "X");
+    page.closeButton->alignInTopRight();
+    page.closeButton->setManaged();
+
+    fillPage(page.page, airport);
+    tabs->showTab(page.page);
+
+    page.closeButton->setCallback([this] (const Button &button) {
+        api().executeLater([this, &button] () {
+            removeTab(button);
+        });
+    });
+    pages.push_back(page);
+}
+
+void AirportApp::removeTab(const Button &closeButton) {
+    for (auto it = pages.begin(); it != pages.end(); ++it) {
+        if (it->closeButton.get() == &closeButton) {
+            tabs->removeTab(tabs->getTabIndex(it->page));
+            pages.erase(it);
+            break;
+        }
     }
 }
 
-void AirportApp::fillPage(const std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
     std::stringstream str;
 
     str << airport->getName() + "\n";
