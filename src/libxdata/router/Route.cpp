@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <limits>
 #include "Route.h"
 #include "src/Logger.h"
 
@@ -26,24 +27,6 @@ void Route::setStartFix(std::weak_ptr<Fix> start) {
 
 void Route::setDestinationFix(std::weak_ptr<Fix> end) {
     endFix = end;
-}
-
-bool Route::hasStartFix() const {
-    auto test = startFix.lock();
-    if (test) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool Route::hasEndFix() const {
-    auto test = endFix.lock();
-    if (test) {
-        return true;
-    } else {
-        return false;
-    }
 }
 
 void Route::setDeparture(std::weak_ptr<Airport> apt) {
@@ -71,64 +54,61 @@ std::weak_ptr<Airport> Route::getArrival() const {
 }
 
 void Route::find() {
-    if (!hasStartFix()) {
-        setStartFix(calculateBestStartFix());
-    }
     auto startFixPtr = startFix.lock();
-
-    if (!hasEndFix()) {
-        setDestinationFix(calculateBestEndFix());
-    }
     auto endFixPtr = endFix.lock();
 
     if (!startFixPtr || !endFixPtr) {
-        throw std::runtime_error("No start or end fix for route");
-    }
-
-    logger::info("Searching route from %s / %s to %s / %s...",
-            startFixPtr->getRegion()->getId().c_str(),
-            startFixPtr->getID().c_str(),
-            endFixPtr->getRegion()->getId().c_str(),
-            endFixPtr->getID().c_str()
-        );
-
-    try {
+        // Airport to airport route
+        calculateRouteFromAiports();
+    } else {
+        // Fix to fix route
         waypoints = router.findFixToFix(startFixPtr.get(), endFixPtr.get());
-    } catch (const std::exception &e) {
-        logger::info("Route error: %s", e.what());
-        throw;
     }
-    logger::info("Found route");
 }
 
-std::weak_ptr<Fix> Route::calculateBestStartFix() {
-    auto airportPtr = departureAirport.lock();
-    if (!airportPtr) {
-        throw std::runtime_error("No departure airport for route without start fix");
+void Route::calculateRouteFromAiports() {
+    auto departurePtr = departureAirport.lock();
+    auto arrivalPtr = arrivalAirport.lock();
+    if (!departurePtr || !arrivalPtr) {
+        throw std::runtime_error("No airports for route without fixes");
     }
 
-    // for now, just use any fix
-    auto fix = airportPtr->getDepartureFixes();
-    if (fix.empty()) {
+    auto startFixes = departurePtr->getDepartureFixes();
+    if (startFixes.empty()) {
         throw std::runtime_error("No known departure fixes");
     }
 
-    return fix.front();
-}
-
-std::weak_ptr<Fix> Route::calculateBestEndFix() {
-    auto airportPtr = arrivalAirport.lock();
-    if (!airportPtr) {
-        throw std::runtime_error("No arrival airport for route without end fix");
-    }
-
-    // for now, just use any fix
-    auto fix = airportPtr->getArrivalFixes();
-    if (fix.empty()) {
+    auto destFixes = arrivalPtr->getArrivalFixes();
+    if (destFixes.empty()) {
         throw std::runtime_error("No known arrival fixes");
     }
 
-    return fix.front();
+    double minDistance = std::numeric_limits<double>::infinity();
+
+    for (auto &start: startFixes) {
+        for (auto &end: destFixes) {
+            auto startPtr = start.lock();
+            auto endPtr = end.lock();
+            if (!startPtr || !endPtr) {
+                throw std::runtime_error("Dangling fix pointers");
+            }
+
+            try {
+                auto route = router.findFixToFix(startPtr.get(), endPtr.get());
+                double distance = getRouteDistance(startPtr.get(), route);
+                if (distance < minDistance) {
+                    startFix = start;
+                    endFix = end;
+                    waypoints = route;
+                    minDistance = distance;
+                }
+            } catch (...) {
+                continue;
+            }
+        }
+    }
+
+    logger::verbose("Searching best start fix...");
 }
 
 void Route::iterateRoute(RouteIterator f) const {
@@ -190,14 +170,18 @@ double Route::getRouteDistance() const {
         throw std::runtime_error("Dangling start fix");
     }
 
+    return getRouteDistance(start.get(), waypoints);
+}
+
+double Route::getRouteDistance(const Fix* start, const std::vector<RouteFinder::RouteDirection>& route) const {
     double distance = 0;
 
-    const Fix *prevFix = start.get();
+    const Fix *prevFix = start;
 
-    iterateRoute([&distance, &prevFix] (const Airway *via, const Fix *to) {
-        distance += prevFix->getLocation().distanceTo(to->getLocation());
-        prevFix = to;
-    });
+    for (auto &entry: route) {
+        distance += prevFix->getLocation().distanceTo(entry.to->getLocation());
+        prevFix = entry.to;
+    }
 
     return distance;
 }

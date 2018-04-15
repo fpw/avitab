@@ -56,10 +56,8 @@ private:
     // Optional
     std::weak_ptr<Airport> departureAirport, arrivalAirport;
 
-    bool hasStartFix() const;
-    bool hasEndFix() const;
-    std::weak_ptr<Fix> calculateBestStartFix();
-    std::weak_ptr<Fix> calculateBestEndFix();
+    void calculateRouteFromAiports();
+    double getRouteDistance(const Fix *start, const std::vector<RouteFinder::RouteDirection> &route) const;
 };
 
 } /* namespace xdata */

@@ -32,6 +32,7 @@ void RouteFinder::setAirwayChangePenalty(float percent) {
 }
 
 std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fix *goal) {
+    logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
     directDistance = from->getLocation().distanceTo(goal->getLocation());
 
     // Init
@@ -48,6 +49,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
     while (!openSet.empty()) {
         Fix *current = getLowestOpen();
         if (current == goal) {
+            logger::verbose("Route found");
             return reconstructPath(goal);
         }
 
@@ -88,7 +90,8 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
         }
     }
 
-    throw std::runtime_error("No path found");
+    logger::verbose("No route found");
+    throw std::runtime_error("No route found");
 }
 
 std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(Fix *lastFix) {
