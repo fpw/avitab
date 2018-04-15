@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "RouteFinder.h"
+#include "Route.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -30,9 +31,65 @@ void RouteFinder::setAirwayChangePenalty(float percent) {
     airwayChangePenalty = percent;
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteFixToFix(std::weak_ptr<Fix> start, std::weak_ptr<Fix> end) {
-    Fix *from = start.lock().get();
-    Fix *goal = end.lock().get();
+void xdata::RouteFinder::findRoute(Route& route) {
+    if (!route.hasStartFix()) {
+        route.setStartFix(calculateBestStartFix(route));
+    }
+    auto startFixPtr = route.getStartFix().lock();
+
+    if (!route.hasEndFix()) {
+        route.setDestinationFix(calculateBestEndFix(route));
+    }
+    auto endFixPtr = route.getDestinationFix().lock();
+
+    if (!startFixPtr || !endFixPtr) {
+        throw std::runtime_error("No start or end fix for route");
+    }
+
+    logger::info("Searching route from %s / %s to %s / %s...",
+            startFixPtr->getRegion()->getId().c_str(),
+            startFixPtr->getID().c_str(),
+            endFixPtr->getRegion()->getId().c_str(),
+            endFixPtr->getID().c_str()
+        );
+
+    auto directions = fixToFix(startFixPtr.get(), endFixPtr.get());
+    route.addDirections(directions);
+
+    logger::info("Route found!");
+}
+
+std::weak_ptr<Fix> RouteFinder::calculateBestStartFix(Route& route) {
+    auto airportPtr = route.getDeparture().lock();
+    if (!airportPtr) {
+        throw std::runtime_error("No departure airport for route without start fix");
+    }
+
+    // for now, just use any fix
+    auto fix = airportPtr->getDepartureFixes();
+    if (fix.empty()) {
+        throw std::runtime_error("No known departure fixes");
+    }
+
+    return fix.front();
+}
+
+std::weak_ptr<Fix> RouteFinder::calculateBestEndFix(Route& route) {
+    auto airportPtr = route.getArrival().lock();
+    if (!airportPtr) {
+        throw std::runtime_error("No arrival airport for route without end fix");
+    }
+
+    // for now, just use any fix
+    auto fix = airportPtr->getArrivalFixes();
+    if (fix.empty()) {
+        throw std::runtime_error("No known arrival fixes");
+    }
+
+    return fix.front();
+}
+
+std::vector<RouteFinder::RouteDirection> RouteFinder::fixToFix(Fix *from, Fix *goal) {
     directDistance = from->getLocation().distanceTo(goal->getLocation());
 
     // Init
@@ -49,7 +106,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteFixToFix(std::wea
     while (!openSet.empty()) {
         Fix *current = getLowestOpen();
         if (current == goal) {
-            return reconstructPath();
+            return reconstructPath(goal);
         }
 
         openSet.erase(current);
@@ -57,8 +114,14 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteFixToFix(std::wea
 
         auto &neighbors = current->getConnections();
         for (auto neighborConn: neighbors) {
-            Airway *airway = std::get<0>(neighborConn).lock().get();
-            Fix *neighbor = std::get<1>(neighborConn).lock().get();
+            auto airwayPtr = std::get<0>(neighborConn).lock();
+            auto fixPtr = std::get<1>(neighborConn).lock();
+            if (!airwayPtr || !fixPtr) {
+                throw std::runtime_error("Navigation pointers expired");
+            }
+
+            Airway *airway = airwayPtr.get();
+            Fix *neighbor = fixPtr.get();
 
             if (airway->getLevel() != airwayLevel) {
                 continue;
@@ -86,26 +149,14 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteFixToFix(std::wea
     throw std::runtime_error("No path found");
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteAirportToAirport(std::weak_ptr<Airport> from, std::weak_ptr<Airport> to) {
-    auto startApt = from.lock();
-    auto toApt = to.lock();
-
-    std::string str;
-
-    auto startFixes = startApt->getDepartureFixes();
-    auto endFixes = toApt->getArrivalFixes();
-
-    return findRouteFixToFix(startFixes.front(), endFixes.front());
-}
-
-std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath() {
+std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(Fix *lastFix) {
+    logger::info("reconstruct");
     std::vector<RouteDirection> res;
 
-    Fix *target = end.lock().get();
-    RouteDirection cur = cameFrom[target];
-    res.push_back(RouteDirection(cur.via, target));
+    RouteDirection cur = cameFrom[lastFix];
+    res.push_back(RouteDirection(cur.via, lastFix));
 
-    auto it = cameFrom.find(cur.to);
+    decltype(cameFrom.find(nullptr)) it;
 
     while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
         cur = cameFrom[it->first];

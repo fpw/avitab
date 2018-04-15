@@ -17,6 +17,7 @@
  */
 #include "RouteApp.h"
 #include "src/libxdata/router/RouteFinder.h"
+#include "src/libxdata/router/Route.h"
 
 namespace avitab {
 
@@ -103,9 +104,13 @@ bool RouteApp::createRoute() {
         return false;
     }
 
+    xdata::Route route;
+    route.setDeparture(departure);
+    route.setArrival(arrival);
+
     xdata::RouteFinder routeFinder;
     try {
-        routeFinder.findRouteAirportToAirport(departure, arrival);
+        routeFinder.findRoute(route);
     } catch (const std::exception &e) {
         errorLabel->setText(e.what());
         return false;

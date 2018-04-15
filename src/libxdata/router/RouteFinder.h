@@ -26,8 +26,9 @@
 #include "src/libxdata/world/models/Airway.h"
 #include "src/libxdata/world/models/airport/Airport.h"
 
-
 namespace xdata {
+
+class Route;
 
 class RouteFinder {
 public:
@@ -41,15 +42,12 @@ public:
 
     void setAirwayLevel(Airway::Level level);
     void setAirwayChangePenalty(float percent);
-    std::vector<RouteDirection> findRouteFixToFix(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to);
-    std::vector<RouteDirection> findRouteAirportToAirport(std::weak_ptr<Airport> from, std::weak_ptr<Airport> to);
+    void findRoute(Route &route);
+
 private:
     Airway::Level airwayLevel = Airway::Level::Lower;
     double directDistance = 0;
     float airwayChangePenalty = 0;
-
-    std::weak_ptr<Fix> start;
-    std::weak_ptr<Fix> end;
 
     std::set<Fix *> closedSet;
     std::set<Fix *> openSet;
@@ -57,11 +55,15 @@ private:
     std::map<Fix *, double> gScore;
     std::map<Fix *, double> fScore;
 
+    std::vector<RouteDirection> fixToFix(Fix *from, Fix *to);
+    std::weak_ptr<Fix> calculateBestStartFix(Route &route);
+    std::weak_ptr<Fix> calculateBestEndFix(Route &route);
+
     Fix *getLowestOpen();
     double minCostHeuristic(Fix *a, Fix *b);
     double cost(Fix *a, const RouteDirection &dir);
     double getGScore(Fix *f);
-    std::vector<RouteDirection> reconstructPath();
+    std::vector<RouteDirection> reconstructPath(Fix *lastFix);
 };
 
 } /* namespace xdata */
