@@ -26,6 +26,13 @@ RouteFinder::RouteFinder(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to):
     start(from),
     end(to)
 {
+    Fix *p1 = from.lock().get();
+    Fix *p2 = to.lock().get();
+    distance = p1->getLocation().distanceTo(p2->getLocation());
+}
+
+void RouteFinder::setAirwayChangePenalty(float percent) {
+    airwayChangePenalty = percent;
 }
 
 std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(Airway::Level level) {
@@ -129,7 +136,7 @@ double RouteFinder::cost(Fix* a, const RouteDirection& dir) {
     auto it = cameFrom.find(a);
     if (it != cameFrom.end()) {
         if (it->second.via != dir.via) {
-            penalty += 100000; // 100km penalty for changing airways
+            penalty += airwayChangePenalty * distance;
         }
     }
 

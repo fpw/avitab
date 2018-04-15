@@ -39,8 +39,12 @@ public:
     };
 
     RouteFinder(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to);
+    void setAirwayChangePenalty(float percent);
     std::vector<RouteDirection> findRoute(Airway::Level level);
 private:
+    double distance = 0;
+    float airwayChangePenalty = 0;
+
     std::weak_ptr<Fix> start;
     std::weak_ptr<Fix> end;
 
