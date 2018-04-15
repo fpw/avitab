@@ -36,4 +36,12 @@ std::weak_ptr<Fix> SID::getDestionationFix() const {
     return destinationFix;
 }
 
+void SID::setTransitionName(const std::string& name) {
+    transition = name;
+}
+
+std::string SID::getTransitionName() const {
+    return transition;
+}
+
 } /* namespace xdata */

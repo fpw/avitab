@@ -76,14 +76,17 @@ void RouteApp::onNextClicked() {
         inDeparture = false;
         keys->setTarget(arrivalField);
     } else {
-        xdata::Route route;
-        if (createRoute(route)) {
-            resetContent();
-            showRoute(route);
-        } else {
-            inDeparture = true;
-            keys->setTarget(departureField);
-        }
+        errorLabel->setText("Please wait...");
+        api().executeLater([this] () {
+            xdata::Route route;
+            if (createRoute(route)) {
+                resetContent();
+                showRoute(route);
+            } else {
+                inDeparture = true;
+                keys->setTarget(departureField);
+            }
+        });
     }
 }
 
@@ -112,6 +115,7 @@ bool RouteApp::createRoute(xdata::Route &route) {
 
     try {
         route.find();
+        errorLabel->setText("");
     } catch (const std::exception &e) {
         errorLabel->setText(e.what());
         return false;
@@ -158,6 +162,10 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
     desc << "Route: \n";
     desc << shortRoute << "\n";
 
+    desc << toSIDs(route);
+    desc << toSTARs(route);
+    desc << toApproaches(route);
+
     double directKm = route.getDirectDistance() / 1000;
     double routeKm = route.getRouteDistance() / 1000;
     double directNm = directKm * xdata::KM_TO_NM;
@@ -201,6 +209,69 @@ std::string RouteApp::toDetailedRouteDescription(const xdata::Route& route) {
     });
 
     return desc.str();
+}
+
+std::string RouteApp::toSIDs(const xdata::Route& route) {
+    auto depPtr = route.getDeparture().lock();
+    if (!depPtr) {
+        throw std::runtime_error("Dangling airports");
+    }
+
+    auto sids = depPtr->findSIDs(route.getStartFix());
+
+    if (sids.empty()) {
+        return "";
+    }
+
+    std::stringstream res;
+    res << "SIDs:\n";
+    for (auto &sid: sids) {
+        res << "   " << sid.getID() << " from " << sid.getTransitionName() << "\n";
+    }
+
+    return res.str();
+}
+
+std::string RouteApp::toSTARs(const xdata::Route& route) {
+    auto arrivalPtr = route.getArrival().lock();
+    if (!arrivalPtr) {
+        throw std::runtime_error("Dangling airports");
+    }
+
+    auto stars = arrivalPtr->findSTARs(route.getDestinationFix());
+
+    if (stars.empty()) {
+        return "";
+    }
+
+    std::stringstream res;
+    res << "STARs:\n";
+    for (auto &star: stars) {
+        res << "   " << star.getID() << " to " << star.getTransitionName() << "\n";
+    }
+
+    return res.str();
+}
+
+std::string RouteApp::toApproaches(const xdata::Route& route) {
+    auto arrivalPtr = route.getArrival().lock();
+    if (!arrivalPtr) {
+        throw std::runtime_error("Dangling airports");
+    }
+
+    auto approaches = arrivalPtr->findApproaches(route.getDestinationFix());
+
+    if (approaches.empty()) {
+        return "";
+    }
+
+    std::stringstream res;
+    res << "Approaches:\n";
+    for (auto &approach: approaches) {
+        res << "   " << approach.getID() << " via " << approach.getTransitionName() << "\n";
+    }
+
+    return res.str();
 }
 
 void RouteApp::removeTab(const Button& closeButton) {

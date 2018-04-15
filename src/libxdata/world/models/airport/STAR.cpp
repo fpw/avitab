@@ -36,4 +36,12 @@ std::weak_ptr<Fix> STAR::getStartFix() const {
     return startFix;
 }
 
+void STAR::setTransitionName(const std::string& name) {
+    transition = name;
+}
+
+std::string STAR::getTransitionName() const {
+    return transition;
+}
+
 } /* namespace xdata */

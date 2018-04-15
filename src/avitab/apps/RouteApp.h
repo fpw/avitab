@@ -60,6 +60,9 @@ private:
     void fillPage(std::shared_ptr<Page> page, const xdata::Route &route);
     std::string toShortRouteDescription(const xdata::Route &route);
     std::string toDetailedRouteDescription(const xdata::Route &route);
+    std::string toSIDs(const xdata::Route &route);
+    std::string toSTARs(const xdata::Route &route);
+    std::string toApproaches(const xdata::Route &route);
     void removeTab(const Button &closeButton);
 };
 

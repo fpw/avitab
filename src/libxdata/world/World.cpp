@@ -178,6 +178,7 @@ void World::onProcedureLoaded(Airport &airport, const CIFPData &procedure) {
         SID sid(procedure.id);
         auto lastFix = findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
         if (lastFix) {
+            sid.setTransitionName(first.transitionId);
             sid.setDestionationFix(lastFix);
             airport.addSID(sid);
         }
@@ -187,6 +188,7 @@ void World::onProcedureLoaded(Airport &airport, const CIFPData &procedure) {
         STAR star(procedure.id);
         auto firstFix = findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
+            star.setTransitionName(first.transitionId);
             star.setStartFix(firstFix);
             airport.addSTAR(star);
         }
@@ -196,6 +198,7 @@ void World::onProcedureLoaded(Airport &airport, const CIFPData &procedure) {
         Approach app(procedure.id);
         auto firstFix = findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
+            app.setTransitionName(first.transitionId);
             app.setStartFix(firstFix);
             airport.addApproach(app);
         }

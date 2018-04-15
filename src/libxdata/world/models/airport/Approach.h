@@ -33,9 +33,12 @@ public:
     void setStartFix(std::weak_ptr<Fix> fix);
     const std::string &getID() const;
     std::weak_ptr<Fix> getStartFix() const;
+    void setTransitionName(const std::string &name);
+    std::string getTransitionName() const;
 
 private:
     std::string id;
+    std::string transition;
     std::weak_ptr<Fix> startFix;
 };
 

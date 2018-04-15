@@ -36,4 +36,12 @@ std::weak_ptr<Fix> Approach::getStartFix() const {
     return startFix;
 }
 
+void Approach::setTransitionName(const std::string& name) {
+    transition = name;
+}
+
+std::string Approach::getTransitionName() const {
+    return transition;
+}
+
 } /* namespace xdata */

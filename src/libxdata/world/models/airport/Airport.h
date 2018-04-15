@@ -74,6 +74,10 @@ public:
     std::vector<std::weak_ptr<Fix>> getArrivalFixes() const;
     std::vector<std::weak_ptr<Fix>> getDepartureFixes() const;
 
+    std::vector<SID> findSIDs(std::weak_ptr<Fix> to) const;
+    std::vector<STAR> findSTARs(std::weak_ptr<Fix> to) const;
+    std::vector<Approach> findApproaches(std::weak_ptr<Fix> to) const;
+
     Airport(const Airport &other) = delete;
     void operator=(const Airport &other) = delete;
 

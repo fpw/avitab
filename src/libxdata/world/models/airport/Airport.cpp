@@ -134,6 +134,62 @@ std::vector<std::weak_ptr<Fix>> Airport::getDepartureFixes() const {
     return res;
 }
 
+
+std::vector<SID> Airport::findSIDs(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<SID>();
+
+    auto toFix = to.lock();
+    for (auto &it: sids) {
+        auto sidFix = it.second.getDestionationFix().lock();
+
+        if (!toFix || !sidFix) {
+            continue;
+        }
+
+        if (sidFix.get() == toFix.get()) {
+            res.push_back(it.second);
+        }
+    }
+    return res;
+}
+
+std::vector<STAR> Airport::findSTARs(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<STAR>();
+
+    auto toFix = to.lock();
+    for (auto &it: stars) {
+        auto starFix = it.second.getStartFix().lock();
+
+        if (!toFix || !starFix) {
+            continue;
+        }
+
+        if (starFix.get() == toFix.get()) {
+            res.push_back(it.second);
+        }
+    }
+    return res;
+}
+
+std::vector<Approach> Airport::findApproaches(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<Approach>();
+
+    auto toFix = to.lock();
+    for (auto &it: approaches) {
+        auto appFix = it.second.getStartFix().lock();
+
+        if (!toFix || !appFix) {
+            continue;
+        }
+
+        if (appFix.get() == toFix.get()) {
+            res.push_back(it.second);
+        }
+    }
+    return res;
+}
+
+
 const std::string& Airport::getMetarTimestamp() const {
     return metarTimestamp;
 }
