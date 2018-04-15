@@ -51,9 +51,13 @@ void RouteApp::resetLayout() {
     arrivalField->alignRightOf(arrivalLabel);
     arrivalField->setPosition(departureField->getX(), arrivalField->getY());
 
+    highRouteCB = std::make_shared<Checkbox>(routePage, "Upper Airways");
+    highRouteCB->alignBelow(arrivalLabel);
+    highRouteCB->setPosition(arrivalField->getX(), arrivalLabel->getY() + 30);
+
     errorLabel = std::make_shared<Label>(routePage, "");
-    errorLabel->alignBelow(arrivalLabel);
-    errorLabel->setPosition(arrivalField->getX(), arrivalLabel->getY() + 30);
+    errorLabel->alignBelow(highRouteCB);
+    errorLabel->setPosition(arrivalField->getX(), highRouteCB->getY() + 30);
 
     keys = std::make_shared<Keyboard>(routePage, departureField);
     keys->hideEnterKey();
@@ -113,6 +117,12 @@ bool RouteApp::createRoute(xdata::Route &route) {
     route.setDeparture(departure);
     route.setArrival(arrival);
 
+    if (highRouteCB->isChecked()) {
+        route.setAirwayLevel(xdata::Airway::Level::Upper);
+    } else {
+        route.setAirwayLevel(xdata::Airway::Level::Lower);
+    }
+
     try {
         route.find();
         errorLabel->setText("");
@@ -133,7 +143,8 @@ void RouteApp::showRoute(const xdata::Route& route) {
     }
 
     TabPage page;
-    page.page = tabs->addTab(tabs, depPtr->getID() + " -> " + arrivalPtr->getID());
+    page.page = tabs->addTab(tabs, depPtr->getID() + " -> " + arrivalPtr->getID() +
+            (highRouteCB->isChecked() ? " U" : " L"));
 
     fillPage(page.page, route);
 

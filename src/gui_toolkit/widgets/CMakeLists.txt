@@ -12,4 +12,5 @@ add_library(avitab_gui_lvgl_widgets
     MessageBox.cpp
     TabGroup.cpp
     Page.cpp
+    Checkbox.cpp
 )

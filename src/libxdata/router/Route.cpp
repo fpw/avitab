@@ -108,7 +108,9 @@ void Route::calculateRouteFromAiports() {
         }
     }
 
-    logger::verbose("Searching best start fix...");
+    if (waypoints.empty()) {
+        throw std::runtime_error("No route found");
+    }
 }
 
 void Route::iterateRoute(RouteIterator f) const {
@@ -171,6 +173,10 @@ double Route::getRouteDistance() const {
     }
 
     return getRouteDistance(start.get(), waypoints);
+}
+
+void Route::setAirwayLevel(Airway::Level level) {
+    router.setAirwayLevel(level);
 }
 
 double Route::getRouteDistance(const Fix* start, const std::vector<RouteFinder::RouteDirection>& route) const {

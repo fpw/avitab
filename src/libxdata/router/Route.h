@@ -31,6 +31,8 @@ class Route {
 public:
     using RouteIterator = std::function<void (const Airway *, const Fix *)>;
 
+    void setAirwayLevel(Airway::Level level);
+
     void setStartFix(std::weak_ptr<Fix> start);
     void setDestinationFix(std::weak_ptr<Fix> end);
     void setDeparture(std::weak_ptr<Airport> apt);

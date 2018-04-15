@@ -27,6 +27,7 @@
 #include "src/gui_toolkit/widgets/Keyboard.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Checkbox.h"
 #include "src/libxdata/router/Route.h"
 
 namespace avitab {
@@ -44,6 +45,7 @@ private:
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Page> routePage;
     std::shared_ptr<Keyboard> keys;
+    std::shared_ptr<Checkbox> highRouteCB;
     std::shared_ptr<Label> departureLabel;
     std::shared_ptr<TextArea> departureField;
     std::shared_ptr<Label> arrivalLabel;
