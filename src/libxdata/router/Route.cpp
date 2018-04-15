@@ -170,4 +170,36 @@ void Route::iterateRouteShort(RouteIterator f) const {
     f(currentAirway, prevFix);
 }
 
+double Route::getDirectDistance() const {
+    auto start = startFix.lock();
+    if (!start) {
+        throw std::runtime_error("Dangling start fix");
+    }
+
+    auto end = endFix.lock();
+    if (!end) {
+        throw std::runtime_error("Dangling end fix");
+    }
+
+    return start->getLocation().distanceTo(end->getLocation());
+}
+
+double Route::getRouteDistance() const {
+    auto start = startFix.lock();
+    if (!start) {
+        throw std::runtime_error("Dangling start fix");
+    }
+
+    double distance = 0;
+
+    const Fix *prevFix = start.get();
+
+    iterateRoute([&distance, &prevFix] (const Airway *via, const Fix *to) {
+        distance += prevFix->getLocation().distanceTo(to->getLocation());
+        prevFix = to;
+    });
+
+    return distance;
+}
+
 } /* namespace xdata */

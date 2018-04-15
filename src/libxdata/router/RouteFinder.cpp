@@ -92,7 +92,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
 }
 
 std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(Fix *lastFix) {
-    logger::info("reconstruct");
+    logger::info("Backtracking route...");
     std::vector<RouteDirection> res;
 
     RouteDirection cur = cameFrom[lastFix];

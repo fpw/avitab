@@ -35,6 +35,8 @@
 
 namespace xdata {
 
+constexpr const double KM_TO_NM = 0.539957;
+
 class World {
 public:
     World();

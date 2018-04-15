@@ -45,6 +45,9 @@ public:
     void iterateRoute(RouteIterator f) const;
     void iterateRouteShort(RouteIterator f) const;
 
+    double getDirectDistance() const;
+    double getRouteDistance() const;
+
 private:
     RouteFinder router;
     std::weak_ptr<Fix> startFix, endFix;

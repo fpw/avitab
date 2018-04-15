@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <sstream>
+#include <iomanip>
 #include "RouteApp.h"
 #include "src/Logger.h"
 
@@ -148,12 +149,22 @@ void RouteApp::showRoute(const xdata::Route& route) {
 
 void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
     std::stringstream desc;
+    desc << std::fixed << std::setprecision(0);
 
     std::string shortRoute = toShortRouteDescription(route);
 
     logger::info("Route: %s", shortRoute.c_str());
 
+    desc << "Route: \n";
     desc << shortRoute << "\n";
+
+    double directKm = route.getDirectDistance() / 1000;
+    double routeKm = route.getRouteDistance() / 1000;
+    double directNm = directKm * xdata::KM_TO_NM;
+    double routeNm = routeKm * xdata::KM_TO_NM;
+
+    desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
+    desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
 
     TextArea widget(page, desc.str());
     widget.setShowCursor(false);
