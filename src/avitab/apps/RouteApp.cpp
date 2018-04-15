@@ -15,9 +15,9 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sstream>
 #include "RouteApp.h"
-#include "src/libxdata/router/RouteFinder.h"
-#include "src/libxdata/router/Route.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -75,8 +75,10 @@ void RouteApp::onNextClicked() {
         inDeparture = false;
         keys->setTarget(arrivalField);
     } else {
-        if (createRoute()) {
+        xdata::Route route;
+        if (createRoute(route)) {
             resetContent();
+            showRoute(route);
         } else {
             inDeparture = true;
             keys->setTarget(departureField);
@@ -84,7 +86,7 @@ void RouteApp::onNextClicked() {
     }
 }
 
-bool RouteApp::createRoute() {
+bool RouteApp::createRoute(xdata::Route &route) {
     auto world = api().getNavWorld();
     if (!world) {
         errorLabel->setText("No navigation data available");
@@ -104,19 +106,100 @@ bool RouteApp::createRoute() {
         return false;
     }
 
-    xdata::Route route;
     route.setDeparture(departure);
     route.setArrival(arrival);
 
-    xdata::RouteFinder routeFinder;
     try {
-        routeFinder.findRoute(route);
+        route.find();
     } catch (const std::exception &e) {
         errorLabel->setText(e.what());
         return false;
     }
 
     return true;
+}
+
+void RouteApp::showRoute(const xdata::Route& route) {
+    auto depPtr = route.getDeparture().lock();
+    auto arrivalPtr = route.getArrival().lock();
+
+    if (!depPtr || !arrivalPtr) {
+        throw std::runtime_error("Dangling airports");
+    }
+
+    TabPage page;
+    page.page = tabs->addTab(tabs, depPtr->getID() + " -> " + arrivalPtr->getID());
+
+    fillPage(page.page, route);
+
+    page.closeButton = std::make_shared<Button>(page.page, "X");
+    page.closeButton->alignInTopRight();
+    page.closeButton->setManaged();
+
+    tabs->showTab(page.page);
+
+    page.closeButton->setCallback([this] (const Button &button) {
+        api().executeLater([this, &button] () {
+            removeTab(button);
+        });
+    });
+    pages.push_back(page);
+}
+
+void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
+    std::stringstream desc;
+
+    std::string shortRoute = toShortRouteDescription(route);
+
+    logger::info("Route: %s", shortRoute.c_str());
+
+    desc << shortRoute << "\n";
+
+    TextArea widget(page, desc.str());
+    widget.setShowCursor(false);
+    widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
+    widget.setManaged();
+}
+
+std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
+    std::stringstream desc;
+
+    route.iterateRouteShort([this, &desc] (const xdata::Airway *via, const xdata::Fix *to) {
+        if (via) {
+            desc << " " << via->getName();
+        }
+        if (to) {
+            desc << " " << to->getID();
+        }
+    });
+
+    return desc.str();
+}
+
+std::string RouteApp::toDetailedRouteDescription(const xdata::Route& route) {
+    std::stringstream desc;
+
+    route.iterateRoute([this, &desc] (const xdata::Airway *via, const xdata::Fix *to) {
+        if (via) {
+            desc << "via " << via->getName();
+        }
+        if (to) {
+            desc << " to " << to->getID();
+        }
+        desc << "\n";
+    });
+
+    return desc.str();
+}
+
+void RouteApp::removeTab(const Button& closeButton) {
+    for (auto it = pages.begin(); it != pages.end(); ++it) {
+        if (it->closeButton.get() == &closeButton) {
+            tabs->removeTab(tabs->getTabIndex(it->page));
+            pages.erase(it);
+            break;
+        }
+    }
 }
 
 } /* namespace avitab */

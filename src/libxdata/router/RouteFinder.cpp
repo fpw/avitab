@@ -31,65 +31,7 @@ void RouteFinder::setAirwayChangePenalty(float percent) {
     airwayChangePenalty = percent;
 }
 
-void xdata::RouteFinder::findRoute(Route& route) {
-    if (!route.hasStartFix()) {
-        route.setStartFix(calculateBestStartFix(route));
-    }
-    auto startFixPtr = route.getStartFix().lock();
-
-    if (!route.hasEndFix()) {
-        route.setDestinationFix(calculateBestEndFix(route));
-    }
-    auto endFixPtr = route.getDestinationFix().lock();
-
-    if (!startFixPtr || !endFixPtr) {
-        throw std::runtime_error("No start or end fix for route");
-    }
-
-    logger::info("Searching route from %s / %s to %s / %s...",
-            startFixPtr->getRegion()->getId().c_str(),
-            startFixPtr->getID().c_str(),
-            endFixPtr->getRegion()->getId().c_str(),
-            endFixPtr->getID().c_str()
-        );
-
-    auto directions = fixToFix(startFixPtr.get(), endFixPtr.get());
-    route.addDirections(directions);
-
-    logger::info("Route found!");
-}
-
-std::weak_ptr<Fix> RouteFinder::calculateBestStartFix(Route& route) {
-    auto airportPtr = route.getDeparture().lock();
-    if (!airportPtr) {
-        throw std::runtime_error("No departure airport for route without start fix");
-    }
-
-    // for now, just use any fix
-    auto fix = airportPtr->getDepartureFixes();
-    if (fix.empty()) {
-        throw std::runtime_error("No known departure fixes");
-    }
-
-    return fix.front();
-}
-
-std::weak_ptr<Fix> RouteFinder::calculateBestEndFix(Route& route) {
-    auto airportPtr = route.getArrival().lock();
-    if (!airportPtr) {
-        throw std::runtime_error("No arrival airport for route without end fix");
-    }
-
-    // for now, just use any fix
-    auto fix = airportPtr->getArrivalFixes();
-    if (fix.empty()) {
-        throw std::runtime_error("No known arrival fixes");
-    }
-
-    return fix.front();
-}
-
-std::vector<RouteFinder::RouteDirection> RouteFinder::fixToFix(Fix *from, Fix *goal) {
+std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fix *goal) {
     directDistance = from->getLocation().distanceTo(goal->getLocation());
 
     // Init

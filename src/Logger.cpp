@@ -30,8 +30,8 @@ bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
     if (logFile) {
-        char buf[2048];
-        vsprintf(buf, format.c_str(), args);
+        char buf[8192];
+        vsnprintf(buf, sizeof(buf), format.c_str(), args);
 
         std::stringstream logStr;
         logStr << platform::getLocalTime("%H:%M:%S") << " " << buf;

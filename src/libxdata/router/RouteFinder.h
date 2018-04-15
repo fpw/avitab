@@ -28,8 +28,6 @@
 
 namespace xdata {
 
-class Route;
-
 class RouteFinder {
 public:
     struct RouteDirection {
@@ -42,7 +40,7 @@ public:
 
     void setAirwayLevel(Airway::Level level);
     void setAirwayChangePenalty(float percent);
-    void findRoute(Route &route);
+    std::vector<RouteDirection> findFixToFix(Fix *from, Fix *to);
 
 private:
     Airway::Level airwayLevel = Airway::Level::Lower;
@@ -54,10 +52,6 @@ private:
     std::map<Fix *, RouteDirection> cameFrom;
     std::map<Fix *, double> gScore;
     std::map<Fix *, double> fScore;
-
-    std::vector<RouteDirection> fixToFix(Fix *from, Fix *to);
-    std::weak_ptr<Fix> calculateBestStartFix(Route &route);
-    std::weak_ptr<Fix> calculateBestEndFix(Route &route);
 
     Fix *getLowestOpen();
     double minCostHeuristic(Fix *a, Fix *b);

@@ -19,6 +19,7 @@
 #define SRC_LIBXDATA_ROUTER_ROUTE_H_
 
 #include <memory>
+#include <functional>
 #include "RouteFinder.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Airway.h"
@@ -28,28 +29,34 @@ namespace xdata {
 
 class Route {
 public:
+    using RouteIterator = std::function<void (const Airway *, const Fix *)>;
+
     void setStartFix(std::weak_ptr<Fix> start);
     void setDestinationFix(std::weak_ptr<Fix> end);
     void setDeparture(std::weak_ptr<Airport> apt);
     void setArrival(std::weak_ptr<Airport> apt);
 
-    bool hasStartFix() const;
-    bool hasEndFix() const;
+    std::weak_ptr<Fix> getStartFix() const;
+    std::weak_ptr<Fix> getDestinationFix() const;
+    std::weak_ptr<Airport> getDeparture() const;
+    std::weak_ptr<Airport> getArrival() const;
 
-    std::weak_ptr<Fix> getStartFix();
-    std::weak_ptr<Fix> getDestinationFix();
-    std::weak_ptr<Airport> getDeparture();
-    std::weak_ptr<Airport> getArrival();
-
-    // Internal
-    void addDirections(const std::vector<RouteFinder::RouteDirection> &directions);
+    void find();
+    void iterateRoute(RouteIterator f) const;
+    void iterateRouteShort(RouteIterator f) const;
 
 private:
+    RouteFinder router;
     std::weak_ptr<Fix> startFix, endFix;
     std::vector<RouteFinder::RouteDirection> waypoints;
 
     // Optional
     std::weak_ptr<Airport> departureAirport, arrivalAirport;
+
+    bool hasStartFix() const;
+    bool hasEndFix() const;
+    std::weak_ptr<Fix> calculateBestStartFix();
+    std::weak_ptr<Fix> calculateBestEndFix();
 };
 
 } /* namespace xdata */

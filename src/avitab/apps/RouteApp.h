@@ -19,12 +19,15 @@
 #define SRC_AVITAB_APPS_ROUTEAPP_H_
 
 #include <memory>
+#include <vector>
 #include "App.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
 #include "src/gui_toolkit/widgets/Keyboard.h"
 #include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/Button.h"
+#include "src/libxdata/router/Route.h"
 
 namespace avitab {
 
@@ -32,6 +35,12 @@ class RouteApp: public App {
 public:
     RouteApp(FuncsPtr appFuncs);
 private:
+    struct TabPage {
+        std::shared_ptr<Page> page;
+        std::shared_ptr<Button> closeButton;
+    };
+
+    std::vector<TabPage> pages;
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Page> routePage;
     std::shared_ptr<Keyboard> keys;
@@ -45,7 +54,13 @@ private:
     void resetLayout();
     void resetContent();
     void onNextClicked();
-    bool createRoute();
+
+    bool createRoute(xdata::Route &route);
+    void showRoute(const xdata::Route &route);
+    void fillPage(std::shared_ptr<Page> page, const xdata::Route &route);
+    std::string toShortRouteDescription(const xdata::Route &route);
+    std::string toDetailedRouteDescription(const xdata::Route &route);
+    void removeTab(const Button &closeButton);
 };
 
 } /* namespace avitab */
