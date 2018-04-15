@@ -21,11 +21,13 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <functional>
 #include "src/libxdata/loaders/objects/AirportData.h"
 #include "src/libxdata/loaders/objects/FixData.h"
 #include "src/libxdata/loaders/objects/NavaidData.h"
 #include "src/libxdata/loaders/objects/AirwayData.h"
 #include "src/libxdata/loaders/objects/MetarData.h"
+#include "src/libxdata/loaders/objects/CIFPData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Region.h"
@@ -40,10 +42,12 @@ public:
     void onFixLoaded(const FixData &fix);
     void onNavaidLoaded(const NavaidData &navaid);
     void onAirwayLoaded(const AirwayData &airway);
+    void onProcedureLoaded(Airport &airport, const CIFPData &procedure);
     void onMetarLoaded(const MetarData &metar);
 
     std::shared_ptr<Airport> findAirportByID(const std::string &id);
     std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id);
+    void forEachAirport(std::function<void(Airport &)> f);
 
 private:
     // Unique IDs

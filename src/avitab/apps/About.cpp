@@ -33,6 +33,7 @@ About::About(FuncsPtr appFuncs):
             "Uses the mupdf library, copyright 2006-2017 by Artifex Software, Inc.\n"
             "Uses the littlevgl embedded GUI library, copyright 2018 by Gábor Kiss-Vámosi\n"
             "Uses the nlohmann JSON library, copyright 2013-2018 Niels Lohmann\n"
+            "Icon if_applications-internet_118835 copyright by Tango\n"
             "Icon if_Airport_22906 copyright by Icons-Land\n"
             "Icon if_clipboard_43705 copyright by Iconshock\n"
             "Icon if_Help_1493288 copyright by GlyphLab\n"

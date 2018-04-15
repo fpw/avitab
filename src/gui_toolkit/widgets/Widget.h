@@ -48,6 +48,8 @@ public:
     void alignInTopRight();
     void alignInBottomCenter();
     void alignLeftOf(WidgetPtr base);
+    void alignRightOf(WidgetPtr base);
+    void alignBelow(WidgetPtr base);
     void setBackgroundWhite();
     int getWidth();
     int getHeight();

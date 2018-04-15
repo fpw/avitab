@@ -92,6 +92,24 @@ std::string BaseParser::parseWord() {
     return word;
 }
 
+std::string BaseParser::nextDelimitedWord(char delim) {
+    std::stringstream word;
+
+    char c = '\0';
+
+    while (lineStream >> c) {
+        if (c == delim) {
+            break;
+        }
+
+        if (!std::isspace(c)) {
+            word << c;
+        }
+    }
+
+    return word.str();
+}
+
 double BaseParser::parseDouble() {
     skipWhiteSpace();
 

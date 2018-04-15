@@ -27,12 +27,28 @@ TextArea::TextArea(WidgetPtr parent, const std::string& text):
     setText(text);
 }
 
+void TextArea::setMultiLine(bool multiLine) {
+    if (multiLine) {
+        lv_ta_set_one_line(obj(), false);
+    } else {
+        lv_ta_set_one_line(obj(), true);
+    }
+}
+
 void TextArea::setText(const std::string& text) {
     lv_ta_set_text(obj(), text.c_str());
 }
 
 std::string TextArea::getText() {
     return lv_ta_get_text(obj());
+}
+
+void TextArea::setShowCursor(bool show) {
+    if (show) {
+        lv_ta_set_cursor_type(obj(), LV_CURSOR_LINE);
+    } else {
+        lv_ta_set_cursor_type(obj(), static_cast<lv_cursor_type_t>(LV_CURSOR_LINE | LV_CURSOR_HIDDEN));
+    }
 }
 
 } /* namespace avitab */

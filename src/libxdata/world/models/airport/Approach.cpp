@@ -15,29 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
+#include <src/libxdata/world/models/airport/Approach.h>
 
-#include <functional>
-#include "Widget.h"
+namespace xdata {
 
-namespace avitab {
+Approach::Approach(const std::string& id):
+    id(id)
+{
+}
 
-class Keyboard: public Widget {
-public:
-    using Callback = std::function<void()>;
+void Approach::setStartFix(std::weak_ptr<Fix> fix) {
+    startFix = fix;
+}
 
-    Keyboard(WidgetPtr parent, WidgetPtr target);
-    void setTarget(WidgetPtr target);
-    void setOnCancel(Callback cb);
-    void setOnOk(Callback cb);
-    void hideEnterKey();
-private:
-    WidgetPtr targetText;
-    Callback onCancel;
-    Callback onOk;
-};
+const std::string& Approach::getID() const {
+    return id;
+}
 
-} /* namespace avitab */
+std::weak_ptr<Fix> Approach::getStartFix() const {
+    return startFix;
+}
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_ */
+} /* namespace xdata */

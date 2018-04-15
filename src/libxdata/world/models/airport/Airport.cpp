@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 
@@ -69,16 +70,68 @@ const std::vector<Frequency> &Airport::getATCFrequencies(ATCFrequency type) {
 void Airport::attachILSData(const std::string& rwyName, std::weak_ptr<Fix> ils) {
     auto rwy = runways.find(rwyName);
     if (rwy == runways.end()) {
-        throw std::runtime_error("Adding ILS to non-existing runway");
+        throw std::runtime_error("Unknown runway: " + rwyName);
     }
-
     rwy->second.attachILSData(ils);
 }
 
-void xdata::Airport::forEachRunway(std::function<void(const Runway&)> f) {
+const Runway &Airport::getRunwayByName(const std::string& rw) const {
+    auto rwy = runways.find(rw);
+    if (rwy == runways.end()) {
+        throw std::runtime_error("Unknown runway: " + rw);
+    }
+    return rwy->second;
+}
+
+void Airport::forEachRunway(std::function<void(const Runway&)> f) {
     for (auto &rwy: runways) {
         f(rwy.second);
     }
+}
+
+void Airport::addSID(const SID& sid) {
+    sids.insert(std::make_pair(sid.getID(), sid));
+}
+
+void Airport::addSTAR(const STAR& star) {
+    stars.insert(std::make_pair(star.getID(), star));
+}
+
+void Airport::addApproach(const Approach& approach) {
+    approaches.insert(std::make_pair(approach.getID(), approach));
+}
+
+std::vector<std::weak_ptr<Fix>> Airport::getArrivalFixes() const {
+    std::vector<std::weak_ptr<Fix>> res;
+
+    for (auto &it: stars) {
+        auto fix = it.second.getStartFix();
+        if (!containsFix(res, fix)) {
+            res.push_back(fix);
+        }
+    }
+
+    for (auto &it: approaches) {
+        auto fix = it.second.getStartFix();
+        if (!containsFix(res, fix)) {
+            res.push_back(fix);
+        }
+    }
+
+    return res;
+}
+
+std::vector<std::weak_ptr<Fix>> Airport::getDepartureFixes() const {
+    std::vector<std::weak_ptr<Fix>> res;
+
+    for (auto &it: sids) {
+        auto fix = it.second.getDestionationFix();
+        if (!containsFix(res, fix)) {
+            res.push_back(fix);
+        }
+    }
+
+    return res;
 }
 
 const std::string& Airport::getMetarTimestamp() const {
@@ -87,6 +140,15 @@ const std::string& Airport::getMetarTimestamp() const {
 
 const std::string& Airport::getMetarString() const {
     return metarString;
+}
+
+bool Airport::containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const {
+    for (auto &it: fixes) {
+        if (it.lock().get() == fix.lock().get()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } /* namespace xdata */

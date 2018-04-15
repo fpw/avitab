@@ -1,6 +1,7 @@
 add_subdirectory(parsers)
 add_library(xdata_loaders
     AirportLoader.cpp
+    CIFPLoader.cpp
     FixLoader.cpp
     NavaidLoader.cpp
     AirwayLoader.cpp

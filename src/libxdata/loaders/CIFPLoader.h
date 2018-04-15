@@ -15,29 +15,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
+#ifndef SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
+#define SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
 
+#include <string>
+#include <memory>
 #include <functional>
-#include "Widget.h"
+#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include "src/libxdata/loaders/objects/CIFPData.h"
 
-namespace avitab {
+namespace xdata {
 
-class Keyboard: public Widget {
+class CIFPLoader {
 public:
-    using Callback = std::function<void()>;
+    using Acceptor = std::function<void(const CIFPData &)>;
 
-    Keyboard(WidgetPtr parent, WidgetPtr target);
-    void setTarget(WidgetPtr target);
-    void setOnCancel(Callback cb);
-    void setOnOk(Callback cb);
-    void hideEnterKey();
+    CIFPLoader(const std::string &file);
+    void setAcceptor(Acceptor a);
+    void loadCIFP();
+
 private:
-    WidgetPtr targetText;
-    Callback onCancel;
-    Callback onOk;
+    enum class RecordType {
+        SID, STAR, PRDATA, APPROACH, RWY, UNKNOWN
+    };
+
+    Acceptor acceptor;
+    BaseParser parser;
+    RecordType currentType = RecordType::UNKNOWN;
+    CIFPData curData;
+
+    void parseLine();
+    void finishAndRestart();
+
+    RecordType parseRecordType();
+    void parseProcedure();
 };
 
-} /* namespace avitab */
+} /* namespace xdata */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_CIFPLOADER_H_ */

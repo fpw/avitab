@@ -18,6 +18,7 @@
 #include "XData.h"
 #include "src/platform/Platform.h"
 #include "src/libxdata/loaders/AirportLoader.h"
+#include "src/libxdata/loaders/CIFPLoader.h"
 #include "src/libxdata/loaders/FixLoader.h"
 #include "src/libxdata/loaders/NavaidLoader.h"
 #include "src/libxdata/loaders/AirwayLoader.h"
@@ -50,6 +51,7 @@ void XData::load() {
     loadFixes();
     loadNavaids();
     loadAirways();
+    loadProcedures();
     loadMetar();
 }
 
@@ -83,6 +85,22 @@ void xdata::XData::loadAirways() {
     AirwayLoader loader(navDataPath + "earth_awy.dat");
     loader.setAcceptor(std::bind(&World::onAirwayLoaded, world.get(), _1));
     loader.loadAirways();
+}
+
+void XData::loadProcedures() {
+    using namespace std::placeholders;
+
+    world->forEachAirport([this] (Airport &ap) {
+        try {
+            CIFPLoader loader(navDataPath + "CIFP/" + ap.getID() + ".dat");
+            loader.setAcceptor([this, &ap] (const CIFPData &cifp) {
+                world->onProcedureLoaded(ap, cifp);
+            });
+            loader.loadCIFP();
+        } catch (const std::exception &e) {
+            // many airports do not have CIFP info, ignore
+        }
+    });
 }
 
 void XData::loadMetar() {

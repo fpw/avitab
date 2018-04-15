@@ -15,29 +15,30 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
 
-#include <functional>
-#include "Widget.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include "Runway.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 
-namespace avitab {
+namespace xdata {
 
-class Keyboard: public Widget {
+class SID {
 public:
-    using Callback = std::function<void()>;
+    SID(const std::string &id);
 
-    Keyboard(WidgetPtr parent, WidgetPtr target);
-    void setTarget(WidgetPtr target);
-    void setOnCancel(Callback cb);
-    void setOnOk(Callback cb);
-    void hideEnterKey();
+    void setDestionationFix(std::weak_ptr<Fix> fix);
+    const std::string &getID() const;
+    std::weak_ptr<Fix> getDestionationFix() const;
+
 private:
-    WidgetPtr targetText;
-    Callback onCancel;
-    Callback onOk;
+    std::string id;
+    std::weak_ptr<Fix> destinationFix;
 };
 
-} /* namespace avitab */
+} /* namespace xdata */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_ */

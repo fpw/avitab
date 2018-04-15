@@ -41,6 +41,7 @@ private:
     void loadFixes();
     void loadNavaids();
     void loadAirways();
+    void loadProcedures();
     void loadMetar();
 };
 

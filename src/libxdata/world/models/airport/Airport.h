@@ -27,6 +27,9 @@
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
 #include "Runway.h"
+#include "SID.h"
+#include "STAR.h"
+#include "Approach.h"
 
 namespace xdata {
 
@@ -62,7 +65,17 @@ public:
     const std::string &getMetarString() const;
 
     void forEachRunway(std::function<void(const Runway &)> f);
+    const Runway &getRunwayByName(const std::string &rw) const;
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
+    void addSID(const SID &sid);
+    void addSTAR(const STAR &star);
+    void addApproach(const Approach &approach);
+
+    std::vector<std::weak_ptr<Fix>> getArrivalFixes() const;
+    std::vector<std::weak_ptr<Fix>> getDepartureFixes() const;
+
+    Airport(const Airport &other) = delete;
+    void operator=(const Airport &other) = delete;
 
 private:
     std::string id; // either ICAO code or X + fictional id
@@ -74,7 +87,12 @@ private:
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
     std::map<std::string, Runway> runways;
+    std::map<std::string, SID> sids;
+    std::map<std::string, STAR> stars;
+    std::map<std::string, Approach> approaches;
     std::string metarTimestamp, metarString;
+
+    bool containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const;
 };
 
 } /* namespace xdata */

@@ -24,6 +24,9 @@
 #include "src/libxdata/world/models/navaids/NDB.h"
 #include "src/libxdata/world/models/navaids/VOR.h"
 #include "src/libxdata/world/models/navaids/DME.h"
+#include "src/libxdata/world/models/airport/SID.h"
+#include "src/libxdata/world/models/airport/STAR.h"
+#include "src/libxdata/world/models/airport/Approach.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -162,10 +165,57 @@ void World::onAirwayLoaded(const AirwayData& airway) {
     }
 }
 
+void World::onProcedureLoaded(Airport &airport, const CIFPData &procedure) {
+    if (procedure.sequence.empty()) {
+        return;
+    }
+
+    auto &first = procedure.sequence.front();
+    auto &last = procedure.sequence.back();
+
+    switch (procedure.type) {
+    case CIFPData::ProcedureType::SID: {
+        SID sid(procedure.id);
+        auto lastFix = findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
+        if (lastFix) {
+            sid.setDestionationFix(lastFix);
+            airport.addSID(sid);
+        }
+        break;
+    }
+    case CIFPData::ProcedureType::STAR: {
+        STAR star(procedure.id);
+        auto firstFix = findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
+        if (firstFix) {
+            star.setStartFix(firstFix);
+            airport.addSTAR(star);
+        }
+        break;
+    }
+    case CIFPData::ProcedureType::APPROACH: {
+        Approach app(procedure.id);
+        auto firstFix = findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
+        if (firstFix) {
+            app.setStartFix(firstFix);
+            airport.addApproach(app);
+        }
+        break;
+    }
+    default:
+        return;
+    }
+}
+
 void World::onMetarLoaded(const MetarData& metar) {
     auto airport = findAirportByID(metar.icaoCode);
     if (airport) {
         airport->setCurrentMetar(metar.timestamp, metar.metar);
+    }
+}
+
+void World::forEachAirport(std::function<void(Airport&)> f) {
+    for (auto it: airports) {
+        f(*it.second);
     }
 }
 

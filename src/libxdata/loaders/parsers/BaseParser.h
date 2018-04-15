@@ -37,6 +37,7 @@ public:
     bool isEOL();
     std::string restOfLine();
     std::string parseWord();
+    std::string nextDelimitedWord(char delim);
     int parseInt();
     double parseDouble();
     void skip(char c);

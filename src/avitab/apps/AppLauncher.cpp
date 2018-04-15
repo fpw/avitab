@@ -21,6 +21,7 @@
 #include "About.h"
 #include "PlaneManualApp.h"
 #include "AirportApp.h"
+#include "RouteApp.h"
 #include "src/Logger.h"
 
 namespace avitab {
@@ -33,6 +34,7 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
 
     addEntry<ChartsApp>("Charts", root + "if_starthere_18227.png");
     addEntry<AirportApp>("Airports", root + "if_Airport_22906.png");
+    addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png");
     addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png");
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
     addEntry<About>("About", root + "if_Help_1493288.png");

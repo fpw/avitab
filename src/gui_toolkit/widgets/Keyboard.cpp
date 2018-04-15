@@ -53,6 +53,10 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
     setObj(keys);
 }
 
+void Keyboard::setTarget(WidgetPtr target) {
+    lv_kb_set_ta(obj(), target->obj());
+}
+
 void Keyboard::setOnCancel(Callback cb) {
     onCancel = cb;
 }

@@ -22,22 +22,18 @@
 
 namespace xdata {
 
-RouteFinder::RouteFinder(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to):
-    start(from),
-    end(to)
-{
-    Fix *p1 = from.lock().get();
-    Fix *p2 = to.lock().get();
-    distance = p1->getLocation().distanceTo(p2->getLocation());
+void RouteFinder::setAirwayLevel(Airway::Level level) {
+    airwayLevel = level;
 }
 
 void RouteFinder::setAirwayChangePenalty(float percent) {
     airwayChangePenalty = percent;
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(Airway::Level level) {
+std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteFixToFix(std::weak_ptr<Fix> start, std::weak_ptr<Fix> end) {
     Fix *from = start.lock().get();
     Fix *goal = end.lock().get();
+    directDistance = from->getLocation().distanceTo(goal->getLocation());
 
     // Init
     closedSet.clear();
@@ -64,7 +60,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(Airway::Level le
             Airway *airway = std::get<0>(neighborConn).lock().get();
             Fix *neighbor = std::get<1>(neighborConn).lock().get();
 
-            if (airway->getLevel() != level) {
+            if (airway->getLevel() != airwayLevel) {
                 continue;
             }
 
@@ -88,6 +84,18 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(Airway::Level le
     }
 
     throw std::runtime_error("No path found");
+}
+
+std::vector<RouteFinder::RouteDirection> RouteFinder::findRouteAirportToAirport(std::weak_ptr<Airport> from, std::weak_ptr<Airport> to) {
+    auto startApt = from.lock();
+    auto toApt = to.lock();
+
+    std::string str;
+
+    auto startFixes = startApt->getDepartureFixes();
+    auto endFixes = toApt->getArrivalFixes();
+
+    return findRouteFixToFix(startFixes.front(), endFixes.front());
 }
 
 std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath() {
@@ -136,7 +144,7 @@ double RouteFinder::cost(Fix* a, const RouteDirection& dir) {
     auto it = cameFrom.find(a);
     if (it != cameFrom.end()) {
         if (it->second.via != dir.via) {
-            penalty += airwayChangePenalty * distance;
+            penalty += airwayChangePenalty * directDistance;
         }
     }
 

@@ -24,6 +24,7 @@
 #include <map>
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Airway.h"
+#include "src/libxdata/world/models/airport/Airport.h"
 
 
 namespace xdata {
@@ -38,11 +39,13 @@ public:
         RouteDirection(Airway *via, Fix *to): via(via), to(to) { }
     };
 
-    RouteFinder(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to);
+    void setAirwayLevel(Airway::Level level);
     void setAirwayChangePenalty(float percent);
-    std::vector<RouteDirection> findRoute(Airway::Level level);
+    std::vector<RouteDirection> findRouteFixToFix(std::weak_ptr<Fix> from, std::weak_ptr<Fix> to);
+    std::vector<RouteDirection> findRouteAirportToAirport(std::weak_ptr<Airport> from, std::weak_ptr<Airport> to);
 private:
-    double distance = 0;
+    Airway::Level airwayLevel = Airway::Level::Lower;
+    double directDistance = 0;
     float airwayChangePenalty = 0;
 
     std::weak_ptr<Fix> start;

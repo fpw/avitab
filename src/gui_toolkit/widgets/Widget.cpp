@@ -86,6 +86,14 @@ void Widget::alignLeftOf(WidgetPtr base) {
     lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_LEFT_MID, 0, 0);
 }
 
+void Widget::alignRightOf(WidgetPtr base) {
+    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+}
+
+void Widget::alignBelow(WidgetPtr base) {
+    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+}
+
 int Widget::getWidth() {
     return lv_obj_get_width(obj());
 }

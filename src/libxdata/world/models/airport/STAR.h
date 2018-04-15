@@ -15,29 +15,29 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_STAR_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_STAR_H_
+#include <string>
+#include <vector>
+#include <memory>
+#include "Runway.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 
-#include <functional>
-#include "Widget.h"
+namespace xdata {
 
-namespace avitab {
-
-class Keyboard: public Widget {
+class STAR {
 public:
-    using Callback = std::function<void()>;
+    STAR(const std::string &id);
 
-    Keyboard(WidgetPtr parent, WidgetPtr target);
-    void setTarget(WidgetPtr target);
-    void setOnCancel(Callback cb);
-    void setOnOk(Callback cb);
-    void hideEnterKey();
+    void setStartFix(std::weak_ptr<Fix> fix);
+    const std::string &getID() const;
+    std::weak_ptr<Fix> getStartFix() const;
+
 private:
-    WidgetPtr targetText;
-    Callback onCancel;
-    Callback onOk;
+    std::string id;
+    std::weak_ptr<Fix> startFix;
 };
 
-} /* namespace avitab */
+} /* namespace xdata */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_STAR_H_ */
