@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Location.h"
+#include <cmath>
 
 namespace xdata {
 
@@ -23,6 +24,21 @@ Location::Location(double lat, double lon):
     latitude(lat),
     longitude(lon)
 {
+}
+
+double Location::distanceTo(const Location& other) const {
+    // using the haversine formula
+    double R = 6371000; // earth radius in meters
+    double phi1 = latitude * M_PI / 180.0;
+    double phi2 = other.latitude * M_PI / 180.0;
+    double deltaPhi = (other.latitude - latitude) * M_PI / 180.0;
+    double deltaLambda = (other.longitude - longitude) * M_PI / 180.0;
+
+    double a = std::sin(deltaPhi / 2.0) * std::sin(deltaPhi / 2.0) +
+               std::cos(phi1) * std::cos(phi2) *
+               std::sin(deltaLambda / 2.0) * std::sin(deltaLambda / 2.0);
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+    return R * c;
 }
 
 } /* namespace xdata */

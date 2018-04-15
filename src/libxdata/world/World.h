@@ -52,6 +52,8 @@ private:
 
     // Unique only within region
     std::multimap<std::string, std::shared_ptr<Fix>> fixes;
+
+    // Unique within airway level
     std::multimap<std::string, std::shared_ptr<Airway>> airways;
 
     std::shared_ptr<Region> createOrFindRegion(const std::string &id);

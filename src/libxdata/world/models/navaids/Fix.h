@@ -34,11 +34,15 @@ namespace xdata {
 
 class Fix {
 public:
+    using Connection = std::tuple<std::weak_ptr<Airway>, std::weak_ptr<Fix>>;
+
     Fix(std::shared_ptr<Region> region, std::string id, Location loc);
     const std::string &getID() const;
+    const Location &getLocation() const;
     std::shared_ptr<Region> getRegion() const;
 
     void connectTo(std::weak_ptr<Airway> via, std::weak_ptr<Fix> to);
+    const std::vector<Connection> &getConnections() const;
 
     void attachNDB(std::shared_ptr<NDB> ndbInfo);
     void attachDME(std::shared_ptr<DME> dmeInfo);
@@ -46,8 +50,6 @@ public:
     void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
     std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
 private:
-    using Connection = std::tuple<std::weak_ptr<Airway>, std::weak_ptr<Fix>>;
-
     std::shared_ptr<Region> region;
     std::string id;
     Location location;

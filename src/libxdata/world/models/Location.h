@@ -28,6 +28,8 @@ struct Location {
 
     Location() = default;
     Location(double lat, double lon);
+
+    double distanceTo(const Location &other) const;
 };
 
 } /* namespace xdata */

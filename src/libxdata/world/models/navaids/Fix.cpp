@@ -30,6 +30,10 @@ const std::string& Fix::getID() const {
     return id;
 }
 
+const Location& Fix::getLocation() const {
+    return location;
+}
+
 std::shared_ptr<Region> Fix::getRegion() const {
     return region;
 }
@@ -37,6 +41,10 @@ std::shared_ptr<Region> Fix::getRegion() const {
 void Fix::connectTo(std::weak_ptr<Airway> via, std::weak_ptr<Fix> to) {
     Connection con = std::make_tuple(via, to);
     connections.push_back(con);
+}
+
+const std::vector<Fix::Connection>& Fix::getConnections() const {
+    return connections;
 }
 
 void Fix::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
