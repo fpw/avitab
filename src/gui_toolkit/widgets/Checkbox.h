@@ -19,6 +19,7 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_CHECKBOX_H_
 
 #include "Widget.h"
+#include <string>
 
 namespace avitab {
 
