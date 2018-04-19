@@ -32,12 +32,12 @@ void AirportLoader::load(const std::string& file) {
 }
 
 void AirportLoader::onAirportLoaded(const AirportData& port) {
-    auto airport = world->createOrFindAirport(port.id);
+    auto airport = world->findOrCreateAirport(port.id);
     airport->setName(port.name);
     airport->setElevation(port.elevation);
 
     if (!port.region.empty()) {
-        auto region = world->createOrFindRegion(port.region);
+        auto region = world->findOrCreateRegion(port.region);
         airport->setRegion(region);
         if (!port.country.empty()) {
             region->setName(port.country);

@@ -17,6 +17,7 @@
  */
 #include "NavaidLoader.h"
 #include "src/libxdata/parsers/NavaidParser.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 
 namespace xdata {
 
@@ -35,7 +36,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
     auto fix = world->findFixByRegionAndID(navaid.icaoRegion, navaid.id);
     if (!fix) {
         Location location(navaid.latitude, navaid.longitude);
-        auto region = world->createOrFindRegion(navaid.icaoRegion);
+        auto region = world->findOrCreateRegion(navaid.icaoRegion);
         fix = std::make_shared<Fix>(region, navaid.id, location);
         world->addFix(fix);
     }

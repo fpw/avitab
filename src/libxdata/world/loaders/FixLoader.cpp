@@ -35,7 +35,7 @@ void FixLoader::onFixLoaded(const FixData& fix) {
     if (fix.terminalAreaId == "ENRT") {
         auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
 
-        auto region = world->createOrFindRegion(fix.icaoRegion);
+        auto region = world->findOrCreateRegion(fix.icaoRegion);
         Location loc(fix.latitude, fix.longitude);
 
         fixModel = std::make_shared<Fix>(region, fix.id, loc);

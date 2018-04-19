@@ -99,11 +99,11 @@ void StandAloneEnvironment::createCommand(const std::string& name, const std::st
 void StandAloneEnvironment::destroyCommands() {
 }
 
-std::string avitab::StandAloneEnvironment::getAirplanePath() {
+std::string StandAloneEnvironment::getAirplanePath() {
     return "";
 }
 
-std::string avitab::StandAloneEnvironment::getProgramPath() {
+std::string StandAloneEnvironment::getProgramPath() {
     return platform::nativeToUTF8(ourPath);
 }
 
@@ -120,7 +120,7 @@ EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
     return simulatedData[dataRef];
 }
 
-std::shared_ptr<xdata::XData> avitab::StandAloneEnvironment::getNavData() {
+std::shared_ptr<xdata::XData> StandAloneEnvironment::getNavData() {
     return xplaneData;
 }
 

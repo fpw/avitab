@@ -46,7 +46,7 @@ void AirwayLoader::onAirwayLoaded(const AirwayData& airway) {
     default:                                throw std::runtime_error("Invalid airway level");
     }
 
-    auto awy = world->createOrFindAirway(airway.name, level);
+    auto awy = world->findOrCreateAirway(airway.name, level);
     switch (airway.dirRestriction) {
     case AirwayData::DirectionRestriction::FORWARD:
         fromFix->connectTo(awy, toFix);

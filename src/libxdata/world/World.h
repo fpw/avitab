@@ -18,7 +18,6 @@
 #ifndef SRC_LIBXDATA_WORLD_WORLD_H_
 #define SRC_LIBXDATA_WORLD_WORLD_H_
 
-#include <src/libxdata/parsers/objects/CIFPData.h>
 #include <map>
 #include <string>
 #include <memory>
@@ -36,14 +35,14 @@ class World {
 public:
     World();
 
-    std::shared_ptr<Airport> findAirportByID(const std::string &id);
-    std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id);
-    void forEachAirport(std::function<void(Airport &)> f);
+    std::shared_ptr<Airport> findAirportByID(const std::string &id) const;
+    std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const;
 
+    void forEachAirport(std::function<void(Airport &)> f);
     void addFix(std::shared_ptr<Fix> fix);
-    std::shared_ptr<Region> createOrFindRegion(const std::string &id);
-    std::shared_ptr<Airport> createOrFindAirport(const std::string &id);
-    std::shared_ptr<Airway> createOrFindAirway(const std::string &name, Airway::Level lvl);
+    std::shared_ptr<Region> findOrCreateRegion(const std::string &id);
+    std::shared_ptr<Airport> findOrCreateAirport(const std::string &id);
+    std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, Airway::Level lvl);
 
 private:
     // Unique IDs

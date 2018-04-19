@@ -70,7 +70,7 @@ void XData::loadNavaids() {
     loader.load(navDataPath + "earth_nav.dat");
 }
 
-void xdata::XData::loadAirways() {
+void XData::loadAirways() {
     AirwayLoader loader(world);
     loader.load(navDataPath + "earth_awy.dat");
 }

@@ -20,13 +20,6 @@
 #include <iostream>
 #include <sstream>
 #include "World.h"
-#include "src/libxdata/world/models/navaids/ILSLocalizer.h"
-#include "src/libxdata/world/models/navaids/NDB.h"
-#include "src/libxdata/world/models/navaids/VOR.h"
-#include "src/libxdata/world/models/navaids/DME.h"
-#include "src/libxdata/world/models/airport/SID.h"
-#include "src/libxdata/world/models/airport/STAR.h"
-#include "src/libxdata/world/models/airport/Approach.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -35,13 +28,7 @@ World::World()
 {
 }
 
-void World::forEachAirport(std::function<void(Airport&)> f) {
-    for (auto it: airports) {
-        f(*it.second);
-    }
-}
-
-std::shared_ptr<Airport> World::findAirportByID(const std::string& id) {
+std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
     std::string cleanId = id;
     for (auto &c: cleanId) c = toupper(c);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
@@ -54,17 +41,7 @@ std::shared_ptr<Airport> World::findAirportByID(const std::string& id) {
     }
 }
 
-std::shared_ptr<Region> World::createOrFindRegion(const std::string& id) {
-    auto iter = regions.find(id);
-    if (iter == regions.end()) {
-        auto ptr = std::make_shared<Region>(id);
-        regions.insert(std::make_pair(id, ptr));
-        return ptr;
-    }
-    return iter->second;
-}
-
-std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, const std::string& id) {
+std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, const std::string& id) const {
     auto range = fixes.equal_range(id);
 
     for (auto it = range.first; it != range.second; ++it) {
@@ -76,7 +53,23 @@ std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, cons
     return nullptr;
 }
 
-std::shared_ptr<Airport> World::createOrFindAirport(const std::string& id) {
+void World::forEachAirport(std::function<void(Airport&)> f) {
+    for (auto it: airports) {
+        f(*it.second);
+    }
+}
+
+std::shared_ptr<Region> World::findOrCreateRegion(const std::string& id) {
+    auto iter = regions.find(id);
+    if (iter == regions.end()) {
+        auto ptr = std::make_shared<Region>(id);
+        regions.insert(std::make_pair(id, ptr));
+        return ptr;
+    }
+    return iter->second;
+}
+
+std::shared_ptr<Airport> World::findOrCreateAirport(const std::string& id) {
     auto iter = airports.find(id);
     if (iter == airports.end()) {
         auto ptr = std::make_shared<Airport>(id);
@@ -86,7 +79,7 @@ std::shared_ptr<Airport> World::createOrFindAirport(const std::string& id) {
     return iter->second;
 }
 
-std::shared_ptr<Airway> World::createOrFindAirway(const std::string& name, Airway::Level lvl) {
+std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, Airway::Level lvl) {
     auto range = airways.equal_range(name);
 
     for (auto it = range.first; it != range.second; ++it) {
