@@ -16,46 +16,30 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "FixLoader.h"
+#include "src/libxdata/loaders/parsers/FixParser.h"
 
 namespace xdata {
 
-FixLoader::FixLoader(const std::string& file):
-    parser(file)
+FixLoader::FixLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
-    header = parser.parseHeader();
 }
 
-std::string FixLoader::getHeader() const {
-    return header;
+void FixLoader::load(const std::string& file) {
+    FixParser parser(file);
+    parser.setAcceptor([this] (const FixData &data) { onFixLoaded(data); });
+    parser.loadFixes();
 }
 
-void FixLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
-}
+void FixLoader::onFixLoaded(const FixData& fix) {
+    if (fix.terminalAreaId == "ENRT") {
+        auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
 
-void FixLoader::loadFixes() {
-    using namespace std::placeholders;
-    parser.eachLine(std::bind(&FixLoader::parseLine, this));
-}
+        auto region = world->createOrFindRegion(fix.icaoRegion);
+        Location loc(fix.latitude, fix.longitude);
 
-void FixLoader::parseLine() {
-    FixData fix {};
-
-    fix.latitude = parser.parseDouble();
-    fix.longitude = parser.parseDouble();
-    fix.id = parser.parseWord();
-    fix.terminalAreaId = parser.parseWord();
-    fix.icaoRegion = parser.parseWord();
-
-    if (!parser.isEOL()) {
-        int arincData = parser.parseInt();
-        fix.col27 = (arincData >>  0) & 0xFF;
-        fix.col28 = (arincData >>  8) & 0xFF;
-        fix.col29 = (arincData >> 16) & 0xFF;
-    }
-
-    if (!fix.id.empty()) {
-        acceptor(fix);
+        fixModel = std::make_shared<Fix>(region, fix.id, loc);
+        world->addFix(fixModel);
     }
 }
 

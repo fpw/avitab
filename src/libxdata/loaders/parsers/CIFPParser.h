@@ -15,26 +15,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#ifndef SRC_LIBXDATA_LOADERS_CIFPPARSER_H_
+#define SRC_LIBXDATA_LOADERS_CIFPPARSER_H_
 
+#include <string>
 #include <memory>
-#include "src/libxdata/loaders/parsers/FixParser.h"
-#include "src/libxdata/loaders/objects/FixData.h"
-#include "src/libxdata/world/World.h"
+#include <functional>
+#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include "src/libxdata/loaders/objects/CIFPData.h"
 
 namespace xdata {
 
-class FixLoader {
+class CIFPParser {
 public:
-    FixLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const CIFPData &)>;
 
-    void onFixLoaded(const FixData &fix);
+    CIFPParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    void loadCIFP();
+
+private:
+    enum class RecordType {
+        SID, STAR, PRDATA, APPROACH, RWY, UNKNOWN
+    };
+
+    Acceptor acceptor;
+    BaseParser parser;
+    RecordType currentType = RecordType::UNKNOWN;
+    CIFPData curData;
+
+    void parseLine();
+    void finishAndRestart();
+
+    RecordType parseRecordType();
+    void parseProcedure();
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_CIFPPARSER_H_ */

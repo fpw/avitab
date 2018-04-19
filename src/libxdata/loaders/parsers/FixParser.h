@@ -15,26 +15,32 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#ifndef SRC_LIBXDATA_LOADERS_FIXPARSER_H_
+#define SRC_LIBXDATA_LOADERS_FIXPARSER_H_
 
-#include <memory>
-#include "src/libxdata/loaders/parsers/FixParser.h"
+#include <string>
+#include <functional>
+#include "src/libxdata/loaders/parsers/BaseParser.h"
 #include "src/libxdata/loaders/objects/FixData.h"
-#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class FixLoader {
+class FixParser {
 public:
-    FixLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const FixData &)>;
 
-    void onFixLoaded(const FixData &fix);
+    FixParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadFixes();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+
+    void parseLine();
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_FIXPARSER_H_ */

@@ -16,94 +16,65 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "CIFPLoader.h"
-#include "src/Logger.h"
+#include "src/libxdata/loaders/parsers/CIFPParser.h"
 
 namespace xdata {
 
-CIFPLoader::CIFPLoader(const std::string& file):
-    parser(file)
+CIFPLoader::CIFPLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
 }
 
-void CIFPLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
+void CIFPLoader::load(Airport &airport, const std::string& file) {
+    CIFPParser parser(file);
+    parser.setAcceptor([this, &airport] (const CIFPData &cifp) {
+        onProcedureLoaded(airport, cifp);
+    });
+    parser.loadCIFP();
 }
 
-void CIFPLoader::loadCIFP() {
-    using namespace std::placeholders;
-    parser.eachLine(std::bind(&CIFPLoader::parseLine, this));
-    finishAndRestart();
-}
-
-void CIFPLoader::parseLine() {
-    RecordType lineType = parseRecordType();
-
-    if (lineType != currentType) {
-        finishAndRestart();
-        currentType = lineType;
-    }
-
-    switch (lineType) {
-    case RecordType::SID:
-    case RecordType::STAR:
-    case RecordType::APPROACH:
-        parseProcedure();
-        break;
-    default:
-        // silently ignore other types for now
+void CIFPLoader::onProcedureLoaded(Airport& airport, const CIFPData& procedure) {
+    if (procedure.sequence.empty()) {
         return;
     }
-}
 
-void CIFPLoader::finishAndRestart() {
-    // finish and start new one
-    if (curData.type != CIFPData::ProcedureType::NONE) {
-        if (acceptor) {
-            acceptor(curData);
+    auto &first = procedure.sequence.front();
+    auto &last = procedure.sequence.back();
+
+    switch (procedure.type) {
+    case CIFPData::ProcedureType::SID: {
+        SID sid(procedure.id);
+        auto lastFix = world->findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
+        if (lastFix) {
+            sid.setTransitionName(first.transitionId);
+            sid.setDestionationFix(lastFix);
+            airport.addSID(sid);
         }
+        break;
     }
-    curData = CIFPData {};
-}
-
-CIFPLoader::RecordType CIFPLoader::parseRecordType() {
-    std::string typeStr = parser.nextDelimitedWord(':');
-
-    if (typeStr == "SID") {
-        return RecordType::SID;
-    } else if (typeStr == "STAR") {
-        return RecordType::STAR;
-    } else if (typeStr == "APPCH") {
-        return RecordType::APPROACH;
-    } else if (typeStr == "PRDAT") {
-        return RecordType::PRDATA;
-    } else if (typeStr == "RWY") {
-        return RecordType::RWY;
-    } else {
-        return RecordType::UNKNOWN;
-    }
-}
-
-void CIFPLoader::parseProcedure() {
-    parser.nextDelimitedWord(','); // sequence number
-    parser.nextDelimitedWord(','); // type
-    std::string routeId = parser.nextDelimitedWord(',');
-
-    if (routeId != curData.id) {
-        finishAndRestart();
-        curData.id = routeId;
-        switch (currentType) {
-        case RecordType::SID:       curData.type = CIFPData::ProcedureType::SID; break;
-        case RecordType::STAR:      curData.type = CIFPData::ProcedureType::STAR; break;
-        case RecordType::APPROACH:  curData.type = CIFPData::ProcedureType::APPROACH; break;
-        default:                    curData.type = CIFPData::ProcedureType::NONE; break;
+    case CIFPData::ProcedureType::STAR: {
+        STAR star(procedure.id);
+        auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
+        if (firstFix) {
+            star.setTransitionName(first.transitionId);
+            star.setStartFix(firstFix);
+            airport.addSTAR(star);
         }
+        break;
     }
-
-    CIFPData::Entry entry {};
-    entry.transitionId = parser.nextDelimitedWord(',');
-    entry.fixId = parser.nextDelimitedWord(',');
-    entry.fixIcaoRegion = parser.nextDelimitedWord(',');
-    curData.sequence.push_back(entry);
+    case CIFPData::ProcedureType::APPROACH: {
+        Approach app(procedure.id);
+        auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
+        if (firstFix) {
+            app.setTransitionName(first.transitionId);
+            app.setStartFix(firstFix);
+            airport.addApproach(app);
+        }
+        break;
+    }
+    default:
+        return;
+    }
 }
 
 } /* namespace xdata */

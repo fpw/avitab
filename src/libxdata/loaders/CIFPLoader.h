@@ -18,37 +18,22 @@
 #ifndef SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
 #define SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
 
-#include <string>
 #include <memory>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include "src/libxdata/loaders/parsers/CIFPParser.h"
 #include "src/libxdata/loaders/objects/CIFPData.h"
+#include "src/libxdata/world/models/airport/Airport.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
 class CIFPLoader {
 public:
-    using Acceptor = std::function<void(const CIFPData &)>;
-
-    CIFPLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    void loadCIFP();
-
+    CIFPLoader(std::shared_ptr<World> worldPtr);
+    void load(Airport &airport, const std::string &file);
 private:
-    enum class RecordType {
-        SID, STAR, PRDATA, APPROACH, RWY, UNKNOWN
-    };
+    std::shared_ptr<World> world;
 
-    Acceptor acceptor;
-    BaseParser parser;
-    RecordType currentType = RecordType::UNKNOWN;
-    CIFPData curData;
-
-    void parseLine();
-    void finishAndRestart();
-
-    RecordType parseRecordType();
-    void parseProcedure();
+    void onProcedureLoaded(Airport &airport, const CIFPData &procedure);
 };
 
 } /* namespace xdata */

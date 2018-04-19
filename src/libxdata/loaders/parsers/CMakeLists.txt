@@ -1,4 +1,9 @@
 add_library(xdata_parsers
     BaseParser.cpp
+    AirportParser.cpp
+    CIFPParser.cpp
+    FixParser.cpp
+    NavaidParser.cpp
+    AirwayParser.cpp
+    MetarParser.cpp
 )
-

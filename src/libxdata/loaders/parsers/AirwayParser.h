@@ -15,26 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#ifndef SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_
+#define SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_
 
-#include <memory>
-#include "src/libxdata/loaders/parsers/FixParser.h"
-#include "src/libxdata/loaders/objects/FixData.h"
-#include "src/libxdata/world/World.h"
+#include <string>
+#include <functional>
+#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include "src/libxdata/loaders/objects/AirwayData.h"
 
 namespace xdata {
 
-class FixLoader {
+class AirwayParser {
 public:
-    FixLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const AirwayData &)>;
 
-    void onFixLoaded(const FixData &fix);
+    AirwayParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadAirways();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+
+    void parseLine();
+    AirwayData::AltitudeLevel parseLevel(int num);
+    AirwayData::NavType parseNavType(int type);
+    AirwayData::DirectionRestriction parseDirectionalRestriction(const std::string &dir);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_ */

@@ -22,11 +22,6 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include "src/libxdata/loaders/objects/AirportData.h"
-#include "src/libxdata/loaders/objects/FixData.h"
-#include "src/libxdata/loaders/objects/NavaidData.h"
-#include "src/libxdata/loaders/objects/AirwayData.h"
-#include "src/libxdata/loaders/objects/MetarData.h"
 #include "src/libxdata/loaders/objects/CIFPData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
@@ -40,16 +35,15 @@ constexpr const double KM_TO_NM = 0.539957;
 class World {
 public:
     World();
-    void onAirportLoaded(const AirportData &port);
-    void onFixLoaded(const FixData &fix);
-    void onNavaidLoaded(const NavaidData &navaid);
-    void onAirwayLoaded(const AirwayData &airway);
-    void onProcedureLoaded(Airport &airport, const CIFPData &procedure);
-    void onMetarLoaded(const MetarData &metar);
 
     std::shared_ptr<Airport> findAirportByID(const std::string &id);
     std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id);
     void forEachAirport(std::function<void(Airport &)> f);
+
+    void addFix(std::shared_ptr<Fix> fix);
+    std::shared_ptr<Region> createOrFindRegion(const std::string &id);
+    std::shared_ptr<Airport> createOrFindAirport(const std::string &id);
+    std::shared_ptr<Airway> createOrFindAirway(const std::string &name, Airway::Level lvl);
 
 private:
     // Unique IDs
@@ -61,10 +55,6 @@ private:
 
     // Unique within airway level
     std::multimap<std::string, std::shared_ptr<Airway>> airways;
-
-    std::shared_ptr<Region> createOrFindRegion(const std::string &id);
-    std::shared_ptr<Airport> createOrFindAirport(const std::string &id);
-    std::shared_ptr<Airway> createOrFindAirway(const std::string &name, Airway::Level lvl);
 };
 
 } /* namespace xdata */

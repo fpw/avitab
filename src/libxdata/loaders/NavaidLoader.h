@@ -18,28 +18,21 @@
 #ifndef SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
 #define SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include <memory>
+#include "src/libxdata/loaders/parsers/NavaidParser.h"
 #include "src/libxdata/loaders/objects/NavaidData.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
 class NavaidLoader {
 public:
-    using Acceptor = std::function<void(const NavaidData &)>;
-
-    NavaidLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadNavaids();
+    NavaidLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
+    std::shared_ptr<World> world;
 
-    void parseLine();
-    NavaidData::Type parseType(int num);
+    void onNavaidLoaded(const NavaidData &navaid);
 };
 
 } /* namespace xdata */

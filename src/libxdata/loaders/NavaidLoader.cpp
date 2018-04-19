@@ -16,78 +16,61 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "NavaidLoader.h"
-#include <iostream>
+#include "src/libxdata/loaders/parsers/NavaidParser.h"
 
 namespace xdata {
 
-NavaidLoader::NavaidLoader(const std::string& file):
-    parser(file)
+NavaidLoader::NavaidLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
-    header = parser.parseHeader();
 }
 
-std::string NavaidLoader::getHeader() const {
-    return header;
+void NavaidLoader::load(const std::string& file) {
+    NavaidParser parser(file);
+    parser.setAcceptor([this] (const NavaidData &data) { onNavaidLoaded(data); });
+    parser.loadNavaids();
 }
 
-void NavaidLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
-}
-
-void NavaidLoader::loadNavaids() {
-    using namespace std::placeholders;
-    parser.eachLine(std::bind(&NavaidLoader::parseLine, this));
-}
-
-void NavaidLoader::parseLine() {
-    int typeNum = parser.parseInt();
-    if (typeNum == 99 || typeNum == 0) {
-        return;
+void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
+    auto fix = world->findFixByRegionAndID(navaid.icaoRegion, navaid.id);
+    if (!fix) {
+        Location location(navaid.latitude, navaid.longitude);
+        auto region = world->createOrFindRegion(navaid.icaoRegion);
+        fix = std::make_shared<Fix>(region, navaid.id, location);
+        world->addFix(fix);
     }
 
-    NavaidData nav {};
-    nav.type = parseType(typeNum);
-    nav.latitude = parser.parseDouble();
-    nav.longitude = parser.parseDouble();
-    nav.elevation = parser.parseInt();
-    nav.radio = parser.parseInt();
+    if (navaid.type == NavaidData::Type::ILS_LOC) {
+        std::istringstream rwyAndDesc(navaid.name);
+        std::string rwy;
+        std::string desc;
+        rwyAndDesc >> rwy;
+        rwyAndDesc >> desc;
+        Frequency ilsFrq = Frequency(navaid.radio, Frequency::Unit::MHZ, desc);
+        auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
+        ils->setRunwayHeading(navaid.bearing);
+        fix->attachILSLocalizer(ils);
 
-    if (nav.type == NavaidData::Type::FPAP || nav.type == NavaidData::Type::LTP_FTP) {
-        nav.range = parser.parseInt() * 10;
-        parser.skip('.');
-        nav.range += parser.parseInt();
-    } else {
-        nav.range = parser.parseInt();
-    }
-
-    nav.bearing = parser.parseDouble();
-    nav.id = parser.parseWord();
-    nav.terminalRegion = parser.parseWord();
-    nav.icaoRegion = parser.parseWord();
-    nav.name = parser.restOfLine();
-
-    if (!nav.id.empty()) {
-        acceptor(nav);
-    }
-}
-
-NavaidData::Type NavaidLoader::parseType(int num) {
-    switch (num) {
-    case 2:   return NavaidData::Type::NDB;
-    case 3:   return NavaidData::Type::VOR;
-    case 4:   return NavaidData::Type::ILS_LOC;
-    case 5:   return NavaidData::Type::LOC;
-    case 6:   return NavaidData::Type::ILS_GS;
-    case 7:   return NavaidData::Type::ILS_OM;
-    case 8:   return NavaidData::Type::ILS_MM;
-    case 9:   return NavaidData::Type::ILS_IM;
-    case 12:  return NavaidData::Type::DME_COMP;
-    case 13:  return NavaidData::Type::DME_SINGLE;
-    case 14:  return NavaidData::Type::FPAP;
-    case 15:  return NavaidData::Type::GLS;
-    case 16:  return NavaidData::Type::LTP_FTP;
-    default:
-        throw std::runtime_error("Unknown navAid type: " + std::to_string(num));
+        auto airport = world->findAirportByID(navaid.terminalRegion);
+        if (airport) {
+            try {
+                airport->attachILSData(rwy, fix);
+            } catch (...) {
+                // ignore mismatch of AIRAC vs apt.data
+            }
+        }
+    } else if (navaid.type == NavaidData::Type::NDB) {
+        Frequency ndbFrq = Frequency(navaid.radio, Frequency::Unit::KHZ, navaid.name);
+        auto ndb = std::make_shared<NDB>(ndbFrq, navaid.range);
+        fix->attachNDB(ndb);
+    } else if (navaid.type == NavaidData::Type::VOR) {
+        Frequency vorFrq = Frequency(navaid.radio, Frequency::Unit::MHZ, navaid.name);
+        auto vor = std::make_shared<VOR>(vorFrq, navaid.range);
+        fix->attachVOR(vor);
+    } else if (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP) {
+        Frequency dmeFreq = Frequency(navaid.radio, Frequency::Unit::MHZ, navaid.name);
+        auto dme = std::make_shared<DME>(dmeFreq, navaid.range);
+        fix->attachDME(dme);
     }
 }
 

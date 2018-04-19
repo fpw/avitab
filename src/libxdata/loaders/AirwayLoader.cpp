@@ -16,92 +16,49 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "AirwayLoader.h"
-#include <iostream>
-#include <sstream>
+#include "src/libxdata/loaders/parsers/AirwayParser.h"
 
 namespace xdata {
 
-AirwayLoader::AirwayLoader(const std::string& file):
-    parser(file)
+AirwayLoader::AirwayLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
-    parser.parseHeader();
 }
 
-std::string AirwayLoader::getHeader() const {
-    return header;
+void AirwayLoader::load(const std::string& file) {
+    AirwayParser parser(file);
+    parser.setAcceptor([this] (const AirwayData &data) { onAirwayLoaded(data); });
+    parser.loadAirways();
 }
 
-void AirwayLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
-}
+void AirwayLoader::onAirwayLoaded(const AirwayData& airway) {
+    auto fromFix = world->findFixByRegionAndID(airway.beginIcaoRegion, airway.beginID);
+    auto toFix = world->findFixByRegionAndID(airway.endIcaoRegion, airway.endID);
 
-void AirwayLoader::loadAirways() {
-    using namespace std::placeholders;
-    parser.eachLine(std::bind(&AirwayLoader::parseLine, this));
-}
-
-void AirwayLoader::parseLine() {
-    std::string firstWord = parser.parseWord();
-
-    if (firstWord == "99" || firstWord.empty()) {
+    if (!fromFix || !toFix) {
         return;
     }
 
-    AirwayData awy {};
+    Airway::Level level;
+    switch (airway.level) {
+    case AirwayData::AltitudeLevel::LOW:    level = Airway::Level::Lower; break;
+    case AirwayData::AltitudeLevel::HIGH:   level = Airway::Level::Upper; break;
+    default:                                throw std::runtime_error("Invalid airway level");
+    }
 
-    awy.beginID = firstWord;
-    awy.beginIcaoRegion = parser.parseWord();
-    awy.beginType = parseNavType(parser.parseInt());
-
-    awy.endID = parser.parseWord();
-    awy.endIcaoRegion = parser.parseWord();
-    awy.endType = parseNavType(parser.parseInt());
-
-    awy.dirRestriction = parseDirectionalRestriction(parser.parseWord());
-    awy.level = parseLevel(parser.parseInt());
-
-    awy.base = parser.parseInt();
-    awy.top = parser.parseInt();
-    awy.name = parser.parseWord();
-
-    if (!awy.name.empty()) {
-        std::stringstream nameStream(awy.name);
-        std::string name;
-        while (std::getline(nameStream, name, '-')) {
-            awy.name = name;
-            acceptor(awy);
-        }
+    auto awy = world->createOrFindAirway(airway.name, level);
+    switch (airway.dirRestriction) {
+    case AirwayData::DirectionRestriction::FORWARD:
+        fromFix->connectTo(awy, toFix);
+        break;
+    case AirwayData::DirectionRestriction::BACKWARD:
+        toFix->connectTo(awy, fromFix);
+        break;
+    case AirwayData::DirectionRestriction::NONE:
+        fromFix->connectTo(awy, toFix);
+        toFix->connectTo(awy, fromFix);
+        break;
     }
 }
 
-AirwayData::AltitudeLevel AirwayLoader::parseLevel(int num) {
-    switch (num) {
-    case 1: return AirwayData::AltitudeLevel::LOW;
-    case 2: return AirwayData::AltitudeLevel::HIGH;
-    default:  throw std::runtime_error("Unknown High / Low type: " + std::to_string(num));
-    }
-}
-
-AirwayData::NavType AirwayLoader::parseNavType(int type) {
-    switch (type) {
-    case 11:  return AirwayData::NavType::FIX;
-    case 2:   return AirwayData::NavType::NDB;
-    case 3:   return AirwayData::NavType::VHF;
-    default:  throw std::runtime_error("Unknown segment type: " + std::to_string(type));
-    }
-}
-
-AirwayData::DirectionRestriction AirwayLoader::parseDirectionalRestriction(const std::string& dir) {
-    if (dir == "N") {
-        return AirwayData::DirectionRestriction::NONE;
-    } else if (dir == "F") {
-        return AirwayData::DirectionRestriction::FORWARD;
-    } else if (dir == "B") {
-        return AirwayData::DirectionRestriction::BACKWARD;
-    } else {
-        throw std::runtime_error("Unknown direction restriction: " + dir);
-    }
-}
-
-}
-/* namespace xdata */
+} /* namespace xdata */

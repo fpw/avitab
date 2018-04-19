@@ -15,138 +15,62 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "AirportLoader.h"
-#include "src/libxdata/loaders/objects/AirportData.h"
+#include <cmath>
 
 namespace xdata {
 
-AirportLoader::AirportLoader(const std::string& file):
-    parser(file)
+AirportLoader::AirportLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
-    header = parser.parseHeader();
 }
 
-void AirportLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
+void AirportLoader::load(const std::string& file) {
+    AirportParser parser(file);
+    parser.setAcceptor([this] (const AirportData &data) { onAirportLoaded(data); });
+    parser.loadAirports();
 }
 
-std::string AirportLoader::getHeader() const {
-    return header;
-}
+void AirportLoader::onAirportLoaded(const AirportData& port) {
+    auto airport = world->createOrFindAirport(port.id);
+    airport->setName(port.name);
+    airport->setElevation(port.elevation);
 
-void AirportLoader::loadAirports() {
-    using namespace std::placeholders;
-    curPort = {};
-    parser.eachLine(std::bind(&AirportLoader::parseLine, this));
-}
+    if (!port.region.empty()) {
+        auto region = world->createOrFindRegion(port.region);
+        airport->setRegion(region);
+        if (!port.country.empty()) {
+            region->setName(port.country);
+        }
+    }
 
-void AirportLoader::parseLine() {
-    int rowCode = parser.parseInt();
+    for (auto &entry: port.frequencies) {
+        Frequency frq(entry.frq, Frequency::Unit::MHZ, entry.desc);
+        switch (entry.code) {
+        case 50: airport->addATCFrequency(Airport::ATCFrequency::RECORDED, frq); break;
+        case 51: airport->addATCFrequency(Airport::ATCFrequency::UNICOM, frq); break;
+        case 52: airport->addATCFrequency(Airport::ATCFrequency::CLD, frq); break;
+        case 53: airport->addATCFrequency(Airport::ATCFrequency::GND, frq); break;
+        case 54: airport->addATCFrequency(Airport::ATCFrequency::TWR, frq); break;
+        case 55: airport->addATCFrequency(Airport::ATCFrequency::APP, frq); break;
+        case 56: airport->addATCFrequency(Airport::ATCFrequency::DEP, frq); break;
+        }
+    }
 
-    switch (rowCode) {
-    case 1:
-    case 16:
-    case 17:
-        finishAirport();
-        startAirport();
-        break;
-    case 100:
-        parseRunway();
-        break;
-    case 1302:
-        parseMetaData();
-        break;
-    case 50:
-    case 51:
-    case 52:
-    case 53:
-    case 54:
-    case 55:
-    case 56:
-        parseFrequency(rowCode);
-        break;
-    case 99:
-        finishAirport();
-        break;
+    if (!std::isnan(port.latitude) && !std::isnan(port.longitude)) {
+        Location loc(port.latitude, port.longitude);
+        airport->setLocation(loc);
+    }
+
+    for (auto &entry: port.runways) {
+        for (auto &end: entry.ends) {
+            Runway rwy(end.name);
+            rwy.setLocation(Location(end.latitude, end.longitude));
+            rwy.setWidth(entry.width);
+
+            airport->addRunway(rwy);
+        }
     }
 }
 
-void AirportLoader::startAirport() {
-    curPort.elevation = parser.parseInt();
-    parser.parseInt(); // not required
-    parser.parseInt(); // not required;
-    curPort.id = parser.parseWord();
-    curPort.name = parser.restOfLine();
-}
-
-void AirportLoader::parseRunway() {
-    AirportData::RunwayData rwy;
-
-    rwy.width = parser.parseDouble();
-    rwy.surfaceType = parser.parseInt();
-    parser.parseInt(); // shoulder
-    parser.parseDouble(); // smoothness
-    parser.parseInt(); // center lights
-    parser.parseInt(); // edge lights
-    parser.parseInt(); // autogen signs
-
-    AirportData::RunwayEnd end;
-    while (parseRunwayEnd(end)) {
-        rwy.ends.push_back(end);
-    }
-    curPort.runways.push_back(rwy);
-}
-
-bool AirportLoader::parseRunwayEnd(AirportData::RunwayEnd &end) {
-    std::string firstWord = parser.parseWord();
-    if (firstWord.empty()) {
-        return false;
-    }
-
-    end.name = firstWord;
-    end.latitude = parser.parseDouble();
-    end.longitude = parser.parseDouble();
-    end.displace = parser.parseDouble();
-    parser.parseDouble(); // overrun length
-    parser.parseInt(); // markings
-    parser.parseInt(); // approach lights
-    parser.parseInt(); // touchdown lights
-    parser.parseInt(); // REIL lights
-
-    return true;
-}
-
-void AirportLoader::parseMetaData() {
-    std::string key = parser.parseWord();
-
-    if (key == "country") {
-        curPort.country = parser.restOfLine();
-    } else if (key == "region_code") {
-        curPort.region = parser.restOfLine();
-    } else if (key == "datum_lat") {
-        curPort.latitude = parser.parseDouble();
-    } else if (key == "datum_lon") {
-        curPort.longitude = parser.parseDouble();
-    } else if (key == "icao_code") {
-        curPort.icaoCode = parser.parseWord();
-    }
-}
-
-void AirportLoader::parseFrequency(int code) {
-    AirportData::Frequency entry;
-    entry.code = code;
-    entry.frq = parser.parseInt();
-    entry.desc = parser.restOfLine();
-    curPort.frequencies.push_back(entry);
-}
-
-void AirportLoader::finishAirport() {
-    if (!curPort.id.empty()) {
-        acceptor(curPort);
-    }
-    curPort = {};
-}
-
-}
-/* namespace xdata */
+} /* namespace xdata */

@@ -18,10 +18,10 @@
 #include "XData.h"
 #include "src/platform/Platform.h"
 #include "src/libxdata/loaders/AirportLoader.h"
-#include "src/libxdata/loaders/CIFPLoader.h"
 #include "src/libxdata/loaders/FixLoader.h"
 #include "src/libxdata/loaders/NavaidLoader.h"
 #include "src/libxdata/loaders/AirwayLoader.h"
+#include "src/libxdata/loaders/CIFPLoader.h"
 #include "src/libxdata/loaders/MetarLoader.h"
 #include "src/Logger.h"
 
@@ -56,49 +56,32 @@ void XData::load() {
 }
 
 void XData::loadAirports() {
-    using namespace std::placeholders;
-
-    AirportLoader loader(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
-    loader.setAcceptor(std::bind(&World::onAirportLoaded, world.get(), _1));
-    loader.loadAirports();
+    AirportLoader loader(world);
+    loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
 }
 
 void XData::loadFixes() {
-    using namespace std::placeholders;
-
-    FixLoader loader(navDataPath + "earth_fix.dat");
-    loader.setAcceptor(std::bind(&World::onFixLoaded, world.get(), _1));
-    loader.loadFixes();
+    FixLoader loader(world);
+    loader.load(navDataPath + "earth_fix.dat");
 }
 
 void XData::loadNavaids() {
-    using namespace std::placeholders;
-
-    NavaidLoader loader(navDataPath + "earth_nav.dat");
-    loader.setAcceptor(std::bind(&World::onNavaidLoaded, world.get(), _1));
-    loader.loadNavaids();
+    NavaidLoader loader(world);
+    loader.load(navDataPath + "earth_nav.dat");
 }
 
 void xdata::XData::loadAirways() {
-    using namespace std::placeholders;
-
-    AirwayLoader loader(navDataPath + "earth_awy.dat");
-    loader.setAcceptor(std::bind(&World::onAirwayLoaded, world.get(), _1));
-    loader.loadAirways();
+    AirwayLoader loader(world);
+    loader.load(navDataPath + "earth_awy.dat");
 }
 
 void XData::loadProcedures() {
-    using namespace std::placeholders;
-
     world->forEachAirport([this] (Airport &ap) {
         try {
-            CIFPLoader loader(navDataPath + "CIFP/" + ap.getID() + ".dat");
-            loader.setAcceptor([this, &ap] (const CIFPData &cifp) {
-                world->onProcedureLoaded(ap, cifp);
-            });
-            loader.loadCIFP();
+            CIFPLoader loader(world);
+            loader.load(ap, navDataPath + "CIFP/" + ap.getID() + ".dat");
         } catch (const std::exception &e) {
-            // many airports do not have CIFP info, ignore
+            // many airports do not have CIFP data, so ignore silently
         }
     });
 }
@@ -107,9 +90,8 @@ void XData::loadMetar() {
     using namespace std::placeholders;
 
     try {
-        MetarLoader loader(xplaneRoot + "METAR.rwx");
-        loader.setAcceptor(std::bind(&World::onMetarLoaded, world.get(), _1));
-        loader.loadMetar();
+        MetarLoader loader(world);
+        loader.load(xplaneRoot + "METAR.rwx");
     } catch (const std::exception &e) {
         // metar is optional, so only log
         logger::warn("Error parsing METAR: %s", e.what());

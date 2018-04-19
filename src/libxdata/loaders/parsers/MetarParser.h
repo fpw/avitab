@@ -15,26 +15,31 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#ifndef SRC_LIBXDATA_LOADERS_METARPARSER_H_
+#define SRC_LIBXDATA_LOADERS_METARPARSER_H_
 
-#include <memory>
-#include "src/libxdata/loaders/parsers/FixParser.h"
-#include "src/libxdata/loaders/objects/FixData.h"
-#include "src/libxdata/world/World.h"
+#include <string>
+#include <functional>
+#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include "src/libxdata/loaders/objects/MetarData.h"
 
 namespace xdata {
 
-class FixLoader {
+class MetarParser {
 public:
-    FixLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const MetarData &)>;
 
-    void onFixLoaded(const FixData &fix);
+    MetarParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    void loadMetar();
+private:
+    Acceptor acceptor;
+    BaseParser parser;
+    MetarData curData {};
+
+    void parseLine();
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_METARPARSER_H_ */

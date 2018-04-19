@@ -18,26 +18,20 @@
 #ifndef SRC_LIBXDATA_LOADERS_METARLOADER_H_
 #define SRC_LIBXDATA_LOADERS_METARLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include <memory>
 #include "src/libxdata/loaders/objects/MetarData.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
 class MetarLoader {
 public:
-    using Acceptor = std::function<void(const MetarData &)>;
-
-    MetarLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    void loadMetar();
+    MetarLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    BaseParser parser;
-    MetarData curData {};
+    std::shared_ptr<World> world;
 
-    void parseLine();
+    void onMetarLoaded(const MetarData &metar);
 };
 
 } /* namespace xdata */

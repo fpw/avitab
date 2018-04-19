@@ -16,31 +16,25 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "MetarLoader.h"
+#include "src/libxdata/loaders/parsers/MetarParser.h"
 
 namespace xdata {
 
-MetarLoader::MetarLoader(const std::string &file):
-    parser(file)
+MetarLoader::MetarLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
 {
 }
 
-void MetarLoader::setAcceptor(Acceptor a) {
-    acceptor = a;
+void MetarLoader::load(const std::string& file) {
+    MetarParser parser(file);
+    parser.setAcceptor([this] (const MetarData &data) { onMetarLoaded(data); });
+    parser.loadMetar();
 }
 
-void MetarLoader::loadMetar() {
-    using namespace std::placeholders;
-    parser.eachLine(std::bind(&MetarLoader::parseLine, this));
-}
-
-void MetarLoader::parseLine() {
-    if (curData.timestamp.empty()) {
-        curData.timestamp = parser.restOfLine();
-    } else {
-        curData.icaoCode = parser.parseWord();
-        curData.metar = parser.restOfLine();
-        acceptor(curData);
-        curData = {};
+void MetarLoader::onMetarLoaded(const MetarData& metar) {
+    auto airport = world->findAirportByID(metar.icaoCode);
+    if (airport) {
+        airport->setCurrentMetar(metar.timestamp, metar.metar);
     }
 }
 

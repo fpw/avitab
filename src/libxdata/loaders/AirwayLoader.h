@@ -18,30 +18,21 @@
 #ifndef SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_
 #define SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include <memory>
+#include "src/libxdata/loaders/parsers/AirwayParser.h"
 #include "src/libxdata/loaders/objects/AirwayData.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
 class AirwayLoader {
 public:
-    using Acceptor = std::function<void(const AirwayData &)>;
-
-    AirwayLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadAirways();
+    AirwayLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
+    std::shared_ptr<World> world;
 
-    void parseLine();
-    AirwayData::AltitudeLevel parseLevel(int num);
-    AirwayData::NavType parseNavType(int type);
-    AirwayData::DirectionRestriction parseDirectionalRestriction(const std::string &dir);
+    void onAirwayLoaded(const AirwayData &airway);
 };
 
 } /* namespace xdata */

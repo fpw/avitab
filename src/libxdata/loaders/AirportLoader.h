@@ -18,34 +18,21 @@
 #ifndef SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
 #define SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
+#include <memory>
+#include "src/libxdata/loaders/parsers/AirportParser.h"
 #include "src/libxdata/loaders/objects/AirportData.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
 class AirportLoader {
 public:
-    using Acceptor = std::function<void(const AirportData &)>;
-
-    AirportLoader(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadAirports();
+    AirportLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
-    AirportData curPort;
+    std::shared_ptr<World> world;
 
-    void parseLine();
-    void startAirport();
-    void parseRunway();
-    bool parseRunwayEnd(AirportData::RunwayEnd &end);
-    void parseMetaData();
-    void parseFrequency(int code);
-    void finishAirport();
+    void onAirportLoaded(const AirportData &port);
 };
 
 } /* namespace xdata */
