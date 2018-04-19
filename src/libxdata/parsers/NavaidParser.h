@@ -15,25 +15,33 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_METARLOADER_H_
-#define SRC_LIBXDATA_LOADERS_METARLOADER_H_
+#ifndef SRC_LIBXDATA_PARSERS_NAVAIDPARSER_H_
+#define SRC_LIBXDATA_PARSERS_NAVAIDPARSER_H_
 
-#include <memory>
-#include "src/libxdata/loaders/objects/MetarData.h"
-#include "src/libxdata/world/World.h"
+#include <string>
+#include <functional>
+#include "src/libxdata/parsers/objects/NavaidData.h"
+#include "BaseParser.h"
 
 namespace xdata {
 
-class MetarLoader {
+class NavaidParser {
 public:
-    MetarLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const NavaidData &)>;
 
-    void onMetarLoaded(const MetarData &metar);
+    NavaidParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadNavaids();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+
+    void parseLine();
+    NavaidData::Type parseType(int num);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_METARLOADER_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_NAVAIDPARSER_H_ */

@@ -18,11 +18,11 @@
 #ifndef SRC_LIBXDATA_WORLD_WORLD_H_
 #define SRC_LIBXDATA_WORLD_WORLD_H_
 
+#include <src/libxdata/parsers/objects/CIFPData.h>
 #include <map>
 #include <string>
 #include <memory>
 #include <functional>
-#include "src/libxdata/loaders/objects/CIFPData.h"
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Region.h"

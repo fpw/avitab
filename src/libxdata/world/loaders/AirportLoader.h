@@ -15,32 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "FixLoader.h"
-#include "src/libxdata/loaders/parsers/FixParser.h"
+#ifndef SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
+#define SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
+
+#include <memory>
+#include "src/libxdata/parsers/objects/AirportData.h"
+#include "src/libxdata/parsers/AirportParser.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-FixLoader::FixLoader(std::shared_ptr<World> worldPtr):
-    world(worldPtr)
-{
-}
+class AirportLoader {
+public:
+    AirportLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
+private:
+    std::shared_ptr<World> world;
 
-void FixLoader::load(const std::string& file) {
-    FixParser parser(file);
-    parser.setAcceptor([this] (const FixData &data) { onFixLoaded(data); });
-    parser.loadFixes();
-}
-
-void FixLoader::onFixLoaded(const FixData& fix) {
-    if (fix.terminalAreaId == "ENRT") {
-        auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
-
-        auto region = world->createOrFindRegion(fix.icaoRegion);
-        Location loc(fix.latitude, fix.longitude);
-
-        fixModel = std::make_shared<Fix>(region, fix.id, loc);
-        world->addFix(fixModel);
-    }
-}
+    void onAirportLoaded(const AirportData &port);
+};
 
 } /* namespace xdata */
+
+#endif /* SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_ */

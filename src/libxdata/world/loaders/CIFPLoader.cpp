@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "CIFPLoader.h"
-#include "src/libxdata/loaders/parsers/CIFPParser.h"
+#include "src/libxdata/parsers/CIFPParser.h"
 
 namespace xdata {
 

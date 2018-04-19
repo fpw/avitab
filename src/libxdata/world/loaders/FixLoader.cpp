@@ -15,26 +15,32 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
-#define SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
-
-#include <memory>
-#include "src/libxdata/loaders/parsers/NavaidParser.h"
-#include "src/libxdata/loaders/objects/NavaidData.h"
-#include "src/libxdata/world/World.h"
+#include "FixLoader.h"
+#include "src/libxdata/parsers/FixParser.h"
 
 namespace xdata {
 
-class NavaidLoader {
-public:
-    NavaidLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<World> world;
+FixLoader::FixLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
+{
+}
 
-    void onNavaidLoaded(const NavaidData &navaid);
-};
+void FixLoader::load(const std::string& file) {
+    FixParser parser(file);
+    parser.setAcceptor([this] (const FixData &data) { onFixLoaded(data); });
+    parser.loadFixes();
+}
+
+void FixLoader::onFixLoaded(const FixData& fix) {
+    if (fix.terminalAreaId == "ENRT") {
+        auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
+
+        auto region = world->createOrFindRegion(fix.icaoRegion);
+        Location loc(fix.latitude, fix.longitude);
+
+        fixModel = std::make_shared<Fix>(region, fix.id, loc);
+        world->addFix(fixModel);
+    }
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_ */

@@ -15,8 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_OBJECTS_FIXDATA_H_
-#define SRC_LIBXDATA_LOADERS_OBJECTS_FIXDATA_H_
+#ifndef SRC_LIBXDATA_PARSERS_OBJECTS_FIXDATA_H_
+#define SRC_LIBXDATA_PARSERS_OBJECTS_FIXDATA_H_
 
 #include <string>
 #include <limits>
@@ -114,4 +114,4 @@ struct FixData {
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_OBJECTS_FIXDATA_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_OBJECTS_FIXDATA_H_ */

@@ -15,27 +15,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
-#define SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
+#ifndef SRC_LIBXDATA_PARSERS_CIFPPARSER_H_
+#define SRC_LIBXDATA_PARSERS_CIFPPARSER_H_
 
+#include <string>
 #include <memory>
-#include "src/libxdata/loaders/parsers/CIFPParser.h"
-#include "src/libxdata/loaders/objects/CIFPData.h"
-#include "src/libxdata/world/models/airport/Airport.h"
-#include "src/libxdata/world/World.h"
+#include <functional>
+#include "src/libxdata/parsers/objects/CIFPData.h"
+#include "BaseParser.h"
 
 namespace xdata {
 
-class CIFPLoader {
+class CIFPParser {
 public:
-    CIFPLoader(std::shared_ptr<World> worldPtr);
-    void load(Airport &airport, const std::string &file);
-private:
-    std::shared_ptr<World> world;
+    using Acceptor = std::function<void(const CIFPData &)>;
 
-    void onProcedureLoaded(Airport &airport, const CIFPData &procedure);
+    CIFPParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    void loadCIFP();
+
+private:
+    enum class RecordType {
+        SID, STAR, PRDATA, APPROACH, RWY, UNKNOWN
+    };
+
+    Acceptor acceptor;
+    BaseParser parser;
+    RecordType currentType = RecordType::UNKNOWN;
+    CIFPData curData;
+
+    void parseLine();
+    void finishAndRestart();
+
+    RecordType parseRecordType();
+    void parseProcedure();
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_CIFPLOADER_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_CIFPPARSER_H_ */

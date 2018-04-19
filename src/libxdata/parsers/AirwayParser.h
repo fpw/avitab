@@ -15,19 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_
-#define SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_
+#ifndef SRC_LIBXDATA_PARSERS_AIRWAYPARSER_H_
+#define SRC_LIBXDATA_PARSERS_AIRWAYPARSER_H_
 
 #include <string>
+#include <functional>
+#include "src/libxdata/parsers/objects/AirwayData.h"
+#include "BaseParser.h"
 
 namespace xdata {
 
-struct MetarData {
-    std::string icaoCode;
-    std::string timestamp;
-    std::string metar;
+class AirwayParser {
+public:
+    using Acceptor = std::function<void(const AirwayData &)>;
+
+    AirwayParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadAirways();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+
+    void parseLine();
+    AirwayData::AltitudeLevel parseLevel(int num);
+    AirwayData::NavType parseNavType(int type);
+    AirwayData::DirectionRestriction parseDirectionalRestriction(const std::string &dir);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_OBJECTS_METARDATA_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_AIRWAYPARSER_H_ */

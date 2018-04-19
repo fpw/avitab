@@ -15,42 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_CIFPPARSER_H_
-#define SRC_LIBXDATA_LOADERS_CIFPPARSER_H_
+#ifndef SRC_LIBXDATA_LOADERS_METARLOADER_H_
+#define SRC_LIBXDATA_LOADERS_METARLOADER_H_
 
-#include <string>
 #include <memory>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
-#include "src/libxdata/loaders/objects/CIFPData.h"
+#include "src/libxdata/parsers/objects/MetarData.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class CIFPParser {
+class MetarLoader {
 public:
-    using Acceptor = std::function<void(const CIFPData &)>;
-
-    CIFPParser(const std::string &file);
-    void setAcceptor(Acceptor a);
-    void loadCIFP();
-
+    MetarLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    enum class RecordType {
-        SID, STAR, PRDATA, APPROACH, RWY, UNKNOWN
-    };
+    std::shared_ptr<World> world;
 
-    Acceptor acceptor;
-    BaseParser parser;
-    RecordType currentType = RecordType::UNKNOWN;
-    CIFPData curData;
-
-    void parseLine();
-    void finishAndRestart();
-
-    RecordType parseRecordType();
-    void parseProcedure();
+    void onMetarLoaded(const MetarData &metar);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_CIFPPARSER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_METARLOADER_H_ */

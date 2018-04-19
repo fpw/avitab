@@ -15,8 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_OBJECTS_NAVAIDDATA_H_
-#define SRC_LIBXDATA_LOADERS_OBJECTS_NAVAIDDATA_H_
+#ifndef SRC_LIBXDATA_PARSERS_OBJECTS_NAVAIDDATA_H_
+#define SRC_LIBXDATA_PARSERS_OBJECTS_NAVAIDDATA_H_
 
 #include <string>
 #include <limits>
@@ -132,4 +132,4 @@ struct NavaidData {
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_OBJECTS_NAVAIDDATA_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_OBJECTS_NAVAIDDATA_H_ */

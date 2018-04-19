@@ -15,33 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_NAVAIDPARSER_H_
-#define SRC_LIBXDATA_LOADERS_NAVAIDPARSER_H_
+#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
-#include "src/libxdata/loaders/objects/NavaidData.h"
+#include <memory>
+#include "src/libxdata/parsers/FixParser.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class NavaidParser {
+class FixLoader {
 public:
-    using Acceptor = std::function<void(const NavaidData &)>;
-
-    NavaidParser(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadNavaids();
+    FixLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
+    std::shared_ptr<World> world;
 
-    void parseLine();
-    NavaidData::Type parseType(int num);
+    void onFixLoaded(const FixData &fix);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_NAVAIDPARSER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */

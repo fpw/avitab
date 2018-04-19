@@ -15,26 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
+#ifndef SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_
+#define SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_
 
 #include <memory>
-#include "src/libxdata/loaders/parsers/FixParser.h"
-#include "src/libxdata/loaders/objects/FixData.h"
+#include "src/libxdata/parsers/objects/AirwayData.h"
+#include "src/libxdata/parsers/AirwayParser.h"
 #include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class FixLoader {
+class AirwayLoader {
 public:
-    FixLoader(std::shared_ptr<World> worldPtr);
+    AirwayLoader(std::shared_ptr<World> worldPtr);
     void load(const std::string &file);
 private:
     std::shared_ptr<World> world;
 
-    void onFixLoaded(const FixData &fix);
+    void onAirwayLoaded(const AirwayData &airway);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXLOADER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_ */

@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "NavaidLoader.h"
-#include "src/libxdata/loaders/parsers/NavaidParser.h"
+#include "src/libxdata/parsers/NavaidParser.h"
 
 namespace xdata {
 

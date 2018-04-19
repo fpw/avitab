@@ -17,12 +17,12 @@
  */
 #include "XData.h"
 #include "src/platform/Platform.h"
-#include "src/libxdata/loaders/AirportLoader.h"
-#include "src/libxdata/loaders/FixLoader.h"
-#include "src/libxdata/loaders/NavaidLoader.h"
-#include "src/libxdata/loaders/AirwayLoader.h"
-#include "src/libxdata/loaders/CIFPLoader.h"
-#include "src/libxdata/loaders/MetarLoader.h"
+#include "src/libxdata/world/loaders/AirportLoader.h"
+#include "src/libxdata/world/loaders/FixLoader.h"
+#include "src/libxdata/world/loaders/NavaidLoader.h"
+#include "src/libxdata/world/loaders/AirwayLoader.h"
+#include "src/libxdata/world/loaders/CIFPLoader.h"
+#include "src/libxdata/world/loaders/MetarLoader.h"
 #include "src/Logger.h"
 
 namespace xdata {

@@ -15,9 +15,9 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "AirportParser.h"
-#include "src/libxdata/loaders/objects/AirportData.h"
+#include "src/libxdata/parsers/objects/AirportData.h"
+#include <iostream>
 
 namespace xdata {
 

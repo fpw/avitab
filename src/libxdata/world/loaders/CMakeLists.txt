@@ -1,5 +1,4 @@
-add_subdirectory(parsers)
-add_library(xdata_loaders
+add_library(xdata_world_loaders
     AirportLoader.cpp
     FixLoader.cpp
     NavaidLoader.cpp
@@ -7,5 +6,5 @@ add_library(xdata_loaders
     CIFPLoader.cpp
     MetarLoader.cpp
 )
-target_link_libraries(xdata_loaders xdata_parsers)
 
+target_link_libraries(xdata_world_loaders xdata_parsers)

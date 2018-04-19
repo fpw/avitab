@@ -15,31 +15,27 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_METARPARSER_H_
-#define SRC_LIBXDATA_LOADERS_METARPARSER_H_
-
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
-#include "src/libxdata/loaders/objects/MetarData.h"
+#include "MetarLoader.h"
+#include "src/libxdata/parsers/MetarParser.h"
 
 namespace xdata {
 
-class MetarParser {
-public:
-    using Acceptor = std::function<void(const MetarData &)>;
+MetarLoader::MetarLoader(std::shared_ptr<World> worldPtr):
+    world(worldPtr)
+{
+}
 
-    MetarParser(const std::string &file);
-    void setAcceptor(Acceptor a);
-    void loadMetar();
-private:
-    Acceptor acceptor;
-    BaseParser parser;
-    MetarData curData {};
+void MetarLoader::load(const std::string& file) {
+    MetarParser parser(file);
+    parser.setAcceptor([this] (const MetarData &data) { onMetarLoaded(data); });
+    parser.loadMetar();
+}
 
-    void parseLine();
-};
+void MetarLoader::onMetarLoaded(const MetarData& metar) {
+    auto airport = world->findAirportByID(metar.icaoCode);
+    if (airport) {
+        airport->setCurrentMetar(metar.timestamp, metar.metar);
+    }
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_LOADERS_METARPARSER_H_ */

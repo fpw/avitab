@@ -15,32 +15,39 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_FIXPARSER_H_
-#define SRC_LIBXDATA_LOADERS_FIXPARSER_H_
+#ifndef SRC_LIBXDATA_PARSERS_AIRPORTPARSER_H_
+#define SRC_LIBXDATA_PARSERS_AIRPORTPARSER_H_
 
 #include <string>
 #include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
-#include "src/libxdata/loaders/objects/FixData.h"
+#include "BaseParser.h"
+#include "src/libxdata/parsers/objects/AirportData.h"
 
 namespace xdata {
 
-class FixParser {
+class AirportParser {
 public:
-    using Acceptor = std::function<void(const FixData &)>;
+    using Acceptor = std::function<void(const AirportData &)>;
 
-    FixParser(const std::string &file);
+    AirportParser(const std::string &file);
     void setAcceptor(Acceptor a);
     std::string getHeader() const;
-    void loadFixes();
+    void loadAirports();
 private:
     Acceptor acceptor;
     std::string header;
     BaseParser parser;
+    AirportData curPort;
 
     void parseLine();
+    void startAirport();
+    void parseRunway();
+    bool parseRunwayEnd(AirportData::RunwayEnd &end);
+    void parseMetaData();
+    void parseFrequency(int code);
+    void finishAirport();
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_FIXPARSER_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_AIRPORTPARSER_H_ */

@@ -15,35 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_
-#define SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_
+#ifndef SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
+#define SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
 
-#include <string>
-#include <functional>
-#include "src/libxdata/loaders/parsers/BaseParser.h"
-#include "src/libxdata/loaders/objects/AirwayData.h"
+#include <memory>
+#include "src/libxdata/parsers/NavaidParser.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
-class AirwayParser {
+class NavaidLoader {
 public:
-    using Acceptor = std::function<void(const AirwayData &)>;
-
-    AirwayParser(const std::string &file);
-    void setAcceptor(Acceptor a);
-    std::string getHeader() const;
-    void loadAirways();
+    NavaidLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
 private:
-    Acceptor acceptor;
-    std::string header;
-    BaseParser parser;
+    std::shared_ptr<World> world;
 
-    void parseLine();
-    AirwayData::AltitudeLevel parseLevel(int num);
-    AirwayData::NavType parseNavType(int type);
-    AirwayData::DirectionRestriction parseDirectionalRestriction(const std::string &dir);
+    void onNavaidLoaded(const NavaidData &navaid);
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_LOADERS_AIRWAYPARSER_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_ */
