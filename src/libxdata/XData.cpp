@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <chrono>
 #include "XData.h"
 #include "src/platform/Platform.h"
 #include "src/libxdata/world/loaders/AirportLoader.h"
@@ -47,12 +48,16 @@ std::shared_ptr<World> XData::getWorld() {
 }
 
 void XData::load() {
+    auto startAt = std::chrono::high_resolution_clock::now();
     loadAirports();
     loadFixes();
     loadNavaids();
     loadAirways();
     loadProcedures();
     loadMetar();
+    auto duration = std::chrono::high_resolution_clock::now() - startAt;
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 
 void XData::loadAirports() {
@@ -76,9 +81,9 @@ void XData::loadAirways() {
 }
 
 void XData::loadProcedures() {
-    world->forEachAirport([this] (Airport &ap) {
+    CIFPLoader loader(world);
+    world->forEachAirport([this, &loader] (Airport &ap) {
         try {
-            CIFPLoader loader(world);
             loader.load(ap, navDataPath + "CIFP/" + ap.getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
