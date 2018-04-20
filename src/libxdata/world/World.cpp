@@ -53,9 +53,9 @@ std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, cons
     return nullptr;
 }
 
-void World::forEachAirport(std::function<void(Airport&)> f) {
+void World::forEachAirport(std::function<void(std::shared_ptr<Airport>)> f) {
     for (auto it: airports) {
-        f(*it.second);
+        f(it.second);
     }
 }
 

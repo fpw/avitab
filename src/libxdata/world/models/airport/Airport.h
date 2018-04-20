@@ -26,6 +26,7 @@
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
+#include "src/libxdata/world/graph/NavNode.h"
 #include "Runway.h"
 #include "SID.h"
 #include "STAR.h"
@@ -35,7 +36,7 @@ namespace xdata {
 
 class Fix;
 
-class Airport {
+class Airport: public NavNode {
 public:
     enum class ATCFrequency {
         RECORDED,
@@ -59,6 +60,7 @@ public:
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getID() const;
+    const Location &getLocation() const; // can throw if unknown
     const std::string& getName() const;
     const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
     const std::string &getMetarTimestamp() const;
@@ -67,16 +69,16 @@ public:
     void forEachRunway(std::function<void(const Runway &)> f);
     const Runway &getRunwayByName(const std::string &rw) const;
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
-    void addSID(const SID &sid);
-    void addSTAR(const STAR &star);
-    void addApproach(const Approach &approach);
+    void addSID(std::shared_ptr<SID> sid);
+    void addSTAR(std::shared_ptr<STAR> star);
+    void addApproach(std::shared_ptr<Approach> approach);
 
     std::vector<std::weak_ptr<Fix>> getArrivalFixes() const;
     std::vector<std::weak_ptr<Fix>> getDepartureFixes() const;
 
-    std::vector<SID> findSIDs(std::weak_ptr<Fix> to) const;
-    std::vector<STAR> findSTARs(std::weak_ptr<Fix> to) const;
-    std::vector<Approach> findApproaches(std::weak_ptr<Fix> to) const;
+    std::vector<std::shared_ptr<SID>> findSIDs(std::weak_ptr<Fix> to) const;
+    std::vector<std::shared_ptr<STAR>> findSTARs(std::weak_ptr<Fix> to) const;
+    std::vector<std::shared_ptr<Approach>> findApproaches(std::weak_ptr<Fix> to) const;
 
     Airport(const Airport &other) = delete;
     void operator=(const Airport &other) = delete;
@@ -91,9 +93,9 @@ private:
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
     std::map<std::string, Runway> runways;
-    std::map<std::string, SID> sids;
-    std::map<std::string, STAR> stars;
-    std::map<std::string, Approach> approaches;
+    std::map<std::string, std::shared_ptr<SID>> sids;
+    std::map<std::string, std::shared_ptr<STAR>> stars;
+    std::map<std::string, std::shared_ptr<Approach>> approaches;
     std::string metarTimestamp, metarString;
 
     bool containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const;

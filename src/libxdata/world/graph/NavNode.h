@@ -15,25 +15,34 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
-#define SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
+#ifndef SRC_LIBXDATA_WORLD_GRAPH_NAVNODE_H_
+#define SRC_LIBXDATA_WORLD_GRAPH_NAVNODE_H_
 
-#include <limits>
+#include <string>
+#include <tuple>
+#include <memory>
+#include <vector>
+#include "NavEdge.h"
+#include "src/libxdata/world/models/Location.h"
 
 namespace xdata {
 
-struct Location {
-    double latitude = std::numeric_limits<double>::quiet_NaN();
-    double longitude = std::numeric_limits<double>::quiet_NaN();
+class NavNode {
+public:
+    using Connection = std::tuple<std::shared_ptr<NavEdge>, std::shared_ptr<NavNode>>;
 
-    Location() = default;
-    Location(double lat, double lon);
+    virtual const std::string &getID() const = 0;
+    virtual const Location& getLocation() const = 0;
 
-    bool isValid() const;
+    void connectTo(std::shared_ptr<NavEdge> via, std::shared_ptr<NavNode> to);
+    const std::vector<Connection> &getConnections() const;
+    bool isConnectedTo(const std::shared_ptr<NavNode> other) const;
 
-    double distanceTo(const Location &other) const;
+    virtual ~NavNode() = default;
+private:
+    std::vector<Connection> connections;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_ */
+#endif /* SRC_LIBXDATA_WORLD_GRAPH_NAVNODE_H_ */

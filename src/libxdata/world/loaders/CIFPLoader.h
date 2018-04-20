@@ -28,11 +28,11 @@ namespace xdata {
 class CIFPLoader {
 public:
     CIFPLoader(std::shared_ptr<World> worldPtr);
-    void load(Airport &airport, const std::string &file);
+    void load(std::shared_ptr<Airport> airport, const std::string &file);
 private:
     std::shared_ptr<World> world;
 
-    void onProcedureLoaded(Airport &airport, const CIFPData &procedure);
+    void onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData &procedure);
 };
 
 } /* namespace xdata */

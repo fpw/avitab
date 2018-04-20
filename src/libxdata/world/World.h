@@ -38,7 +38,7 @@ public:
     std::shared_ptr<Airport> findAirportByID(const std::string &id) const;
     std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const;
 
-    void forEachAirport(std::function<void(Airport &)> f);
+    void forEachAirport(std::function<void(std::shared_ptr<Airport>)> f);
     void addFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Region> findOrCreateRegion(const std::string &id);
     std::shared_ptr<Airport> findOrCreateAirport(const std::string &id);

@@ -22,42 +22,45 @@
 #include <memory>
 #include <set>
 #include <map>
-#include "src/libxdata/world/models/navaids/Fix.h"
-#include "src/libxdata/world/models/Airway.h"
-#include "src/libxdata/world/models/airport/Airport.h"
+#include <functional>
+#include "src/libxdata/world/graph/NavNode.h"
 
 namespace xdata {
 
 class RouteFinder {
 public:
+    using EdgePtr = std::shared_ptr<NavEdge>;
+    using NodePtr = std::shared_ptr<NavNode>;
+    using EdgeFilter = std::function<bool(const EdgePtr, const NodePtr)>;
+
     struct RouteDirection {
-        Airway *via = nullptr;
-        Fix *to = nullptr;
+        EdgePtr via;
+        NodePtr to;
 
         RouteDirection() = default;
-        RouteDirection(Airway *via, Fix *to): via(via), to(to) { }
+        RouteDirection(EdgePtr via, NodePtr to): via(via), to(to) { }
     };
 
-    void setAirwayLevel(Airway::Level level);
+    void setEdgeFilter(EdgeFilter filter);
     void setAirwayChangePenalty(float percent);
-    std::vector<RouteDirection> findFixToFix(Fix *from, Fix *to);
+    std::vector<RouteDirection> findFixToFix(NodePtr from, NodePtr to);
 
 private:
-    Airway::Level airwayLevel = Airway::Level::Lower;
+    EdgeFilter edgeFilter;
     double directDistance = 0;
     float airwayChangePenalty = 0;
 
-    std::set<Fix *> closedSet;
-    std::set<Fix *> openSet;
-    std::map<Fix *, RouteDirection> cameFrom;
-    std::map<Fix *, double> gScore;
-    std::map<Fix *, double> fScore;
+    std::set<NodePtr> closedSet;
+    std::set<NodePtr> openSet;
+    std::map<NodePtr, RouteDirection> cameFrom;
+    std::map<NodePtr, double> gScore;
+    std::map<NodePtr, double> fScore;
 
-    Fix *getLowestOpen();
-    double minCostHeuristic(Fix *a, Fix *b);
-    double cost(Fix *a, const RouteDirection &dir);
-    double getGScore(Fix *f);
-    std::vector<RouteDirection> reconstructPath(Fix *lastFix);
+    NodePtr getLowestOpen();
+    double minCostHeuristic(NodePtr a, NodePtr b);
+    double cost(NodePtr a, const RouteDirection &dir);
+    double getGScore(NodePtr f);
+    std::vector<RouteDirection> reconstructPath(NodePtr lastFix);
 };
 
 } /* namespace xdata */

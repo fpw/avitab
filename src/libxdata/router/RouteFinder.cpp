@@ -23,15 +23,15 @@
 
 namespace xdata {
 
-void RouteFinder::setAirwayLevel(Airway::Level level) {
-    airwayLevel = level;
-}
-
 void RouteFinder::setAirwayChangePenalty(float percent) {
     airwayChangePenalty = percent;
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fix *goal) {
+void RouteFinder::setEdgeFilter(EdgeFilter filter) {
+    edgeFilter = filter;
+}
+
+std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(NodePtr from, NodePtr goal) {
     logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
     directDistance = from->getLocation().distanceTo(goal->getLocation());
 
@@ -47,7 +47,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
     fScore[from] = minCostHeuristic(from, goal);
 
     while (!openSet.empty()) {
-        Fix *current = getLowestOpen();
+        NodePtr current = getLowestOpen();
         if (current == goal) {
             logger::verbose("Route found");
             return reconstructPath(goal);
@@ -58,16 +58,13 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
 
         auto &neighbors = current->getConnections();
         for (auto neighborConn: neighbors) {
-            auto airwayPtr = std::get<0>(neighborConn).lock();
-            auto fixPtr = std::get<1>(neighborConn).lock();
-            if (!airwayPtr || !fixPtr) {
-                throw std::runtime_error("Navigation pointers expired");
+            auto &edge = std::get<0>(neighborConn);
+            auto &neighbor = std::get<1>(neighborConn);
+            if (!edge || !neighbor) {
+                continue;
             }
 
-            Airway *airway = airwayPtr.get();
-            Fix *neighbor = fixPtr.get();
-
-            if (airway->getLevel() != airwayLevel) {
+            if (!edgeFilter(edge, neighbor)) {
                 continue;
             }
 
@@ -79,12 +76,12 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
                 openSet.insert(neighbor);
             }
 
-            double tentativeGScore = getGScore(current) + cost(current, RouteDirection(airway, neighbor));
+            double tentativeGScore = getGScore(current) + cost(current, RouteDirection(edge, neighbor));
             if (tentativeGScore > getGScore(neighbor)) {
                 continue;
             }
 
-            cameFrom[neighbor] = RouteDirection(airway, current);
+            cameFrom[neighbor] = RouteDirection(edge, current);
             gScore[neighbor] = tentativeGScore;
             fScore[neighbor] = getGScore(neighbor) + minCostHeuristic(neighbor, goal);
         }
@@ -94,7 +91,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(Fix *from, Fi
     throw std::runtime_error("No route found");
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(Fix *lastFix) {
+std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr lastFix) {
     logger::info("Backtracking route...");
     std::vector<RouteDirection> res;
 
@@ -113,11 +110,11 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(Fix *lastF
     return res;
 }
 
-Fix* RouteFinder::getLowestOpen() {
-    Fix *res = nullptr;
+RouteFinder::NodePtr RouteFinder::getLowestOpen() {
+    NodePtr res = nullptr;
     double best = std::numeric_limits<double>::infinity();
 
-    for (Fix *f: openSet) {
+    for (NodePtr f: openSet) {
         auto fScoreIt = fScore.find(f);
         if (fScoreIt != fScore.end()) {
             if (fScoreIt->second < best) {
@@ -129,12 +126,12 @@ Fix* RouteFinder::getLowestOpen() {
     return res;
 }
 
-double RouteFinder::minCostHeuristic(Fix* a, Fix* b) {
+double RouteFinder::minCostHeuristic(NodePtr a, NodePtr b) {
     // the minimum cost is a direct line
     return a->getLocation().distanceTo(b->getLocation());
 }
 
-double RouteFinder::cost(Fix* a, const RouteDirection& dir) {
+double RouteFinder::cost(NodePtr a, const RouteDirection& dir) {
     // the actual cost can have penalties later
     double penalty = 0;
     auto it = cameFrom.find(a);
@@ -147,7 +144,7 @@ double RouteFinder::cost(Fix* a, const RouteDirection& dir) {
     return minCostHeuristic(a, dir.to) + penalty;
 }
 
-double RouteFinder::getGScore(Fix* f) {
+double RouteFinder::getGScore(NodePtr f) {
     auto it = gScore.find(f);
     if (it == gScore.end()) {
         return std::numeric_limits<double>::infinity();

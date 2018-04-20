@@ -82,9 +82,9 @@ void XData::loadAirways() {
 
 void XData::loadProcedures() {
     CIFPLoader loader(world);
-    world->forEachAirport([this, &loader] (Airport &ap) {
+    world->forEachAirport([this, &loader] (std::shared_ptr<Airport> ap) {
         try {
-            loader.load(ap, navDataPath + "CIFP/" + ap.getID() + ".dat");
+            loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
         }

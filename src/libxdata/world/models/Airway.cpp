@@ -25,7 +25,7 @@ Airway::Airway(const std::string& name, Level lvl):
 {
 }
 
-const std::string& Airway::getName() const {
+const std::string& Airway::getID() const {
     return name;
 }
 

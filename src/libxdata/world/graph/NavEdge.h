@@ -15,25 +15,19 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
-#define SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
+#ifndef SRC_LIBXDATA_WORLD_GRAPH_NAVEDGE_H_
+#define SRC_LIBXDATA_WORLD_GRAPH_NAVEDGE_H_
 
-#include <limits>
+#include <string>
 
 namespace xdata {
 
-struct Location {
-    double latitude = std::numeric_limits<double>::quiet_NaN();
-    double longitude = std::numeric_limits<double>::quiet_NaN();
-
-    Location() = default;
-    Location(double lat, double lon);
-
-    bool isValid() const;
-
-    double distanceTo(const Location &other) const;
+class NavEdge {
+public:
+    virtual const std::string &getID() const = 0;
+    virtual ~NavEdge() = default;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_ */
+#endif /* SRC_LIBXDATA_WORLD_GRAPH_NAVEDGE_H_ */

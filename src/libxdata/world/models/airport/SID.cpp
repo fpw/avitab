@@ -19,8 +19,9 @@
 
 namespace xdata {
 
-SID::SID(const std::string &id):
-    id(id)
+SID::SID(const std::string &id, std::weak_ptr<Airport> airport):
+    id(id),
+    airport(airport)
 {
 }
 
@@ -30,6 +31,10 @@ void SID::setDestionationFix(std::weak_ptr<Fix> fix) {
 
 const std::string& SID::getID() const {
     return id;
+}
+
+std::weak_ptr<Airport> SID::getAirport() const {
+    return airport;
 }
 
 std::weak_ptr<Fix> SID::getDestionationFix() const {

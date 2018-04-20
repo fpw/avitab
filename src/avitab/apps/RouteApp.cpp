@@ -82,11 +82,7 @@ void RouteApp::onNextClicked() {
     } else {
         errorLabel->setText("Please wait...");
         api().executeLater([this] () {
-            xdata::Route route;
-            if (createRoute(route)) {
-                resetContent();
-                showRoute(route);
-            } else {
+            if (!createRoute()) {
                 inDeparture = true;
                 keys->setTarget(departureField);
             }
@@ -94,7 +90,7 @@ void RouteApp::onNextClicked() {
     }
 }
 
-bool RouteApp::createRoute(xdata::Route &route) {
+bool RouteApp::createRoute() {
     auto world = api().getNavWorld();
     if (!world) {
         errorLabel->setText("No navigation data available");
@@ -114,8 +110,7 @@ bool RouteApp::createRoute(xdata::Route &route) {
         return false;
     }
 
-    route.setDeparture(departure);
-    route.setArrival(arrival);
+    xdata::Route route(departure, arrival);
 
     if (highRouteCB->isChecked()) {
         route.setAirwayLevel(xdata::Airway::Level::Upper);
@@ -131,16 +126,15 @@ bool RouteApp::createRoute(xdata::Route &route) {
         return false;
     }
 
+    resetContent();
+    showRoute(route);
+
     return true;
 }
 
 void RouteApp::showRoute(const xdata::Route& route) {
-    auto depPtr = route.getDeparture().lock();
-    auto arrivalPtr = route.getArrival().lock();
-
-    if (!depPtr || !arrivalPtr) {
-        throw std::runtime_error("Dangling airports");
-    }
+    auto depPtr = route.getStart();
+    auto arrivalPtr = route.getDestination();
 
     TabPage page;
     page.page = tabs->addTab(tabs, depPtr->getID() + " -> " + arrivalPtr->getID() +
@@ -194,9 +188,9 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
 std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
     std::stringstream desc;
 
-    route.iterateRouteShort([this, &desc] (const xdata::Airway *via, const xdata::Fix *to) {
+    route.iterateRouteShort([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
         if (via) {
-            desc << " " << via->getName();
+            desc << " " << via->getID();
         }
         if (to) {
             desc << " " << to->getID();
@@ -209,9 +203,9 @@ std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
 std::string RouteApp::toDetailedRouteDescription(const xdata::Route& route) {
     std::stringstream desc;
 
-    route.iterateRoute([this, &desc] (const xdata::Airway *via, const xdata::Fix *to) {
+    route.iterateRoute([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
         if (via) {
-            desc << "via " << via->getName();
+            desc << "via " << via->getID();
         }
         if (to) {
             desc << " to " << to->getID();
@@ -223,11 +217,8 @@ std::string RouteApp::toDetailedRouteDescription(const xdata::Route& route) {
 }
 
 std::string RouteApp::toSIDs(const xdata::Route& route) {
-    auto depPtr = route.getDeparture().lock();
-    if (!depPtr) {
-        throw std::runtime_error("Dangling airports");
-    }
-
+    auto depPtr = route.getDestination();
+/*
     auto sids = depPtr->findSIDs(route.getStartFix());
 
     if (sids.empty()) {
@@ -241,9 +232,12 @@ std::string RouteApp::toSIDs(const xdata::Route& route) {
     }
 
     return res.str();
+    */
+    return "";
 }
 
 std::string RouteApp::toSTARs(const xdata::Route& route) {
+/*
     auto arrivalPtr = route.getArrival().lock();
     if (!arrivalPtr) {
         throw std::runtime_error("Dangling airports");
@@ -262,9 +256,12 @@ std::string RouteApp::toSTARs(const xdata::Route& route) {
     }
 
     return res.str();
+    */
+    return "";
 }
 
 std::string RouteApp::toApproaches(const xdata::Route& route) {
+    /*
     auto arrivalPtr = route.getArrival().lock();
     if (!arrivalPtr) {
         throw std::runtime_error("Dangling airports");
@@ -283,6 +280,8 @@ std::string RouteApp::toApproaches(const xdata::Route& route) {
     }
 
     return res.str();
+    */
+    return "";
 }
 
 void RouteApp::removeTab(const Button& closeButton) {

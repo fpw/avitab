@@ -57,7 +57,7 @@ private:
     void resetContent();
     void onNextClicked();
 
-    bool createRoute(xdata::Route &route);
+    bool createRoute();
     void showRoute(const xdata::Route &route);
     void fillPage(std::shared_ptr<Page> page, const xdata::Route &route);
     std::string toShortRouteDescription(const xdata::Route &route);

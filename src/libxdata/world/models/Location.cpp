@@ -26,6 +26,10 @@ Location::Location(double lat, double lon):
 {
 }
 
+bool Location::isValid() const {
+    return (!std::isnan(latitude) && !std::isnan(longitude));
+}
+
 double Location::distanceTo(const Location& other) const {
     // using the haversine formula
     double R = 6371000; // earth radius in meters

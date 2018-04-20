@@ -18,175 +18,114 @@
 #include <limits>
 #include "Route.h"
 #include "src/Logger.h"
+#include "src/libxdata/world/models/airport/Airport.h"
 
 namespace xdata {
 
-void Route::setStartFix(std::weak_ptr<Fix> start) {
-    startFix = start;
+Route::Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest):
+    startNode(start),
+    destNode(dest)
+{
+    router.setEdgeFilter([this] (const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) {
+        return checkEdge(via, to);
+    });
 }
 
-void Route::setDestinationFix(std::weak_ptr<Fix> end) {
-    endFix = end;
+void Route::setAirwayLevel(Airway::Level level) {
+    airwayLevel = level;
 }
 
-void Route::setDeparture(std::weak_ptr<Airport> apt) {
-    departureAirport = apt;
+std::shared_ptr<NavNode> Route::getStart() const {
+    return startNode;
 }
 
-void Route::setArrival(std::weak_ptr<Airport> apt) {
-    arrivalAirport = apt;
-}
-
-std::weak_ptr<Fix> Route::getStartFix() const {
-    return startFix;
-}
-
-std::weak_ptr<Fix> Route::getDestinationFix() const {
-    return endFix;
-}
-
-std::weak_ptr<Airport> Route::getDeparture() const {
-    return departureAirport;
-}
-
-std::weak_ptr<Airport> Route::getArrival() const {
-    return arrivalAirport;
+std::shared_ptr<NavNode> Route::getDestination() const {
+    return destNode;
 }
 
 void Route::find() {
-    auto startFixPtr = startFix.lock();
-    auto endFixPtr = endFix.lock();
-
-    if (!startFixPtr || !endFixPtr) {
-        // Airport to airport route
-        calculateRouteFromAiports();
-    } else {
-        // Fix to fix route
-        waypoints = router.findFixToFix(startFixPtr.get(), endFixPtr.get());
-    }
+    waypoints = router.findFixToFix(startNode, destNode);
 }
 
-void Route::calculateRouteFromAiports() {
-    auto departurePtr = departureAirport.lock();
-    auto arrivalPtr = arrivalAirport.lock();
-    if (!departurePtr || !arrivalPtr) {
-        throw std::runtime_error("No airports for route without fixes");
+bool Route::checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const {
+    auto airway = std::dynamic_pointer_cast<const Airway>(via);
+    if (airway) {
+        return (airway->getLevel() == airwayLevel);
     }
 
-    auto startFixes = departurePtr->getDepartureFixes();
-    if (startFixes.empty()) {
-        throw std::runtime_error("No known departure fixes");
-    }
-
-    auto destFixes = arrivalPtr->getArrivalFixes();
-    if (destFixes.empty()) {
-        throw std::runtime_error("No known arrival fixes");
-    }
-
-    double minDistance = std::numeric_limits<double>::infinity();
-
-    for (auto &start: startFixes) {
-        for (auto &end: destFixes) {
-            auto startPtr = start.lock();
-            auto endPtr = end.lock();
-            if (!startPtr || !endPtr) {
-                throw std::runtime_error("Dangling fix pointers");
-            }
-
-            try {
-                auto route = router.findFixToFix(startPtr.get(), endPtr.get());
-                double distance = getRouteDistance(startPtr.get(), route);
-                if (distance < minDistance) {
-                    startFix = start;
-                    endFix = end;
-                    waypoints = route;
-                    minDistance = distance;
-                }
-            } catch (...) {
-                continue;
-            }
+    auto star = std::dynamic_pointer_cast<const STAR>(via);
+    if (star) {
+        auto arrival = star->getAirport().lock();
+        if (arrival) {
+            return arrival.get() == destNode.get();
+        } else {
+            return false;
         }
     }
 
-    if (waypoints.empty()) {
-        throw std::runtime_error("No route found");
+    auto app = std::dynamic_pointer_cast<const Approach>(via);
+    if (app) {
+        auto arrival = app->getAirport().lock();
+        if (arrival) {
+            return arrival.get() == destNode.get();
+        } else {
+            return false;
+        }
     }
+
+    auto sid = std::dynamic_pointer_cast<const SID>(via);
+    if (sid) {
+        return startNode->isConnectedTo(to);
+    }
+
+    return true;
 }
 
 void Route::iterateRoute(RouteIterator f) const {
-    auto start = startFix.lock();
-    if (!start) {
-        throw std::runtime_error("Dangling start fix");
-    }
-
-    f(nullptr, start.get());
+    f(nullptr, startNode);
     for (auto &entry: waypoints) {
         f(entry.via, entry.to);
     }
 }
 
 void Route::iterateRouteShort(RouteIterator f) const {
-    auto start = startFix.lock();
-    if (!start) {
-        throw std::runtime_error("Dangling start fix");
-    }
+    f(nullptr, startNode);
 
-    f(nullptr, start.get());
-
-    Airway *currentAirway = nullptr;
-    Fix *prevFix = start.get();
+    std::shared_ptr<NavEdge> currentEdge = nullptr;
+    std::shared_ptr<NavNode> prevNode = startNode;
 
     for (auto &entry: waypoints) {
-        if (!currentAirway) {
-            currentAirway = entry.via;
+        if (!currentEdge) {
+            currentEdge = entry.via;
         }
 
-        if (currentAirway != entry.via) {
-            f(currentAirway, prevFix);
-            currentAirway = entry.via;
+        if (currentEdge != entry.via) {
+            f(currentEdge, prevNode);
+            currentEdge = entry.via;
         }
 
-        prevFix = entry.to;
+        prevNode = entry.to;
     }
 
-    f(currentAirway, prevFix);
+    f(currentEdge, prevNode);
 }
 
 double Route::getDirectDistance() const {
-    auto start = startFix.lock();
-    if (!start) {
-        throw std::runtime_error("Dangling start fix");
-    }
-
-    auto end = endFix.lock();
-    if (!end) {
-        throw std::runtime_error("Dangling end fix");
-    }
-
-    return start->getLocation().distanceTo(end->getLocation());
+    return startNode->getLocation().distanceTo(destNode->getLocation());
 }
 
 double Route::getRouteDistance() const {
-    auto start = startFix.lock();
-    if (!start) {
-        throw std::runtime_error("Dangling start fix");
-    }
-
-    return getRouteDistance(start.get(), waypoints);
+    return getRouteDistance(startNode, waypoints);
 }
 
-void Route::setAirwayLevel(Airway::Level level) {
-    router.setAirwayLevel(level);
-}
-
-double Route::getRouteDistance(const Fix* start, const std::vector<RouteFinder::RouteDirection>& route) const {
+double Route::getRouteDistance(std::shared_ptr<NavNode> start, const std::vector<RouteFinder::RouteDirection>& route) const {
     double distance = 0;
 
-    const Fix *prevFix = start;
+    std::shared_ptr<NavNode> prevNode = start;
 
     for (auto &entry: route) {
-        distance += prevFix->getLocation().distanceTo(entry.to->getLocation());
-        prevFix = entry.to;
+        distance += prevNode->getLocation().distanceTo(entry.to->getLocation());
+        prevNode = entry.to;
     }
 
     return distance;

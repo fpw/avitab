@@ -15,25 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
-#define SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_
 
-#include <limits>
+#include "NavNode.h"
 
 namespace xdata {
 
-struct Location {
-    double latitude = std::numeric_limits<double>::quiet_NaN();
-    double longitude = std::numeric_limits<double>::quiet_NaN();
+void NavNode::connectTo(std::shared_ptr<NavEdge> via, std::shared_ptr<NavNode> to) {
+    connections.push_back(std::make_tuple(via, to));
+}
 
-    Location() = default;
-    Location(double lat, double lon);
+const std::vector<NavNode::Connection>& NavNode::getConnections() const {
+    return connections;
+}
 
-    bool isValid() const;
-
-    double distanceTo(const Location &other) const;
-};
+bool NavNode::isConnectedTo(const std::shared_ptr<NavNode> other) const {
+    for (auto &conn: connections) {
+        if (std::get<1>(conn) == other) {
+            return true;
+        }
+    }
+    return false;
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_WORLD_MODELS_LOCATION_H_ */

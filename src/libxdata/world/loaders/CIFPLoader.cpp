@@ -25,15 +25,15 @@ CIFPLoader::CIFPLoader(std::shared_ptr<World> worldPtr):
 {
 }
 
-void CIFPLoader::load(Airport &airport, const std::string& file) {
+void CIFPLoader::load(std::shared_ptr<Airport> airport, const std::string& file) {
     CIFPParser parser(file);
-    parser.setAcceptor([this, &airport] (const CIFPData &cifp) {
+    parser.setAcceptor([this, airport] (const CIFPData &cifp) {
         onProcedureLoaded(airport, cifp);
     });
     parser.loadCIFP();
 }
 
-void CIFPLoader::onProcedureLoaded(Airport& airport, const CIFPData& procedure) {
+void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
     if (procedure.sequence.empty()) {
         return;
     }
@@ -43,32 +43,34 @@ void CIFPLoader::onProcedureLoaded(Airport& airport, const CIFPData& procedure) 
 
     switch (procedure.type) {
     case CIFPData::ProcedureType::SID: {
-        SID sid(procedure.id);
+        auto sid = std::make_shared<SID>(procedure.id, airport);
         auto lastFix = world->findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
         if (lastFix) {
-            sid.setTransitionName(first.transitionId);
-            sid.setDestionationFix(lastFix);
-            airport.addSID(sid);
+            sid->setTransitionName(first.transitionId);
+            sid->setDestionationFix(lastFix);
+            airport->addSID(sid);
+            airport->connectTo(sid, lastFix);
         }
         break;
     }
     case CIFPData::ProcedureType::STAR: {
-        STAR star(procedure.id);
+        auto star = std::make_shared<STAR>(procedure.id, airport);
         auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
-            star.setTransitionName(first.transitionId);
-            star.setStartFix(firstFix);
-            airport.addSTAR(star);
+            star->setTransitionName(first.transitionId);
+            star->setStartFix(firstFix);
+            airport->addSTAR(star);
+            firstFix->connectTo(star, airport);
         }
         break;
     }
     case CIFPData::ProcedureType::APPROACH: {
-        Approach app(procedure.id);
+        auto app = std::make_shared<Approach>(procedure.id, airport);
         auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
-            app.setTransitionName(first.transitionId);
-            app.setStartFix(firstFix);
-            airport.addApproach(app);
+            app->setTransitionName(first.transitionId);
+            app->setStartFix(firstFix);
+            firstFix->connectTo(app, airport);
         }
         break;
     }

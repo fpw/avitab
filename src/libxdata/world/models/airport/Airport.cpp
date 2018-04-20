@@ -89,30 +89,30 @@ void Airport::forEachRunway(std::function<void(const Runway&)> f) {
     }
 }
 
-void Airport::addSID(const SID& sid) {
-    sids.insert(std::make_pair(sid.getID(), sid));
+void Airport::addSID(std::shared_ptr<SID> sid) {
+    sids.insert(std::make_pair(sid->getID(), sid));
 }
 
-void Airport::addSTAR(const STAR& star) {
-    stars.insert(std::make_pair(star.getID(), star));
+void Airport::addSTAR(std::shared_ptr<STAR> star) {
+    stars.insert(std::make_pair(star->getID(), star));
 }
 
-void Airport::addApproach(const Approach& approach) {
-    approaches.insert(std::make_pair(approach.getID(), approach));
+void Airport::addApproach(std::shared_ptr<Approach> approach) {
+    approaches.insert(std::make_pair(approach->getID(), approach));
 }
 
 std::vector<std::weak_ptr<Fix>> Airport::getArrivalFixes() const {
     std::vector<std::weak_ptr<Fix>> res;
 
     for (auto &it: stars) {
-        auto fix = it.second.getStartFix();
+        auto fix = it.second->getStartFix();
         if (!containsFix(res, fix)) {
             res.push_back(fix);
         }
     }
 
     for (auto &it: approaches) {
-        auto fix = it.second.getStartFix();
+        auto fix = it.second->getStartFix();
         if (!containsFix(res, fix)) {
             res.push_back(fix);
         }
@@ -125,7 +125,7 @@ std::vector<std::weak_ptr<Fix>> Airport::getDepartureFixes() const {
     std::vector<std::weak_ptr<Fix>> res;
 
     for (auto &it: sids) {
-        auto fix = it.second.getDestionationFix();
+        auto fix = it.second->getDestionationFix();
         if (!containsFix(res, fix)) {
             res.push_back(fix);
         }
@@ -135,12 +135,12 @@ std::vector<std::weak_ptr<Fix>> Airport::getDepartureFixes() const {
 }
 
 
-std::vector<SID> Airport::findSIDs(std::weak_ptr<Fix> to) const {
-    auto res = std::vector<SID>();
+std::vector<std::shared_ptr<SID>> Airport::findSIDs(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<std::shared_ptr<SID>>();
 
     auto toFix = to.lock();
     for (auto &it: sids) {
-        auto sidFix = it.second.getDestionationFix().lock();
+        auto sidFix = it.second->getDestionationFix().lock();
 
         if (!toFix || !sidFix) {
             continue;
@@ -153,12 +153,12 @@ std::vector<SID> Airport::findSIDs(std::weak_ptr<Fix> to) const {
     return res;
 }
 
-std::vector<STAR> Airport::findSTARs(std::weak_ptr<Fix> to) const {
-    auto res = std::vector<STAR>();
+std::vector<std::shared_ptr<STAR>> Airport::findSTARs(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<std::shared_ptr<STAR>>();
 
     auto toFix = to.lock();
     for (auto &it: stars) {
-        auto starFix = it.second.getStartFix().lock();
+        auto starFix = it.second->getStartFix().lock();
 
         if (!toFix || !starFix) {
             continue;
@@ -171,12 +171,12 @@ std::vector<STAR> Airport::findSTARs(std::weak_ptr<Fix> to) const {
     return res;
 }
 
-std::vector<Approach> Airport::findApproaches(std::weak_ptr<Fix> to) const {
-    auto res = std::vector<Approach>();
+std::vector<std::shared_ptr<Approach>> Airport::findApproaches(std::weak_ptr<Fix> to) const {
+    auto res = std::vector<std::shared_ptr<Approach>>();
 
     auto toFix = to.lock();
     for (auto &it: approaches) {
-        auto appFix = it.second.getStartFix().lock();
+        auto appFix = it.second->getStartFix().lock();
 
         if (!toFix || !appFix) {
             continue;
@@ -196,6 +196,13 @@ const std::string& Airport::getMetarTimestamp() const {
 
 const std::string& Airport::getMetarString() const {
     return metarString;
+}
+
+const Location& Airport::getLocation() const {
+    if (!location.isValid()) {
+        throw std::runtime_error("No location for airport " + getID());
+    }
+    return location;
 }
 
 bool Airport::containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const {

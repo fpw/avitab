@@ -19,8 +19,9 @@
 
 namespace xdata {
 
-STAR::STAR(const std::string& id):
-    id(id)
+STAR::STAR(const std::string& id, std::weak_ptr<Airport> airport):
+    id(id),
+    airport(airport)
 {
 }
 
@@ -30,6 +31,10 @@ void STAR::setStartFix(std::weak_ptr<Fix> fix) {
 
 const std::string& STAR::getID() const {
     return id;
+}
+
+std::weak_ptr<Airport> STAR::getAirport() const {
+    return airport;
 }
 
 std::weak_ptr<Fix> STAR::getStartFix() const {

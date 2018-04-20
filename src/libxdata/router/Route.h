@@ -21,27 +21,21 @@
 #include <memory>
 #include <functional>
 #include "RouteFinder.h"
-#include "src/libxdata/world/models/navaids/Fix.h"
+#include "src/libxdata/world/graph/NavEdge.h"
 #include "src/libxdata/world/models/Airway.h"
-#include "src/libxdata/world/models/airport/Airport.h"
 
 namespace xdata {
 
 class Route {
 public:
-    using RouteIterator = std::function<void (const Airway *, const Fix *)>;
+    using RouteIterator = std::function<void (const std::shared_ptr<NavEdge>, const std::shared_ptr<NavNode>)>;
+
+    Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest);
 
     void setAirwayLevel(Airway::Level level);
 
-    void setStartFix(std::weak_ptr<Fix> start);
-    void setDestinationFix(std::weak_ptr<Fix> end);
-    void setDeparture(std::weak_ptr<Airport> apt);
-    void setArrival(std::weak_ptr<Airport> apt);
-
-    std::weak_ptr<Fix> getStartFix() const;
-    std::weak_ptr<Fix> getDestinationFix() const;
-    std::weak_ptr<Airport> getDeparture() const;
-    std::weak_ptr<Airport> getArrival() const;
+    std::shared_ptr<NavNode> getStart() const;
+    std::shared_ptr<NavNode> getDestination() const;
 
     void find();
     void iterateRoute(RouteIterator f) const;
@@ -52,14 +46,12 @@ public:
 
 private:
     RouteFinder router;
-    std::weak_ptr<Fix> startFix, endFix;
+    std::shared_ptr<NavNode> startNode, destNode;
+    Airway::Level airwayLevel = Airway::Level::Lower;
     std::vector<RouteFinder::RouteDirection> waypoints;
 
-    // Optional
-    std::weak_ptr<Airport> departureAirport, arrivalAirport;
-
-    void calculateRouteFromAiports();
-    double getRouteDistance(const Fix *start, const std::vector<RouteFinder::RouteDirection> &route) const;
+    double getRouteDistance(std::shared_ptr<NavNode> start, const std::vector<RouteFinder::RouteDirection> &route) const;
+    bool checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const;
 };
 
 } /* namespace xdata */

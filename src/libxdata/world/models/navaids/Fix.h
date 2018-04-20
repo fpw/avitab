@@ -18,10 +18,8 @@
 #ifndef SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
 #define SRC_LIBXDATA_WORLD_MODELS_FIXES_FIX_H_
 
-#include <tuple>
 #include <memory>
-#include <utility>
-#include <vector>
+#include "src/libxdata/world/graph/NavNode.h"
 #include "src/libxdata/world/models/Location.h"
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Airway.h"
@@ -32,17 +30,12 @@
 
 namespace xdata {
 
-class Fix {
+class Fix: public NavNode {
 public:
-    using Connection = std::tuple<std::weak_ptr<Airway>, std::weak_ptr<Fix>>;
-
     Fix(std::shared_ptr<Region> region, std::string id, Location loc);
     const std::string &getID() const;
     const Location &getLocation() const;
     std::shared_ptr<Region> getRegion() const;
-
-    void connectTo(std::weak_ptr<Airway> via, std::weak_ptr<Fix> to);
-    const std::vector<Connection> &getConnections() const;
 
     void attachNDB(std::shared_ptr<NDB> ndbInfo);
     void attachDME(std::shared_ptr<DME> dmeInfo);
@@ -53,7 +46,6 @@ private:
     std::shared_ptr<Region> region;
     std::string id;
     Location location;
-    std::vector<Connection> connections;
 
     // Optional
     std::shared_ptr<NDB> ndb;

@@ -19,10 +19,11 @@
 #define SRC_LIBXDATA_WORLD_MODELS_AIRWAY_H_
 
 #include <string>
+#include "src/libxdata/world/graph/NavEdge.h"
 
 namespace xdata {
 
-class Airway {
+class Airway: public NavEdge {
 public:
     enum class Level {
         Upper,
@@ -30,7 +31,7 @@ public:
     };
 
     Airway(const std::string &name, Level lvl);
-    const std::string &getName() const;
+    const std::string &getID() const;
     Level getLevel() const;
 
 private:

@@ -23,15 +23,19 @@
 #include <memory>
 #include "Runway.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
+#include "src/libxdata/world/graph/NavEdge.h"
 
 namespace xdata {
 
-class SID {
+class Airport;
+
+class SID: public NavEdge {
 public:
-    SID(const std::string &id);
+    SID(const std::string &id, std::weak_ptr<Airport> airport);
 
     void setDestionationFix(std::weak_ptr<Fix> fix);
     const std::string &getID() const;
+    std::weak_ptr<Airport> getAirport() const;
     std::weak_ptr<Fix> getDestionationFix() const;
     void setTransitionName(const std::string &name);
     std::string getTransitionName() const;
@@ -40,6 +44,7 @@ private:
     std::string id;
     std::string transition;
     std::weak_ptr<Fix> destinationFix;
+    std::weak_ptr<Airport> airport;
 };
 
 } /* namespace xdata */

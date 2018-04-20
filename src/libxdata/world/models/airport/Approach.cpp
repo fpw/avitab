@@ -19,8 +19,9 @@
 
 namespace xdata {
 
-Approach::Approach(const std::string& id):
-    id(id)
+Approach::Approach(const std::string& id, std::weak_ptr<Airport> airport):
+    id(id),
+    airport(airport)
 {
 }
 
@@ -30,6 +31,10 @@ void Approach::setStartFix(std::weak_ptr<Fix> fix) {
 
 const std::string& Approach::getID() const {
     return id;
+}
+
+std::weak_ptr<Airport> Approach::getAirport() const {
+    return airport;
 }
 
 std::weak_ptr<Fix> Approach::getStartFix() const {
