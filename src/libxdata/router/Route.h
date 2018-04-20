@@ -50,7 +50,6 @@ private:
     AirwayLevel airwayLevel = AirwayLevel::LOWER;
     std::vector<RouteFinder::RouteDirection> waypoints;
 
-    double getRouteDistance(std::shared_ptr<NavNode> start, const std::vector<RouteFinder::RouteDirection> &route) const;
     bool checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const;
 };
 

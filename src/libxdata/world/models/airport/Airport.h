@@ -73,13 +73,6 @@ public:
     void addSTAR(std::shared_ptr<STAR> star);
     void addApproach(std::shared_ptr<Approach> approach);
 
-    std::vector<std::weak_ptr<Fix>> getArrivalFixes() const;
-    std::vector<std::weak_ptr<Fix>> getDepartureFixes() const;
-
-    std::vector<std::shared_ptr<SID>> findSIDs(std::weak_ptr<Fix> to) const;
-    std::vector<std::shared_ptr<STAR>> findSTARs(std::weak_ptr<Fix> to) const;
-    std::vector<std::shared_ptr<Approach>> findApproaches(std::weak_ptr<Fix> to) const;
-
     Airport(const Airport &other) = delete;
     void operator=(const Airport &other) = delete;
 

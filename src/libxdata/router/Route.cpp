@@ -93,15 +93,11 @@ double Route::getDirectDistance() const {
 }
 
 double Route::getRouteDistance() const {
-    return getRouteDistance(startNode, waypoints);
-}
-
-double Route::getRouteDistance(std::shared_ptr<NavNode> start, const std::vector<RouteFinder::RouteDirection>& route) const {
     double distance = 0;
 
-    std::shared_ptr<NavNode> prevNode = start;
+    std::shared_ptr<NavNode> prevNode = startNode;
 
-    for (auto &entry: route) {
+    for (auto &entry: waypoints) {
         distance += prevNode->getLocation().distanceTo(entry.to->getLocation());
         prevNode = entry.to;
     }

@@ -167,15 +167,12 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
     desc << "Route: \n";
     desc << shortRoute << "\n";
 
-    desc << toSIDs(route);
-    desc << toSTARs(route);
-    desc << toApproaches(route);
-
     double directKm = route.getDirectDistance() / 1000;
     double routeKm = route.getRouteDistance() / 1000;
     double directNm = directKm * xdata::KM_TO_NM;
     double routeNm = routeKm * xdata::KM_TO_NM;
 
+    desc << "-----\n";
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
     desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
 
@@ -188,100 +185,21 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
 std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
     std::stringstream desc;
 
-    route.iterateRouteShort([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
+    route.iterateRouteShort([this, &desc, &route] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
         if (via) {
-            desc << " " << via->getID();
+            if (!via->isProcedure()) {
+                desc << " " << via->getID();
+            }
         }
+
         if (to) {
-            desc << " " << to->getID();
+            if (to != route.getStart() && to != route.getDestination()) {
+                desc << " " << to->getID();
+            }
         }
     });
 
     return desc.str();
-}
-
-std::string RouteApp::toDetailedRouteDescription(const xdata::Route& route) {
-    std::stringstream desc;
-
-    route.iterateRoute([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
-        if (via) {
-            desc << "via " << via->getID();
-        }
-        if (to) {
-            desc << " to " << to->getID();
-        }
-        desc << "\n";
-    });
-
-    return desc.str();
-}
-
-std::string RouteApp::toSIDs(const xdata::Route& route) {
-    auto depPtr = route.getDestination();
-/*
-    auto sids = depPtr->findSIDs(route.getStartFix());
-
-    if (sids.empty()) {
-        return "";
-    }
-
-    std::stringstream res;
-    res << "SIDs:\n";
-    for (auto &sid: sids) {
-        res << "   " << sid.getID() << " from " << sid.getTransitionName() << "\n";
-    }
-
-    return res.str();
-    */
-    return "";
-}
-
-std::string RouteApp::toSTARs(const xdata::Route& route) {
-/*
-    auto arrivalPtr = route.getArrival().lock();
-    if (!arrivalPtr) {
-        throw std::runtime_error("Dangling airports");
-    }
-
-    auto stars = arrivalPtr->findSTARs(route.getDestinationFix());
-
-    if (stars.empty()) {
-        return "";
-    }
-
-    std::stringstream res;
-    res << "STARs:\n";
-    for (auto &star: stars) {
-        res << "   " << star.getID() << " to " << star.getTransitionName() << "\n";
-    }
-
-    return res.str();
-    */
-    return "";
-}
-
-std::string RouteApp::toApproaches(const xdata::Route& route) {
-    /*
-    auto arrivalPtr = route.getArrival().lock();
-    if (!arrivalPtr) {
-        throw std::runtime_error("Dangling airports");
-    }
-
-    auto approaches = arrivalPtr->findApproaches(route.getDestinationFix());
-
-    if (approaches.empty()) {
-        return "";
-    }
-
-    std::stringstream res;
-    res << "Approaches:\n";
-    for (auto &approach: approaches) {
-        res << "   " << approach.getID() << " via " << approach.getTransitionName() << "\n";
-    }
-
-    return res.str();
-    */
-    return "";
 }
 
 void RouteApp::removeTab(const Button& closeButton) {
