@@ -43,6 +43,9 @@ private:
     void startAirport();
     void parseRunway();
     bool parseRunwayEnd(AirportData::RunwayEnd &end);
+    void parseWaterway();
+    bool parseWaterwayEnd(AirportData::RunwayEnd &end);
+    void parseHelipad();
     void parseMetaData();
     void parseFrequency(int code);
     void finishAirport();

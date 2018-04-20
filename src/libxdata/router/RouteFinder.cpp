@@ -31,7 +31,7 @@ void RouteFinder::setEdgeFilter(EdgeFilter filter) {
     edgeFilter = filter;
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findFixToFix(NodePtr from, NodePtr goal) {
+std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, NodePtr goal) {
     logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
     directDistance = from->getLocation().distanceTo(goal->getLocation());
 

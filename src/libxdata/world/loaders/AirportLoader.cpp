@@ -15,8 +15,9 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "AirportLoader.h"
 #include <cmath>
+#include "AirportLoader.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -32,6 +33,13 @@ void AirportLoader::load(const std::string& file) {
 }
 
 void AirportLoader::onAirportLoaded(const AirportData& port) {
+    if (std::isnan(port.latitude) || std::isnan(port.longitude)) {
+        if (port.runways.empty()) {
+            logger::warn("Airport %s has no location or runways, discarding", port.id.c_str());
+            return;
+        }
+    }
+
     auto airport = world->findOrCreateAirport(port.id);
     airport->setName(port.name);
     airport->setElevation(port.elevation);

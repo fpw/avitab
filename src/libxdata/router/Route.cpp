@@ -44,7 +44,7 @@ std::shared_ptr<NavNode> Route::getDestination() const {
 }
 
 void Route::find() {
-    waypoints = router.findFixToFix(startNode, destNode);
+    waypoints = router.findRoute(startNode, destNode);
 }
 
 bool Route::checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const {

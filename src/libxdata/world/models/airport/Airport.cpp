@@ -200,8 +200,13 @@ const std::string& Airport::getMetarString() const {
 
 const Location& Airport::getLocation() const {
     if (!location.isValid()) {
-        throw std::runtime_error("No location for airport " + getID());
+        // some airports do not have a location, try the first runway's location instead
+        if (!runways.empty()) {
+            return runways.begin()->second.getLocation();
+        }
+        // if they don't even have runways, we can't do anything -> return NaN below
     }
+
     return location;
 }
 

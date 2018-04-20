@@ -35,7 +35,7 @@ public:
     const std::string &getName() const;
     float getWidth() const;
     void attachILSData(std::weak_ptr<Fix> ils);
-    Location getLocation() const;
+    const Location &getLocation() const;
 
     // Optional, can return nullptr
     std::shared_ptr<Fix> getILSData() const;

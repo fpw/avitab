@@ -54,6 +54,12 @@ void AirportParser::parseLine() {
     case 100:
         parseRunway();
         break;
+    case 101:
+        parseWaterway();
+        break;
+    case 102:
+        parseHelipad();
+        break;
     case 1302:
         parseMetaData();
         break;
@@ -115,6 +121,47 @@ bool AirportParser::parseRunwayEnd(AirportData::RunwayEnd &end) {
     parser.parseInt(); // REIL lights
 
     return true;
+}
+
+void AirportParser::parseWaterway() {
+    AirportData::RunwayData rwy;
+    rwy.width = parser.parseDouble();
+    parser.parseInt(); // buoys
+
+    AirportData::RunwayEnd end;
+    while (parseWaterwayEnd(end)) {
+        rwy.ends.push_back(end);
+    }
+    curPort.runways.push_back(rwy);
+}
+
+bool AirportParser::parseWaterwayEnd(AirportData::RunwayEnd& end) {
+    std::string firstWord = parser.parseWord();
+    if (firstWord.empty()) {
+        return false;
+    }
+
+    end.name = firstWord;
+    end.latitude = parser.parseDouble();
+    end.longitude = parser.parseDouble();
+
+    return true;
+}
+
+void AirportParser::parseHelipad() {
+    AirportData::RunwayData rwy;
+
+    AirportData::RunwayEnd end;
+    end.name = parser.parseWord();
+    end.latitude = parser.parseDouble();
+    end.longitude = parser.parseDouble();
+    parser.parseDouble(); // orientation
+    parser.parseDouble(); // length
+    rwy.width = parser.parseDouble();
+    rwy.surfaceType = parser.parseInt();
+
+    rwy.ends.push_back(end);
+    curPort.runways.push_back(rwy);
 }
 
 void AirportParser::parseMetaData() {

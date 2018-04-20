@@ -55,7 +55,7 @@ std::shared_ptr<Fix> Runway::getILSData() const {
     return ils.lock();
 }
 
-Location Runway::getLocation() const {
+const Location &Runway::getLocation() const {
     return location;
 }
 

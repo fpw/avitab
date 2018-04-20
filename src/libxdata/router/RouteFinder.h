@@ -43,7 +43,7 @@ public:
 
     void setEdgeFilter(EdgeFilter filter);
     void setAirwayChangePenalty(float percent);
-    std::vector<RouteDirection> findFixToFix(NodePtr from, NodePtr to);
+    std::vector<RouteDirection> findRoute(NodePtr from, NodePtr to);
 
 private:
     EdgeFilter edgeFilter;
