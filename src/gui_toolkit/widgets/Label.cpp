@@ -30,8 +30,16 @@ Label::Label(WidgetPtr parent, const std::string& title):
     setText(title);
 }
 
+void Label::setAllowColors(bool colors) {
+    lv_label_set_recolor(obj(), colors);
+}
+
 void Label::setText(const std::string& title) {
     lv_label_set_text(obj(), title.c_str());
+}
+
+void Label::setLongMode(bool longText) {
+    lv_label_set_long_mode(obj(), longText ? LV_LABEL_LONG_BREAK : LV_LABEL_LONG_DOT);
 }
 
 void Label::setTextFormatted(const std::string format, ...) {

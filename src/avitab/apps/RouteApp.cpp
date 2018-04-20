@@ -176,8 +176,10 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
     desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
 
-    TextArea widget(page, desc.str());
-    widget.setShowCursor(false);
+    Label widget(page, "");
+    widget.setAllowColors(true);
+    widget.setLongMode(true);
+    widget.setText(desc.str());
     widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
     widget.setManaged();
 }
@@ -188,7 +190,7 @@ std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
     route.iterateRouteShort([this, &desc, &route] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
         if (via) {
             if (!via->isProcedure()) {
-                desc << " " << via->getID();
+                desc << " #368BC1 " << via->getID() << "#";
             }
         }
 

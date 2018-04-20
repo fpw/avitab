@@ -103,8 +103,11 @@ void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Air
     str << "\n";
     str << toWeatherInfo(airport);
 
-    Label label(page, str.str());
-    label.setManaged();
+    Label widget(page, "");
+    widget.setLongMode(true);
+    widget.setText(str.str());
+    widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
+    widget.setManaged();
 }
 
 std::string AirportApp::toATCInfo(std::shared_ptr<xdata::Airport> airport) {
@@ -174,17 +177,8 @@ std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
 
     std::stringstream str;
     str << "Weather, updated " << timestamp << "\n";
-    int lineChars = 0;
-    for (auto c: metar) {
-        if (lineChars >= 50 && std::isspace(c)) {
-            str << "\n";
-            lineChars = 0;
-        } else {
-            str << c;
-            lineChars++;
-        }
-    }
-    return str.str() + "\n";
+    str << metar << "\n";
+    return str.str();
 
 }
 

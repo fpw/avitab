@@ -26,6 +26,8 @@ namespace avitab {
 class Label: public Widget {
 public:
     Label(WidgetPtr parent, const std::string &title);
+    void setAllowColors(bool colors);
+    void setLongMode(bool longText);
     void setText(const std::string &title);
     void setTextFormatted(const std::string format, ...);
 };
