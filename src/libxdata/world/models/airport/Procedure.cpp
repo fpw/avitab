@@ -15,30 +15,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Airway.h"
+#include "Procedure.h"
 
 namespace xdata {
 
-Airway::Airway(const std::string& name, AirwayLevel lvl):
-    name(name),
-    level(lvl)
+Procedure::Procedure(const std::string& id):
+    id(id)
 {
 }
 
-const std::string& Airway::getID() const {
-    return name;
+const std::string& Procedure::getID() const {
+    return id;
 }
 
-bool Airway::supportsLevel(AirwayLevel level) const {
-    return this->level == level;
+void Procedure::setConnectedFix(std::weak_ptr<Fix> fix) {
+    connectedFix = fix;
 }
 
-AirwayLevel Airway::getLevel() const {
-    return level;
+std::weak_ptr<Fix> Procedure::getConnectedFix() const {
+    return connectedFix;
 }
 
-bool Airway::isProcedure() const {
-    return false;
+bool Procedure::supportsLevel(AirwayLevel level) const {
+    // a procedure supports both upper and lower levels
+    return true;
+}
+
+void Procedure::setTransitionName(const std::string& name) {
+    transition = name;
+}
+
+std::string Procedure::getTransitionName() const {
+    return transition;
+}
+
+bool Procedure::isProcedure() const {
+    return true;
 }
 
 } /* namespace xdata */

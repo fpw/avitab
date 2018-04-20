@@ -43,7 +43,7 @@ void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPD
 
     switch (procedure.type) {
     case CIFPData::ProcedureType::SID: {
-        auto sid = std::make_shared<SID>(procedure.id, airport);
+        auto sid = std::make_shared<SID>(procedure.id);
         auto lastFix = world->findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
         if (lastFix) {
             sid->setTransitionName(first.transitionId);
@@ -54,7 +54,7 @@ void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPD
         break;
     }
     case CIFPData::ProcedureType::STAR: {
-        auto star = std::make_shared<STAR>(procedure.id, airport);
+        auto star = std::make_shared<STAR>(procedure.id);
         auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
             star->setTransitionName(first.transitionId);
@@ -65,7 +65,7 @@ void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPD
         break;
     }
     case CIFPData::ProcedureType::APPROACH: {
-        auto app = std::make_shared<Approach>(procedure.id, airport);
+        auto app = std::make_shared<Approach>(procedure.id);
         auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
         if (firstFix) {
             app->setTransitionName(first.transitionId);

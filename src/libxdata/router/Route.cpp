@@ -31,7 +31,7 @@ Route::Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest):
     });
 }
 
-void Route::setAirwayLevel(Airway::Level level) {
+void Route::setAirwayLevel(AirwayLevel level) {
     airwayLevel = level;
 }
 
@@ -48,37 +48,15 @@ void Route::find() {
 }
 
 bool Route::checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const {
-    auto airway = std::dynamic_pointer_cast<const Airway>(via);
-    if (airway) {
-        return (airway->getLevel() == airwayLevel);
+    if (via->isProcedure()) {
+        // We only allow SIDs, STARs etc. if they are start or end of the route.
+        // This prevents routes that use SIDs and STARs of other airports as waypoints
+        return startNode->isConnectedTo(to) || to == destNode;
+    } else {
+        // Normal airways are allowed if their level matches the desired level
+        return via->supportsLevel(airwayLevel);
     }
 
-    auto star = std::dynamic_pointer_cast<const STAR>(via);
-    if (star) {
-        auto arrival = star->getAirport().lock();
-        if (arrival) {
-            return arrival.get() == destNode.get();
-        } else {
-            return false;
-        }
-    }
-
-    auto app = std::dynamic_pointer_cast<const Approach>(via);
-    if (app) {
-        auto arrival = app->getAirport().lock();
-        if (arrival) {
-            return arrival.get() == destNode.get();
-        } else {
-            return false;
-        }
-    }
-
-    auto sid = std::dynamic_pointer_cast<const SID>(via);
-    if (sid) {
-        return startNode->isConnectedTo(to);
-    }
-
-    return true;
 }
 
 void Route::iterateRoute(RouteIterator f) const {

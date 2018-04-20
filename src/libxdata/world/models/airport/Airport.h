@@ -59,8 +59,8 @@ public:
     void addRunway(const Runway &rwy);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
-    const std::string& getID() const;
-    const Location &getLocation() const; // can throw if unknown
+    const std::string& getID() const override;
+    const Location &getLocation() const override; // can throw if unknown
     const std::string& getName() const;
     const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
     const std::string &getMetarTimestamp() const;

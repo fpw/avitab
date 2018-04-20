@@ -22,9 +22,17 @@
 
 namespace xdata {
 
+enum class AirwayLevel {
+    UPPER,
+    LOWER
+};
+
 class NavEdge {
 public:
     virtual const std::string &getID() const = 0;
+    virtual bool supportsLevel(AirwayLevel level) const = 0;
+    virtual bool isProcedure() const = 0;
+
     virtual ~NavEdge() = default;
 };
 

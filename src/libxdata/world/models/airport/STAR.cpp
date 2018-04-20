@@ -19,34 +19,17 @@
 
 namespace xdata {
 
-STAR::STAR(const std::string& id, std::weak_ptr<Airport> airport):
-    id(id),
-    airport(airport)
+STAR::STAR(const std::string& id):
+    Procedure(id)
 {
 }
 
 void STAR::setStartFix(std::weak_ptr<Fix> fix) {
-    startFix = fix;
-}
-
-const std::string& STAR::getID() const {
-    return id;
-}
-
-std::weak_ptr<Airport> STAR::getAirport() const {
-    return airport;
+    setConnectedFix(fix);
 }
 
 std::weak_ptr<Fix> STAR::getStartFix() const {
-    return startFix;
-}
-
-void STAR::setTransitionName(const std::string& name) {
-    transition = name;
-}
-
-std::string STAR::getTransitionName() const {
-    return transition;
+    return getConnectedFix();
 }
 
 } /* namespace xdata */

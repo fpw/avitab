@@ -79,7 +79,7 @@ std::shared_ptr<Airport> World::findOrCreateAirport(const std::string& id) {
     return iter->second;
 }
 
-std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, Airway::Level lvl) {
+std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, AirwayLevel lvl) {
     auto range = airways.equal_range(name);
 
     for (auto it = range.first; it != range.second; ++it) {

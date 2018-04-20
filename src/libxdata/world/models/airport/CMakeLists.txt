@@ -4,4 +4,5 @@ add_library(xdata_models_airport
     SID.cpp
     STAR.cpp
     Approach.cpp
+    Procedure.cpp
 )

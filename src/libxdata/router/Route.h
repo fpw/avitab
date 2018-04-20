@@ -32,7 +32,7 @@ public:
 
     Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest);
 
-    void setAirwayLevel(Airway::Level level);
+    void setAirwayLevel(AirwayLevel level);
 
     std::shared_ptr<NavNode> getStart() const;
     std::shared_ptr<NavNode> getDestination() const;
@@ -47,7 +47,7 @@ public:
 private:
     RouteFinder router;
     std::shared_ptr<NavNode> startNode, destNode;
-    Airway::Level airwayLevel = Airway::Level::Lower;
+    AirwayLevel airwayLevel = AirwayLevel::LOWER;
     std::vector<RouteFinder::RouteDirection> waypoints;
 
     double getRouteDistance(std::shared_ptr<NavNode> start, const std::vector<RouteFinder::RouteDirection> &route) const;

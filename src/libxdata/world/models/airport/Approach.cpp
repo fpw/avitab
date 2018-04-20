@@ -19,34 +19,17 @@
 
 namespace xdata {
 
-Approach::Approach(const std::string& id, std::weak_ptr<Airport> airport):
-    id(id),
-    airport(airport)
+Approach::Approach(const std::string& id):
+    Procedure(id)
 {
 }
 
 void Approach::setStartFix(std::weak_ptr<Fix> fix) {
-    startFix = fix;
-}
-
-const std::string& Approach::getID() const {
-    return id;
-}
-
-std::weak_ptr<Airport> Approach::getAirport() const {
-    return airport;
+    setConnectedFix(fix);
 }
 
 std::weak_ptr<Fix> Approach::getStartFix() const {
-    return startFix;
-}
-
-void Approach::setTransitionName(const std::string& name) {
-    transition = name;
-}
-
-std::string Approach::getTransitionName() const {
-    return transition;
+    return getConnectedFix();
 }
 
 } /* namespace xdata */

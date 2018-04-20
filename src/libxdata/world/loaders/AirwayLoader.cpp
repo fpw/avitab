@@ -39,10 +39,10 @@ void AirwayLoader::onAirwayLoaded(const AirwayData& airway) {
         return;
     }
 
-    Airway::Level level;
+    AirwayLevel level;
     switch (airway.level) {
-    case AirwayData::AltitudeLevel::LOW:    level = Airway::Level::Lower; break;
-    case AirwayData::AltitudeLevel::HIGH:   level = Airway::Level::Upper; break;
+    case AirwayData::AltitudeLevel::LOW:    level = AirwayLevel::LOWER; break;
+    case AirwayData::AltitudeLevel::HIGH:   level = AirwayLevel::UPPER; break;
     default:                                throw std::runtime_error("Invalid airway level");
     }
 

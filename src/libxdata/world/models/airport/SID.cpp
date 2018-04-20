@@ -19,34 +19,17 @@
 
 namespace xdata {
 
-SID::SID(const std::string &id, std::weak_ptr<Airport> airport):
-    id(id),
-    airport(airport)
+SID::SID(const std::string &id):
+    Procedure(id)
 {
 }
 
 void SID::setDestionationFix(std::weak_ptr<Fix> fix) {
-    destinationFix = fix;
-}
-
-const std::string& SID::getID() const {
-    return id;
-}
-
-std::weak_ptr<Airport> SID::getAirport() const {
-    return airport;
+    setConnectedFix(fix);
 }
 
 std::weak_ptr<Fix> SID::getDestionationFix() const {
-    return destinationFix;
-}
-
-void SID::setTransitionName(const std::string& name) {
-    transition = name;
-}
-
-std::string SID::getTransitionName() const {
-    return transition;
+    return getConnectedFix();
 }
 
 } /* namespace xdata */

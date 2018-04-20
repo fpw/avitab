@@ -113,9 +113,9 @@ bool RouteApp::createRoute() {
     xdata::Route route(departure, arrival);
 
     if (highRouteCB->isChecked()) {
-        route.setAirwayLevel(xdata::Airway::Level::Upper);
+        route.setAirwayLevel(xdata::AirwayLevel::UPPER);
     } else {
-        route.setAirwayLevel(xdata::Airway::Level::Lower);
+        route.setAirwayLevel(xdata::AirwayLevel::LOWER);
     }
 
     try {

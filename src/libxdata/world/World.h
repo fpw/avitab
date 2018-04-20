@@ -42,7 +42,7 @@ public:
     void addFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Region> findOrCreateRegion(const std::string &id);
     std::shared_ptr<Airport> findOrCreateAirport(const std::string &id);
-    std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, Airway::Level lvl);
+    std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, AirwayLevel lvl);
 
 private:
     // Unique IDs

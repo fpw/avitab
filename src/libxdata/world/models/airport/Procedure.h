@@ -15,27 +15,38 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_AIRWAY_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_PROCEDURE_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_PROCEDURE_H_
 
 #include <string>
+#include <vector>
+#include <memory>
+#include "Runway.h"
+#include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/graph/NavEdge.h"
 
 namespace xdata {
 
-class Airway: public NavEdge {
+class Procedure: public NavEdge {
 public:
-    Airway(const std::string &name, AirwayLevel lvl);
+    Procedure(const std::string &id);
+
+    void setConnectedFix(std::weak_ptr<Fix> fix);
     const std::string &getID() const override;
-    bool supportsLevel(AirwayLevel level) const override;
-    AirwayLevel getLevel() const;
+    virtual bool supportsLevel(AirwayLevel level) const override;
+    std::weak_ptr<Fix> getConnectedFix() const;
+    void setTransitionName(const std::string &name);
+    std::string getTransitionName() const;
     bool isProcedure() const override;
 
+    virtual ~Procedure() = default;
+
 private:
-    std::string name;
-    AirwayLevel level;
+    std::string id;
+    std::string transition;
+    std::weak_ptr<Fix> connectedFix;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRWAY_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_PROCEDURE_H_ */

@@ -33,8 +33,8 @@ namespace xdata {
 class Fix: public NavNode {
 public:
     Fix(std::shared_ptr<Region> region, std::string id, Location loc);
-    const std::string &getID() const;
-    const Location &getLocation() const;
+    const std::string &getID() const override;
+    const Location &getLocation() const override;
     std::shared_ptr<Region> getRegion() const;
 
     void attachNDB(std::shared_ptr<NDB> ndbInfo);

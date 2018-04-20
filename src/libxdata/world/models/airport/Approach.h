@@ -18,33 +18,16 @@
 #ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
 #define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
 
-#include <string>
-#include <vector>
-#include <memory>
-#include "Runway.h"
-#include "src/libxdata/world/models/navaids/Fix.h"
-#include "src/libxdata/world/graph/NavEdge.h"
+#include "Procedure.h"
 
 namespace xdata {
 
-class Airport;
-
-class Approach: public NavEdge {
+class Approach: public Procedure {
 public:
-    Approach(const std::string &id, std::weak_ptr<Airport> airport);
+    Approach(const std::string &id);
 
     void setStartFix(std::weak_ptr<Fix> fix);
-    const std::string &getID() const;
-    std::weak_ptr<Airport> getAirport() const;
     std::weak_ptr<Fix> getStartFix() const;
-    void setTransitionName(const std::string &name);
-    std::string getTransitionName() const;
-
-private:
-    std::string id;
-    std::string transition;
-    std::weak_ptr<Fix> startFix;
-    std::weak_ptr<Airport> airport;
 };
 
 } /* namespace xdata */
