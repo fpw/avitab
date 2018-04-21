@@ -29,14 +29,20 @@ AirportLoader::AirportLoader(std::shared_ptr<World> worldPtr):
 
 void AirportLoader::load(const std::string& file) {
     AirportParser parser(file);
-    parser.setAcceptor([this] (const AirportData &data) { onAirportLoaded(data); });
+    parser.setAcceptor([this] (const AirportData &data) {
+        try {
+            onAirportLoaded(data);
+        } catch (const std::exception &e) {
+            logger::warn("Can't parse airport %s: %s", data.id.c_str(), e.what());
+        }
+    });
     parser.loadAirports();
 }
 
 void AirportLoader::onAirportLoaded(const AirportData& port) {
     if (std::isnan(port.latitude) || std::isnan(port.longitude)) {
-        if (port.runways.empty()) {
-            logger::warn("Airport %s has no location or runways, discarding", port.id.c_str());
+        if (port.runways.empty() && port.heliports.empty()) {
+            logger::warn("Airport %s has no location or landing points, discarding", port.id.c_str());
             return;
         }
     }
@@ -69,6 +75,12 @@ void AirportLoader::onAirportLoaded(const AirportData& port) {
     if (!std::isnan(port.latitude) && !std::isnan(port.longitude)) {
         Location loc(port.latitude, port.longitude);
         airport->setLocation(loc);
+    }
+
+    for (auto &entry: port.heliports) {
+        auto port = std::make_shared<Heliport>(entry.name);
+        port->setLocation(Location(entry.latitude, entry.longitude));
+        airport->addHeliport(port);
     }
 
     for (auto &entry: port.runways) {

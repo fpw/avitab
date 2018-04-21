@@ -53,6 +53,13 @@ struct AirportData {
         std::vector<RunwayEnd> ends;
     };
 
+    struct HeliportData {
+        std::string name;
+        double latitude;
+        double longitude;
+        int surfaceType;
+    };
+
     std::string id;
     std::string name;
     int elevation = 0;
@@ -66,6 +73,7 @@ struct AirportData {
 
     std::vector<Frequency> frequencies;
     std::vector<RunwayData> runways;
+    std::vector<HeliportData> heliports;
 };
 
 } /* namespace xdata */

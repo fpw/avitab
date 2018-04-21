@@ -15,12 +15,10 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
-#define SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_HELIPORT_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_HELIPORT_H_
 
 #include <string>
-#include <memory>
-#include <limits>
 #include "src/libxdata/world/models/Location.h"
 #include "src/libxdata/world/graph/NavNode.h"
 
@@ -28,31 +26,19 @@ namespace xdata {
 
 class Fix;
 
-class Runway: public NavNode {
+class Heliport: public NavNode {
 public:
-    Runway(const std::string &name);
-    void rename(const std::string &newName);
-    void setWidth(float w);
-    void setLength(float l);
+    Heliport(const std::string &name);
     void setLocation(const Location &loc);
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
-    float getWidth() const;
-    void attachILSData(std::weak_ptr<Fix> ils);
 
-    // Optional, can return nullptr
-    std::shared_ptr<Fix> getILSData() const;
 private:
     std::string name;
     Location location;
-    float width = std::numeric_limits<float>::quiet_NaN(); // meters
-    float length = std::numeric_limits<float>::quiet_NaN(); // meters
-
-    // optional
-    std::weak_ptr<Fix> ils;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_RUNWAY_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_HELIPORT_H_ */

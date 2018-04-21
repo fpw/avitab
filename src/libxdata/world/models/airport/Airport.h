@@ -31,6 +31,7 @@
 #include "src/libxdata/world/models/airport/procedures/STAR.h"
 #include "src/libxdata/world/models/airport/procedures/Approach.h"
 #include "Runway.h"
+#include "Heliport.h"
 
 namespace xdata {
 
@@ -56,7 +57,6 @@ public:
     void setLocation(const Location &loc);
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
-    void addRunway(std::shared_ptr<Runway> rwy);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getID() const override;
@@ -66,8 +66,10 @@ public:
     const std::string &getMetarTimestamp() const;
     const std::string &getMetarString() const;
 
+    void addRunway(std::shared_ptr<Runway> rwy);
     void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f);
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
+    void addHeliport(std::shared_ptr<Heliport> port);
 
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);
@@ -90,10 +92,13 @@ private:
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
     std::map<std::string, std::shared_ptr<Fix>> terminalFixes;
     std::map<std::string, std::shared_ptr<Runway>> runways;
+    std::map<std::string, std::shared_ptr<Heliport>> heliports;
     std::map<std::string, std::shared_ptr<SID>> sids;
     std::map<std::string, std::shared_ptr<STAR>> stars;
     std::map<std::string, std::shared_ptr<Approach>> approaches;
     std::string metarTimestamp, metarString;
+
+    std::shared_ptr<Runway> getRunwayAndFixName(const std::string &name);
 };
 
 } /* namespace xdata */

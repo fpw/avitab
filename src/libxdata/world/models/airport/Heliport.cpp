@@ -15,55 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdexcept>
-#include "Runway.h"
-#include "src/libxdata/world/models/navaids/Fix.h"
+#include "Heliport.h"
 
 namespace xdata {
 
-Runway::Runway(const std::string& name):
+Heliport::Heliport(const std::string& name):
     name(name)
 {
 }
 
-void Runway::rename(const std::string& newName) {
-    name = newName;
-}
-
-void Runway::setWidth(float w) {
-    this->width = w;
-}
-
-void Runway::setLength(float l) {
-    this->length = l;
-}
-
-void Runway::setLocation(const Location &loc) {
-    this->location = loc;
-}
-
-const std::string& Runway::getID() const {
+const std::string& Heliport::getID() const {
     return name;
 }
 
-float Runway::getWidth() const {
-    return width;
+void Heliport::setLocation(const Location& loc) {
+    location = loc;
 }
 
-void Runway::attachILSData(std::weak_ptr<Fix> ils) {
-    auto loc = ils.lock();
-    if (!loc->getILSLocalizer()) {
-        throw std::runtime_error("Adding ILS fix without ILS data");
-    }
-
-    this->ils = ils;
-}
-
-std::shared_ptr<Fix> Runway::getILSData() const {
-    return ils.lock();
-}
-
-const Location &Runway::getLocation() const {
+const Location& Heliport::getLocation() const {
     return location;
 }
 

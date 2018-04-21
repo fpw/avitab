@@ -29,7 +29,14 @@ NavaidLoader::NavaidLoader(std::shared_ptr<World> worldPtr):
 
 void NavaidLoader::load(const std::string& file) {
     NavaidParser parser(file);
-    parser.setAcceptor([this] (const NavaidData &data) { onNavaidLoaded(data); });
+    parser.setAcceptor([this] (const NavaidData &data) {
+        try {
+            onNavaidLoaded(data);
+        } catch (const std::exception &e) {
+            logger::warn("Can't parse navaid %s: %s", data.id.c_str(), e.what());
+        }
+
+    });
     parser.loadNavaids();
 }
 
@@ -55,12 +62,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
 
         auto airport = world->findAirportByID(navaid.terminalRegion);
         if (airport) {
-            try {
-                airport->attachILSData(rwy, fix);
-            } catch (...) {
-                // if CIFP data is newer than apt.dat, the runways can mismatch
-                logger::warn("Airport %s: Runway %s not found in apt.dat", airport->getID().c_str(), rwy.c_str());
-            }
+            airport->attachILSData(rwy, fix);
         }
     } else if (navaid.type == NavaidData::Type::NDB) {
         Frequency ndbFrq = Frequency(navaid.radio, Frequency::Unit::KHZ, navaid.name);

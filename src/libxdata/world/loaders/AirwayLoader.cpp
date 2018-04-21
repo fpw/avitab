@@ -17,6 +17,7 @@
  */
 #include "AirwayLoader.h"
 #include "src/libxdata/parsers/AirwayParser.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -27,7 +28,13 @@ AirwayLoader::AirwayLoader(std::shared_ptr<World> worldPtr):
 
 void AirwayLoader::load(const std::string& file) {
     AirwayParser parser(file);
-    parser.setAcceptor([this] (const AirwayData &data) { onAirwayLoaded(data); });
+    parser.setAcceptor([this] (const AirwayData &data) {
+        try {
+            onAirwayLoaded(data);
+        } catch (const std::exception &e) {
+            logger::warn("Can't parse airway %s: %s", data.name.c_str(), e.what());
+        }
+    });
     parser.loadAirways();
 }
 

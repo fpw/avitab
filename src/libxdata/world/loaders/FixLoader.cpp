@@ -17,6 +17,7 @@
  */
 #include "FixLoader.h"
 #include "src/libxdata/parsers/FixParser.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -27,7 +28,13 @@ FixLoader::FixLoader(std::shared_ptr<World> worldPtr):
 
 void FixLoader::load(const std::string& file) {
     FixParser parser(file);
-    parser.setAcceptor([this] (const FixData &data) { onFixLoaded(data); });
+    parser.setAcceptor([this] (const FixData &data) {
+        try {
+            onFixLoaded(data);
+        } catch (const std::exception &e) {
+            logger::warn("Can't parse fix %s: %s", data.id.c_str(), e.what());
+        }
+    });
     parser.loadFixes();
 }
 

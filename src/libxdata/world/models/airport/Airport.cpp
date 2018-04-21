@@ -51,6 +51,10 @@ void Airport::addRunway(std::shared_ptr<Runway> rwy) {
     runways.insert(std::make_pair(rwy->getID(), rwy));
 }
 
+void Airport::addHeliport(std::shared_ptr<Heliport> port) {
+    heliports.insert(std::make_pair(port->getID(), port));
+}
+
 void Airport::addTerminalFix(std::shared_ptr<Fix> fix) {
     terminalFixes.insert(std::make_pair(fix->getID(), fix));
 }
@@ -81,11 +85,49 @@ const std::vector<Frequency> &Airport::getATCFrequencies(ATCFrequency type) {
 }
 
 void Airport::attachILSData(const std::string& rwyName, std::weak_ptr<Fix> ils) {
-    auto rwy = runways.find(rwyName);
-    if (rwy == runways.end()) {
-        throw std::runtime_error("Unknown runway: " + rwyName);
+    auto rwy = getRunwayAndFixName(rwyName);
+    if (!rwy) {
+        throw std::runtime_error("Unknown runway " + rwyName + " for airport " + id);
     }
-    rwy->second->attachILSData(ils);
+    rwy->attachILSData(ils);
+}
+
+std::shared_ptr<Runway> Airport::getRunwayAndFixName(const std::string& name) {
+    auto rwy = getRunwayByName(name);
+    if (rwy) {
+        return rwy;
+    }
+
+    int wantHeading = std::stoi(name.substr(0, 2)) * 10;
+
+    // the nav data is often newer than apt.dat, so we must sometimes rename runways
+    for (auto it = runways.begin(); it != runways.end(); ++it) {
+        if (std::isalpha(name.back())) {
+            if (name.back() != it->first.back()) {
+                // make sure we don't rename 16L to 17C etc.
+                continue;
+            }
+        }
+
+
+        int curHeading = std::stoi(it->first.substr(0, 2)) * 10;
+        int diff = wantHeading - curHeading;
+        if (diff < -180) {
+            diff += 360;
+        }
+        if (diff > 180) {
+            diff -= 360;
+        }
+        if (std::abs(diff) <= 30) {
+            logger::info("Renaming runway %s to %s for airport %s due to newer nav data", it->first.c_str(), name.c_str(), id.c_str());
+            rwy = it->second;
+            runways.erase(it);
+            rwy->rename(name);
+            runways.insert(std::make_pair(rwy->getID(), rwy));
+            return it->second;
+        }
+    }
+    return nullptr;
 }
 
 const std::shared_ptr<Runway> Airport::getRunwayByName(const std::string& rw) const {
@@ -128,7 +170,12 @@ const Location& Airport::getLocation() const {
         if (!runways.empty()) {
             return runways.begin()->second->getLocation();
         }
-        // if they don't even have runways, we can't do anything -> return NaN below
+
+        if (!heliports.empty()) {
+            return heliports.begin()->second->getLocation();
+        }
+
+        // if they don't even have runways or heliports, we can't do anything -> return NaN below
     }
 
     return location;

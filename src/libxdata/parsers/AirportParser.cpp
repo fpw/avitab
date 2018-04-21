@@ -149,19 +149,17 @@ bool AirportParser::parseWaterwayEnd(AirportData::RunwayEnd& end) {
 }
 
 void AirportParser::parseHelipad() {
-    AirportData::RunwayData rwy;
+    AirportData::HeliportData port;
 
-    AirportData::RunwayEnd end;
-    end.name = parser.parseWord();
-    end.latitude = parser.parseDouble();
-    end.longitude = parser.parseDouble();
+    port.name = parser.parseWord();
+    port.latitude = parser.parseDouble();
+    port.longitude = parser.parseDouble();
     parser.parseDouble(); // orientation
     parser.parseDouble(); // length
-    rwy.width = parser.parseDouble();
-    rwy.surfaceType = parser.parseInt();
+    parser.parseDouble(); // width
+    port.surfaceType = parser.parseInt();
 
-    rwy.ends.push_back(end);
-    curPort.runways.push_back(rwy);
+    curPort.heliports.push_back(port);
 }
 
 void AirportParser::parseMetaData() {
