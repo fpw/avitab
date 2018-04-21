@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <cstdlib>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/Logger.h"
