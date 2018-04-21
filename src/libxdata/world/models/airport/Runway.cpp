@@ -30,11 +30,15 @@ void Runway::setWidth(float w) {
     this->width = w;
 }
 
+void Runway::setLength(float l) {
+    this->length = l;
+}
+
 void Runway::setLocation(const Location &loc) {
     this->location = loc;
 }
 
-const std::string& Runway::getName() const {
+const std::string& Runway::getID() const {
     return name;
 }
 

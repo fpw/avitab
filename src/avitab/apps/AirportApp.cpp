@@ -138,14 +138,14 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     double magneticVariation = std::numeric_limits<double>::quiet_NaN();
 
     str << "Runways\n";
-    airport->forEachRunway([this, &str, &magneticVariation] (const xdata::Runway &rwy) {
-        str << "    Runway " + rwy.getName();
-        auto ils = rwy.getILSData();
+    airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
+        str << "    Runway " + rwy->getID();
+        auto ils = rwy->getILSData();
         if (ils) {
             double heading = ils->getILSLocalizer()->getRunwayHeading();
 
             if (std::isnan(magneticVariation)) {
-                xdata::Location rwyLoc = rwy.getLocation();
+                xdata::Location rwyLoc = rwy->getLocation();
                 magneticVariation = api().getMagneticVariation(rwyLoc.latitude, rwyLoc.longitude);
             }
 

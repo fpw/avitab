@@ -33,14 +33,36 @@ void FixLoader::load(const std::string& file) {
 
 void FixLoader::onFixLoaded(const FixData& fix) {
     if (fix.terminalAreaId == "ENRT") {
-        auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
-
-        auto region = world->findOrCreateRegion(fix.icaoRegion);
-        Location loc(fix.latitude, fix.longitude);
-
-        fixModel = std::make_shared<Fix>(region, fix.id, loc);
-        world->addFix(fixModel);
+        loadEnrouteFix(fix);
+    } else {
+        loadTerminalFix(fix);
     }
+}
+
+void FixLoader::loadEnrouteFix(const FixData& fix) {
+    auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
+
+    auto region = world->findOrCreateRegion(fix.icaoRegion);
+    Location loc(fix.latitude, fix.longitude);
+
+    fixModel = std::make_shared<Fix>(region, fix.id, loc);
+    world->addFix(fixModel);
+}
+
+void FixLoader::loadTerminalFix(const FixData& fix) {
+    auto fixModel = world->findFixByRegionAndID(fix.icaoRegion, fix.id);
+
+    auto region = world->findOrCreateRegion(fix.icaoRegion);
+    Location loc(fix.latitude, fix.longitude);
+
+    fixModel = std::make_shared<Fix>(region, fix.id, loc);
+
+    auto airport = world->findAirportByID(fix.terminalAreaId);
+    if (!airport) {
+        // CIFP has airports earlier than apt.dat
+        return;
+    }
+    airport->addTerminalFix(fixModel);
 }
 
 } /* namespace xdata */

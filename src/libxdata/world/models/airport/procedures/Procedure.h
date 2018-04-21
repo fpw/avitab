@@ -20,10 +20,11 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
-#include "Runway.h"
+#include "src/libxdata/world/models/airport/Runway.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
-#include "src/libxdata/world/graph/NavEdge.h"
+#include "src/libxdata/world/graph/NavNode.h"
 
 namespace xdata {
 
@@ -31,20 +32,24 @@ class Procedure: public NavEdge {
 public:
     Procedure(const std::string &id);
 
-    void setConnectedFix(std::weak_ptr<Fix> fix);
     const std::string &getID() const override;
     virtual bool supportsLevel(AirwayLevel level) const override;
-    std::weak_ptr<Fix> getConnectedFix() const;
-    void setTransitionName(const std::string &name);
-    std::string getTransitionName() const;
     bool isProcedure() const override;
+
+    void attachRunwayTransition(std::shared_ptr<Runway> rwy, const std::vector<std::shared_ptr<NavNode>> &nodes);
+    void attachCommonRoute(std::shared_ptr<NavNode> start, const std::vector<std::shared_ptr<NavNode>> &nodes);
+    void attachEnrouteTransitions(const std::vector<std::shared_ptr<NavNode>> &nodes);
+
+    virtual std::string toDebugString() const;
 
     virtual ~Procedure() = default;
 
 private:
     std::string id;
-    std::string transition;
-    std::weak_ptr<Fix> connectedFix;
+
+    std::map<std::shared_ptr<Runway>, std::vector<std::shared_ptr<NavNode>>> runwayTransitions;
+    std::map<std::shared_ptr<NavNode>, std::vector<std::shared_ptr<NavNode>>> commonRoutes;
+    std::vector<std::vector<std::shared_ptr<NavNode>>> enrouteTransitions;
 };
 
 } /* namespace xdata */

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -46,8 +47,20 @@ void Airport::addATCFrequency(ATCFrequency which, const Frequency &frq) {
     atcFrequencies[which].push_back(frq);
 }
 
-void Airport::addRunway(const Runway& rwy) {
-    runways.insert(std::make_pair(rwy.getName(), rwy));
+void Airport::addRunway(std::shared_ptr<Runway> rwy) {
+    runways.insert(std::make_pair(rwy->getID(), rwy));
+}
+
+void Airport::addTerminalFix(std::shared_ptr<Fix> fix) {
+    terminalFixes.insert(std::make_pair(fix->getID(), fix));
+}
+
+std::shared_ptr<Fix> xdata::Airport::getTerminalFix(const std::string& id) {
+    auto it = terminalFixes.find(id);
+    if (it == terminalFixes.end()) {
+        return nullptr;
+    }
+    return it->second;
 }
 
 void Airport::setCurrentMetar(const std::string& timestamp, const std::string& metar) {
@@ -72,18 +85,18 @@ void Airport::attachILSData(const std::string& rwyName, std::weak_ptr<Fix> ils) 
     if (rwy == runways.end()) {
         throw std::runtime_error("Unknown runway: " + rwyName);
     }
-    rwy->second.attachILSData(ils);
+    rwy->second->attachILSData(ils);
 }
 
-const Runway &Airport::getRunwayByName(const std::string& rw) const {
+const std::shared_ptr<Runway> Airport::getRunwayByName(const std::string& rw) const {
     auto rwy = runways.find(rw);
     if (rwy == runways.end()) {
-        throw std::runtime_error("Unknown runway: " + rw);
+        return nullptr;
     }
     return rwy->second;
 }
 
-void Airport::forEachRunway(std::function<void(const Runway&)> f) {
+void Airport::forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) {
     for (auto &rwy: runways) {
         f(rwy.second);
     }
@@ -113,21 +126,12 @@ const Location& Airport::getLocation() const {
     if (!location.isValid()) {
         // some airports do not have a location, try the first runway's location instead
         if (!runways.empty()) {
-            return runways.begin()->second.getLocation();
+            return runways.begin()->second->getLocation();
         }
         // if they don't even have runways, we can't do anything -> return NaN below
     }
 
     return location;
-}
-
-bool Airport::containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const {
-    for (auto &it: fixes) {
-        if (it.lock().get() == fix.lock().get()) {
-            return true;
-        }
-    }
-    return false;
 }
 
 } /* namespace xdata */

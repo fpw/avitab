@@ -84,7 +84,7 @@ CIFPParser::RecordType CIFPParser::parseRecordType() {
 
 void CIFPParser::parseProcedure() {
     parser.nextDelimitedWord(','); // sequence number
-    parser.nextDelimitedWord(','); // type
+    std::string type = parser.nextDelimitedWord(','); // type
     std::string routeId = parser.nextDelimitedWord(',');
 
     if (routeId != curData.id) {
@@ -98,11 +98,93 @@ void CIFPParser::parseProcedure() {
         }
     }
 
-    CIFPData::Entry entry {};
-    entry.transitionId = parser.nextDelimitedWord(',');
-    entry.fixId = parser.nextDelimitedWord(',');
-    entry.fixIcaoRegion = parser.nextDelimitedWord(',');
-    curData.sequence.push_back(entry);
+    switch (currentType) {
+    case RecordType::SID:
+        if (type == "1" || type == "4") {
+            parseRunwayTransition();
+        } else if (type == "2" || type == "5") {
+            parseCommonRoute();
+        } else if (type == "3" || type == "6") {
+            parseEnrouteTransition();
+        }
+        break;
+    case RecordType::STAR:
+        if (type == "1" || type == "4") {
+            parseEnrouteTransition();
+        } else if (type == "2" || type == "5") {
+            parseCommonRoute();
+        } else if (type == "3" || type == "6") {
+            parseRunwayTransition();
+        }
+        break;
+    case RecordType::APPROACH:
+        if (type == "A") {
+            parseApproachTransition();
+        } else {
+            parseApproach();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+void CIFPParser::parseRunwayTransition() {
+    std::string rwy = parser.nextDelimitedWord(',');
+    auto &rwt = curData.runwayTransitions[rwy];
+
+    auto fix = parseFixInRegion();
+    if (!fix.id.empty()) {
+        rwt.fixes.push_back(fix);
+    }
+}
+
+void CIFPParser::parseCommonRoute() {
+    std::string toFix = parser.nextDelimitedWord(',');
+    auto &route = curData.commonRoutes[toFix];
+
+    auto fix = parseFixInRegion();
+    if (!fix.id.empty()) {
+        route.fixes.push_back(fix);
+    }
+}
+
+void CIFPParser::parseEnrouteTransition() {
+    std::string toFix = parser.nextDelimitedWord(',');
+    auto &enrt = curData.enrouteTransitions[toFix];
+
+    auto fix = parseFixInRegion();
+    if (!fix.id.empty()) {
+        enrt.fixes.push_back(fix);
+    }
+}
+
+void CIFPParser::parseApproachTransition() {
+    std::string name = parser.nextDelimitedWord(',');
+    auto &trans = curData.approachTransitions[name];
+
+    auto fix = parseFixInRegion();
+    if (!fix.id.empty()) {
+        trans.fixes.push_back(fix);
+    }
+}
+
+void CIFPParser::parseApproach() {
+    parser.nextDelimitedWord(','); // should be empty
+
+    auto fix = parseFixInRegion();
+    if (!fix.id.empty()) {
+        curData.approach.push_back(fix);
+    }
+}
+
+CIFPData::FixInRegion CIFPParser::parseFixInRegion() {
+    CIFPData::FixInRegion fix;
+    fix.id = parser.nextDelimitedWord(',');
+    fix.region = parser.nextDelimitedWord(',');
+    fix.sectionCode = parser.nextDelimitedWord(',');
+    fix.subSectionCode = parser.nextDelimitedWord(',');
+    return fix;
 }
 
 } /* namespace xdata */

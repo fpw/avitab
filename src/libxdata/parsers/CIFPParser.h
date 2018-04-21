@@ -49,6 +49,13 @@ private:
 
     RecordType parseRecordType();
     void parseProcedure();
+    void parseRunwayTransition();
+    void parseCommonRoute();
+    void parseEnrouteTransition();
+    void parseApproachTransition();
+    void parseApproach();
+
+    CIFPData::FixInRegion parseFixInRegion();
 };
 
 } /* namespace xdata */

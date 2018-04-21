@@ -33,6 +33,19 @@ private:
     std::shared_ptr<World> world;
 
     void onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData &procedure);
+
+    void loadSID(std::shared_ptr<Airport> airport, const CIFPData &procedure);
+    void loadSTAR(std::shared_ptr<Airport> airport, const CIFPData &procedure);
+    void loadApproach(std::shared_ptr<Airport> airport, const CIFPData &procedure);
+
+    std::vector<std::shared_ptr<NavNode>> convertFixes(std::shared_ptr<Airport> airport, const std::vector<CIFPData::FixInRegion> &fixes) const;
+    void loadRunwayTransition(const CIFPData& procedure, Procedure &proc, const std::shared_ptr<Airport>& airport);
+    void loadCommonRoutes(const CIFPData& procedure, Procedure &proc, const std::shared_ptr<Airport>& airport);
+    void loadEnroute(const CIFPData& procedure, Procedure &proc, const std::shared_ptr<Airport>& airport);
+    void loadApproachTransitions(const CIFPData& procedure, Approach &proc, const std::shared_ptr<Airport>& airport);
+    void loadApproaches(const CIFPData& procedure, Approach &proc, const std::shared_ptr<Airport>& airport);
+
+    void forEveryMatchingRunway(const std::string &rwSpec, const std::shared_ptr<Airport> apt, std::function<void (std::shared_ptr<Runway>)> f);
 };
 
 } /* namespace xdata */

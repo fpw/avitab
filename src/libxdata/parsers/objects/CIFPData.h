@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace xdata {
 
@@ -90,15 +91,44 @@ struct CIFPData {
         APPROACH
     };
 
-    struct Entry {
-        std::string transitionId;
-        std::string fixId;
-        std::string fixIcaoRegion;
+    struct FixInRegion {
+        std::string id;
+        std::string region;
+        std::string sectionCode; // D = Navaid, E = Enroute, P = Airport
+        std::string subSectionCode; // see page 56 ARINC 424-17
+    };
+
+    // SID: for route type 1 or 4
+    // STAR: for route type 3 or 6
+    struct RunwayTransition {
+        std::vector<FixInRegion> fixes;
+    };
+
+    // SID: for route type 2 or 5
+    // STAR: for route type 2 or 5
+    struct CommonRoute {
+        std::vector<FixInRegion> fixes;
+    };
+
+    // SID: for route type 3 or 6
+    // STAR: for route type 1 or 4
+    struct EnrouteTransition {
+        std::vector<FixInRegion> fixes;
+    };
+
+    // Approach: for route type A
+    struct ApproachTransition {
+        std::vector<FixInRegion> fixes;
     };
 
     ProcedureType type = ProcedureType::NONE;
     std::string id;
-    std::vector<Entry> sequence;
+
+    std::map<std::string, RunwayTransition> runwayTransitions; // key is runway, e.g. "RW06B"
+    std::map<std::string, CommonRoute> commonRoutes; // key is source transition, e.g. runway (also "ALL") or empty
+    std::map<std::string, EnrouteTransition> enrouteTransitions; // key is destination fix, e.g. "COREZ"
+    std::map<std::string, ApproachTransition> approachTransitions; // key is approach name, e.g. "RAR25"
+    std::vector<FixInRegion> approach;
 };
 
 } /* namespace xdata */

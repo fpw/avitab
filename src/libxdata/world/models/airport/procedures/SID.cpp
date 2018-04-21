@@ -15,21 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
-#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
-
-#include "Procedure.h"
+#include "SID.h"
 
 namespace xdata {
 
-class Approach: public Procedure {
-public:
-    Approach(const std::string &id);
-
-    void setStartFix(std::weak_ptr<Fix> fix);
-    std::weak_ptr<Fix> getStartFix() const;
-};
+SID::SID(const std::string &id):
+    Procedure(id)
+{
+}
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_ */

@@ -17,6 +17,7 @@
  */
 #include "CIFPLoader.h"
 #include "src/libxdata/parsers/CIFPParser.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -28,55 +29,170 @@ CIFPLoader::CIFPLoader(std::shared_ptr<World> worldPtr):
 void CIFPLoader::load(std::shared_ptr<Airport> airport, const std::string& file) {
     CIFPParser parser(file);
     parser.setAcceptor([this, airport] (const CIFPData &cifp) {
-        onProcedureLoaded(airport, cifp);
+        try {
+            onProcedureLoaded(airport, cifp);
+        } catch (const std::exception &e) {
+            logger::warn("CIFP error in %s: %s", cifp.id.c_str(), e.what());
+        }
     });
     parser.loadCIFP();
 }
 
 void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
-    if (procedure.sequence.empty()) {
-        return;
-    }
-
-    auto &first = procedure.sequence.front();
-    auto &last = procedure.sequence.back();
-
     switch (procedure.type) {
     case CIFPData::ProcedureType::SID: {
-        auto sid = std::make_shared<SID>(procedure.id);
-        auto lastFix = world->findFixByRegionAndID(last.fixIcaoRegion, last.fixId);
-        if (lastFix) {
-            sid->setTransitionName(first.transitionId);
-            sid->setDestionationFix(lastFix);
-            airport->addSID(sid);
-            airport->connectTo(sid, lastFix);
-        }
+        loadSID(airport, procedure);
         break;
     }
     case CIFPData::ProcedureType::STAR: {
-        auto star = std::make_shared<STAR>(procedure.id);
-        auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
-        if (firstFix) {
-            star->setTransitionName(first.transitionId);
-            star->setStartFix(firstFix);
-            airport->addSTAR(star);
-            firstFix->connectTo(star, airport);
-        }
+        loadSTAR(airport, procedure);
         break;
     }
     case CIFPData::ProcedureType::APPROACH: {
-        auto app = std::make_shared<Approach>(procedure.id);
-        auto firstFix = world->findFixByRegionAndID(first.fixIcaoRegion, first.fixId);
-        if (firstFix) {
-            app->setTransitionName(first.transitionId);
-            app->setStartFix(firstFix);
-            firstFix->connectTo(app, airport);
-        }
+        loadApproach(airport, procedure);
         break;
     }
     default:
         return;
     }
+}
+
+void CIFPLoader::loadSID(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
+    auto sid = std::make_shared<SID>(procedure.id);
+
+    loadRunwayTransition(procedure, *sid, airport);
+    loadCommonRoutes(procedure, *sid, airport);
+    loadEnroute(procedure, *sid, airport);
+
+    airport->addSID(sid);
+}
+
+void CIFPLoader::loadSTAR(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
+    auto star = std::make_shared<STAR>(procedure.id);
+
+    loadEnroute(procedure, *star, airport);
+    loadCommonRoutes(procedure, *star, airport);
+    loadRunwayTransition(procedure, *star, airport);
+
+    airport->addSTAR(star);
+}
+
+void CIFPLoader::loadApproach(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
+    auto approach = std::make_shared<Approach>(procedure.id);
+
+    loadApproachTransitions(procedure, *approach, airport);
+    loadApproaches(procedure, *approach, airport);
+
+    airport->addApproach(approach);
+}
+
+void CIFPLoader::loadRunwayTransition(const CIFPData& procedure, Procedure &proc, const std::shared_ptr<Airport>& airport) {
+    for (auto &entry: procedure.runwayTransitions) {
+        auto nodes = convertFixes(airport, entry.second.fixes);
+        std::string rwyName = entry.first;
+        forEveryMatchingRunway(rwyName, airport, [this, &nodes, &proc] (std::shared_ptr<Runway> rw) {
+            proc.attachRunwayTransition(rw, nodes);
+        });
+    }
+}
+
+void CIFPLoader::loadCommonRoutes(const CIFPData& procedure, Procedure& proc, const std::shared_ptr<Airport>& airport) {
+    for (auto &entry: procedure.commonRoutes) {
+        auto nodes = convertFixes(airport, entry.second.fixes);
+
+        std::string rw = entry.first;
+        if (rw.empty()) {
+            // just some ordinary route segment
+            if (!nodes.empty()) {
+                proc.attachCommonRoute(*nodes.begin(), nodes);
+            }
+        } else {
+            // a route segment that connects to a runway
+            forEveryMatchingRunway(rw, airport, [this, &nodes, &proc] (std::shared_ptr<Runway> rw) {
+                proc.attachCommonRoute(rw, nodes);
+            });
+        }
+    }
+}
+
+void CIFPLoader::loadEnroute(const CIFPData& procedure, Procedure& proc, const std::shared_ptr<Airport>& airport) {
+    for (auto &entry: procedure.enrouteTransitions) {
+        auto nodes = convertFixes(airport, entry.second.fixes);
+        if (!nodes.empty()) {
+            proc.attachEnrouteTransitions(nodes);
+        }
+    }
+}
+
+void CIFPLoader::loadApproachTransitions(const CIFPData& procedure, Approach& proc, const std::shared_ptr<Airport>& airport) {
+    for (auto &entry: procedure.approachTransitions) {
+        std::string appName = entry.first;
+        auto nodes = convertFixes(airport, entry.second.fixes);
+        if (!nodes.empty()) {
+            proc.addTransition(appName, nodes);
+        }
+    }
+}
+
+void CIFPLoader::loadApproaches(const CIFPData& procedure, Approach& proc, const std::shared_ptr<Airport>& airport) {
+    auto nodes = convertFixes(airport, procedure.approach);
+    if (!nodes.empty()) {
+        proc.addApproach(nodes);
+    }
+}
+
+void CIFPLoader::forEveryMatchingRunway(const std::string& rwSpec, const std::shared_ptr<Airport> apt, std::function<void (std::shared_ptr<Runway>)> f) {
+    if (rwSpec == "ALL") {
+        apt->forEachRunway([this, &f](std::shared_ptr<Runway> rw) {
+            f(rw);
+        });
+        return;
+    } else if (rwSpec.substr(0, 2) == "RW") {
+        std::string rwyName = rwSpec.substr(2);
+        if (rwyName.back() == 'B') {
+            // all runways with same prefix
+            apt->forEachRunway([this, &f, &rwyName] (std::shared_ptr<Runway> rw) {
+                if (rw->getID().substr(0, 2) == rwyName.substr(0, 2)) {
+                    f(rw);
+                }
+            });
+        } else {
+            auto rwy = apt->getRunwayByName(rwyName);
+            if (rwy) {
+                f(rwy);
+            }
+        }
+        return;
+    }
+    throw std::runtime_error("Runway spec invalid: " + apt->getID() + ", RW: " + rwSpec);
+}
+
+std::vector<std::shared_ptr<NavNode>> CIFPLoader::convertFixes(std::shared_ptr<Airport> airport, const std::vector<CIFPData::FixInRegion>& fixes) const {
+    std::vector<std::shared_ptr<NavNode>> res;
+
+    for (auto &fix: fixes) {
+        std::shared_ptr<NavNode> node = world->findFixByRegionAndID(fix.region, fix.id);
+        if (!node) {
+            node = airport->getTerminalFix(fix.id);
+            if (!node) {
+                if (fix.id == airport->getID()) {
+                    node = airport;
+                } else if (fix.id.substr(0, 2) == "RW") {
+                    node = airport->getRunwayByName(fix.id.substr(2));
+                    if (!node) {
+                        // ignore runways that are not found, this is reported somewhere else already
+                        return res;
+                    }
+                }
+                if (!node) {
+                    throw std::runtime_error("Couldn't find fix " + fix.id + " for " + airport->getID());
+                }
+            }
+        }
+        res.push_back(node);
+    }
+
+    return res;
 }
 
 } /* namespace xdata */

@@ -15,21 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "SID.h"
+#include "STAR.h"
 
 namespace xdata {
 
-SID::SID(const std::string &id):
+STAR::STAR(const std::string& id):
     Procedure(id)
 {
-}
-
-void SID::setDestionationFix(std::weak_ptr<Fix> fix) {
-    setConnectedFix(fix);
-}
-
-std::weak_ptr<Fix> SID::getDestionationFix() const {
-    return getConnectedFix();
 }
 
 } /* namespace xdata */

@@ -15,42 +15,42 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Procedure.h"
+#include <sstream>
+#include "Approach.h"
 
 namespace xdata {
 
-Procedure::Procedure(const std::string& id):
-    id(id)
+Approach::Approach(const std::string& id):
+    Procedure(id)
 {
 }
 
-const std::string& Procedure::getID() const {
-    return id;
+void Approach::addTransition(const std::string& id, const std::vector<std::shared_ptr<NavNode>>& nodes) {
+    transitions.insert(std::make_pair(id, nodes));
 }
 
-void Procedure::setConnectedFix(std::weak_ptr<Fix> fix) {
-    connectedFix = fix;
+void Approach::addApproach(const std::vector<std::shared_ptr<NavNode>> &nodes) {
+    approach = nodes;
 }
 
-std::weak_ptr<Fix> Procedure::getConnectedFix() const {
-    return connectedFix;
-}
+std::string Approach::toDebugString() const {
+    std::stringstream res;
 
-bool Procedure::supportsLevel(AirwayLevel level) const {
-    // a procedure supports both upper and lower levels
-    return true;
-}
+    for (auto &it: transitions) {
+        res << "  Transition " << it.first << " connects ";
+        for (auto &node: it.second) {
+            res << node->getID() << ", ";
+        }
+        res << "\n";
+    }
 
-void Procedure::setTransitionName(const std::string& name) {
-    transition = name;
-}
+    res << "  Actual approach: ";
+    for (auto &node: approach) {
+        res << node->getID() << ", ";
+    }
+    res << "\n";
 
-std::string Procedure::getTransitionName() const {
-    return transition;
-}
-
-bool Procedure::isProcedure() const {
-    return true;
+    return res.str();
 }
 
 } /* namespace xdata */

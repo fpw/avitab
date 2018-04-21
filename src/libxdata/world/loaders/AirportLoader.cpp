@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <limits>
 #include "AirportLoader.h"
 #include "src/Logger.h"
 
@@ -71,11 +72,22 @@ void AirportLoader::onAirportLoaded(const AirportData& port) {
     }
 
     for (auto &entry: port.runways) {
-        for (auto &end: entry.ends) {
-            Runway rwy(end.name);
-            rwy.setLocation(Location(end.latitude, end.longitude));
-            rwy.setWidth(entry.width);
+        float length = std::numeric_limits<float>::quiet_NaN();
+        if (entry.ends.size() == 2) {
+            auto &end1 = entry.ends[0];
+            auto &end2 = entry.ends[1];
+            Location end1Loc(end1.latitude, end1.longitude);
+            Location end2Loc(end2.latitude, end2.longitude);
+            length = end1Loc.distanceTo(end2Loc);
+        }
 
+        for (auto &end: entry.ends) {
+            auto rwy = std::make_shared<Runway>(end.name);
+            rwy->setLocation(Location(end.latitude, end.longitude));
+            rwy->setWidth(entry.width);
+            if (!std::isnan(length)) {
+                rwy->setLength(length);
+            }
             airport->addRunway(rwy);
         }
     }

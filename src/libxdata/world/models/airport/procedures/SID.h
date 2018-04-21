@@ -15,21 +15,18 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "STAR.h"
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
+
+#include "Procedure.h"
 
 namespace xdata {
 
-STAR::STAR(const std::string& id):
-    Procedure(id)
-{
-}
-
-void STAR::setStartFix(std::weak_ptr<Fix> fix) {
-    setConnectedFix(fix);
-}
-
-std::weak_ptr<Fix> STAR::getStartFix() const {
-    return getConnectedFix();
-}
+class SID: public Procedure {
+public:
+    SID(const std::string &id);
+};
 
 } /* namespace xdata */
+
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_ */

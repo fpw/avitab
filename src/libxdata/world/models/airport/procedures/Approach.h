@@ -15,21 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
-#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_
+#ifndef SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
+#define SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_
 
 #include "Procedure.h"
 
 namespace xdata {
 
-class SID: public Procedure {
+class Approach: public Procedure {
 public:
-    SID(const std::string &id);
+    Approach(const std::string &id);
+    void addTransition(const std::string &id, const std::vector<std::shared_ptr<NavNode>> &nodes);
+    void addApproach(const std::vector<std::shared_ptr<NavNode>> &nodes);
+    std::string toDebugString() const override;
 
-    void setDestionationFix(std::weak_ptr<Fix> fix);
-    std::weak_ptr<Fix> getDestionationFix() const;
+private:
+    std::map<std::string, std::vector<std::shared_ptr<NavNode>>> transitions;
+    std::vector<std::shared_ptr<NavNode>> approach;
 };
 
 } /* namespace xdata */
 
-#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_SID_H_ */
+#endif /* SRC_LIBXDATA_WORLD_MODELS_AIRPORT_APPROACH_H_ */

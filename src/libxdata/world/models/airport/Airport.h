@@ -27,10 +27,10 @@
 #include "src/libxdata/world/models/Frequency.h"
 #include "src/libxdata/world/models/Location.h"
 #include "src/libxdata/world/graph/NavNode.h"
+#include "src/libxdata/world/models/airport/procedures/SID.h"
+#include "src/libxdata/world/models/airport/procedures/STAR.h"
+#include "src/libxdata/world/models/airport/procedures/Approach.h"
 #include "Runway.h"
-#include "SID.h"
-#include "STAR.h"
-#include "Approach.h"
 
 namespace xdata {
 
@@ -56,7 +56,7 @@ public:
     void setLocation(const Location &loc);
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
-    void addRunway(const Runway &rwy);
+    void addRunway(std::shared_ptr<Runway> rwy);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getID() const override;
@@ -66,8 +66,11 @@ public:
     const std::string &getMetarTimestamp() const;
     const std::string &getMetarString() const;
 
-    void forEachRunway(std::function<void(const Runway &)> f);
-    const Runway &getRunwayByName(const std::string &rw) const;
+    void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f);
+    const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
+
+    void addTerminalFix(std::shared_ptr<Fix> fix);
+    std::shared_ptr<Fix> getTerminalFix(const std::string &id);
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
     void addSID(std::shared_ptr<SID> sid);
     void addSTAR(std::shared_ptr<STAR> star);
@@ -85,13 +88,12 @@ private:
     // Optional
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
-    std::map<std::string, Runway> runways;
+    std::map<std::string, std::shared_ptr<Fix>> terminalFixes;
+    std::map<std::string, std::shared_ptr<Runway>> runways;
     std::map<std::string, std::shared_ptr<SID>> sids;
     std::map<std::string, std::shared_ptr<STAR>> stars;
     std::map<std::string, std::shared_ptr<Approach>> approaches;
     std::string metarTimestamp, metarString;
-
-    bool containsFix(std::vector<std::weak_ptr<Fix>> &fixes, std::weak_ptr<Fix> fix) const;
 };
 
 } /* namespace xdata */

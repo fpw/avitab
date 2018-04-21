@@ -20,29 +20,33 @@
 
 #include <string>
 #include <memory>
+#include <limits>
 #include "src/libxdata/world/models/Location.h"
+#include "src/libxdata/world/graph/NavNode.h"
 
 namespace xdata {
 
 class Fix;
 
-class Runway {
+class Runway: public NavNode {
 public:
     Runway(const std::string &name);
     void setWidth(float w);
+    void setLength(float l);
     void setLocation(const Location &loc);
 
-    const std::string &getName() const;
+    const std::string &getID() const override;
+    const Location &getLocation() const override;
     float getWidth() const;
     void attachILSData(std::weak_ptr<Fix> ils);
-    const Location &getLocation() const;
 
     // Optional, can return nullptr
     std::shared_ptr<Fix> getILSData() const;
 private:
     std::string name;
     Location location;
-    float width = 0; // meters
+    float width = std::numeric_limits<float>::quiet_NaN(); // meters
+    float length = std::numeric_limits<float>::quiet_NaN(); // meters
 
     // optional
     std::weak_ptr<Fix> ils;

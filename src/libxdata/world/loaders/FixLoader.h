@@ -32,6 +32,8 @@ private:
     std::shared_ptr<World> world;
 
     void onFixLoaded(const FixData &fix);
+    void loadEnrouteFix(const FixData &fix);
+    void loadTerminalFix(const FixData &fix);
 };
 
 } /* namespace xdata */

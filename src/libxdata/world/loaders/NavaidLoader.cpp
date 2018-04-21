@@ -18,6 +18,7 @@
 #include "NavaidLoader.h"
 #include "src/libxdata/parsers/NavaidParser.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -57,7 +58,8 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
             try {
                 airport->attachILSData(rwy, fix);
             } catch (...) {
-                // ignore mismatch of AIRAC vs apt.data
+                // if CIFP data is newer than apt.dat, the runways can mismatch
+                logger::warn("Airport %s: Runway %s not found in apt.dat", airport->getID().c_str(), rwy.c_str());
             }
         }
     } else if (navaid.type == NavaidData::Type::NDB) {
