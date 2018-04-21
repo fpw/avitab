@@ -103,7 +103,7 @@ std::shared_ptr<Runway> Airport::getRunwayAndFixName(const std::string& name) {
 
     // the nav data is often newer than apt.dat, so we must sometimes rename runways
     for (auto it = runways.begin(); it != runways.end(); ++it) {
-        if (std::isalpha(name.back())) {
+        if (std::isalpha(name.back()) || std::isalpha(it->first.back())) {
             if (name.back() != it->first.back()) {
                 // make sure we don't rename 16L to 17C etc.
                 continue;
