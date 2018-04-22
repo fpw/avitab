@@ -48,4 +48,8 @@ void Page::setLayoutCenterColumns() {
     lv_page_set_scrl_layout(obj(), LV_LAYOUT_CENTER);
 }
 
+void Page::setLayoutRows() {
+    lv_page_set_scrl_layout(obj(), LV_LAYOUT_ROW_T);
+}
+
 } /* namespace avitab */

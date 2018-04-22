@@ -35,7 +35,9 @@ void Label::setAllowColors(bool colors) {
 }
 
 void Label::setText(const std::string& title) {
-    lv_label_set_text(obj(), title.c_str());
+    if (title != lv_label_get_text(obj())) {
+        lv_label_set_text(obj(), title.c_str());
+    }
 }
 
 void Label::setLongMode(bool longText) {

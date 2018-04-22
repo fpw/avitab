@@ -13,4 +13,5 @@ add_library(avitab_gui_lvgl_widgets
     TabGroup.cpp
     Page.cpp
     Checkbox.cpp
+    DropDownList.cpp
 )

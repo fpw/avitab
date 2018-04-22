@@ -157,6 +157,30 @@ void Airport::addApproach(std::shared_ptr<Approach> approach) {
     approaches.insert(std::make_pair(approach->getID(), approach));
 }
 
+std::vector<std::shared_ptr<SID>> Airport::getSIDs() const {
+    std::vector<std::shared_ptr<SID>> res;
+    for (auto &it: sids) {
+        res.push_back(it.second);
+    }
+    return res;
+}
+
+std::vector<std::shared_ptr<STAR>> Airport::getSTARs() const {
+    std::vector<std::shared_ptr<STAR>> res;
+    for (auto &it: stars) {
+        res.push_back(it.second);
+    }
+    return res;
+}
+
+std::vector<std::shared_ptr<Approach>> Airport::getApproaches() const {
+    std::vector<std::shared_ptr<Approach>> res;
+    for (auto &it: approaches) {
+        res.push_back(it.second);
+    }
+    return res;
+}
+
 const std::string& Airport::getMetarTimestamp() const {
     return metarTimestamp;
 }

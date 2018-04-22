@@ -15,25 +15,21 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_DROPDOWNLIST_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_DROPDOWNLIST_H_
 
+#include <vector>
 #include "Widget.h"
+
 
 namespace avitab {
 
-class Page: public Widget {
+class DropDownList: public Widget {
 public:
-    Page(WidgetPtr parent);
-    Page(WidgetPtr parent, lv_obj_t *page);
-
-    int getContentWidth();
-    int getContentHeight();
-    void setFit(bool horz, bool vert);
-    void setLayoutCenterColumns();
-    void setLayoutRows();
+    DropDownList(WidgetPtr parent, const std::vector<std::string> &choices);
+    int getSelectedIndex();
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_PAGE_H_ */
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_DROPDOWNLIST_H_ */

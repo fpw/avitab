@@ -25,148 +25,120 @@ namespace avitab {
 RouteApp::RouteApp(FuncsPtr appFuncs):
     App(appFuncs)
 {
-    resetLayout();
+    window = std::make_shared<Window>(getUIContainer(), "Route");
+    window->setOnClose([this] () {
+        showDeparturePage();
+        exit();
+    });
+    showDeparturePage();
 }
 
-void RouteApp::resetLayout() {
-    tabs = std::make_shared<TabGroup>(getUIContainer());
-    routePage = tabs->addTab(tabs, "Route");
+void RouteApp::showDeparturePage() {
+    reset();
 
+    window->setCaption("Route Wizard - Departure");
 
-    departureLabel = std::make_shared<Label>(routePage, "Departure");
-    departureLabel->alignInTopLeft();
+    label = std::make_shared<Label>(window, "Departure airport code:");
+    label->alignInTopLeft();
 
-    departureField = std::make_shared<TextArea>(routePage, "");
+    departureField = std::make_shared<TextArea>(window, "");
     departureField->setMultiLine(false);
     departureField->setShowCursor(false);
-    departureField->alignRightOf(departureLabel);
+    departureField->alignBelow(label);
 
-    arrivalLabel = std::make_shared<Label>(routePage, "Arrival");
-    arrivalLabel->alignBelow(departureLabel);
-    arrivalLabel->setPosition(arrivalLabel->getX(), arrivalLabel->getY() + 20);
+    keys = std::make_shared<Keyboard>(window, departureField);
+    keys->hideEnterKey();
 
-    arrivalField = std::make_shared<TextArea>(routePage, "");
+    keys->setOnCancel([this] () {
+        departureField->setText("");
+    });
+
+    keys->setOnOk([this] () { api().executeLater([this] () {
+        onDepartureEntered(departureField->getText());
+    });});
+
+    keys->setPosition(-5, window->getContentHeight() - keys->getHeight());
+}
+
+void RouteApp::onDepartureEntered(const std::string& departure) {
+    auto navWorld = api().getNavWorld();
+    if (!navWorld) {
+        showError("No navigation data available");
+        return;
+    }
+
+    auto ap = navWorld->findAirportByID(departure);
+    if (!ap) {
+        showError("Airport not found");
+        return;
+    }
+
+    departureAirport = ap;
+
+    showArrivalPage();
+}
+
+void RouteApp::showArrivalPage() {
+    reset();
+
+    window->setCaption("Route Wizard - Arrival");
+
+    label = std::make_shared<Label>(window, "Arrival airport code:");
+    label->alignInTopLeft();
+
+    arrivalField = std::make_shared<TextArea>(window, "");
     arrivalField->setMultiLine(false);
     arrivalField->setShowCursor(false);
-    arrivalField->alignRightOf(arrivalLabel);
-    arrivalField->setPosition(departureField->getX(), arrivalField->getY());
+    arrivalField->alignBelow(label);
 
-    highRouteCB = std::make_shared<Checkbox>(routePage, "Upper Airways");
-    highRouteCB->alignBelow(arrivalLabel);
-    highRouteCB->setPosition(arrivalField->getX(), arrivalLabel->getY() + 30);
-
-    errorLabel = std::make_shared<Label>(routePage, "");
-    errorLabel->alignBelow(highRouteCB);
-    errorLabel->setPosition(arrivalField->getX(), highRouteCB->getY() + 30);
-
-    keys = std::make_shared<Keyboard>(routePage, departureField);
+    keys = std::make_shared<Keyboard>(window, arrivalField);
     keys->hideEnterKey();
-    keys->setOnCancel([this] () { api().executeLater([this] () { resetContent(); });});
-    keys->setOnOk([this] () { api().executeLater([this] () { onNextClicked(); });});
-    keys->setPosition(-5, routePage->getContentHeight() - 90);
 
-    inDeparture = true;
-}
-
-void RouteApp::resetContent() {
-    departureField->setText("");
-    arrivalField->setText("");
-    keys->setTarget(departureField);
-    inDeparture = true;
-}
-
-void RouteApp::onNextClicked() {
-    if (inDeparture) {
-        inDeparture = false;
-        keys->setTarget(arrivalField);
-    } else {
-        errorLabel->setText("Please wait...");
-        api().executeLater([this] () {
-            if (!createRoute()) {
-                inDeparture = true;
-                keys->setTarget(departureField);
-            }
-        });
-    }
-}
-
-bool RouteApp::createRoute() {
-    auto world = api().getNavWorld();
-    if (!world) {
-        errorLabel->setText("No navigation data available");
-        return false;
-    }
-
-    auto departure = world->findAirportByID(departureField->getText());
-    auto arrival = world->findAirportByID(arrivalField->getText());
-
-    if (!departure) {
-        errorLabel->setText("Departure airport not found");
-        return false;
-    }
-
-    if (!arrival) {
-        errorLabel->setText("Arrival airport not found");
-        return false;
-    }
-
-    xdata::Route route(departure, arrival);
-
-    if (highRouteCB->isChecked()) {
-        route.setAirwayLevel(xdata::AirwayLevel::UPPER);
-    } else {
-        route.setAirwayLevel(xdata::AirwayLevel::LOWER);
-    }
-
-    try {
-        route.find();
-        errorLabel->setText("");
-    } catch (const std::exception &e) {
-        errorLabel->setText(e.what());
-        return false;
-    }
-
-    resetContent();
-    showRoute(route);
-
-    return true;
-}
-
-void RouteApp::showRoute(const xdata::Route& route) {
-    auto depPtr = route.getStart();
-    auto arrivalPtr = route.getDestination();
-
-    TabPage page;
-    page.page = tabs->addTab(tabs, depPtr->getID() + " -> " + arrivalPtr->getID() +
-            (highRouteCB->isChecked() ? " U" : " L"));
-
-    fillPage(page.page, route);
-
-    page.closeButton = std::make_shared<Button>(page.page, "X");
-    page.closeButton->alignInTopRight();
-    page.closeButton->setManaged();
-
-    tabs->showTab(page.page);
-
-    page.closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] () {
-            removeTab(button);
-        });
+    keys->setOnCancel([this] () {
+        arrivalField->setText("");
     });
-    pages.push_back(page);
+
+    keys->setOnOk([this] () { api().executeLater([this] () {
+        onArrivalEntered(arrivalField->getText());
+    });});
+
+    keys->setPosition(-5, window->getContentHeight() - keys->getHeight());
 }
 
-void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
+void RouteApp::onArrivalEntered(const std::string& arrival) {
+    auto navWorld = api().getNavWorld();
+
+    auto ap = navWorld->findAirportByID(arrival);
+    if (!ap) {
+        showError("Airport not found");
+        return;
+    }
+
+    arrivalAirport = ap;
+
+    route = std::make_shared<xdata::Route>(departureAirport, arrivalAirport);
+    try {
+        route->find();
+        showRoute();
+    } catch (const std::exception &e) {
+        std::string error = std::string("Couldn't find a preliminary route, error: ") + e.what();
+        showError(error);
+    }
+}
+
+void RouteApp::showRoute() {
+    reset();
+
     std::stringstream desc;
     desc << std::fixed << std::setprecision(0);
 
-    std::string shortRoute = toShortRouteDescription(route);
+    std::string shortRoute = toShortRouteDescription();
 
     desc << "Route: \n";
     desc << shortRoute << "\n";
 
-    double directKm = route.getDirectDistance() / 1000;
-    double routeKm = route.getRouteDistance() / 1000;
+    double directKm = route->getDirectDistance() / 1000;
+    double routeKm = route->getRouteDistance() / 1000;
     double directNm = directKm * xdata::KM_TO_NM;
     double routeNm = routeKm * xdata::KM_TO_NM;
 
@@ -174,42 +146,49 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
     desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
 
-    Label widget(page, "");
-    widget.setAllowColors(true);
-    widget.setLongMode(true);
-    widget.setText(desc.str());
-    widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
-    widget.setManaged();
+    label = std::make_shared<Label>(window, "");
+    label->setAllowColors(true);
+    label->setLongMode(true);
+    label->setText(desc.str());
+    label->setDimensions(window->getContentWidth(), window->getHeight() - 40);
 }
 
-std::string RouteApp::toShortRouteDescription(const xdata::Route& route) {
+void RouteApp::reset() {
+    checkBox.reset();
+    errorMessage.reset();
+    list.reset();
+    label.reset();
+    departureField.reset();
+    arrivalField.reset();
+    keys.reset();
+    nextButton.reset();
+    cancelButton.reset();
+}
+
+void RouteApp::showError(const std::string& msg) {
+    errorMessage = std::make_shared<MessageBox>(getUIContainer(), msg);
+    errorMessage->addButton("Ok", [this] () {
+        errorMessage.reset();
+    });
+    errorMessage->centerInParent();
+}
+
+std::string RouteApp::toShortRouteDescription() {
     std::stringstream desc;
 
-    route.iterateRouteShort([this, &desc, &route] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
+    route->iterateRouteShort([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
         if (via) {
             if (!via->isProcedure()) {
                 desc << " #368BC1 " << via->getID() << "#";
             }
         }
 
-        if (to) {
-            if (to != route.getStart() && to != route.getDestination()) {
-                desc << " " << to->getID();
-            }
+        if (to && to != departureAirport && to != arrivalAirport) {
+            desc << " " << to->getID();
         }
     });
 
     return desc.str();
-}
-
-void RouteApp::removeTab(const Button& closeButton) {
-    for (auto it = pages.begin(); it != pages.end(); ++it) {
-        if (it->closeButton.get() == &closeButton) {
-            tabs->removeTab(tabs->getTabIndex(it->page));
-            pages.erase(it);
-            break;
-        }
-    }
 }
 
 } /* namespace avitab */

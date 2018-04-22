@@ -33,7 +33,6 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 void AirportApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
     searchPage = tabs->addTab(tabs, "Search");
-    // searchPage->setLayoutCenterColumns();
 
     searchField = std::make_shared<TextArea>(searchPage, "");
     searchField->alignInTopLeft();

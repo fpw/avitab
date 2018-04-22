@@ -20,7 +20,9 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 #include "App.h"
+#include "src/libxdata/router/Route.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
@@ -28,7 +30,9 @@
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/Checkbox.h"
-#include "src/libxdata/router/Route.h"
+#include "src/gui_toolkit/widgets/MessageBox.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/DropDownList.h"
 
 namespace avitab {
 
@@ -36,32 +40,32 @@ class RouteApp: public App {
 public:
     RouteApp(FuncsPtr appFuncs);
 private:
-    struct TabPage {
-        std::shared_ptr<Page> page;
-        std::shared_ptr<Button> closeButton;
-    };
-
-    std::vector<TabPage> pages;
-    std::shared_ptr<TabGroup> tabs;
-    std::shared_ptr<Page> routePage;
+    std::shared_ptr<Window> window;
+    std::shared_ptr<Label> label;
+    std::shared_ptr<TextArea> departureField, arrivalField;
     std::shared_ptr<Keyboard> keys;
-    std::shared_ptr<Checkbox> highRouteCB;
-    std::shared_ptr<Label> departureLabel;
-    std::shared_ptr<TextArea> departureField;
-    std::shared_ptr<Label> arrivalLabel;
-    std::shared_ptr<TextArea> arrivalField;
-    std::shared_ptr<Label> errorLabel;
-    bool inDeparture = true;
+    std::shared_ptr<DropDownList> list;
+    std::shared_ptr<MessageBox> errorMessage;
+    std::shared_ptr<Button> nextButton, cancelButton;
+    std::shared_ptr<Checkbox> checkBox;
 
-    void resetLayout();
-    void resetContent();
-    void onNextClicked();
+    xdata::AirwayLevel airwayLevel = xdata::AirwayLevel::UPPER;
+    std::shared_ptr<xdata::Airport> departureAirport, arrivalAirport;
+    std::shared_ptr<xdata::Fix> departureFix, arrivalFix;
+    std::shared_ptr<xdata::Route> route;
 
-    bool createRoute();
-    void showRoute(const xdata::Route &route);
-    void fillPage(std::shared_ptr<Page> page, const xdata::Route &route);
-    std::string toShortRouteDescription(const xdata::Route &route);
-    void removeTab(const Button &closeButton);
+    void showDeparturePage();
+    void onDepartureEntered(const std::string &departure);
+
+    void showArrivalPage();
+    void onArrivalEntered(const std::string &arrival);
+
+    void showRoute();
+
+    void reset();
+    void showError(const std::string &msg);
+
+    std::string toShortRouteDescription();
 };
 
 } /* namespace avitab */

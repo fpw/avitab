@@ -47,6 +47,7 @@ public:
     void alignInTopLeft();
     void alignInTopRight();
     void alignInBottomCenter();
+    void alignInBottomRight();
     void alignLeftOf(WidgetPtr base);
     void alignRightOf(WidgetPtr base);
     void alignBelow(WidgetPtr base);

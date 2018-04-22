@@ -74,6 +74,10 @@ void Widget::alignInBottomCenter() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
 }
 
+void Widget::alignInBottomRight() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
+}
+
 void Widget::alignInTopLeft() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
 }

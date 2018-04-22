@@ -22,6 +22,7 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <set>
 #include <functional>
 #include "src/libxdata/world/models/Region.h"
 #include "src/libxdata/world/models/Frequency.h"
@@ -78,6 +79,10 @@ public:
     void addSID(std::shared_ptr<SID> sid);
     void addSTAR(std::shared_ptr<STAR> star);
     void addApproach(std::shared_ptr<Approach> approach);
+
+    std::vector<std::shared_ptr<SID>> getSIDs() const;
+    std::vector<std::shared_ptr<STAR>> getSTARs() const;
+    std::vector<std::shared_ptr<Approach>> getApproaches() const;
 
     Airport(const Airport &other) = delete;
     void operator=(const Airport &other) = delete;
