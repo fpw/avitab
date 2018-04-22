@@ -19,6 +19,7 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_DROPDOWNLIST_H_
 
 #include <vector>
+#include <string>
 #include "Widget.h"
 
 
