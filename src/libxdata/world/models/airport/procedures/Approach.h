@@ -29,6 +29,10 @@ public:
     void addApproach(const std::vector<std::shared_ptr<NavNode>> &nodes);
     std::string toDebugString() const override;
 
+    const std::shared_ptr<Fix> getStartFix() const;
+    const std::shared_ptr<Runway> getRunway() const;
+    void iterateTransitions(std::function<void(const std::string &, std::shared_ptr<Fix>, std::shared_ptr<Runway>)> f);
+
 private:
     std::map<std::string, std::vector<std::shared_ptr<NavNode>>> transitions;
     std::vector<std::shared_ptr<NavNode>> approach;

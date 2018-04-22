@@ -25,6 +25,7 @@ namespace xdata {
 class SID: public Procedure {
 public:
     SID(const std::string &id);
+    void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>)> f) const;
 };
 
 } /* namespace xdata */

@@ -33,6 +33,34 @@ void Approach::addApproach(const std::vector<std::shared_ptr<NavNode>> &nodes) {
     approach = nodes;
 }
 
+const std::shared_ptr<Fix> Approach::getStartFix() const {
+    if (approach.empty()) {
+        return nullptr;
+    }
+    return std::dynamic_pointer_cast<Fix>(approach.front());
+}
+
+const std::shared_ptr<Runway> Approach::getRunway() const {
+    for (auto &node: approach) {
+        if (node->isRunway()) {
+            return std::dynamic_pointer_cast<Runway>(node);
+        }
+    }
+    return nullptr;
+}
+
+void Approach::iterateTransitions(std::function<void(const std::string&, std::shared_ptr<Fix>, std::shared_ptr<Runway>)> f) {
+    for (auto &it: transitions) {
+        if (it.second.empty()) {
+            continue;
+        }
+        auto &startFix = it.second.front();
+        if (startFix->isGlobalFix()) {
+            f(it.first, std::dynamic_pointer_cast<Fix>(startFix), getRunway());
+        }
+    }
+}
+
 std::string Approach::toDebugString() const {
     std::stringstream res;
 

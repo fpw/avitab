@@ -53,14 +53,15 @@ public:
     void setName(const std::string &name);
     void setElevation(int elevation);
 
+    const std::string& getID() const override;
+    const Location &getLocation() const override;
+
     // Optional
     void setLocation(const Location &loc);
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
-    const std::string& getID() const override;
-    const Location &getLocation() const override;
     const std::string& getName() const;
     const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
     const std::string &getMetarTimestamp() const;
@@ -90,12 +91,15 @@ private:
     // Optional
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
-    std::map<std::string, std::shared_ptr<Fix>> terminalFixes;
+
     std::map<std::string, std::shared_ptr<Runway>> runways;
     std::map<std::string, std::shared_ptr<Heliport>> heliports;
+
+    std::map<std::string, std::shared_ptr<Fix>> terminalFixes;
     std::map<std::string, std::shared_ptr<SID>> sids;
     std::map<std::string, std::shared_ptr<STAR>> stars;
     std::map<std::string, std::shared_ptr<Approach>> approaches;
+
     std::string metarTimestamp, metarString;
 
     std::shared_ptr<Runway> getRunwayAndFixName(const std::string &name);

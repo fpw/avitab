@@ -38,6 +38,7 @@ public:
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
+    bool isRunway() const override;
     float getWidth() const;
     void attachILSData(std::weak_ptr<Fix> ils);
 

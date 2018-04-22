@@ -95,6 +95,7 @@ std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, Airwa
 }
 
 void World::addFix(std::shared_ptr<Fix> fix) {
+    fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
 }
 

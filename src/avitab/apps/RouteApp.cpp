@@ -162,8 +162,6 @@ void RouteApp::fillPage(std::shared_ptr<Page> page, const xdata::Route& route) {
 
     std::string shortRoute = toShortRouteDescription(route);
 
-    logger::info("Route: %s", shortRoute.c_str());
-
     desc << "Route: \n";
     desc << shortRoute << "\n";
 

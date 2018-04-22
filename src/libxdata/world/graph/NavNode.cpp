@@ -37,4 +37,12 @@ bool NavNode::isConnectedTo(const std::shared_ptr<NavNode> other) const {
     return false;
 }
 
+bool NavNode::isRunway() const {
+    return false;
+}
+
+bool NavNode::isGlobalFix() const {
+    return false;
+}
+
 } /* namespace xdata */

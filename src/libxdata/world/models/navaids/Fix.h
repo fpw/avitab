@@ -35,8 +35,10 @@ public:
     Fix(std::shared_ptr<Region> region, std::string id, Location loc);
     const std::string &getID() const override;
     const Location &getLocation() const override;
+    bool isGlobalFix() const override;
     std::shared_ptr<Region> getRegion() const;
 
+    void setGlobal(bool global);
     void attachNDB(std::shared_ptr<NDB> ndbInfo);
     void attachDME(std::shared_ptr<DME> dmeInfo);
     void attachVOR(std::shared_ptr<VOR> vorInfo);
@@ -46,6 +48,7 @@ private:
     std::shared_ptr<Region> region;
     std::string id;
     Location location;
+    bool global = false;
 
     // Optional
     std::shared_ptr<NDB> ndb;

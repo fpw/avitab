@@ -33,6 +33,8 @@ public:
 
     virtual const std::string &getID() const = 0;
     virtual const Location& getLocation() const = 0;
+    virtual bool isRunway() const;
+    virtual bool isGlobalFix() const;
 
     void connectTo(std::shared_ptr<NavEdge> via, std::shared_ptr<NavNode> to);
     const std::vector<Connection> &getConnections() const;

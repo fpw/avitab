@@ -59,6 +59,10 @@ void Runway::attachILSData(std::weak_ptr<Fix> ils) {
     this->ils = ils;
 }
 
+bool Runway::isRunway() const {
+    return true;
+}
+
 std::shared_ptr<Fix> Runway::getILSData() const {
     return ils.lock();
 }

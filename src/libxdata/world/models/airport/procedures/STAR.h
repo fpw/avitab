@@ -25,6 +25,7 @@ namespace xdata {
 class STAR: public Procedure {
 public:
     STAR(const std::string &id);
+    void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>, std::shared_ptr<NavNode>)> f) const;
 };
 
 } /* namespace xdata */

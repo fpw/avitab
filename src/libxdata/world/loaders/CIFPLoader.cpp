@@ -65,6 +65,11 @@ void CIFPLoader::loadSID(std::shared_ptr<Airport> airport, const CIFPData& proce
     loadEnroute(procedure, *sid, airport);
 
     airport->addSID(sid);
+    sid->iterate([this, &sid, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> finalFix) {
+        if (finalFix->isGlobalFix()) {
+            airport->connectTo(sid, finalFix);
+        }
+    });
 }
 
 void CIFPLoader::loadSTAR(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
@@ -75,6 +80,11 @@ void CIFPLoader::loadSTAR(std::shared_ptr<Airport> airport, const CIFPData& proc
     loadRunwayTransition(procedure, *star, airport);
 
     airport->addSTAR(star);
+    star->iterate([this, &star, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> startFix, std::shared_ptr<NavNode> endPoint) {
+        if (startFix->isGlobalFix()) {
+            startFix->connectTo(star, airport);
+        }
+    });
 }
 
 void CIFPLoader::loadApproach(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
@@ -84,6 +94,17 @@ void CIFPLoader::loadApproach(std::shared_ptr<Airport> airport, const CIFPData& 
     loadApproaches(procedure, *approach, airport);
 
     airport->addApproach(approach);
+
+    auto startFix = approach->getStartFix();
+    if (startFix != nullptr && startFix->isGlobalFix()) {
+        startFix->connectTo(approach, airport);
+    }
+
+    approach->iterateTransitions([this, &approach, &airport] (const std::string &name, std::shared_ptr<Fix> startFix, std::shared_ptr<Runway> rw) {
+        if (startFix != nullptr && startFix->isGlobalFix()) {
+            startFix->connectTo(approach, airport);
+        }
+    });
 }
 
 void CIFPLoader::loadRunwayTransition(const CIFPData& procedure, Procedure &proc, const std::shared_ptr<Airport>& airport) {

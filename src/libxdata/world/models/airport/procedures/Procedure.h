@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <functional>
 #include "src/libxdata/world/models/airport/Runway.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/graph/NavNode.h"
@@ -44,12 +45,13 @@ public:
 
     virtual ~Procedure() = default;
 
-private:
-    std::string id;
-
+protected:
     std::map<std::shared_ptr<Runway>, std::vector<std::shared_ptr<NavNode>>> runwayTransitions;
     std::map<std::shared_ptr<NavNode>, std::vector<std::shared_ptr<NavNode>>> commonRoutes;
     std::vector<std::vector<std::shared_ptr<NavNode>>> enrouteTransitions;
+
+private:
+    std::string id;
 };
 
 } /* namespace xdata */

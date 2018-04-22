@@ -38,6 +38,14 @@ std::shared_ptr<Region> Fix::getRegion() const {
     return region;
 }
 
+void Fix::setGlobal(bool global) {
+    this->global = global;
+}
+
+bool Fix::isGlobalFix() const {
+    return global;
+}
+
 void Fix::attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils) {
     ilsLoc = ils;
 }
