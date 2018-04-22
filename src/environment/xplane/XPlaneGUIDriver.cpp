@@ -152,6 +152,8 @@ void XPlaneGUIDriver::onDraw() {
 
     XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
 
+    glColor3f(brightness, brightness, brightness);
+
     correctRatio(left, top, right, bottom);
     renderWindowTexture(left, top, right, bottom);
 }
@@ -291,6 +293,22 @@ void XPlaneGUIDriver::onKey(char key, XPLMKeyFlags flags, char virtualKey, bool 
 
 XPLMCursorStatus XPlaneGUIDriver::getCursor(int x, int y) {
     return xplm_CursorDefault;
+}
+
+void XPlaneGUIDriver::brighter() {
+    if (brightness <= 0.9f) {
+        brightness += 0.1f;
+    } else {
+        brightness = 1.0f;
+    }
+}
+
+void XPlaneGUIDriver::darker() {
+    if (brightness >= 0.2f) {
+        brightness -= 0.1f;
+    } else {
+        brightness = 0.1f;
+    }
 }
 
 XPlaneGUIDriver::~XPlaneGUIDriver() {

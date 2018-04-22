@@ -38,6 +38,9 @@ public:
 
     virtual int getWheelDirection() = 0;
 
+    virtual void brighter() = 0;
+    virtual void darker() = 0;
+
     virtual ~GUIDriver();
 protected:
     int width();

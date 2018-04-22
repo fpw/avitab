@@ -40,9 +40,12 @@ public:
     void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
 
     int getWheelDirection() override;
+    void brighter() override;
+    void darker() override;
 
     ~XPlaneGUIDriver();
 private:
+    float brightness = 1.0f;
     DataRef<bool> isVrEnabled;
     int textureId = -1;
     XPLMWindowID window = nullptr;

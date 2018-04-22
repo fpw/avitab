@@ -190,6 +190,14 @@ void LVGLToolkit::guiLoop() {
     logger::verbose("LVGL thread destroyed");
 }
 
+void LVGLToolkit::brighter() {
+    driver->brighter();
+}
+
+void LVGLToolkit::darker() {
+    driver->darker();
+}
+
 void LVGLToolkit::runInGUI(GUITask func) {
     std::lock_guard<std::mutex> lock(guiMutex);
     executeLater(func);

@@ -36,6 +36,14 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     homeButton->setCallback([this] (const Button &) { api().onHomeButton(); });
     homeButton->centerInParent();
 
+    darkerButton = std::make_shared<Button>(container, Widget::Symbol::MINUS);
+    darkerButton->alignLeftOf(homeButton);
+    darkerButton->setCallback([this] (const Button &) { api().darkenScreen();  });
+
+    brighterButton = std::make_shared<Button>(container, Widget::Symbol::PLUS);
+    brighterButton->alignRightOf(homeButton);
+    brighterButton->setCallback([this] (const Button &) { api().brightenScreen();  });
+
     onTick();
 
     pauseButton = std::make_shared<Button>(container, Widget::Symbol::PAUSE);
@@ -45,6 +53,7 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     nextButton = std::make_shared<Button>(container, Widget::Symbol::NEXT);
     nextButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
     nextButton->alignLeftOf(pauseButton);
+
 
     prevButton = std::make_shared<Button>(container, Widget::Symbol::PREV);
     prevButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PREV); });

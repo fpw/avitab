@@ -125,6 +125,14 @@ void AviTab::showGUIContainer(std::shared_ptr<Container> container) {
     centerContainer->setVisible(true);
 }
 
+void AviTab::brightenScreen() {
+    guiLib->brighter();
+}
+
+void AviTab::darkenScreen() {
+    guiLib->darker();
+}
+
 std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
     return guiLib->createRasterJob(path);
 }

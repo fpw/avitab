@@ -32,6 +32,8 @@ public:
     void createWindow(const std::string &title) override;
     bool hasWindow() override;
     void killWindow() override;
+    void brighter() override;
+    void darker() override;
 
     bool handleEvents();
     uint32_t getLastDrawTime();

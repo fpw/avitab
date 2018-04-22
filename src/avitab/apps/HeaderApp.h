@@ -33,7 +33,8 @@ private:
     static constexpr int HOR_PADDING = 10;
     std::shared_ptr<Label> clockLabel;
     std::shared_ptr<Label> fpsLabel;
-    std::shared_ptr<Button> homeButton, pauseButton, nextButton, prevButton;
+    std::shared_ptr<Button> homeButton, brighterButton, darkerButton;
+    std::shared_ptr<Button> pauseButton, nextButton, prevButton;
     Timer tickTimer;
     std::string curTimeString;
 

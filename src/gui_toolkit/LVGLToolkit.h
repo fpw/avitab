@@ -44,6 +44,8 @@ public:
     bool hasNativeWindow();
     void signalStop();
     void destroyNativeWindow();
+    void brighter();
+    void darker();
 
     std::unique_ptr<RasterJob> createRasterJob(const std::string &document);
 

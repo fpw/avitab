@@ -46,6 +46,9 @@ void RouteApp::showDeparturePage() {
     departureField->setShowCursor(false);
     departureField->alignBelow(label);
 
+    checkBox = std::make_shared<Checkbox>(window, "Upper airways");
+    checkBox->alignBelow(departureField);
+
     keys = std::make_shared<Keyboard>(window, departureField);
     keys->hideEnterKey();
 
@@ -54,8 +57,13 @@ void RouteApp::showDeparturePage() {
     });
 
     keys->setOnOk([this] () { api().executeLater([this] () {
+        if (checkBox->isChecked()) {
+            airwayLevel = xdata::AirwayLevel::UPPER;
+        } else {
+            airwayLevel = xdata::AirwayLevel::LOWER;
+        }
         onDepartureEntered(departureField->getText());
-    });});
+     });});
 
     keys->setPosition(-5, window->getContentHeight() - keys->getHeight());
 }
@@ -117,6 +125,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
     arrivalAirport = ap;
 
     route = std::make_shared<xdata::Route>(departureAirport, arrivalAirport);
+    route->setAirwayLevel(airwayLevel);
     try {
         route->find();
         showRoute();

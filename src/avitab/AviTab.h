@@ -37,6 +37,8 @@ public:
     void stopApp();
 
     // App API
+    void brightenScreen() override;
+    void darkenScreen() override;
     std::unique_ptr<RasterJob> createRasterJob(const std::string &path) override;
     Icon loadIcon(const std::string &path) override;
     void executeLater(std::function<void()> func) override;

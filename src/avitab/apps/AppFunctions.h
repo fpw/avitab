@@ -30,6 +30,8 @@ namespace avitab {
 
 class AppFunctions {
 public:
+    virtual void brightenScreen() = 0;
+    virtual void darkenScreen() = 0;
     virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
     virtual Icon loadIcon(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
