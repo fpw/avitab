@@ -60,6 +60,10 @@ void XData::load() {
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 
+void XData::cancelLoading() {
+    world->cancelLoading();
+}
+
 void XData::loadAirports() {
     AirportLoader loader(world);
     loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
@@ -87,6 +91,9 @@ void XData::loadProcedures() {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
+        }
+        if (world->shouldCancelLoading()) {
+            throw std::runtime_error("Cancelled");
         }
     });
 }

@@ -34,6 +34,9 @@ void CIFPLoader::load(std::shared_ptr<Airport> airport, const std::string& file)
         } catch (const std::exception &e) {
             logger::warn("CIFP error in %s: %s", cifp.id.c_str(), e.what());
         }
+        if (world->shouldCancelLoading()) {
+            throw std::runtime_error("Cancelled");
+        }
     });
     parser.loadCIFP();
 }

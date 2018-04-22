@@ -28,6 +28,14 @@ World::World()
 {
 }
 
+void World::cancelLoading() {
+    loadCancelled = true;
+}
+
+bool World::shouldCancelLoading() const {
+    return loadCancelled;
+}
+
 std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
     std::string cleanId = id;
     for (auto &c: cleanId) c = toupper(c);

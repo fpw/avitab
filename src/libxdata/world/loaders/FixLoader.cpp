@@ -34,6 +34,9 @@ void FixLoader::load(const std::string& file) {
         } catch (const std::exception &e) {
             logger::warn("Can't parse fix %s: %s", data.id.c_str(), e.what());
         }
+        if (world->shouldCancelLoading()) {
+            throw std::runtime_error("Cancelled");
+        }
     });
     parser.loadFixes();
 }

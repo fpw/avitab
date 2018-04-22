@@ -34,6 +34,9 @@ void AirwayLoader::load(const std::string& file) {
         } catch (const std::exception &e) {
             logger::warn("Can't parse airway %s: %s", data.name.c_str(), e.what());
         }
+        if (world->shouldCancelLoading()) {
+            throw std::runtime_error("Cancelled");
+        }
     });
     parser.loadAirways();
 }

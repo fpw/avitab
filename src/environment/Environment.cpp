@@ -57,6 +57,10 @@ bool Environment::isNavWorldReady() {
     return state == std::future_status::ready;
 }
 
+void Environment::cancelNavWorldLoading() {
+    getNavData()->cancelLoading();
+}
+
 std::shared_ptr<xdata::World> Environment::getNavWorld() {
     if (!navWorldLoadAttempted && navWorldFuture.valid()) {
         navWorldLoadAttempted = true;

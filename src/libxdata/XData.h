@@ -28,6 +28,7 @@ class XData {
 public:
     XData(const std::string &dataRootPath);
     void load();
+    void cancelLoading();
     void reloadMetar();
     std::shared_ptr<World> getWorld();
 private:

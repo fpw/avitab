@@ -190,6 +190,7 @@ void AviTab::onHomeButton() {
 
 void AviTab::stopApp() {
     // runs in environment thread, called by PluginDisable
+    env->cancelNavWorldLoading();
 
     // This function is called by the environment
     // and it will never call the environment callback

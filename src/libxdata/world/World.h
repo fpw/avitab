@@ -22,6 +22,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <atomic>
 #include "src/libxdata/world/models/airport/Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/libxdata/world/models/Region.h"
@@ -44,7 +45,12 @@ public:
     std::shared_ptr<Airport> findOrCreateAirport(const std::string &id);
     std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, AirwayLevel lvl);
 
+    void cancelLoading();
+    bool shouldCancelLoading() const;
+
 private:
+    std::atomic_bool loadCancelled { false };
+
     // Unique IDs
     std::map<std::string, std::shared_ptr<Region>> regions;
     std::map<std::string, std::shared_ptr<Airport>> airports;
