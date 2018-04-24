@@ -177,7 +177,9 @@ void RouteApp::reset() {
 void RouteApp::showError(const std::string& msg) {
     errorMessage = std::make_shared<MessageBox>(getUIContainer(), msg);
     errorMessage->addButton("Ok", [this] () {
-        errorMessage.reset();
+        api().executeLater([this] () {
+            errorMessage.reset();
+        });
     });
     errorMessage->centerInParent();
 }
