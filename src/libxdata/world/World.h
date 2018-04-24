@@ -34,10 +34,13 @@ constexpr const double KM_TO_NM = 0.539957;
 
 class World {
 public:
+    static constexpr const int MAX_SEARCH_RESULTS = 10;
+
     World();
 
     std::shared_ptr<Airport> findAirportByID(const std::string &id) const;
     std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const;
+    std::vector<std::shared_ptr<Airport>> findAirport(const std::string &keyWord) const;
 
     void forEachAirport(std::function<void(std::shared_ptr<Airport>)> f);
     void addFix(std::shared_ptr<Fix> fix);

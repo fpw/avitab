@@ -49,7 +49,7 @@ public:
     void alignInBottomCenter();
     void alignInBottomRight();
     void alignLeftOf(WidgetPtr base);
-    void alignRightOf(WidgetPtr base);
+    void alignRightOf(WidgetPtr base, int xPad = 0);
     void alignBelow(WidgetPtr base);
     void setBackgroundWhite();
     int getWidth();

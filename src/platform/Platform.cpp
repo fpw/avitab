@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <climits>
 #include <libgen.h>
+#include <algorithm>
 #include <regex>
 #include "Platform.h"
 #include "src/Logger.h"
@@ -220,6 +221,18 @@ void controlMediaPlayer(MediaControl ctrl) {
     keybd_event(key, scanCode, KEYEVENTF_EXTENDEDKEY, 0);
     keybd_event(key, scanCode, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 #endif
+}
+
+std::string lower(const std::string& in) {
+    std::string res;
+    std::transform(in.begin(), in.end(), std::back_inserter(res), ::tolower);
+    return res;
+}
+
+std::string upper(const std::string& in) {
+    std::string res;
+    std::transform(in.begin(), in.end(), std::back_inserter(res), ::toupper);
+    return res;
 }
 
 }

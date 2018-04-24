@@ -21,6 +21,7 @@
 #include <sstream>
 #include "World.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace xdata {
 
@@ -37,8 +38,7 @@ bool World::shouldCancelLoading() const {
 }
 
 std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
-    std::string cleanId = id;
-    for (auto &c: cleanId) c = toupper(c);
+    std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
     auto it = airports.find(cleanId);
@@ -47,6 +47,28 @@ std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
     } else {
         return it->second;
     }
+}
+
+std::vector<std::shared_ptr<Airport>> World::findAirport(const std::string& keyWord) const {
+    std::vector<std::shared_ptr<Airport>> res;
+
+    std::string key = platform::lower(keyWord);
+
+    auto directfind = findAirportByID(key);
+    if (directfind) {
+        res.push_back(directfind);
+    }
+
+    for (auto &it: airports) {
+        if (platform::lower(it.second->getName()).find(key) != std::string::npos) {
+            res.push_back(it.second);
+            if (res.size() >= MAX_SEARCH_RESULTS) {
+                break;
+            }
+        }
+    }
+
+    return res;
 }
 
 std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, const std::string& id) const {

@@ -27,6 +27,7 @@
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/DropDownList.h"
 
 namespace avitab {
 
@@ -44,11 +45,14 @@ private:
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Page> searchPage;
     std::shared_ptr<TextArea> searchField;
+    std::shared_ptr<DropDownList> resultList;
+    std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
 
     void removeTab(const Button &closeButton);
     void resetLayout();
-    void onCodeEntered(const std::string &code);
+    void onSearchEntered(const std::string &code);
+    void onAirportSelected(std::shared_ptr<xdata::Airport> airport);
     void fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
 
     std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);

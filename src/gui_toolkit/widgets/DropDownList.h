@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 #include "Widget.h"
 
 
@@ -27,8 +28,13 @@ namespace avitab {
 
 class DropDownList: public Widget {
 public:
+    using SelectCallback = std::function<void()>;
+
     DropDownList(WidgetPtr parent, const std::vector<std::string> &choices);
+    void setSelectAction(SelectCallback cb);
     int getSelectedIndex();
+private:
+    SelectCallback onSelect;
 };
 
 } /* namespace avitab */

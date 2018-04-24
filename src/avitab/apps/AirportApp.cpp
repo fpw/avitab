@@ -38,17 +38,17 @@ void AirportApp::resetLayout() {
     searchField->alignInTopLeft();
     searchField->setDimensions(searchField->getWidth(), 30);
 
-    searchLabel = std::make_shared<Label>(searchPage, "Enter an ICAO code such as EDHL");
+    searchLabel = std::make_shared<Label>(searchPage, "Enter a keyword or ICAO code");
     searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 5);
 
     keys = std::make_shared<Keyboard>(searchPage, searchField);
     keys->hideEnterKey();
     keys->setOnCancel([this] () { searchField->setText(""); });
-    keys->setOnOk([this] () { onCodeEntered(searchField->getText()); });
+    keys->setOnOk([this] () { onSearchEntered(searchField->getText()); });
     keys->setPosition(-5, searchPage->getContentHeight() - 90);
 }
 
-void AirportApp::onCodeEntered(const std::string& code) {
+void AirportApp::onSearchEntered(const std::string& code) {
     auto world = api().getNavWorld();
 
     if (!world) {
@@ -56,15 +56,40 @@ void AirportApp::onCodeEntered(const std::string& code) {
         return;
     }
 
-    auto airport = world->findAirportByID(code);
+    auto airports = world->findAirport(code);
 
-    if (!airport) {
-        searchLabel->setText("Not found!");
+    if (airports.empty()) {
+        searchLabel->setText("No matching airports found");
+        resultList.reset();
+        nextButton.reset();
         return;
+    } else if (airports.size() >= xdata::World::MAX_SEARCH_RESULTS) {
+        searchLabel->setText("Too many results, only showing first " + std::to_string(airports.size()));
+    } else {
+        searchLabel->setText("");
     }
 
-    searchLabel->setText("");
+    std::vector<std::string> resultStrings;
+    for (auto &ap: airports) {
+        resultStrings.push_back(ap->getID() + " - " + ap->getName());
+    }
 
+    resultList = std::make_shared<DropDownList>(searchPage, resultStrings);
+    resultList->alignBelow(searchLabel);
+
+    nextButton = std::make_shared<Button>(searchPage, "Next");
+    nextButton->alignRightOf(resultList, 5);
+
+    nextButton->setCallback([this, airports] (const Button &) {
+        size_t idx = resultList->getSelectedIndex();
+        if (idx < airports.size()) {
+            auto airport = airports.at(resultList->getSelectedIndex());
+            onAirportSelected(airport);
+        }
+    });
+}
+
+void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
     TabPage page;
     page.page = tabs->addTab(tabs, airport->getID());
     page.closeButton = std::make_shared<Button>(page.page, "X");

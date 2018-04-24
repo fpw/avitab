@@ -60,6 +60,8 @@ std::string formatStringArgs(const std::string format, va_list args);
 std::string formatString(const std::string format, ...);
 
 void controlMediaPlayer(MediaControl ctrl);
+std::string lower(const std::string &in);
+std::string upper(const std::string &in);
 
 }
 

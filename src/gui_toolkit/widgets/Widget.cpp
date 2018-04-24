@@ -90,8 +90,8 @@ void Widget::alignLeftOf(WidgetPtr base) {
     lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_LEFT_MID, 0, 0);
 }
 
-void Widget::alignRightOf(WidgetPtr base) {
-    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+void Widget::alignRightOf(WidgetPtr base, int xPad) {
+    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_RIGHT_MID, xPad, 0);
 }
 
 void Widget::alignBelow(WidgetPtr base) {

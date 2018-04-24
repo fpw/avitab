@@ -35,12 +35,23 @@ DropDownList::DropDownList(WidgetPtr parent, const std::vector<std::string>& cho
     }
 
     lv_ddlist_set_options(obj, choiceStr.c_str());
+    lv_obj_set_free_ptr(obj, this);
 
     setObj(obj);
 }
 
 int DropDownList::getSelectedIndex() {
     return lv_ddlist_get_selected(obj());
+}
+
+void DropDownList::setSelectAction(SelectCallback cb) {
+    onSelect = cb;
+
+    lv_ddlist_set_action(obj(), [] (lv_obj_t *dd) -> lv_res_t {
+        DropDownList *us = reinterpret_cast<DropDownList *>(lv_obj_get_free_ptr(dd));
+        us->onSelect();
+        return LV_RES_OK;
+    });
 }
 
 } /* namespace avitab */
