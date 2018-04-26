@@ -1,15 +1,24 @@
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 
+find_package(curl REQUIRED)
+include_directories(${LIBCURL_INCLUDE_DIR})
+add_definitions(-DCURL_STATICLIB)
+
 add_subdirectory(libxdata)
 add_subdirectory(environment)
 add_subdirectory(gui_toolkit)
 add_subdirectory(platform)
+add_subdirectory(maps)
 add_subdirectory(avitab)
 
 set(CommonLibs 
     avitab_main
     avitab_platform
+    maps
+    curl
+    ssl
+    crypto
 )
 
 # X-Plane plugin
@@ -22,6 +31,7 @@ if(WIN32)
         ${CommonLibs}
         avitab_env_xplane
         XPLM_64
+        ws2_32
     )
 elseif(APPLE)
 target_link_libraries(avitab_plugin
@@ -63,6 +73,7 @@ if(WIN32)
         -static-libgcc
         -static-libstdc++
         -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
+        ws2_32
         -Wl,--subsystem,windows
     )
 else()
@@ -70,3 +81,4 @@ else()
         ${SDL2_LIBRARIES}
     )
 endif(WIN32)
+

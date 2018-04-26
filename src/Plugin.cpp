@@ -91,12 +91,3 @@ PLUGIN_API void XPluginStop(void) {
         logger::error("Exception in XPluginStop: %s", e.what());
     }
 }
-
-#ifdef _WIN32
-#include <windows.h>
-
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
-    return TRUE;
-}
-
-#endif
