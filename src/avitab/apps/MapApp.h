@@ -15,26 +15,30 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_
-#define SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_
+#ifndef SRC_AVITAB_APPS_MAPAPP_H_
+#define SRC_AVITAB_APPS_MAPAPP_H_
 
-#include "Widget.h"
+#include <memory>
+#include <vector>
+#include "App.h"
+#include "src/maps/OSMMap.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/widgets/Window.h"
 
 namespace avitab {
 
-class PixMap: public Widget {
+class MapApp: public App {
 public:
-    PixMap(WidgetPtr parent);
-    void draw(const uint32_t *pix, int dataWidth, int dataHeight);
-    void panLeft();
-    void panRight();
-    void panUp();
-    void panDown();
+    MapApp(FuncsPtr funcs);
+    void onMouseWheel(int dir, int x, int y) override;
 private:
-    float PAN_FACTOR = 0.1f;
-    lv_img_t image;
+    std::unique_ptr<maps::OSMMap> map;
+    std::shared_ptr<Window> window;
+    std::shared_ptr<PixMap> mapWidget;
+
+    void update();
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_ */
+#endif /* SRC_AVITAB_APPS_MAPAPP_H_ */

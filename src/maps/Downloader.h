@@ -27,12 +27,15 @@ namespace maps {
 class Downloader {
 public:
     Downloader();
+    void setCacheDirectory(const std::string &cache);
     std::vector<uint8_t> download(const std::string &url);
     ~Downloader();
 private:
+    std::string cacheDir;
     void *curl = nullptr;
 
     static size_t onData(void *buffer, size_t size, size_t nmemb, void *resPtr);
+    std::string urlToCacheName(const std::string &url);
 };
 
 } /* namespace maps */

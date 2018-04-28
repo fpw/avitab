@@ -19,20 +19,46 @@
 #define SRC_MAPS_OSMMAP_H_
 
 #include <memory>
+#include <map>
+#include <vector>
+#include <cstdint>
 #include "Downloader.h"
+#include "OSMTile.h"
 
 namespace maps {
 
 class OSMMap {
 public:
-    OSMMap();
+    static constexpr const int ZOOM_MIN = 2;
+    static constexpr const int ZOOM_MAX = 17;
+
+    OSMMap(int width, int height);
+    void setCacheDirectory(const std::string &path);
     void setCenter(double latitude, double longitude);
     void setZoom(int level);
-    void load();
+    void zoomIn();
+    void zoomOut();
+    void updateImage();
+
+    int getWidth() const;
+    int getHeight() const;
+    const uint32_t *getImageData() const;
+
 private:
     std::shared_ptr<Downloader> downloader;
+
+    std::vector<uint32_t> mapImage;
+    int pixWidth = 0, pixHeight = 0;
+
     double latitude = 0, longitude = 0;
     int zoomLevel = 12;
+    double centerX = 0, centerY = 0;
+
+    std::map<uint64_t, std::shared_ptr<OSMTile>> tileCache;
+
+    void reposition();
+    std::shared_ptr<OSMTile> getOrLoadTile(int x, int y);
+    void copyTile(std::shared_ptr<OSMTile> tile, int dstX, int dstY);
 };
 
 } /* namespace maps */

@@ -6,14 +6,16 @@ include_directories(${LIBCURL_INCLUDE_DIR})
 add_definitions(-DCURL_STATICLIB)
 
 add_subdirectory(libxdata)
+add_subdirectory(maps)
 add_subdirectory(environment)
 add_subdirectory(gui_toolkit)
 add_subdirectory(platform)
-add_subdirectory(maps)
 add_subdirectory(avitab)
 
 set(CommonLibs 
     avitab_main
+    avitab_apps
+    avitab_app_components
     avitab_platform
     maps
     curl

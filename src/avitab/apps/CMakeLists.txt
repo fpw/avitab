@@ -9,5 +9,5 @@ add_library(avitab_apps
     PlaneManualApp.cpp
     AirportApp.cpp
     RouteApp.cpp
+    MapApp.cpp
 )
-target_link_libraries(avitab_apps avitab_app_components)

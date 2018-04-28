@@ -140,6 +140,10 @@ int Widget::getY() {
     return lv_obj_get_y(obj());
 }
 
+void Widget::enablePanning() {
+    lv_obj_set_drag(obj(), true);
+}
+
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
     switch (symbol) {
     case Symbol::NONE:      return nullptr;

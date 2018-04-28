@@ -21,7 +21,6 @@
 #include "src/Logger.h"
 #include "src/avitab/apps/HeaderApp.h"
 #include "src/avitab/apps/AppLauncher.h"
-#include "src/maps/OSMMap.h"
 
 namespace avitab {
 

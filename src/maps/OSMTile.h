@@ -27,16 +27,24 @@ namespace maps {
 
 class OSMTile {
 public:
-    OSMTile(int zoom, int x, int y);
+    OSMTile(int x, int y, int zoom);
     void load(std::shared_ptr<Downloader> downloader);
 
-    static OSMTile fromLocation(double latitude, double longitude, int zoom);
+    int getX() const;
+    int getY() const;
+
+    int getImageWidth() const;
+    int getImageHeight() const;
+    const uint32_t *getImageData() const;
 private:
     int x, y;
     int zoomLevel;
     std::vector<uint32_t> image;
     int imageWidth = 0, imageHeight = 0;
 };
+
+double longitudeToX(double lon, int zoom);
+double latitudeToY(double lat, int zoom);
 
 } /* namespace maps */
 

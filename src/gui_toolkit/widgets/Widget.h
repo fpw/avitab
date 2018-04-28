@@ -41,6 +41,7 @@ public:
     void setParent(WidgetPtr newParent);
     void setPosition(int x, int y);
     void setDimensions(int width, int height);
+    void enablePanning();
     void centerInParent();
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);

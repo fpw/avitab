@@ -34,6 +34,14 @@ StandAloneEnvironment::StandAloneEnvironment() {
     }
 
     xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
+
+    EnvData data {};
+
+    data.doubleValue = 53.80193;
+    setData("sim/flightmodel/position/latitude", data);
+
+    data.doubleValue = 10.70183;
+    setData("sim/flightmodel/position/longitude", data);
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {

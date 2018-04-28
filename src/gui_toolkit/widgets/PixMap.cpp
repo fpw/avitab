@@ -32,10 +32,6 @@ void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {
     lv_img_set_src(obj(), &image);
 }
 
-void PixMap::enablePanning() {
-    lv_obj_set_drag(obj(), true);
-}
-
 void PixMap::panLeft() {
     int x = lv_obj_get_x(obj()) + image.header.w * PAN_FACTOR;
     if (x < image.header.w / 2) {

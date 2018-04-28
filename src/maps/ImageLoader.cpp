@@ -33,9 +33,15 @@ std::vector<uint32_t> loadImage(const std::vector<uint8_t>& imgData, int &outWid
     }
 
     std::vector<uint32_t> res;
-
     res.resize(outWidth * outHeight);
-    std::memcpy(res.data(), decodedData, outWidth * outHeight * 4);
+
+    for (int i = 0; i < outWidth * outHeight * 4; i += 4) {
+        uint32_t argb = decodedData[i + 3] << 24  |
+                       (decodedData[i + 0] << 16) |
+                       (decodedData[i + 1] << 8)  |
+                        decodedData[i + 2];
+        res[i / 4] = argb;
+    }
 
     stbi_image_free(decodedData);
     return res;
