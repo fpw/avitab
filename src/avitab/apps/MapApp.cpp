@@ -21,18 +21,15 @@ namespace avitab {
 
 MapApp::MapApp(FuncsPtr funcs):
     App(funcs),
-    window(std::make_shared<Window>(getUIContainer(), "Maps"))
+    window(std::make_shared<Window>(getUIContainer(), "Maps")),
+    updateTimer(std::bind(&MapApp::update, this), 200)
 {
     window->setOnClose([this] () { exit(); });
-
-    double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
-    double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
 
     mapWidget = std::make_shared<PixMap>(window);
 
     map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
     map->setCacheDirectory(api().getDataPath() + "MapTiles/");
-    map->setCenter(lat, lon);
 
     update();
 }
@@ -46,9 +43,16 @@ void MapApp::onMouseWheel(int dir, int x, int y) {
     update();
 }
 
-void MapApp::update() {
+bool MapApp::update() {
+    double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
+    double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
+    double heading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+
+    map->setCenter(lat, lon, heading);
     map->updateImage();
     mapWidget->draw(map->getImageData(), map->getWidth(), map->getHeight());
+
+    return true;
 }
 
 } /* namespace avitab */

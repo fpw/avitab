@@ -33,11 +33,12 @@ About::About(FuncsPtr appFuncs):
             "Uses the mupdf library, copyright 2006-2017 by Artifex Software, Inc.\n"
             "Uses the littlevgl embedded GUI library, copyright 2018 by Gábor Kiss-Vámosi\n"
             "Uses the nlohmann JSON library, copyright 2013-2018 Niels Lohmann\n"
+            "Uses the curl transfer library, copyright 1996-2018 Daniel Stenberg\n"
             "Icon if_applications-internet_118835 copyright by Tango\n"
             "Icon if_Airport_22906 copyright by Icons-Land\n"
-            "Icon if_clipboard_43705 copyright by Iconshock\n"
             "Icon if_Help_1493288 copyright by GlyphLab\n"
             "Icon if_ilustracoes_04-11_1519786 copyright by Thalita Torres\n"
+            "Icon if_xmag_3617 copyright by Everaldo Coelho\n"
             "Icons if_starthere_18227 and if_txt2_3783 copyright by Everaldo Coelho\n";
 
     label->setText(aboutText);

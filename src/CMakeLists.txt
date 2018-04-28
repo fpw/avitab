@@ -19,8 +19,6 @@ set(CommonLibs
     avitab_platform
     maps
     curl
-    ssl
-    crypto
 )
 
 # X-Plane plugin
@@ -34,6 +32,7 @@ if(WIN32)
         avitab_env_xplane
         XPLM_64
         ws2_32
+        crypt32
     )
 elseif(APPLE)
 target_link_libraries(avitab_plugin
@@ -76,6 +75,7 @@ if(WIN32)
         -static-libstdc++
         -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
         ws2_32
+        crypt32
         -Wl,--subsystem,windows
     )
 else()

@@ -24,6 +24,7 @@
 #include "src/maps/OSMMap.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/Timer.h"
 
 namespace avitab {
 
@@ -35,8 +36,9 @@ private:
     std::unique_ptr<maps::OSMMap> map;
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
+    Timer updateTimer;
 
-    void update();
+    bool update();
 };
 
 } /* namespace avitab */

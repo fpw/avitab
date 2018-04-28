@@ -18,6 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstring>
+#include <thread>
 #include <fstream>
 #include <curl/curl.h>
 #include "Downloader.h"
@@ -40,6 +41,7 @@ void Downloader::setCacheDirectory(const std::string& cache) {
 
 std::vector<uint8_t> Downloader::download(const std::string& url) {
     std::string cacheFile = urlToCacheName(url);
+
     if (platform::fileExists(cacheFile)) {
         std::ifstream stream(cacheFile, std::ios::in | std::ios::binary);
         std::vector<uint8_t> res((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
@@ -49,6 +51,7 @@ std::vector<uint8_t> Downloader::download(const std::string& url) {
 
         std::vector<uint8_t> res;
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &res);

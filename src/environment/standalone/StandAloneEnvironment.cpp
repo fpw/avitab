@@ -120,7 +120,6 @@ double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
 }
 
 void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
-    // the SDL loop always runs so we don't need the onEmpty callback
     registerEnvironmentCallback(cb);
 }
 

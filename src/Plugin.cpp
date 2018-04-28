@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <curl/curl.h>
 #include <XPLM/XPLMDefs.h>
 #include <memory>
 #include "src/environment/xplane/XPlaneEnvironment.h"
@@ -30,6 +31,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
     strncpy(outSignature, "org.solhost.folko.avitab", 255);
 
     try {
+        curl_global_init(CURL_GLOBAL_ALL);
+
         environment = std::make_shared<avitab::XPlaneEnvironment>();
         environment->loadConfig();
         logger::setStdOut(environment->getConfig()->getBool("/AviTab/logToStdOut"));
@@ -86,8 +89,18 @@ PLUGIN_API void XPluginStop(void) {
                 aviTab.reset();
             }
             environment.reset();
+            curl_global_cleanup();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStop: %s", e.what());
     }
 }
+
+#ifdef _WIN32
+#include <windows.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved) {
+    return TRUE;
+}
+
+#endif

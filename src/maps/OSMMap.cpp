@@ -34,16 +34,25 @@ void OSMMap::setCacheDirectory(const std::string& path) {
     downloader->setCacheDirectory(path);
 }
 
-void OSMMap::setCenter(double latitude, double longitude) {
-    this->latitude = latitude;
-    this->longitude = longitude;
-    reposition();
+void OSMMap::setCenter(double latitude, double longitude, double heading) {
+    double deltaLat = std::abs(latitude - this->latitude);
+    double deltaLon = std::abs(longitude - this->longitude);
+    double deltaHeading = std::abs(heading - this->heading);
+
+    if (deltaLat > 0.0000001 || deltaLon > 0.0000001 || deltaHeading > 0.1) {
+        this->latitude = latitude;
+        this->longitude = longitude;
+        this->heading = heading;
+        reposition();
+    }
 }
 
 void OSMMap::setZoom(int level) {
-    tileCache.clear();
-    this->zoomLevel = level;
-    reposition();
+    if (level != this->zoomLevel) {
+        tileCache.clear();
+        this->zoomLevel = level;
+        reposition();
+    }
 }
 
 void OSMMap::zoomIn() {
@@ -61,6 +70,7 @@ void OSMMap::zoomOut() {
 void OSMMap::reposition() {
     centerX = longitudeToX(longitude, zoomLevel);
     centerY = latitudeToY(latitude, zoomLevel);
+    needRedraw = true;
 }
 
 int OSMMap::getWidth() const {
@@ -76,6 +86,11 @@ const uint32_t* OSMMap::getImageData() const {
 }
 
 void OSMMap::updateImage() {
+    if (!needRedraw) {
+        return;
+    }
+    logger::info("Redraw");
+
     std::fill(mapImage.begin(), mapImage.end(), 0xFF000000);
 
     auto center = getOrLoadTile(centerX, centerY);
@@ -97,6 +112,10 @@ void OSMMap::updateImage() {
             }
         }
     }
+
+    drawOverlays();
+
+    needRedraw = false;
 }
 
 std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
@@ -145,6 +164,9 @@ void OSMMap::copyTile(std::shared_ptr<OSMTile> tile, int dstX, int dstY) {
             std::memcpy(dstPtr + dstYClip * pixWidth + dstXClip, srcPtr + srcY * srcWidth + srcX, width * sizeof(uint32_t));
         }
     }
+}
+
+void OSMMap::drawOverlays() {
 }
 
 } /* namespace maps */

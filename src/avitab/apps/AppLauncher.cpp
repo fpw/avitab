@@ -33,10 +33,10 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     getUIContainer()->setLayoutPretty();
     std::string root = api().getDataPath() + "icons/";
 
-    addEntry<ChartsApp>("Charts", root + "if_starthere_18227.png");
-    addEntry<AirportApp>("Airports", root + "if_Airport_22906.png");
+    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png");
+    addEntry<AirportApp>("Airports", root + "if_xmag_3617.png");
     addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png");
-    addEntry<MapApp>("Maps", root + "");
+    addEntry<MapApp>("Maps", root + "if_starthere_18227.png");
     addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png");
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
     addEntry<About>("About", root + "if_Help_1493288.png");
