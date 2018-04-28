@@ -21,7 +21,6 @@
 #include <memory>
 #include <string>
 #include "src/gui_toolkit/rasterizers/RasterJob.h"
-#include "src/gui_toolkit/Icon.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/environment/EnvData.h"
 #include "src/libxdata/world/World.h"
@@ -33,7 +32,6 @@ public:
     virtual void brightenScreen() = 0;
     virtual void darkenScreen() = 0;
     virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
-    virtual Icon loadIcon(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
     virtual std::string getAirplanePath() = 0;

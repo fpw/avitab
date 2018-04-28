@@ -22,6 +22,7 @@
 #include <vector>
 #include <cstdint>
 #include "Downloader.h"
+#include "src/platform/ImageLoader.h"
 
 namespace maps {
 
@@ -29,18 +30,12 @@ class OSMTile {
 public:
     OSMTile(int x, int y, int zoom);
     void load(std::shared_ptr<Downloader> downloader);
-
-    int getX() const;
-    int getY() const;
-
-    int getImageWidth() const;
-    int getImageHeight() const;
-    const uint32_t *getImageData() const;
+    const platform::Image &getImage() const;
 private:
+    bool validCoords;
     int x, y;
     int zoomLevel;
-    std::vector<uint32_t> image;
-    int imageWidth = 0, imageHeight = 0;
+    platform::Image image {};
 };
 
 double longitudeToX(double lon, int zoom);

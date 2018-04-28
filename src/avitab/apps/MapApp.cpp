@@ -30,6 +30,7 @@ MapApp::MapApp(FuncsPtr funcs):
 
     map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
     map->setCacheDirectory(api().getDataPath() + "MapTiles/");
+    map->setOverlayDirectory(api().getDataPath() + "icons/");
 
     update();
 }
@@ -46,11 +47,12 @@ void MapApp::onMouseWheel(int dir, int x, int y) {
 bool MapApp::update() {
     double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
     double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
-    double heading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+    float heading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
 
-    map->setCenter(lat, lon, heading);
+    map->setCenter(lat, lon);
+    map->setPlanePosition(lat, lon, heading);
     map->updateImage();
-    mapWidget->draw(map->getImageData(), map->getWidth(), map->getHeight());
+    mapWidget->draw(map->getImage());
 
     return true;
 }

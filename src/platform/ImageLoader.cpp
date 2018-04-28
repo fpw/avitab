@@ -17,34 +17,44 @@
  */
 #include <stdexcept>
 #include <cstring>
+#include <fstream>
 #include "ImageLoader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-namespace maps {
+namespace platform {
 
-std::vector<uint32_t> loadImage(const std::vector<uint8_t>& imgData, int &outWidth, int &outHeight) {
-    int nChannels;
-    uint8_t *decodedData = stbi_load_from_memory(imgData.data(), imgData.size(), &outWidth, &outHeight, &nChannels, 4);
+Image loadImage(const std::string& path) {
+    std::ifstream stream(path, std::ios::in | std::ios::binary);
+    std::vector<uint8_t> data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+    return loadImage(data);
+}
+
+Image loadImage(const std::vector<uint8_t> &encodedData) {
+    Image img;
+
+    int nChannels = 4;
+    uint8_t *decodedData = stbi_load_from_memory(encodedData.data(), encodedData.size(),
+                                                 &img.width, &img.height, nullptr, nChannels);
 
     if (!decodedData) {
         throw std::runtime_error(std::string("Couldn't decode image: ") + stbi_failure_reason());
     }
 
-    std::vector<uint32_t> res;
-    res.resize(outWidth * outHeight);
+    img.pixels.resize(img.width * img.height);
 
-    for (int i = 0; i < outWidth * outHeight * 4; i += 4) {
+    for (int i = 0; i < img.width * img.height * nChannels; i += nChannels) {
         uint32_t argb = decodedData[i + 3] << 24  |
                        (decodedData[i + 0] << 16) |
                        (decodedData[i + 1] << 8)  |
                         decodedData[i + 2];
-        res[i / 4] = argb;
+        img.pixels[i / nChannels] = argb;
     }
 
     stbi_image_free(decodedData);
-    return res;
+
+    return img;
 }
 
-} /* namespace maps */
+} /* namespace platform */

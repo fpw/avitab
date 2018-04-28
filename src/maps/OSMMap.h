@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <cstdint>
+#include "src/platform/ImageLoader.h"
 #include "Downloader.h"
 #include "OSMTile.h"
 
@@ -29,38 +30,46 @@ namespace maps {
 
 class OSMMap {
 public:
-    static constexpr const int ZOOM_MIN = 2;
+    static constexpr const int TILE_RADIUS = 2;
+    static constexpr const int ZOOM_MIN = 0;
     static constexpr const int ZOOM_MAX = 17;
 
     OSMMap(int width, int height);
     void setCacheDirectory(const std::string &path);
-    void setCenter(double latitude, double longitude, double heading);
+    void setOverlayDirectory(const std::string &path);
+    void setCenter(double latitude, double longitude);
+    void setPlanePosition(double latitude, double longitude, double heading);
     void setZoom(int level);
     void zoomIn();
     void zoomOut();
     void updateImage();
 
-    int getWidth() const;
-    int getHeight() const;
-    const uint32_t *getImageData() const;
+    const platform::Image &getImage() const;
 
 private:
-    bool needRedraw = false;
-    std::shared_ptr<Downloader> downloader;
-
-    std::vector<uint32_t> mapImage;
-    int pixWidth = 0, pixHeight = 0;
-
-    double latitude = 0, longitude = 0, heading = 0;
+    // Center position of the map image
+    double centerLat = 0, centerLong = 0;
     int zoomLevel = 12;
-    double centerX = 0, centerY = 0;
 
+    // Actual map image
+    platform::Image mapImage;
+    bool needRedraw = false;
+
+    // Overlays
+    double planeLat = 0, planeLong = 0, planeHeading = 0;
+    platform::Image planeIcon;
+
+
+    // Tiles
+    std::shared_ptr<Downloader> downloader;
     std::map<uint64_t, std::shared_ptr<OSMTile>> tileCache;
 
-    void reposition();
     std::shared_ptr<OSMTile> getOrLoadTile(int x, int y);
-    void copyTile(std::shared_ptr<OSMTile> tile, int dstX, int dstY);
+    void copyImage(const platform::Image &src, int dstX, int dstY);
+    void blendImage(const platform::Image &src, int dstX, int dstY, double angle);
     void drawOverlays();
+
+    void positionToPixel(double lat, double lon, int &px, int &py) const;
 };
 
 } /* namespace maps */

@@ -20,33 +20,36 @@
 #include <sstream>
 #include <stdexcept>
 #include "OSMTile.h"
-#include "ImageLoader.h"
 #include "src/Logger.h"
 
 namespace maps {
 
 OSMTile::OSMTile(int x, int y, int zoom):
-    x(x),
-    y(y),
     zoomLevel(zoom)
 {
-    if (x < 0 || x >= (1 << zoomLevel) - 1) {
-        throw std::runtime_error("Tile x out of bounds");
-    }
-    if (y < 0 || y >= (1 << zoomLevel) - 1) {
-        throw std::runtime_error("Tile y out of bounds");
-    }
-}
+    uint32_t endXY = 1 << zoomLevel;
 
-int OSMTile::getX() const {
-    return x;
-}
+    if (y < 0 || (uint32_t) y >= endXY) {
+        validCoords = false;
+    } else {
+        this-> y = y;
+        validCoords = true;
+    }
 
-int OSMTile::getY() const {
-    return y;
+    if (x < 0) {
+        x = endXY - x;
+    }
+    this->x = x % endXY;
 }
 
 void OSMTile::load(std::shared_ptr<Downloader> downloader) {
+    if (!validCoords) {
+        image.width = 256;
+        image.height = 256;
+        image.pixels.resize(image.width * image.height, 0);
+        return;
+    }
+
     std::ostringstream urlStream;
     urlStream << "https://a.tile.opentopomap.org/";
     urlStream << zoomLevel << "/" << x << "/" << y << ".png";
@@ -54,19 +57,11 @@ void OSMTile::load(std::shared_ptr<Downloader> downloader) {
     std::string url = urlStream.str();
 
     auto data = downloader->download(url);
-    image = loadImage(data, imageWidth, imageHeight);
+    image = platform::loadImage(data);
 }
 
-int OSMTile::getImageWidth() const {
-    return imageWidth;
-}
-
-int OSMTile::getImageHeight() const {
-    return imageHeight;
-}
-
-const uint32_t* OSMTile::getImageData() const {
-    return image.data();
+const platform::Image& OSMTile::getImage() const {
+    return image;
 }
 
 double longitudeToX(double lon, int zoom) {

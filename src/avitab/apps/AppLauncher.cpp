@@ -24,6 +24,7 @@
 #include "AirportApp.h"
 #include "RouteApp.h"
 #include "MapApp.h"
+#include "src/platform/ImageLoader.h"
 
 namespace avitab {
 
@@ -49,9 +50,11 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
         this->show();
     });
 
+    auto iconImg = platform::loadImage(icon);
+
     Entry entry;
     entry.app = std::move(app);
-    entry.button = std::make_shared<Button>(getUIContainer(), api().loadIcon(icon), name);
+    entry.button = std::make_shared<Button>(getUIContainer(), iconImg, name);
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;

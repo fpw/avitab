@@ -15,20 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_ICON_H_
-#define SRC_GUI_TOOLKIT_ICON_H_
+#ifndef SRC_MAPS_IMAGELOADER_H_
+#define SRC_MAPS_IMAGELOADER_H_
 
-#include <cstdint>
 #include <vector>
-#include <memory>
+#include <cstdint>
+#include <string>
 
-namespace avitab {
+namespace platform {
 
-struct Icon {
-    std::shared_ptr<std::vector<uint32_t>> data;
-    int width = 0, height = 0;
+struct Image {
+    std::vector<uint32_t> pixels;
+    int width = 0;
+    int height = 0;
 };
 
-}
+Image loadImage(const std::string &path);
+Image loadImage(const std::vector<uint8_t> &encodedData);
 
-#endif /* SRC_GUI_TOOLKIT_ICON_H_ */
+} /* namespace platform */
+
+#endif /* SRC_MAPS_IMAGELOADER_H_ */
