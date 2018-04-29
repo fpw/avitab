@@ -39,6 +39,12 @@ void Downloader::setCacheDirectory(const std::string& cache) {
     cacheDir = cache;
 }
 
+bool Downloader::isCached(const std::string& url) {
+    std::string cacheFileUTF8 = urlToCacheName(url);
+    std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
+    return platform::fileExists(cacheFileUTF8);
+}
+
 std::vector<uint8_t> Downloader::download(const std::string& url) {
     std::string cacheFileUTF8 = urlToCacheName(url);
     std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
@@ -48,6 +54,7 @@ std::vector<uint8_t> Downloader::download(const std::string& url) {
         std::vector<uint8_t> res((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
         return res;
     } else {
+        std::lock_guard<std::mutex> lock(curlMutex);
         logger::verbose("Downloading '%s'", url.c_str());
 
         std::vector<uint8_t> res;

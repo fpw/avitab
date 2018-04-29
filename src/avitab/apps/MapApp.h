@@ -46,7 +46,7 @@ private:
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();
-    bool update();
+    bool onTimer();
 };
 
 } /* namespace avitab */

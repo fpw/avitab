@@ -19,6 +19,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include <future>
 #include "OSMTile.h"
 #include "src/Logger.h"
 
@@ -42,10 +43,10 @@ OSMTile::OSMTile(int x, int y, int zoom):
     this->x = x % endXY;
 }
 
-void OSMTile::load(std::shared_ptr<Downloader> downloader) {
+void OSMTile::loadInBackground(std::shared_ptr<Downloader> downloader) {
     if (!validCoords) {
-        image.width = 256;
-        image.height = 256;
+        image.width = WIDTH;
+        image.height = HEIGHT;
         image.pixels.resize(image.width * image.height, 0);
         return;
     }
@@ -56,11 +57,31 @@ void OSMTile::load(std::shared_ptr<Downloader> downloader) {
 
     std::string url = urlStream.str();
 
-    auto data = downloader->download(url);
-    image = platform::loadImage(data);
+    imageFuture = std::async(std::launch::async, [this, downloader, url] () {
+        auto data = downloader->download(url);
+        return platform::loadImage(data);
+    });
+
+    if (downloader->isCached(url)) {
+        imageFuture.wait();
+    }
 }
 
-const platform::Image& OSMTile::getImage() const {
+bool OSMTile::hasImage() const {
+    if (!imageFuture.valid()) {
+        // if the future expired, we already have the image
+        return true;
+    }
+
+    auto state = imageFuture.wait_for(std::chrono::seconds(0));
+    return state == std::future_status::ready;
+}
+
+const platform::Image& OSMTile::getImage() {
+    if (imageFuture.valid()) {
+        image = imageFuture.get();
+    }
+
     return image;
 }
 

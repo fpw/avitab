@@ -21,6 +21,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <mutex>
 
 namespace maps {
 
@@ -28,9 +29,11 @@ class Downloader {
 public:
     Downloader();
     void setCacheDirectory(const std::string &cache);
+    bool isCached(const std::string &url);
     std::vector<uint8_t> download(const std::string &url);
     ~Downloader();
 private:
+    std::mutex curlMutex;
     std::string cacheDir;
     void *curl = nullptr;
 

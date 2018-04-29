@@ -23,7 +23,7 @@ namespace avitab {
 MapApp::MapApp(FuncsPtr funcs):
     App(funcs),
     window(std::make_shared<Window>(getUIContainer(), "Maps")),
-    updateTimer(std::bind(&MapApp::update, this), 200)
+    updateTimer(std::bind(&MapApp::onTimer, this), 200)
 {
     window->setOnClose([this] () { exit(); });
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&MapApp::onMinusButton, this));
@@ -42,7 +42,7 @@ MapApp::MapApp(FuncsPtr funcs):
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
     mapWidget->draw(map->getImage());
 
-    update();
+    onTimer();
 }
 
 void MapApp::onRedrawNeeded() {
@@ -61,17 +61,17 @@ void MapApp::onMouseWheel(int dir, int x, int y) {
     } else {
         map->zoomOut();
     }
-    update();
+    onTimer();
 }
 
 void MapApp::onPlusButton() {
     map->zoomIn();
-    update();
+    onTimer();
 }
 
 void MapApp::onMinusButton() {
     map->zoomOut();
-    update();
+    onTimer();
 }
 
 void MapApp::onTrackButton() {
@@ -79,7 +79,7 @@ void MapApp::onTrackButton() {
     trackButton->setToggleState(trackPlane);
 }
 
-bool MapApp::update() {
+bool MapApp::onTimer() {
     double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
     double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
     float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
@@ -89,6 +89,8 @@ bool MapApp::update() {
     } else {
         map->setPlanePosition(planeLat, planeLon, planeHeading);
     }
+
+    map->doWork();
 
     return true;
 }

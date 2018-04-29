@@ -51,6 +51,9 @@ public:
     void zoomIn();
     void zoomOut();
 
+    // Call periodically to refresh tiles that were pending
+    void doWork();
+
     const platform::Image &getImage() const;
 
 private:
@@ -69,7 +72,7 @@ private:
     // Tiles
     std::shared_ptr<Downloader> downloader;
     std::map<uint64_t, std::shared_ptr<OSMTile>> tileCache;
-    int centerTileWidth = 0, centerTileHeight = 0;
+    bool pendingTiles = false;
 
     void updateImage();
     std::shared_ptr<OSMTile> getOrLoadTile(int x, int y);

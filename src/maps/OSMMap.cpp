@@ -99,30 +99,37 @@ void OSMMap::zoomOut() {
     }
 }
 
+void OSMMap::doWork() {
+    if (pendingTiles) {
+        updateImage();
+    }
+}
+
 void OSMMap::updateImage() {
-    std::fill(mapImage.pixels.begin(), mapImage.pixels.end(), 0xFF000000);
+    std::fill(mapImage.pixels.begin(), mapImage.pixels.end(), 0);
 
     double centerX = longitudeToX(centerLong, zoomLevel);
     double centerY = latitudeToY(centerLat, zoomLevel);
 
-    auto centerImg = getOrLoadTile(centerX, centerY)->getImage();
-    centerTileWidth = centerImg.width;
-    centerTileHeight = centerImg.height;
-
     // Center pixel's position inside center tile
-    int xOff = (centerX - (int) centerX) * centerImg.width;
-    int yOff = (centerY - (int) centerY) * centerImg.height;
+    int xOff = (centerX - (int) centerX) * OSMTile::WIDTH;
+    int yOff = (centerY - (int) centerY) * OSMTile::HEIGHT;
 
     // Center tile's upper left position
     int centerPosX = mapImage.width / 2 - xOff;
     int centerPosY = mapImage.height / 2 - yOff;
 
+    pendingTiles = false;
     for (int y = -TILE_RADIUS; y <= TILE_RADIUS; y++) {
         for (int x = -TILE_RADIUS; x <= TILE_RADIUS; x++) {
             try {
                 auto tile = getOrLoadTile(((int) centerX) + x, ((int) centerY) + y);
-                platform::copyImage(tile->getImage(), mapImage,
-                        centerPosX + x * centerImg.width, centerPosY + y * centerImg.height);
+                if (tile->hasImage()) {
+                    platform::copyImage(tile->getImage(), mapImage,
+                            centerPosX + x * OSMTile::WIDTH, centerPosY + y * OSMTile::HEIGHT);
+                } else {
+                    pendingTiles = true;
+                }
             } catch (const std::exception &e) {
                 logger::warn("Couldn't display tile: %s", e.what());
             }
@@ -144,7 +151,7 @@ std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
     }
 
     auto tile = std::make_shared<OSMTile>(x, y, zoomLevel);
-    tile->load(downloader);
+    tile->loadInBackground(downloader);
 
     if (tileCache.size() > 75) {
         // TODO: Better strategy
@@ -152,7 +159,6 @@ std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
     }
 
     tileCache.insert(std::make_pair(idx, tile));
-
     return tile;
 }
 
@@ -171,12 +177,6 @@ void OSMMap::drawOverlays() {
 }
 
 void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
-    if (centerTileWidth == 0 || centerTileHeight == 0) {
-        px = 0;
-        py = 0;
-        return;
-    }
-
     // Center tile num
     double cx = longitudeToX(centerLong, zoomLevel);
     double cy = latitudeToY(centerLat, zoomLevel);
@@ -185,22 +185,16 @@ void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
     double tx = longitudeToX(lon, zoomLevel);
     double ty = latitudeToY(lat, zoomLevel);
 
-    px = mapImage.width / 2 + (tx - cx) * centerTileWidth;
-    py = mapImage.height / 2 + (ty - cy) * centerTileHeight;
+    px = mapImage.width / 2 + (tx - cx) * OSMTile::WIDTH;
+    py = mapImage.height / 2 + (ty - cy) * OSMTile::HEIGHT;
 }
 
 void OSMMap::pixelToPosition(int px, int py, double& lat, double& lon) const {
-    if (centerTileWidth == 0 || centerTileHeight == 0) {
-        lat = 0;
-        lon = 0;
-        return;
-    }
-
     double cx = longitudeToX(centerLong, zoomLevel);
     double cy = latitudeToY(centerLat, zoomLevel);
 
-    double x = cx + (px - mapImage.width / 2.0) / centerTileWidth;
-    double y = cy + (py - mapImage.height / 2.0) / centerTileHeight;
+    double x = cx + (px - mapImage.width / 2.0) / OSMTile::WIDTH;
+    double y = cy + (py - mapImage.height / 2.0) / OSMTile::HEIGHT;
 
     lat = yToLatitude(y, zoomLevel);
     lon = xToLongitude(x, zoomLevel);

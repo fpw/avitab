@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 #include <cstdint>
+#include <future>
 #include "Downloader.h"
 #include "src/platform/ImageLoader.h"
 
@@ -28,13 +29,18 @@ namespace maps {
 
 class OSMTile {
 public:
+    static constexpr const int WIDTH = 256;
+    static constexpr const int HEIGHT = 256;
+
     OSMTile(int x, int y, int zoom);
-    void load(std::shared_ptr<Downloader> downloader);
-    const platform::Image &getImage() const;
+    void loadInBackground(std::shared_ptr<Downloader> downloader);
+    bool hasImage() const;
+    const platform::Image &getImage();
 private:
     bool validCoords;
     int x, y;
     int zoomLevel;
+    std::future<platform::Image> imageFuture;
     platform::Image image {};
 };
 
