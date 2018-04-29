@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "MapApp.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -27,10 +28,19 @@ MapApp::MapApp(FuncsPtr funcs):
     window->setOnClose([this] () { exit(); });
 
     mapWidget = std::make_shared<PixMap>(window);
+    mapWidget->setClickable(true);
+    mapWidget->setClickHandler([this] (int x, int y) {
+        map->moveCenterTo(x, y);
+        update();
+    });
 
     map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
     map->setCacheDirectory(api().getDataPath() + "MapTiles/");
     map->setOverlayDirectory(api().getDataPath() + "icons/");
+
+    double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
+    double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
+    map->setCenter(lat, lon);
 
     update();
 }
@@ -49,7 +59,6 @@ bool MapApp::update() {
     double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
     float heading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
 
-    map->setCenter(lat, lon);
     map->setPlanePosition(lat, lon, heading);
     map->updateImage();
     mapWidget->draw(map->getImage());

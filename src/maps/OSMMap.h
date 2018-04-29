@@ -38,6 +38,7 @@ public:
     void setCacheDirectory(const std::string &path);
     void setOverlayDirectory(const std::string &path);
     void setCenter(double latitude, double longitude);
+    void moveCenterTo(int x, int y);
     void setPlanePosition(double latitude, double longitude, double heading);
     void setZoom(int level);
     void zoomIn();
@@ -70,6 +71,7 @@ private:
     void drawOverlays();
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
+    void pixelToPosition(int px, int py, double &lat, double &lon) const;
 };
 
 } /* namespace maps */

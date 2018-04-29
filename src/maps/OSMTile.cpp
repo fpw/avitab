@@ -73,4 +73,13 @@ double latitudeToY(double lat, int zoom) {
            1.0 / std::cos(lat * M_PI / 180.0)) / M_PI) / 2.0 * std::pow(2.0, zoom);
 }
 
+double xToLongitude(double x, int zoom) {
+    return x / pow(2.0, zoom) * 360.0 - 180;
+}
+
+double yToLatitude(double y, int zoom) {
+    double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, zoom);
+    return 180.0 / M_PI * std::atan(0.5 * (std::exp(n) - std::exp(-n)));
+}
+
 } /* namespace maps */

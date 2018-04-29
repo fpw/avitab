@@ -40,6 +40,8 @@ private:
 
 double longitudeToX(double lon, int zoom);
 double latitudeToY(double lat, int zoom);
+double xToLongitude(double x, int zoom);
+double yToLatitude(double y, int zoom);
 
 } /* namespace maps */
 

@@ -54,6 +54,10 @@ void Widget::setPosition(int x, int y) {
     lv_obj_set_pos(obj(), x, y);
 }
 
+void Widget::setClickable(bool click) {
+    lv_obj_set_click(obj(), click);
+}
+
 void Widget::setDimensions(int width, int height) {
     lv_obj_set_size(obj(), width, height);
 }
@@ -142,6 +146,27 @@ int Widget::getY() {
 
 void Widget::enablePanning() {
     lv_obj_set_drag(obj(), true);
+}
+
+void Widget::setClickHandler(ClickHandler handler) {
+    onClick = handler;
+    origSigFunc = lv_obj_get_signal_func(obj());
+    lv_obj_set_free_ptr(obj(), this);
+
+    lv_obj_set_signal_func(obj(), [] (_lv_obj_t *o, lv_signal_t sign, void *param) -> lv_res_t {
+        Widget *us = reinterpret_cast<Widget *>(lv_obj_get_free_ptr(o));
+        if (sign == LV_SIGNAL_PRESSED) {
+            lv_point_t point;
+            lv_indev_t *dev = reinterpret_cast<lv_indev_t *>(param);
+            lv_indev_get_point(dev, &point);
+            if (us->onClick) {
+                us->onClick(point.x - o->coords.x1, point.y - o->coords.y1);
+            }
+        } else {
+            us->origSigFunc(o, sign, param);
+        }
+        return LV_RES_OK;
+    });
 }
 
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
