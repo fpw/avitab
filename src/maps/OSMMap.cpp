@@ -17,7 +17,6 @@
  */
 #include <cstring>
 #include <algorithm>
-#include <cmath>
 #include "OSMMap.h"
 #include "src/Logger.h"
 
@@ -29,6 +28,10 @@ OSMMap::OSMMap(int width, int height):
     mapImage.width = width;
     mapImage.height = height;
     mapImage.pixels.resize(mapImage.width * mapImage.height);
+}
+
+void OSMMap::setRedrawCallback(RedrawCallback cb) {
+    onRedrawNeeded = cb;
 }
 
 void OSMMap::setCacheDirectory(const std::string& path) {
@@ -46,7 +49,35 @@ void OSMMap::setCenter(double latitude, double longitude) {
     if (deltaLat > 0.0000001 || deltaLon > 0.0000001) {
         this->centerLat = latitude;
         this->centerLong = longitude;
-        needRedraw = true;
+        updateImage();
+    }
+}
+
+void OSMMap::setPlanePosition(double latitude, double longitude, double heading) {
+    double deltaLat = std::abs(latitude - this->planeLat);
+    double deltaLon = std::abs(longitude - this->planeLong);
+    double deltaHeading = std::abs(heading - this->planeHeading);
+
+    if (deltaLat > 0.0000001 || deltaLon > 0.0000001 || deltaHeading > 0.1) {
+        planeLat = latitude;
+        planeLong = longitude;
+        planeHeading = heading;
+        updateImage();
+    }
+}
+
+void OSMMap::centerOnPlane(double latitude, double longitude, double heading) {
+    planeLat = latitude;
+    planeLong = longitude;
+    planeHeading = heading;
+    setCenter(latitude, longitude);
+}
+
+void OSMMap::setZoom(int level) {
+    if (level != this->zoomLevel) {
+        this->zoomLevel = level;
+        tileCache.clear();
+        updateImage();
     }
 }
 
@@ -54,14 +85,6 @@ void OSMMap::moveCenterTo(int x, int y) {
     double lat, lon;
     pixelToPosition(x, y, lat, lon);
     setCenter(lat, lon);
-}
-
-void OSMMap::setZoom(int level) {
-    if (level != this->zoomLevel) {
-        tileCache.clear();
-        this->zoomLevel = level;
-        needRedraw = true;
-    }
 }
 
 void OSMMap::zoomIn() {
@@ -77,18 +100,14 @@ void OSMMap::zoomOut() {
 }
 
 void OSMMap::updateImage() {
-    if (!needRedraw) {
-        return;
-    }
-
-    logger::info("Redraw, zoom level %d", zoomLevel);
-
     std::fill(mapImage.pixels.begin(), mapImage.pixels.end(), 0xFF000000);
 
     double centerX = longitudeToX(centerLong, zoomLevel);
     double centerY = latitudeToY(centerLat, zoomLevel);
 
     auto &centerImg = getOrLoadTile(centerX, centerY)->getImage();
+    centerTileWidth = centerImg.width;
+    centerTileHeight = centerImg.height;
 
     // Center pixel's position inside center tile
     int xOff = (centerX - (int) centerX) * centerImg.width;
@@ -102,7 +121,8 @@ void OSMMap::updateImage() {
         for (int x = -TILE_RADIUS; x <= TILE_RADIUS; x++) {
             try {
                 auto tile = getOrLoadTile(((int) centerX) + x, ((int) centerY) + y);
-                copyImage(tile->getImage(), centerPosX + x * centerImg.width, centerPosY + y * centerImg.height);
+                platform::copyImage(tile->getImage(), mapImage,
+                        centerPosX + x * centerImg.width, centerPosY + y * centerImg.height);
             } catch (const std::exception &e) {
                 logger::warn("Couldn't display tile: %s", e.what());
             }
@@ -111,7 +131,9 @@ void OSMMap::updateImage() {
 
     drawOverlays();
 
-    needRedraw = false;
+    if (onRedrawNeeded) {
+        onRedrawNeeded();
+    }
 }
 
 std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
@@ -127,80 +149,8 @@ std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
     return tile;
 }
 
-void OSMMap::copyImage(const platform::Image &src, int dstX, int dstY) {
-    if (dstX + src.width < 0 || dstX > mapImage.width) {
-        return;
-    }
-
-    uint32_t *dstPtr = mapImage.pixels.data();
-    const uint32_t *srcPtr = src.pixels.data();
-
-    for (int srcY = 0; srcY < src.height; srcY++) {
-        int dstYClip = dstY + srcY;
-        if (dstYClip < 0 || dstYClip >= mapImage.height) {
-            continue;
-        }
-
-        int width = src.width;
-        int srcX = 0;
-        int dstXClip = dstX;
-        if (dstXClip < 0) {
-            srcX = -dstX;
-            dstXClip = 0;
-            width -= -dstX;
-        }
-        if (dstX + width >= mapImage.width) {
-            width = mapImage.width - dstX;
-        }
-
-        if (width > 0) {
-            std::memcpy(dstPtr + dstYClip * mapImage.width + dstXClip,
-                        srcPtr + srcY * src.width + srcX,
-                        width * sizeof(uint32_t));
-        }
-    }
-}
-
-void OSMMap::blendImage(const platform::Image& src, int dstX, int dstY, double angle) {
-    // Rotation center
-    int cx = src.width / 2;
-    int cy = src.height / 2;
-
-    double theta = -angle * M_PI / 180.0;
-    double cosTheta = std::cos(theta);
-    double sinTheta = std::sin(theta);
-
-    for (int y = dstY; y < dstY + src.height; y++) {
-        for (int x = dstX; x < dstX + src.width; x++) {
-            if (x < 0 || x >= mapImage.width || y < 0 || y >= mapImage.height) {
-                continue;
-            }
-
-            int x2 = cosTheta * (x - dstX - cx) - sinTheta * (y - dstY - cy) + cx;
-            int y2 = sinTheta * (x - dstX - cx) + cosTheta * (y - dstY - cy) + cy;
-            if (x2 < 0 || x2 >= src.width || y2 < 0 || y2 >= src.height) {
-                continue;
-            }
-
-            // TODO: interpolate from neighbors
-
-            const uint32_t *s = src.pixels.data() + y2 * src.width + x2;
-            uint32_t *d = mapImage.pixels.data() + y * mapImage.width + x;
-            if (*s & 0xFF000000) {
-                *d = *s;
-            }
-        }
-    }
-}
-
 const platform::Image& OSMMap::getImage() const {
     return mapImage;
-}
-
-void OSMMap::setPlanePosition(double latitude, double longitude, double heading) {
-    planeLat = latitude;
-    planeLong = longitude;
-    planeHeading = heading;
 }
 
 void OSMMap::drawOverlays() {
@@ -210,10 +160,16 @@ void OSMMap::drawOverlays() {
     px -= planeIcon.width / 2;
     py -= planeIcon.height / 2;
 
-    blendImage(planeIcon, px, py, planeHeading);
+    platform::blendImage(planeIcon, planeHeading, mapImage, px, py);
 }
 
 void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
+    if (centerTileWidth == 0 || centerTileHeight == 0) {
+        px = 0;
+        py = 0;
+        return;
+    }
+
     // Center tile num
     double cx = longitudeToX(centerLong, zoomLevel);
     double cy = latitudeToY(centerLat, zoomLevel);
@@ -222,16 +178,22 @@ void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
     double tx = longitudeToX(lon, zoomLevel);
     double ty = latitudeToY(lat, zoomLevel);
 
-    px = mapImage.width / 2 + (tx - cx) * 256;
-    py = mapImage.height / 2 + (ty - cy) * 256;
+    px = mapImage.width / 2 + (tx - cx) * centerTileWidth;
+    py = mapImage.height / 2 + (ty - cy) * centerTileHeight;
 }
 
 void OSMMap::pixelToPosition(int px, int py, double& lat, double& lon) const {
+    if (centerTileWidth == 0 || centerTileHeight == 0) {
+        lat = 0;
+        lon = 0;
+        return;
+    }
+
     double cx = longitudeToX(centerLong, zoomLevel);
     double cy = latitudeToY(centerLat, zoomLevel);
 
-    double x = cx + (px - mapImage.width / 2.0) / 256;
-    double y = cy + (py - mapImage.height / 2.0) / 256;
+    double x = cx + (px - mapImage.width / 2.0) / centerTileWidth;
+    double y = cy + (py - mapImage.height / 2.0) / centerTileHeight;
 
     lat = yToLatitude(y, zoomLevel);
     lon = xToLongitude(x, zoomLevel);

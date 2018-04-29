@@ -26,23 +26,30 @@ MapApp::MapApp(FuncsPtr funcs):
     updateTimer(std::bind(&MapApp::update, this), 200)
 {
     window->setOnClose([this] () { exit(); });
-
-    mapWidget = std::make_shared<PixMap>(window);
-    mapWidget->setClickable(true);
-    mapWidget->setClickHandler([this] (int x, int y) {
-        map->moveCenterTo(x, y);
-        update();
-    });
+    window->addSymbol(Widget::Symbol::MINUS, std::bind(&MapApp::onMinusButton, this));
+    window->addSymbol(Widget::Symbol::PLUS, std::bind(&MapApp::onPlusButton, this));
+    window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
 
     map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
     map->setCacheDirectory(api().getDataPath() + "MapTiles/");
     map->setOverlayDirectory(api().getDataPath() + "icons/");
 
-    double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
-    double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
-    map->setCenter(lat, lon);
+    mapWidget = std::make_shared<PixMap>(window);
+    mapWidget->setClickable(true);
+    mapWidget->setClickHandler([this] (int x, int y) { onMapClicked(x, y); });
+
+    map->setRedrawCallback([this] () { onRedrawNeeded(); });
 
     update();
+}
+
+void MapApp::onRedrawNeeded() {
+    mapWidget->draw(map->getImage());
+}
+
+void MapApp::onMapClicked(int x, int y) {
+    trackPlane = false;
+    map->moveCenterTo(x, y);
 }
 
 void MapApp::onMouseWheel(int dir, int x, int y) {
@@ -54,14 +61,30 @@ void MapApp::onMouseWheel(int dir, int x, int y) {
     update();
 }
 
-bool MapApp::update() {
-    double lat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
-    double lon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
-    float heading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+void MapApp::onPlusButton() {
+    map->zoomIn();
+    update();
+}
 
-    map->setPlanePosition(lat, lon, heading);
-    map->updateImage();
-    mapWidget->draw(map->getImage());
+void MapApp::onMinusButton() {
+    map->zoomOut();
+    update();
+}
+
+void MapApp::onTrackButton() {
+    trackPlane = !trackPlane;
+}
+
+bool MapApp::update() {
+    double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
+    double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
+    float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+
+    if (trackPlane) {
+        map->centerOnPlane(planeLat, planeLon, planeHeading);
+    } else {
+        map->setPlanePosition(planeLat, planeLon, planeHeading);
+    }
 
     return true;
 }

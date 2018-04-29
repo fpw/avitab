@@ -187,6 +187,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
     case Symbol::HOME:      return SYMBOL_HOME;
     case Symbol::COPY:      return SYMBOL_COPY;
+    case Symbol::GPS:       return SYMBOL_GPS;
     default:                return nullptr;
     }
 }

@@ -37,7 +37,13 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     Timer updateTimer;
+    bool trackPlane = true;
 
+    void onRedrawNeeded();
+    void onMapClicked(int x, int y);
+    void onPlusButton();
+    void onMinusButton();
+    void onTrackButton();
     bool update();
 };
 

@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <cstdint>
+#include <functional>
 #include "src/platform/ImageLoader.h"
 #include "Downloader.h"
 #include "OSMTile.h"
@@ -34,16 +35,21 @@ public:
     static constexpr const int ZOOM_MIN = 0;
     static constexpr const int ZOOM_MAX = 17;
 
+    using RedrawCallback = std::function<void()>;
+
     OSMMap(int width, int height);
+    void setRedrawCallback(RedrawCallback cb);
     void setCacheDirectory(const std::string &path);
     void setOverlayDirectory(const std::string &path);
+
     void setCenter(double latitude, double longitude);
     void moveCenterTo(int x, int y);
+
     void setPlanePosition(double latitude, double longitude, double heading);
-    void setZoom(int level);
+    void centerOnPlane(double latitude, double longitude, double heading);
+
     void zoomIn();
     void zoomOut();
-    void updateImage();
 
     const platform::Image &getImage() const;
 
@@ -54,21 +60,21 @@ private:
 
     // Actual map image
     platform::Image mapImage;
-    bool needRedraw = false;
+    RedrawCallback onRedrawNeeded;
 
     // Overlays
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     platform::Image planeIcon;
 
-
     // Tiles
     std::shared_ptr<Downloader> downloader;
     std::map<uint64_t, std::shared_ptr<OSMTile>> tileCache;
+    int centerTileWidth = 0, centerTileHeight = 0;
 
+    void updateImage();
     std::shared_ptr<OSMTile> getOrLoadTile(int x, int y);
-    void copyImage(const platform::Image &src, int dstX, int dstY);
-    void blendImage(const platform::Image &src, int dstX, int dstY, double angle);
     void drawOverlays();
+    void setZoom(int level);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;

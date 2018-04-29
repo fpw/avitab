@@ -40,10 +40,11 @@ void Downloader::setCacheDirectory(const std::string& cache) {
 }
 
 std::vector<uint8_t> Downloader::download(const std::string& url) {
-    std::string cacheFile = urlToCacheName(url);
+    std::string cacheFileUTF8 = urlToCacheName(url);
+    std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
 
-    if (platform::fileExists(cacheFile)) {
-        std::ifstream stream(cacheFile, std::ios::in | std::ios::binary);
+    if (platform::fileExists(cacheFileUTF8)) {
+        std::ifstream stream(cacheFileNative, std::ios::in | std::ios::binary);
         std::vector<uint8_t> res((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
         return res;
     } else {
@@ -69,7 +70,7 @@ std::vector<uint8_t> Downloader::download(const std::string& url) {
             throw std::runtime_error(std::string("Download error - HTTP status " + std::to_string(httpStatus)));
         }
 
-        std::ofstream stream(cacheFile, std::ios::out | std::ios::binary);
+        std::ofstream stream(cacheFileNative, std::ios::out | std::ios::binary);
         stream.write(reinterpret_cast<const char *>(&res[0]), res.size());
 
         return res;

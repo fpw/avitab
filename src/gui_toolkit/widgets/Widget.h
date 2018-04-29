@@ -33,7 +33,7 @@ public:
         PREV, NEXT, PAUSE,
         PLUS, MINUS,
         FILE, DIRECTORY,
-        HOME,
+        HOME, GPS,
         COPY,
     };
     using WidgetPtr = std::shared_ptr<Widget>;

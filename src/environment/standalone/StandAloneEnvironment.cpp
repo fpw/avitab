@@ -37,11 +37,14 @@ StandAloneEnvironment::StandAloneEnvironment() {
 
     EnvData data {};
 
-    data.doubleValue = 53.80193;
+    data.doubleValue = 53.8019434;
     setData("sim/flightmodel/position/latitude", data);
 
-    data.doubleValue = 10.70183;
+    data.doubleValue = 10.7017287;
     setData("sim/flightmodel/position/longitude", data);
+
+    data.floatValue = 70;
+    setData("sim/flightmodel/position/psi", data);
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {

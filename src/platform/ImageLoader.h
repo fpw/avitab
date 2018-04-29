@@ -33,6 +33,9 @@ struct Image {
 Image loadImage(const std::string &path);
 Image loadImage(const std::vector<uint8_t> &encodedData);
 
+void copyImage(const platform::Image &src, platform::Image &dst, int dstX, int dstY);
+void blendImage(const platform::Image &src, double angle, platform::Image &dst, int dstX, int dstY);
+
 } /* namespace platform */
 
 #endif /* SRC_MAPS_IMAGELOADER_H_ */
