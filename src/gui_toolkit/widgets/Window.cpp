@@ -52,7 +52,7 @@ void Window::setOnClose(WindowCallback cb) {
     addSymbol(Symbol::CLOSE, cb);
 }
 
-void Window::addSymbol(Symbol smb, WindowCallback cb) {
+std::shared_ptr<Button> Window::addSymbol(Symbol smb, WindowCallback cb) {
     callbacks[smb] = cb;
 
     const void *lvSymbol = symbolToLVSymbol(smb);
@@ -72,6 +72,8 @@ void Window::addSymbol(Symbol smb, WindowCallback cb) {
         return LV_RES_OK;
     });
     lv_obj_set_free_num(btn, static_cast<size_t>(smb));
+
+    return std::make_shared<Button>(nullptr, btn);
 }
 
 } /* namespace avitab */

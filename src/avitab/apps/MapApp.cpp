@@ -28,7 +28,8 @@ MapApp::MapApp(FuncsPtr funcs):
     window->setOnClose([this] () { exit(); });
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&MapApp::onMinusButton, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&MapApp::onPlusButton, this));
-    window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
+    trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
+    trackButton->setToggleState(trackPlane);
 
     map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
     map->setCacheDirectory(api().getDataPath() + "MapTiles/");
@@ -49,6 +50,7 @@ void MapApp::onRedrawNeeded() {
 
 void MapApp::onMapClicked(int x, int y) {
     trackPlane = false;
+    trackButton->setToggleState(trackPlane);
     map->moveCenterTo(x, y);
 }
 
@@ -73,6 +75,7 @@ void MapApp::onMinusButton() {
 
 void MapApp::onTrackButton() {
     trackPlane = !trackPlane;
+    trackButton->setToggleState(trackPlane);
 }
 
 bool MapApp::update() {

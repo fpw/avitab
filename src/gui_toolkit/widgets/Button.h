@@ -32,8 +32,11 @@ public:
     Button(WidgetPtr parent, const std::string &text);
     Button(WidgetPtr parent, const platform::Image &icon, const std::string &caption);
     Button(WidgetPtr parent, Symbol smb);
+    Button(WidgetPtr parent, lv_obj_t *obj);
 
     void setCallback(ButtonCallback cb);
+    void setToggleable(bool toggleable);
+    void setToggleState(bool toggled);
 private:
     platform::Image iconData;
     lv_img_t iconImage;
