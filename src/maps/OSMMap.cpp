@@ -105,7 +105,7 @@ void OSMMap::updateImage() {
     double centerX = longitudeToX(centerLong, zoomLevel);
     double centerY = latitudeToY(centerLat, zoomLevel);
 
-    auto &centerImg = getOrLoadTile(centerX, centerY)->getImage();
+    auto centerImg = getOrLoadTile(centerX, centerY)->getImage();
     centerTileWidth = centerImg.width;
     centerTileHeight = centerImg.height;
 
@@ -145,7 +145,14 @@ std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
 
     auto tile = std::make_shared<OSMTile>(x, y, zoomLevel);
     tile->load(downloader);
+
+    if (tileCache.size() > 75) {
+        // TODO: Better strategy
+        tileCache.clear();
+    }
+
     tileCache.insert(std::make_pair(idx, tile));
+
     return tile;
 }
 

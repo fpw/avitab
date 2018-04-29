@@ -40,12 +40,13 @@ MapApp::MapApp(FuncsPtr funcs):
     mapWidget->setClickHandler([this] (int x, int y) { onMapClicked(x, y); });
 
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
+    mapWidget->draw(map->getImage());
 
     update();
 }
 
 void MapApp::onRedrawNeeded() {
-    mapWidget->draw(map->getImage());
+    mapWidget->invalidate();
 }
 
 void MapApp::onMapClicked(int x, int y) {
