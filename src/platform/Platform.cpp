@@ -76,20 +76,8 @@ std::string nativeToUTF8(const std::string& native) {
 }
 #elif defined __APPLE__
 std::string nativeToUTF8(const std::string& native) {
-    char outPath[AVITAB_PATH_LEN_MAX];
-    CFStringRef inStr = CFStringCreateWithCString(kCFAllocatorDefault, native.c_str(), kCFStringEncodingMacRoman);
-    if (!inStr) {
-        throw std::runtime_error("Couldn't create CFString");
-    }
-    CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, inStr, kCFURLHFSPathStyle, 0);
-    CFStringRef outStr = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
-    if (!CFStringGetCString(outStr, outPath, outPathMaxLen, kCFURLPOSIXPathStyle)) {
-        throw std::runtime_error("Couldn't convert native path");
-    }
-    CFRelease(outStr);
-    CFRelease(url);
-    CFRelease(inStr);
-    return std::string(outPath);
+    auto root = std::regex_replace(native, std::regex("^OS X:"), ":");
+    return std::regex_replace(root, std::regex(":"), "/");
 }
 #else
 std::string nativeToUTF8(const std::string& native) {
