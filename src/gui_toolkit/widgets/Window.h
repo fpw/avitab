@@ -22,6 +22,7 @@
 #include <string>
 #include <map>
 #include "Widget.h"
+#include "Button.h"
 
 namespace avitab {
 
@@ -35,7 +36,7 @@ public:
     void hideScrollbars();
     int getContentWidth();
     int getContentHeight();
-    void addSymbol(Symbol smb, WindowCallback cb);
+    std::shared_ptr<Button> addSymbol(Symbol smb, WindowCallback cb);
 private:
     std::map<Symbol, WindowCallback> callbacks;
 };

@@ -54,6 +54,10 @@ void Widget::setPosition(int x, int y) {
     lv_obj_set_pos(obj(), x, y);
 }
 
+void Widget::setClickable(bool click) {
+    lv_obj_set_click(obj(), click);
+}
+
 void Widget::setDimensions(int width, int height) {
     lv_obj_set_size(obj(), width, height);
 }
@@ -140,6 +144,33 @@ int Widget::getY() {
     return lv_obj_get_y(obj());
 }
 
+void Widget::enablePanning() {
+    lv_obj_set_drag(obj(), true);
+}
+
+void Widget::setClickHandler(ClickHandler handler) {
+    onClick = handler;
+    origSigFunc = lv_obj_get_signal_func(obj());
+    lv_obj_set_free_ptr(obj(), this);
+
+    lv_obj_set_signal_func(obj(), [] (_lv_obj_t *o, lv_signal_t sign, void *param) -> lv_res_t {
+        Widget *us = reinterpret_cast<Widget *>(lv_obj_get_free_ptr(o));
+        if (sign == LV_SIGNAL_PRESSED || sign == LV_SIGNAL_PRESSING || sign == LV_SIGNAL_RELEASED || sign == LV_SIGNAL_PRESS_LOST) {
+            lv_point_t point;
+            lv_indev_t *dev = reinterpret_cast<lv_indev_t *>(param);
+            lv_indev_get_point(dev, &point);
+            if (us->onClick) {
+                bool start = (sign == LV_SIGNAL_PRESSED);
+                bool end = (sign == LV_SIGNAL_RELEASED) || (sign == LV_SIGNAL_PRESS_LOST);
+                us->onClick(point.x - o->coords.x1, point.y - o->coords.y1, start, end);
+            }
+        } else {
+            us->origSigFunc(o, sign, param);
+        }
+        return LV_RES_OK;
+    });
+}
+
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
     switch (symbol) {
     case Symbol::NONE:      return nullptr;
@@ -158,6 +189,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
     case Symbol::HOME:      return SYMBOL_HOME;
     case Symbol::COPY:      return SYMBOL_COPY;
+    case Symbol::GPS:       return SYMBOL_GPS;
     default:                return nullptr;
     }
 }

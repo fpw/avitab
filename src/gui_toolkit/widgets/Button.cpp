@@ -32,11 +32,11 @@ Button::Button(WidgetPtr parent, const std::string& text):
     setObj(button);
 }
 
-Button::Button(WidgetPtr parent, Icon icon, const std::string& caption):
+Button::Button(WidgetPtr parent, const platform::Image &icon, const std::string& caption):
     Widget(parent)
 {
     iconData = icon;
-    iconImage = toLVImage(iconData.data->data(), iconData.width, iconData.height);
+    iconImage = toLVImage(iconData.pixels.data(), iconData.width, iconData.height);
 
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
     lv_cont_set_fit(button, true, true);
@@ -79,6 +79,12 @@ Button::Button(WidgetPtr parent, Symbol smb):
     setObj(button);
 }
 
+Button::Button(WidgetPtr parent, lv_obj_t* obj):
+    Widget(parent)
+{
+    setManagedObj(obj);
+}
+
 void Button::setCallback(ButtonCallback cb) {
     callbackFunc = cb;
     lv_obj_set_free_ptr(obj(), this);
@@ -90,6 +96,14 @@ void Button::setCallback(ButtonCallback cb) {
         }
         return LV_RES_OK;
     });
+}
+
+void Button::setToggleable(bool toggleable) {
+    lv_btn_set_toggle(obj(), toggleable);
+}
+
+void Button::setToggleState(bool toggled) {
+    lv_btn_set_state(obj(), toggled ? LV_BTN_STATE_TGL_PR : LV_BTN_STATE_REL);
 }
 
 } /* namespace avitab */

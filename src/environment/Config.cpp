@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
+#include <json/json.hpp>
 #include "Config.h"
-#include "json/json.hpp"
 
 using json = nlohmann::json;
 

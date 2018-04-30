@@ -19,6 +19,8 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_WIDGET_H_
 
 #include <memory>
+#include <functional>
+#include <string>
 #include <lvgl/lvgl.h>
 
 namespace avitab {
@@ -31,16 +33,20 @@ public:
         PREV, NEXT, PAUSE,
         PLUS, MINUS,
         FILE, DIRECTORY,
-        HOME,
+        HOME, GPS,
         COPY,
     };
     using WidgetPtr = std::shared_ptr<Widget>;
+    using ClickHandler = std::function<void(int, int, bool, bool)>;
 
     Widget(WidgetPtr parent);
 
     void setParent(WidgetPtr newParent);
     void setPosition(int x, int y);
     void setDimensions(int width, int height);
+    void setClickable(bool click);
+    void setClickHandler(ClickHandler handler);
+    void enablePanning();
     void centerInParent();
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);
@@ -77,6 +83,8 @@ private:
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;
     lv_style_t styleMod;
+    ClickHandler onClick;
+    lv_signal_func_t origSigFunc = nullptr;
 };
 }
 

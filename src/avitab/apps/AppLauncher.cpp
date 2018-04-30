@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "src/Logger.h"
 #include "AppLauncher.h"
 #include "ChartsApp.h"
 #include "NotesApp.h"
@@ -22,7 +23,8 @@
 #include "PlaneManualApp.h"
 #include "AirportApp.h"
 #include "RouteApp.h"
-#include "src/Logger.h"
+#include "MapApp.h"
+#include "src/platform/ImageLoader.h"
 
 namespace avitab {
 
@@ -32,9 +34,10 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     getUIContainer()->setLayoutPretty();
     std::string root = api().getDataPath() + "icons/";
 
-    addEntry<ChartsApp>("Charts", root + "if_starthere_18227.png");
-    addEntry<AirportApp>("Airports", root + "if_Airport_22906.png");
+    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png");
+    addEntry<AirportApp>("Airports", root + "if_xmag_3617.png");
     addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png");
+    addEntry<MapApp>("Maps", root + "if_starthere_18227.png");
     addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png");
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
     addEntry<About>("About", root + "if_Help_1493288.png");
@@ -47,9 +50,11 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
         this->show();
     });
 
+    auto iconImg = platform::loadImage(icon);
+
     Entry entry;
     entry.app = std::move(app);
-    entry.button = std::make_shared<Button>(getUIContainer(), api().loadIcon(icon), name);
+    entry.button = std::make_shared<Button>(getUIContainer(), iconImg, name);
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;

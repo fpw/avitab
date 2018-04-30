@@ -19,6 +19,7 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_PIXMAP_H_
 
 #include "Widget.h"
+#include "src/platform/ImageLoader.h"
 
 namespace avitab {
 
@@ -26,7 +27,7 @@ class PixMap: public Widget {
 public:
     PixMap(WidgetPtr parent);
     void draw(const uint32_t *pix, int dataWidth, int dataHeight);
-    void enablePanning();
+    void draw(const platform::Image &img);
     void panLeft();
     void panRight();
     void panUp();

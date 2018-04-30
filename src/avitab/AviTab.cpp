@@ -137,31 +137,6 @@ std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
     return guiLib->createRasterJob(path);
 }
 
-Icon AviTab::loadIcon(const std::string& path) {
-    Icon icon;
-    icon.data = std::make_shared<std::vector<uint32_t>>();
-
-    auto job = guiLib->createRasterJob(path);
-    job->setOutputBuf(icon.data, 64);
-
-    std::promise<JobInfo> infoPromise;
-    auto infoFuture = infoPromise.get_future();
-    job->rasterize(std::move(infoPromise));
-
-    // loading icons is so fast that we can do it synchronously
-    try {
-        auto info = infoFuture.get();
-        icon.width = info.width;
-        icon.height = info.height;
-    } catch (const std::exception &e) {
-        logger::error("Couldn't raster icon: %s", e.what());
-        icon.width = 0;
-        icon.height = 0;
-    }
-
-    return icon;
-}
-
 std::shared_ptr<xdata::World> AviTab::getNavWorld() {
     return env->getNavWorld();
 }

@@ -34,6 +34,17 @@ StandAloneEnvironment::StandAloneEnvironment() {
     }
 
     xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
+
+    EnvData data {};
+
+    data.doubleValue = 53.8019434;
+    setData("sim/flightmodel/position/latitude", data);
+
+    data.doubleValue = 10.7017287;
+    setData("sim/flightmodel/position/longitude", data);
+
+    data.floatValue = 70;
+    setData("sim/flightmodel/position/psi", data);
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {
@@ -112,7 +123,6 @@ double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
 }
 
 void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
-    // the SDL loop always runs so we don't need the onEmpty callback
     registerEnvironmentCallback(cb);
 }
 

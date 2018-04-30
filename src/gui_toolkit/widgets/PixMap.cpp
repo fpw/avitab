@@ -27,13 +27,13 @@ PixMap::PixMap(WidgetPtr parent):
     setObj(img);
 }
 
+void PixMap::draw(const platform::Image& img) {
+    draw(img.pixels.data(), img.width, img.height);
+}
+
 void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {
     image = toLVImage(pix, dataWidth, dataHeight);
     lv_img_set_src(obj(), &image);
-}
-
-void PixMap::enablePanning() {
-    lv_obj_set_drag(obj(), true);
 }
 
 void PixMap::panLeft() {

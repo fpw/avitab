@@ -15,20 +15,33 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_GUI_TOOLKIT_ICON_H_
-#define SRC_GUI_TOOLKIT_ICON_H_
+#ifndef SRC_MAPS_DOWNLOADER_H_
+#define SRC_MAPS_DOWNLOADER_H_
 
-#include <cstdint>
 #include <vector>
-#include <memory>
+#include <cstdint>
+#include <string>
+#include <curl/curl.h>
 
-namespace avitab {
+namespace maps {
 
-struct Icon {
-    std::shared_ptr<std::vector<uint32_t>> data;
-    int width = 0, height = 0;
+class Downloader {
+public:
+    Downloader();
+    void setCacheDirectory(const std::string &cache);
+    bool isCached(const std::string &url);
+    std::vector<uint8_t> download(const std::string &url, bool &cancel);
+    void stop();
+    ~Downloader();
+private:
+    std::string cacheDir;
+    CURL *curl = nullptr;
+
+    static size_t onData(void *buffer, size_t size, size_t nmemb, void *resPtr);
+    static int onProgress(void *client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow);
+    std::string urlToCacheName(const std::string &url);
 };
 
-}
+} /* namespace maps */
 
-#endif /* SRC_GUI_TOOLKIT_ICON_H_ */
+#endif /* SRC_MAPS_DOWNLOADER_H_ */
