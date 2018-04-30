@@ -80,9 +80,10 @@ void Environment::resumeEnvironmentJobs() {
 
 void Environment::registerEnvironmentCallback(EnvironmentCallback cb) {
     std::lock_guard<std::mutex> lock(envMutex);
-    if (!stopped) {
-        envCallbacks.push_back(cb);
+    if (stopped) {
+        throw std::runtime_error("Environment is stopped");
     }
+    envCallbacks.push_back(cb);
 }
 
 void Environment::runEnvironmentCallbacks() {
