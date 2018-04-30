@@ -49,6 +49,12 @@ void App::show() {
     api().showGUIContainer(uiContainer);
 }
 
+void App::resume() {
+}
+
+void App::suspend() {
+}
+
 void App::onMouseWheel(int dir, int x, int y) {
 }
 

@@ -19,6 +19,7 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_KEYBOARD_H_
 
 #include <functional>
+#include "TextArea.h"
 #include "Widget.h"
 
 namespace avitab {
@@ -27,13 +28,13 @@ class Keyboard: public Widget {
 public:
     using Callback = std::function<void()>;
 
-    Keyboard(WidgetPtr parent, WidgetPtr target);
-    void setTarget(WidgetPtr target);
+    Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target);
+    void setTarget(std::shared_ptr<TextArea> target);
     void setOnCancel(Callback cb);
     void setOnOk(Callback cb);
     void hideEnterKey();
 private:
-    WidgetPtr targetText;
+    std::shared_ptr<TextArea> targetText;
     Callback onCancel;
     Callback onOk;
 };

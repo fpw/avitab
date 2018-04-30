@@ -33,6 +33,26 @@ RouteApp::RouteApp(FuncsPtr appFuncs):
     showDeparturePage();
 }
 
+void RouteApp::suspend() {
+    if (departureField) {
+        departureField->setShowCursor(false);
+    }
+
+    if (arrivalField) {
+        arrivalField->setShowCursor(false);
+    }
+}
+
+void RouteApp::resume() {
+    if (departureField) {
+        departureField->setShowCursor(true);
+    }
+
+    if (arrivalField) {
+        arrivalField->setShowCursor(true);
+    }
+}
+
 void RouteApp::showDeparturePage() {
     reset();
 

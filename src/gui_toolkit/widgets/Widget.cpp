@@ -190,6 +190,8 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::HOME:      return SYMBOL_HOME;
     case Symbol::COPY:      return SYMBOL_COPY;
     case Symbol::GPS:       return SYMBOL_GPS;
+    case Symbol::EDIT:      return SYMBOL_EDIT;
+    case Symbol::KEYBOARD:  return SYMBOL_KEYBOARD;
     default:                return nullptr;
     }
 }

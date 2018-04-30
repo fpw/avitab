@@ -54,6 +54,9 @@ private:
     std::shared_ptr<xdata::Fix> departureFix, arrivalFix;
     std::shared_ptr<xdata::Route> route;
 
+    void suspend() override;
+    void resume() override;
+
     void showDeparturePage();
     void onDepartureEntered(const std::string &departure);
 

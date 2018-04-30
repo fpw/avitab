@@ -19,7 +19,7 @@
 
 namespace avitab {
 
-Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
+Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
     Widget(parent),
     targetText(target)
 {
@@ -50,10 +50,12 @@ Keyboard::Keyboard(WidgetPtr parent, WidgetPtr target):
         return LV_RES_OK;
     });
 
+    target->setShowCursor(false);
+
     setObj(keys);
 }
 
-void Keyboard::setTarget(WidgetPtr target) {
+void Keyboard::setTarget(std::shared_ptr<TextArea> target) {
     lv_kb_set_ta(obj(), target->obj());
 }
 

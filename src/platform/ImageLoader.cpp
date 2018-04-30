@@ -130,4 +130,32 @@ void blendImage(const Image& src, double angle, Image& dst, int dstX, int dstY) 
     }
 }
 
+void drawLine(Image& dst, int x1, int y1, int x2, int y2, uint32_t color) {
+    int dx = std::abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+    int dy = -std::abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy, e2 = 0;
+
+    if (x1 == x2 && y1 == y2) {
+        dst.pixels[y1 * dst.width + x1] = color;
+    }
+
+    while (x1 != x2 || y1 != y2) {
+        if (x1 >= 0 && x1 < dst.width && y1 >= 0 && y1 < dst.height) {
+            dst.pixels[y1 * dst.width + x1] = color;
+        }
+
+        e2 = 2 * err;
+
+        if (e2 >= dy) {
+            err += dy;
+            x1 += sx;
+        }
+
+        if (e2 <= dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
 } /* namespace platform */

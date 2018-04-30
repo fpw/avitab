@@ -33,6 +33,8 @@ class MapApp: public App {
 public:
     MapApp(FuncsPtr funcs);
     void onMouseWheel(int dir, int x, int y) override;
+    void suspend() override;
+    void resume() override;
 private:
     std::unique_ptr<maps::OSMMap> map;
     std::shared_ptr<Window> window;
@@ -40,6 +42,7 @@ private:
     std::shared_ptr<Button> trackButton;
     Timer updateTimer;
     bool trackPlane = true;
+    bool suspended = true;
 
     int panPosX = 0, panPosY = 0;
 

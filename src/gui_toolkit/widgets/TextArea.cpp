@@ -25,6 +25,7 @@ TextArea::TextArea(WidgetPtr parent, const std::string& text):
     lv_obj_t *ta = lv_ta_create(parentObj(), nullptr);
     setObj(ta);
     setText(text);
+    setShowCursor(false);
 }
 
 void TextArea::setMultiLine(bool multiLine) {

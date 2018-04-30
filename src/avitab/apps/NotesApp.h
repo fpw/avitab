@@ -22,16 +22,32 @@
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
 #include "src/gui_toolkit/widgets/Keyboard.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/widgets/Button.h"
+#include "src/platform/ImageLoader.h"
 
 namespace avitab {
 
 class NotesApp: public App {
 public:
     NotesApp(FuncsPtr appFuncs);
+    void suspend() override;
+    void resume() override;
 private:
+    bool keyboardMode = false;
+
+    platform::Image image;
+    int drawPosX = 0, drawPosY = 0;
+    std::string text;
+
     std::shared_ptr<Window> window;
     std::shared_ptr<TextArea> textArea;
     std::shared_ptr<Keyboard> keys;
+    std::shared_ptr<PixMap> scratchPad;
+    std::shared_ptr<Button> keyboardButton;
+
+    void createLayout();
+    void onDraw(int x, int y, bool start, bool stop);
 };
 
 } /* namespace avitab */

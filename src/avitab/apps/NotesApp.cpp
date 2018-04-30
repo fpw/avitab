@@ -17,22 +17,90 @@
  */
 #include "NotesApp.h"
 #include "src/platform/Platform.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
 NotesApp::NotesApp(FuncsPtr appFuncs):
     App(appFuncs),
-    window(std::make_shared<Window>(getUIContainer(), "Notes")),
-    textArea(std::make_shared<TextArea>(window, ""))
+    window(std::make_shared<Window>(getUIContainer(), "Notes"))
 {
     window->setOnClose([this] () { exit(); });
 
     window->addSymbol(Widget::Symbol::COPY, [this] () {
-        textArea->setText(platform::getClipboardContent());
+        if (textArea) {
+            textArea->setText(platform::getClipboardContent());
+        }
+
+        if (scratchPad) {
+            std::fill(image.pixels.begin(), image.pixels.end(), 0xFFFFFFFF);
+            scratchPad->invalidate();
+        }
     });
 
-    textArea->setDimensions(window->getContentWidth(), window->getContentHeight());
-    keys = std::make_shared<Keyboard>(window, textArea);
+    keyboardButton = window->addSymbol(Widget::Symbol::KEYBOARD, [this] () {
+        keyboardMode = !keyboardMode;
+        keyboardButton->setToggleState(keyboardMode);
+        createLayout();
+    });
+
+    image.height = window->getContentHeight();
+    image.width = window->getContentWidth();
+    image.pixels.resize(image.height * image.width, 0xFFFFFFFF);
+
+    createLayout();
+}
+
+void NotesApp::suspend() {
+    if (textArea) {
+        textArea->setShowCursor(false);
+    }
+}
+
+void NotesApp::resume() {
+    if (textArea) {
+        textArea->setShowCursor(true);
+    }
+}
+
+void NotesApp::createLayout() {
+    if (textArea) {
+        text = textArea->getText();
+    }
+
+    textArea.reset();
+    keys.reset();
+    scratchPad.reset();
+
+    if (keyboardMode) {
+        textArea = std::make_shared<TextArea>(window, text);
+        textArea->setDimensions(window->getContentWidth(), window->getContentHeight());
+        keys = std::make_shared<Keyboard>(window, textArea);
+        textArea->setShowCursor(true);
+    } else {
+        scratchPad = std::make_shared<PixMap>(window);
+        scratchPad->draw(image);
+        scratchPad->setClickable(true);
+        scratchPad->setClickHandler([this] (int x, int y, bool start, bool stop) {
+            onDraw(x, y, start, stop);
+        });
+    }
+}
+
+void NotesApp::onDraw(int x, int y, bool start, bool stop) {
+    if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
+        return;
+    }
+
+    if (!start && !stop) {
+        platform::drawLine(image, drawPosX, drawPosY, x, y, 0xFF000000);
+        if (scratchPad) {
+            scratchPad->invalidate();
+        }
+    }
+
+    drawPosX = x;
+    drawPosY = y;
 }
 
 } /* namespace avitab */

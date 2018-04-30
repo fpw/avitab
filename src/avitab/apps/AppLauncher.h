@@ -37,6 +37,7 @@ public:
 
     AppLauncher(FuncsPtr appFuncs);
     void onMouseWheel(int dir, int x, int y) override;
+    void show() override;
 private:
     std::vector<Entry> entries;
     std::shared_ptr<App> activeApp;

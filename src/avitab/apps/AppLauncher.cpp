@@ -43,6 +43,13 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     addEntry<About>("About", root + "if_Help_1493288.png");
 }
 
+void AppLauncher::show() {
+    if (activeApp) {
+        activeApp->suspend();
+    }
+    App::show();
+}
+
 template<typename T>
 void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
     auto app = startSubApp<T>();
@@ -64,7 +71,11 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
 
     size_t index = entries.size() - 1;
     entry.button->setCallback([this, index] (const Button &) {
+        if (activeApp) {
+            activeApp->suspend();
+        }
         activeApp = entries[index].app;
+        activeApp->resume();
         activeApp->show();
     });
 }

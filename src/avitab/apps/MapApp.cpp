@@ -45,8 +45,18 @@ MapApp::MapApp(FuncsPtr funcs):
     onTimer();
 }
 
+void MapApp::suspend() {
+    suspended = true;
+}
+
+void MapApp::resume() {
+    suspended = false;
+}
+
 void MapApp::onRedrawNeeded() {
-    mapWidget->invalidate();
+    if (!suspended) {
+        mapWidget->invalidate();
+    }
 }
 
 void MapApp::onMapPan(int x, int y, bool start, bool end) {

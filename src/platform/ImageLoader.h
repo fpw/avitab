@@ -33,8 +33,9 @@ struct Image {
 Image loadImage(const std::string &path);
 Image loadImage(const std::vector<uint8_t> &encodedData);
 
-void copyImage(const platform::Image &src, platform::Image &dst, int dstX, int dstY);
-void blendImage(const platform::Image &src, double angle, platform::Image &dst, int dstX, int dstY);
+void copyImage(const Image &src, Image &dst, int dstX, int dstY);
+void blendImage(const Image &src, double angle, Image &dst, int dstX, int dstY);
+void drawLine(Image &dst, int x1, int y1, int x2, int y2, uint32_t color);
 
 } /* namespace platform */
 
