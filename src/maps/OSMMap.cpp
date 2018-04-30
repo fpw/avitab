@@ -39,7 +39,12 @@ void OSMMap::setCacheDirectory(const std::string& path) {
 }
 
 void OSMMap::setOverlayDirectory(const std::string& path) {
-    planeIcon = platform::loadImage(path + "if_icon-plane_211875.png");
+    std::string name = "if_icon-plane_211875.png";
+    try {
+        planeIcon = platform::loadImage(path + name);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load icon %s: %s", name.c_str(), e.what());
+    }
 }
 
 void OSMMap::setCenter(double latitude, double longitude) {

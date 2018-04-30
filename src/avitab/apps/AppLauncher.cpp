@@ -50,7 +50,12 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
         this->show();
     });
 
-    auto iconImg = platform::loadImage(icon);
+    platform::Image iconImg {};
+    try {
+        iconImg = platform::loadImage(icon);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load icon %s: %s", icon.c_str(), e.what());
+    }
 
     Entry entry;
     entry.app = std::move(app);

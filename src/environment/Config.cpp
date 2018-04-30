@@ -17,6 +17,7 @@
  */
 #include <fstream>
 #include <json/json.hpp>
+#include <stdexcept>
 #include "Config.h"
 
 using json = nlohmann::json;
@@ -26,8 +27,16 @@ namespace avitab {
 Config::Config(const std::string& configFile) {
     std::ifstream configStream(configFile);
 
-    config = std::make_shared<json>();
-    configStream >> *config;
+    if (!configStream) {
+        throw std::runtime_error(std::string("Couldn't read config file ") + configFile);
+    }
+
+    try {
+        config = std::make_shared<json>();
+        configStream >> *config;
+    } catch (const std::exception &e) {
+        throw std::runtime_error(std::string("Couldn't read config file: ") + e.what());
+    }
 }
 
 std::string Config::getString(const std::string& pointer) {
