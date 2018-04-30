@@ -6,8 +6,6 @@ used for flying in virtual reality.
 
 ![](screenshots/launcher.jpg)
 
-More screenshots here: [Screenshots](screenshots/)
-
 ## Purpose
 When flying in a simulator, one often needs to lookup details in PDF charts, plane manuals,
 checklists or other documents. Using a PDF reader breaks the immersion because the virtual aviator
@@ -16,6 +14,16 @@ either has to take off of their HMD or use other tools that can move windows int
 AviTab tries to solve this problem by offering a PDF reader inside a native plugin for X-Plane.
 Using a plugin also opens possibilites for more apps inside the tablet, for example to display information
 about the plane status or aid in navigation.
+
+## Features
+Let the screenshots speak! Note that these were taken using the standalone version for better resolution,
+but all of this is available right inside your VR cockpit.
+
+![](screenshots/charts.jpg)
+![](screenshots/map.jpg)
+![](screenshots/airports.jpg)
+
+More screenshots here: [Screenshots](screenshots/)
 
 ## Installation
 
@@ -29,26 +37,14 @@ about the plane status or aid in navigation.
 
 ### General
 When hovering over the edges of the tablet from a short distance, X-Plane will display green bars around the tablet.
-The _upper_ bar can be used to grab the window and move it around inside the cockpit. The other bars can be used to
-resize the tablet - however, resizing is _not supported_ so please do not try it.
+The _upper_ bar can be used to grab the window and move it around inside the cockpit.
 
 ### Charts Viewer
 The charts viewer displays PDF files inside the charts/ subdirectory of the plugin directoy. You can add your
 charts there, including subdirectories.
 
-### Clipboard
-This app displays the textual contents of your clipboard, if any. This can be used to transfer flight plans from
-a website into VR via your clipboard.
-
-### Clock
-The upper right of the tablet features a clock that displays your computer's time in case you are simulating
-a different time and still want to keep track of the real life outside.
-
 ## Limitations
 
-* There is a bug in the current beta version of X-Plane (b3) where dragging does not work with the VR controllers.
-  Using panning gestures is therefore not possible right now. When using AviTab outside VR, this works.
-* Resizing the tablet is not supported.
 * PDFs containing [CJK fonts](https://en.wikipedia.org/wiki/List_of_CJK_fonts)
   or ancient fonts such [Linear B](https://en.wikipedia.org/wiki/Linear_B) are not supported.
   This is mainly due to font sizes - a version containing all fonts would be 40 Megabytes in size.
