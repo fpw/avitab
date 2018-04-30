@@ -17,6 +17,7 @@
  */
 #include <cstring>
 #include <algorithm>
+#include <cmath>
 #include "OSMMap.h"
 #include "src/Logger.h"
 

@@ -164,7 +164,11 @@ bool fileExists(const std::string& utf8Path) {
 
 void mkdir(const std::string& utf8Path) {
     std::string nativePath = UTF8ToNative(utf8Path);
+#ifdef _WIN32
     ::mkdir(utf8Path.c_str());
+#else
+    ::mkdir(utf8Path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+#endif
 }
 
 std::string getLocalTime(const std::string &format) {
