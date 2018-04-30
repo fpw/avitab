@@ -45,7 +45,7 @@ bool Downloader::isCached(const std::string& url) {
     return platform::fileExists(cacheFileUTF8);
 }
 
-std::vector<uint8_t> Downloader::download(const std::string& url) {
+std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) {
     std::string cacheFileUTF8 = urlToCacheName(url);
     std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
 
@@ -54,7 +54,6 @@ std::vector<uint8_t> Downloader::download(const std::string& url) {
         std::vector<uint8_t> res((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
         return res;
     } else {
-        std::lock_guard<std::mutex> lock(curlMutex);
         logger::verbose("Downloading '%s'", url.c_str());
 
         std::vector<uint8_t> res;
@@ -62,6 +61,11 @@ std::vector<uint8_t> Downloader::download(const std::string& url) {
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
+
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &res);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
 
@@ -93,6 +97,11 @@ size_t Downloader::onData(void* buffer, size_t size, size_t nmemb, void* vecPtr)
     vec->resize(pos + size * nmemb);
     std::memcpy(vec->data() + pos, buffer, size * nmemb);
     return size * nmemb;
+}
+
+int Downloader::onProgress(void* client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow) {
+    bool *cancel = reinterpret_cast<bool *>(client);
+    return *cancel;
 }
 
 std::string Downloader::urlToCacheName(const std::string& url) {

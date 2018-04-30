@@ -22,7 +22,7 @@ namespace avitab {
 
 MapApp::MapApp(FuncsPtr funcs):
     App(funcs),
-    window(std::make_shared<Window>(getUIContainer(), "Maps")),
+    window(std::make_shared<Window>(getUIContainer(), "Map Data (c) OpenStreetMap + SRTM, Map Style (c) OpenTopoMap.org")),
     updateTimer(std::bind(&MapApp::onTimer, this), 200)
 {
     window->setOnClose([this] () { exit(); });
@@ -37,7 +37,7 @@ MapApp::MapApp(FuncsPtr funcs):
 
     mapWidget = std::make_shared<PixMap>(window);
     mapWidget->setClickable(true);
-    mapWidget->setClickHandler([this] (int x, int y) { onMapClicked(x, y); });
+    mapWidget->setClickHandler([this] (int x, int y, bool pr, bool rel) { onMapPan(x, y, pr, rel); });
 
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
     mapWidget->draw(map->getImage());
@@ -49,10 +49,17 @@ void MapApp::onRedrawNeeded() {
     mapWidget->invalidate();
 }
 
-void MapApp::onMapClicked(int x, int y) {
-    trackPlane = false;
-    trackButton->setToggleState(trackPlane);
-    map->moveCenterTo(x, y);
+void MapApp::onMapPan(int x, int y, bool start, bool end) {
+    if (start) {
+        trackPlane = false;
+        trackButton->setToggleState(trackPlane);
+    } else if (!end) {
+        int panVecX = panPosX - x;
+        int panVecY = panPosY - y;
+        map->pan(panVecX, panVecY);
+    }
+    panPosX = x;
+    panPosY = y;
 }
 
 void MapApp::onMouseWheel(int dir, int x, int y) {

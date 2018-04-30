@@ -19,11 +19,9 @@
 #define SRC_MAPS_OSMMAP_H_
 
 #include <memory>
-#include <map>
-#include <vector>
-#include <cstdint>
 #include <functional>
 #include "src/platform/ImageLoader.h"
+#include "TileCache.h"
 #include "Downloader.h"
 #include "OSMTile.h"
 
@@ -44,6 +42,7 @@ public:
 
     void setCenter(double latitude, double longitude);
     void moveCenterTo(int x, int y);
+    void pan(int dx, int dy);
 
     void setPlanePosition(double latitude, double longitude, double heading);
     void centerOnPlane(double latitude, double longitude, double heading);
@@ -70,12 +69,10 @@ private:
     platform::Image planeIcon;
 
     // Tiles
-    std::shared_ptr<Downloader> downloader;
-    std::map<uint64_t, std::shared_ptr<OSMTile>> tileCache;
+    TileCache tiles;
     bool pendingTiles = false;
 
     void updateImage();
-    std::shared_ptr<OSMTile> getOrLoadTile(int x, int y);
     void drawOverlays();
     void setZoom(int level);
 

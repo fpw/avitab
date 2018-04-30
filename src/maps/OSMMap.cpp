@@ -22,8 +22,7 @@
 
 namespace maps {
 
-OSMMap::OSMMap(int width, int height):
-    downloader(std::make_shared<Downloader>())
+OSMMap::OSMMap(int width, int height)
 {
     mapImage.width = width;
     mapImage.height = height;
@@ -35,7 +34,7 @@ void OSMMap::setRedrawCallback(RedrawCallback cb) {
 }
 
 void OSMMap::setCacheDirectory(const std::string& path) {
-    downloader->setCacheDirectory(path);
+    tiles.setCacheDirectory(path);
 }
 
 void OSMMap::setOverlayDirectory(const std::string& path) {
@@ -76,7 +75,6 @@ void OSMMap::centerOnPlane(double latitude, double longitude, double heading) {
 void OSMMap::setZoom(int level) {
     if (level != this->zoomLevel) {
         this->zoomLevel = level;
-        tileCache.clear();
         updateImage();
     }
 }
@@ -84,6 +82,19 @@ void OSMMap::setZoom(int level) {
 void OSMMap::moveCenterTo(int x, int y) {
     double lat, lon;
     pixelToPosition(x, y, lat, lon);
+    setCenter(lat, lon);
+}
+
+void OSMMap::pan(int dx, int dy) {
+    if (dx == 0 || dy == 0) {
+        return;
+    }
+
+    int x = 0, y = 0;
+    positionToPixel(centerLat, centerLong, x, y);
+
+    double lat, lon;
+    pixelToPosition(x + dx, y + dy, lat, lon);
     setCenter(lat, lon);
 }
 
@@ -123,7 +134,7 @@ void OSMMap::updateImage() {
     for (int y = -TILE_RADIUS; y <= TILE_RADIUS; y++) {
         for (int x = -TILE_RADIUS; x <= TILE_RADIUS; x++) {
             try {
-                auto tile = getOrLoadTile(((int) centerX) + x, ((int) centerY) + y);
+                auto tile = tiles.getTile(((int) centerX) + x, ((int) centerY) + y, zoomLevel);
                 if (tile->hasImage()) {
                     platform::copyImage(tile->getImage(), mapImage,
                             centerPosX + x * OSMTile::WIDTH, centerPosY + y * OSMTile::HEIGHT);
@@ -141,25 +152,6 @@ void OSMMap::updateImage() {
     if (onRedrawNeeded) {
         onRedrawNeeded();
     }
-}
-
-std::shared_ptr<OSMTile> OSMMap::getOrLoadTile(int x, int y) {
-    uint64_t idx = (uint64_t)(x) << 32 | (uint64_t) y;
-    auto it = tileCache.find(idx);
-    if (it != tileCache.end()) {
-        return it->second;
-    }
-
-    auto tile = std::make_shared<OSMTile>(x, y, zoomLevel);
-    tile->loadInBackground(downloader);
-
-    if (tileCache.size() > 75) {
-        // TODO: Better strategy
-        tileCache.clear();
-    }
-
-    tileCache.insert(std::make_pair(idx, tile));
-    return tile;
 }
 
 const platform::Image& OSMMap::getImage() const {

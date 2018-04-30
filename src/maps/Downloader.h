@@ -21,7 +21,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
-#include <mutex>
+#include <curl/curl.h>
 
 namespace maps {
 
@@ -30,14 +30,15 @@ public:
     Downloader();
     void setCacheDirectory(const std::string &cache);
     bool isCached(const std::string &url);
-    std::vector<uint8_t> download(const std::string &url);
+    std::vector<uint8_t> download(const std::string &url, bool &cancel);
+    void stop();
     ~Downloader();
 private:
-    std::mutex curlMutex;
     std::string cacheDir;
-    void *curl = nullptr;
+    CURL *curl = nullptr;
 
     static size_t onData(void *buffer, size_t size, size_t nmemb, void *resPtr);
+    static int onProgress(void *client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow);
     std::string urlToCacheName(const std::string &url);
 };
 

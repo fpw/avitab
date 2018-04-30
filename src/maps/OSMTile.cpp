@@ -19,7 +19,6 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include <future>
 #include "OSMTile.h"
 #include "src/Logger.h"
 
@@ -28,61 +27,71 @@ namespace maps {
 OSMTile::OSMTile(int x, int y, int zoom):
     zoomLevel(zoom)
 {
-    uint32_t endXY = 1 << zoomLevel;
-
-    if (y < 0 || (uint32_t) y >= endXY) {
-        validCoords = false;
-    } else {
-        this-> y = y;
-        validCoords = true;
-    }
-
-    if (x < 0) {
-        x = endXY - x;
-    }
-    this->x = x % endXY;
-}
-
-void OSMTile::loadInBackground(std::shared_ptr<Downloader> downloader) {
-    if (!validCoords) {
+    if (!checkAndFixCoordinates(x, y, zoom)) {
         image.width = WIDTH;
         image.height = HEIGHT;
         image.pixels.resize(image.width * image.height, 0);
-        return;
+        imageReady = true;
     }
+    this->x = x;
+    this->y = y;
+    this->zoomLevel = zoom;
+    lastAccess = std::chrono::high_resolution_clock::now();
+}
 
+int OSMTile::getX() const {
+    return x;
+}
+
+int OSMTile::getY() const {
+    return y;
+}
+
+int OSMTile::getZoom() const {
+    return zoomLevel;
+}
+
+std::string OSMTile::getURL() {
     std::ostringstream urlStream;
     urlStream << "https://a.tile.opentopomap.org/";
     urlStream << zoomLevel << "/" << x << "/" << y << ".png";
-
-    std::string url = urlStream.str();
-
-    imageFuture = std::async(std::launch::async, [this, downloader, url] () {
-        auto data = downloader->download(url);
-        return platform::loadImage(data);
-    });
-
-    if (downloader->isCached(url)) {
-        imageFuture.wait();
-    }
+    return urlStream.str();
 }
 
-bool OSMTile::hasImage() const {
-    if (!imageFuture.valid()) {
-        // if the future expired, we already have the image
-        return true;
-    }
+void OSMTile::attachImage(const platform::Image& image) {
+    this->image = image;
+    imageReady = true;
+}
 
-    auto state = imageFuture.wait_for(std::chrono::seconds(0));
-    return state == std::future_status::ready;
+bool OSMTile::hasImage() {
+    return imageReady;
 }
 
 const platform::Image& OSMTile::getImage() {
-    if (imageFuture.valid()) {
-        image = imageFuture.get();
+    if (!hasImage()) {
+        throw std::runtime_error("Image not ready");
+    }
+    lastAccess = std::chrono::high_resolution_clock::now();
+    return image;
+}
+
+const OSMTile::TimeStamp& OSMTile::getLastAccess() {
+    return lastAccess;
+}
+
+bool checkAndFixCoordinates(int &x, int &y, int zoom) {
+    uint32_t endXY = 1 << zoom;
+
+    if (y < 0 || (uint32_t) y >= endXY) {
+        // y isn't torus, so fill transparently if out of bounds
+        return false;
     }
 
-    return image;
+    if (x < 0) {
+        x = endXY + x;
+    }
+    x = x % endXY;
+    return true;
 }
 
 double longitudeToX(double lon, int zoom) {
@@ -95,7 +104,14 @@ double latitudeToY(double lat, int zoom) {
 }
 
 double xToLongitude(double x, int zoom) {
-    return x / pow(2.0, zoom) * 360.0 - 180;
+    double longitude = x / pow(2.0, zoom) * 360.0 - 180;
+    double reduced = std::fmod(longitude, 360.0);
+    if (reduced > 180.0) {
+        reduced -= 360.0;
+    } else if (reduced <= -180.0) {
+        reduced += 360.0;
+    }
+    return reduced;
 }
 
 double yToLatitude(double y, int zoom) {

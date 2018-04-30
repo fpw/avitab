@@ -37,7 +37,7 @@ public:
         COPY,
     };
     using WidgetPtr = std::shared_ptr<Widget>;
-    using ClickHandler = std::function<void(int, int)>;
+    using ClickHandler = std::function<void(int, int, bool, bool)>;
 
     Widget(WidgetPtr parent);
 

@@ -19,10 +19,8 @@
 #define SRC_MAPS_OSMTILE_H_
 
 #include <memory>
-#include <vector>
-#include <cstdint>
-#include <future>
-#include "Downloader.h"
+#include <atomic>
+#include <chrono>
 #include "src/platform/ImageLoader.h"
 
 namespace maps {
@@ -31,19 +29,25 @@ class OSMTile {
 public:
     static constexpr const int WIDTH = 256;
     static constexpr const int HEIGHT = 256;
+    using TimeStamp = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
     OSMTile(int x, int y, int zoom);
-    void loadInBackground(std::shared_ptr<Downloader> downloader);
-    bool hasImage() const;
+    int getX() const;
+    int getY() const;
+    int getZoom() const;
+    std::string getURL();
+    void attachImage(const platform::Image &image);
+    bool hasImage();
     const platform::Image &getImage();
+    const TimeStamp &getLastAccess();
 private:
-    bool validCoords;
-    int x, y;
-    int zoomLevel;
-    std::future<platform::Image> imageFuture;
+    std::atomic_bool imageReady { false };
+    int x, y, zoomLevel;
     platform::Image image {};
+    TimeStamp lastAccess;
 };
 
+bool checkAndFixCoordinates(int &x, int &y, int zoom);
 double longitudeToX(double lon, int zoom);
 double latitudeToY(double lat, int zoom);
 double xToLongitude(double x, int zoom);

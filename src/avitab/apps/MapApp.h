@@ -41,8 +41,10 @@ private:
     Timer updateTimer;
     bool trackPlane = true;
 
+    int panPosX = 0, panPosY = 0;
+
     void onRedrawNeeded();
-    void onMapClicked(int x, int y);
+    void onMapPan(int x, int y, bool start, bool end);
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();

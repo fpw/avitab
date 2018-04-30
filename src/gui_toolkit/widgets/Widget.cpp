@@ -155,12 +155,14 @@ void Widget::setClickHandler(ClickHandler handler) {
 
     lv_obj_set_signal_func(obj(), [] (_lv_obj_t *o, lv_signal_t sign, void *param) -> lv_res_t {
         Widget *us = reinterpret_cast<Widget *>(lv_obj_get_free_ptr(o));
-        if (sign == LV_SIGNAL_PRESSED) {
+        if (sign == LV_SIGNAL_PRESSED || sign == LV_SIGNAL_PRESSING || sign == LV_SIGNAL_RELEASED || sign == LV_SIGNAL_PRESS_LOST) {
             lv_point_t point;
             lv_indev_t *dev = reinterpret_cast<lv_indev_t *>(param);
             lv_indev_get_point(dev, &point);
             if (us->onClick) {
-                us->onClick(point.x - o->coords.x1, point.y - o->coords.y1);
+                bool start = (sign == LV_SIGNAL_PRESSED);
+                bool end = (sign == LV_SIGNAL_RELEASED) || (sign == LV_SIGNAL_PRESS_LOST);
+                us->onClick(point.x - o->coords.x1, point.y - o->coords.y1, start, end);
             }
         } else {
             us->origSigFunc(o, sign, param);
