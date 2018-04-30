@@ -1,7 +1,7 @@
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 
-find_package(curl REQUIRED)
+find_package(CURL REQUIRED)
 include_directories(${LIBCURL_INCLUDE_DIR})
 add_definitions(-DCURL_STATICLIB)
 
