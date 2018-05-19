@@ -295,20 +295,12 @@ XPLMCursorStatus XPlaneGUIDriver::getCursor(int x, int y) {
     return xplm_CursorDefault;
 }
 
-void XPlaneGUIDriver::brighter() {
-    if (brightness <= 0.9f) {
-        brightness += 0.1f;
-    } else {
-        brightness = 1.0f;
-    }
+void XPlaneGUIDriver::setBrightness(float b) {
+    brightness = b;
 }
 
-void XPlaneGUIDriver::darker() {
-    if (brightness >= 0.2f) {
-        brightness -= 0.1f;
-    } else {
-        brightness = 0.1f;
-    }
+float XPlaneGUIDriver::getBrightness() {
+    return brightness;
 }
 
 XPlaneGUIDriver::~XPlaneGUIDriver() {

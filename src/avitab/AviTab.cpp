@@ -61,8 +61,7 @@ void AviTab::toggleTablet() {
             // transfer program flow to GUI thread
             guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
         } else {
-            logger::info("Hiding tablet");
-            guiLib->pauseNativeWindow();
+            close();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in onShowTablet: %s", e.what());
@@ -145,12 +144,12 @@ void AviTab::showGUIContainer(std::shared_ptr<Container> container) {
     centerContainer->setVisible(true);
 }
 
-void AviTab::brightenScreen() {
-    guiLib->brighter();
+void AviTab::setBrightness(float brightness) {
+    guiLib->setBrightness(brightness);
 }
 
-void AviTab::darkenScreen() {
-    guiLib->darker();
+float AviTab::getBrightness() {
+    return guiLib->getBrightness();
 }
 
 std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
@@ -189,6 +188,15 @@ void AviTab::reloadMetar() {
 
 void AviTab::onHomeButton() {
     showAppLauncher();
+}
+
+void AviTab::close() {
+    logger::info("Closing tablet");
+    env->runInEnvironment([this] () {
+        if (guiLib->hasNativeWindow()) {
+            guiLib->pauseNativeWindow();
+        }
+    });
 }
 
 void AviTab::stopApp() {

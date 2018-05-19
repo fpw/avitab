@@ -32,8 +32,8 @@ public:
     void createWindow(const std::string &title) override;
     bool hasWindow() override;
     void killWindow() override;
-    void brighter() override;
-    void darker() override;
+    void setBrightness(float b) override;
+    float getBrightness() override;
 
     bool handleEvents();
     uint32_t getLastDrawTime();
@@ -47,6 +47,7 @@ private:
     SDL_Renderer *renderer = nullptr;
     SDL_Texture *texture = nullptr;
     std::atomic<uint32_t> lastDrawTime {0};
+    float brightness = 1;
 
     std::atomic_int mouseX {0}, mouseY {0}, wheelDir {0};
     bool mousePressed {false};

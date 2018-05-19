@@ -19,8 +19,10 @@
 #define SRC_AVITAB_APPS_HEADERAPP_H_
 
 #include "App.h"
+#include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Slider.h"
 #include "src/gui_toolkit/Timer.h"
 #include <array>
 
@@ -30,16 +32,26 @@ class HeaderApp: public App {
 public:
     HeaderApp(FuncsPtr appFuncs);
 private:
-    static constexpr int HOR_PADDING = 10;
-    std::shared_ptr<Label> clockLabel;
-    std::shared_ptr<Label> fpsLabel;
-    std::shared_ptr<Button> homeButton, brighterButton, darkerButton;
+    static constexpr int HOR_PADDING = 10, VERT_PADDING = 10;
+    std::shared_ptr<Label> clockLabel, fpsLabel;
+    std::shared_ptr<Button> homeButton;
+    std::shared_ptr<Button> settingsButton;;
+
+    std::shared_ptr<Container> prefContainer;
+    std::shared_ptr<Slider> brightnessSlider;
     std::shared_ptr<Button> pauseButton, nextButton, prevButton;
+    std::shared_ptr<Label> brightLabel, mediaLabel;
+    std::shared_ptr<Button> closeButton;
+
     Timer tickTimer;
     std::string curTimeString;
 
     std::array<float, 30> fpsRingBuffer;
     int fpsRingCursor = 0;
+
+    void createSettingsContainer();
+    void toggleSettings();
+    void onBrightnessChange(int brightness);
 
     bool onTick();
     void updateClock();

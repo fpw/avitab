@@ -28,7 +28,7 @@ class Widget {
 public:
     enum class Symbol {
         NONE,
-        CLOSE,
+        CLOSE, SETTINGS,
         LEFT, RIGHT, UP, DOWN, ROTATE,
         PREV, NEXT, PAUSE,
         PLUS, MINUS,
@@ -51,18 +51,19 @@ public:
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);
     void alignInTopLeft();
-    void alignInTopRight();
+    void alignInTopRight(int xPad = 0);
     void alignInBottomCenter();
     void alignInBottomRight();
     void alignLeftOf(WidgetPtr base);
     void alignRightOf(WidgetPtr base, int xPad = 0);
-    void alignBelow(WidgetPtr base);
+    void alignBelow(WidgetPtr base, int yPad = 0);
     void setBackgroundWhite();
     int getWidth();
     int getHeight();
     int getX();
     int getY();
     void setVisible(bool visible);
+    bool isVisible();
     void invalidate();
 
     // For internal use by other widgets

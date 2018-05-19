@@ -158,10 +158,12 @@ int SDLGUIDriver::getWheelDirection() {
     return dir;
 }
 
-void SDLGUIDriver::brighter() {
+void SDLGUIDriver::setBrightness(float b) {
+    brightness = b;
 }
 
-void SDLGUIDriver::darker() {
+float SDLGUIDriver::getBrightness() {
+    return brightness;
 }
 
 } /* namespace avitab */

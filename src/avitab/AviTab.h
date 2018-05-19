@@ -39,8 +39,8 @@ public:
     void stopApp();
 
     // App API
-    void brightenScreen() override;
-    void darkenScreen() override;
+    void setBrightness(float brightness) override;
+    float getBrightness() override;
     std::unique_ptr<RasterJob> createRasterJob(const std::string &path) override;
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
@@ -52,6 +52,7 @@ public:
     std::shared_ptr<xdata::World> getNavWorld() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
+    void close() override;
 
     ~AviTab();
 

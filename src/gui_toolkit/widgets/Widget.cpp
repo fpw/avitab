@@ -86,8 +86,8 @@ void Widget::alignInTopLeft() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
 }
 
-void Widget::alignInTopRight() {
-    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+void Widget::alignInTopRight(int xPad) {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_TOP_RIGHT, -xPad, 0);
 }
 
 void Widget::alignLeftOf(WidgetPtr base) {
@@ -98,8 +98,8 @@ void Widget::alignRightOf(WidgetPtr base, int xPad) {
     lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_RIGHT_MID, xPad, 0);
 }
 
-void Widget::alignBelow(WidgetPtr base) {
-    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+void Widget::alignBelow(WidgetPtr base, int yPad) {
+    lv_obj_align(lvObj, base->obj(), LV_ALIGN_OUT_BOTTOM_LEFT, 0, yPad);
 }
 
 int Widget::getWidth() {
@@ -112,6 +112,10 @@ int Widget::getHeight() {
 
 void Widget::setVisible(bool visible) {
     lv_obj_set_hidden(obj(), !visible);
+}
+
+bool Widget::isVisible() {
+    return lv_obj_get_hidden(obj()) == 0;
 }
 
 void Widget::setBackgroundWhite() {
@@ -175,6 +179,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     switch (symbol) {
     case Symbol::NONE:      return nullptr;
     case Symbol::CLOSE:     return SYMBOL_CLOSE;
+    case Symbol::SETTINGS:  return SYMBOL_SETTINGS;
     case Symbol::LEFT:      return SYMBOL_LEFT;
     case Symbol::RIGHT:     return SYMBOL_RIGHT;
     case Symbol::UP:        return SYMBOL_UP;

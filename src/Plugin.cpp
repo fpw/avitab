@@ -18,6 +18,7 @@
 
 #include <curl/curl.h>
 #include <XPLM/XPLMDefs.h>
+#include <XPLM/XPLMPlugin.h>
 #include <memory>
 #include "src/environment/xplane/XPlaneEnvironment.h"
 #include "src/avitab/AviTab.h"
@@ -67,7 +68,11 @@ PLUGIN_API int XPluginEnable(void) {
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID src, int msg, void *inParam) {
-    logger::verbose("Message from %d: %d (%p)", src, msg, inParam);
+    if (msg == XPLM_MSG_PLANE_LOADED && inParam == 0) {
+        if (aviTab) {
+            aviTab->close();
+        }
+    }
 }
 
 PLUGIN_API void XPluginDisable(void) {

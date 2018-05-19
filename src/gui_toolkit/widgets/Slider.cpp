@@ -15,42 +15,38 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Container.h"
+#include "Slider.h"
 
 namespace avitab {
 
-Container::Container(WidgetPtr parent):
+Slider::Slider(WidgetPtr parent, int min, int max):
     Widget(parent)
 {
-    lv_obj_t *cont = lv_cont_create(parentObj(), nullptr);
-    setObj(cont);
+    lv_obj_t *obj = lv_slider_create(parentObj(), nullptr);
+    lv_slider_set_range(obj, min, max);
+    lv_slider_set_knob_in(obj, true);
+    setObj(obj);
 }
 
-Container::Container():
-    Widget(nullptr)
-{
-    lv_obj_t *cont = lv_cont_create(lv_layer_top(), nullptr);
-    setObj(cont);
+void Slider::setCallback(Callback cb) {
+    onChange = cb;
+
+    lv_obj_set_free_ptr(obj(), this);
+    lv_slider_set_action(obj(), [] (lv_obj_t *slider) -> lv_res_t {
+        Slider *us = reinterpret_cast<Slider *>(lv_obj_get_free_ptr(slider));
+        if (us) {
+            us->onChange(lv_slider_get_value(slider));
+        }
+        return LV_RES_OK;
+    });
 }
 
-void Container::setLayoutRightColumns() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
+void Slider::setValue(int v) {
+    lv_slider_set_value(obj(), v);
 }
 
-void Container::setLayoutPretty() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
-}
-
-void Container::setLayoutRow() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_M);
-}
-
-void Container::setLayoutColumn() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_M);
-}
-
-void Container::setFit(bool horiz, bool vert) {
-    lv_cont_set_fit(obj(), horiz, vert);
+int Slider::getValue() {
+    return lv_slider_get_value(obj());
 }
 
 } /* namespace avitab */

@@ -29,35 +29,68 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     auto container = getUIContainer();
     container->setPosition(0, 0);
     container->setDimensions(container->getWidth(), 30);
-    clockLabel = std::make_shared<Label>(container, ""),
-    fpsLabel = std::make_shared<Label>(container, ""),
+    clockLabel = std::make_shared<Label>(container, "");
+
+    settingsButton = std::make_shared<Button>(container, Widget::Symbol::SETTINGS);
+    settingsButton->setCallback([this] (const Button &) { toggleSettings(); });
+    settingsButton->alignLeftInParent(HOR_PADDING);
 
     homeButton = std::make_shared<Button>(container, Widget::Symbol::HOME);
     homeButton->setCallback([this] (const Button &) { api().onHomeButton(); });
     homeButton->centerInParent();
 
-    darkerButton = std::make_shared<Button>(container, Widget::Symbol::MINUS);
-    darkerButton->alignLeftOf(homeButton);
-    darkerButton->setCallback([this] (const Button &) { api().darkenScreen();  });
-
-    brighterButton = std::make_shared<Button>(container, Widget::Symbol::PLUS);
-    brighterButton->alignRightOf(homeButton);
-    brighterButton->setCallback([this] (const Button &) { api().brightenScreen();  });
+    createSettingsContainer();
 
     onTick();
+}
 
-    pauseButton = std::make_shared<Button>(container, Widget::Symbol::PAUSE);
-    pauseButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PAUSE); });
-    pauseButton->alignLeftOf(clockLabel);
+void HeaderApp::createSettingsContainer() {
+    auto ui = getUIContainer();
 
-    nextButton = std::make_shared<Button>(container, Widget::Symbol::NEXT);
-    nextButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
-    nextButton->alignLeftOf(pauseButton);
+    prefContainer = std::make_shared<Container>();
+    prefContainer->setDimensions(ui->getWidth() / 2, ui->getHeight() / 2);
+    prefContainer->centerInParent();
+    prefContainer->setFit(false, true);
+    prefContainer->setVisible(false);
 
+    fpsLabel = std::make_shared<Label>(prefContainer, "-- FPS");
+    fpsLabel->alignInTopRight(HOR_PADDING);
 
-    prevButton = std::make_shared<Button>(container, Widget::Symbol::PREV);
+    brightLabel = std::make_shared<Label>(prefContainer, "Brightness");
+    brightLabel->alignLeftInParent(HOR_PADDING);
+    brightnessSlider = std::make_shared<Slider>(prefContainer, 10, 100);
+    brightnessSlider->setValue(api().getBrightness() * 100);
+    brightnessSlider->setCallback([this] (int brightness) { onBrightnessChange(brightness); });
+    brightnessSlider->alignRightOf(brightLabel, HOR_PADDING);
+
+    mediaLabel = std::make_shared<Label>(prefContainer, "Ext. Media");
+    mediaLabel->alignBelow(brightLabel, VERT_PADDING);
+
+    prevButton = std::make_shared<Button>(prefContainer, Widget::Symbol::PREV);
     prevButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PREV); });
-    prevButton->alignLeftOf(nextButton);
+    prevButton->alignBelow(brightnessSlider);
+
+    pauseButton = std::make_shared<Button>(prefContainer, Widget::Symbol::PAUSE);
+    pauseButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PAUSE); });
+    pauseButton->alignRightOf(prevButton);
+
+    nextButton = std::make_shared<Button>(prefContainer, Widget::Symbol::NEXT);
+    nextButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
+    nextButton->alignRightOf(pauseButton);
+
+    closeButton = std::make_shared<Button>(prefContainer, "Close AviTab");
+    closeButton->setCallback([this] (const Button &) { toggleSettings(); api().close(); });
+    closeButton->alignBelow(mediaLabel, VERT_PADDING);
+
+    prefContainer->setFit(false, false);
+}
+
+void HeaderApp::toggleSettings() {
+    prefContainer->setVisible(!prefContainer->isVisible());
+}
+
+void HeaderApp::onBrightnessChange(int brightness) {
+    api().setBrightness(brightness / 100.0f);
 }
 
 bool HeaderApp::onTick() {
@@ -87,7 +120,7 @@ void HeaderApp::updateFPS() {
         float avgFps = getAverageFPS();
         if (avgFps > 0) {
             fpsLabel->setTextFormatted("%.0f FPS", avgFps);
-            fpsLabel->alignLeftInParent(HOR_PADDING);
+            fpsLabel->alignInTopRight(HOR_PADDING);
         }
     }
 }

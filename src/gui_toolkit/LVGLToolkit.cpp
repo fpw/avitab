@@ -137,6 +137,14 @@ void LVGLToolkit::setMouseWheelCallback(MouseWheelCallback cb) {
     onMouseWheel = cb;
 }
 
+void LVGLToolkit::setBrightness(float b) {
+    driver->setBrightness(b);
+}
+
+float LVGLToolkit::getBrightness() {
+    return driver->getBrightness();
+}
+
 void LVGLToolkit::guiLoop() {
     using clock = std::chrono::high_resolution_clock;
     using namespace std::chrono_literals;
@@ -188,14 +196,6 @@ void LVGLToolkit::guiLoop() {
     }
 
     logger::verbose("LVGL thread destroyed");
-}
-
-void LVGLToolkit::brighter() {
-    driver->brighter();
-}
-
-void LVGLToolkit::darker() {
-    driver->darker();
 }
 
 void LVGLToolkit::runInGUI(GUITask func) {

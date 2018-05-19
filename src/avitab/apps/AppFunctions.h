@@ -29,8 +29,8 @@ namespace avitab {
 
 class AppFunctions {
 public:
-    virtual void brightenScreen() = 0;
-    virtual void darkenScreen() = 0;
+    virtual void setBrightness(float brightness) = 0;
+    virtual float getBrightness() = 0;
     virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
@@ -42,6 +42,7 @@ public:
     virtual std::shared_ptr<xdata::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
+    virtual void close() = 0;
     virtual ~AppFunctions() = default;
 };
 

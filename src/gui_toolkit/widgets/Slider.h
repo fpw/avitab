@@ -15,42 +15,26 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Container.h"
+#ifndef SRC_GUI_TOOLKIT_WIDGETS_SLIDER_H_
+#define SRC_GUI_TOOLKIT_WIDGETS_SLIDER_H_
+
+#include <functional>
+#include "Widget.h"
 
 namespace avitab {
 
-Container::Container(WidgetPtr parent):
-    Widget(parent)
-{
-    lv_obj_t *cont = lv_cont_create(parentObj(), nullptr);
-    setObj(cont);
-}
+class Slider: public Widget {
+public:
+    using Callback = std::function<void(int)>;
 
-Container::Container():
-    Widget(nullptr)
-{
-    lv_obj_t *cont = lv_cont_create(lv_layer_top(), nullptr);
-    setObj(cont);
-}
-
-void Container::setLayoutRightColumns() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
-}
-
-void Container::setLayoutPretty() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
-}
-
-void Container::setLayoutRow() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_M);
-}
-
-void Container::setLayoutColumn() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_M);
-}
-
-void Container::setFit(bool horiz, bool vert) {
-    lv_cont_set_fit(obj(), horiz, vert);
-}
+    Slider(WidgetPtr parent, int min, int max);
+    void setCallback(Callback cb);
+    void setValue(int v);
+    int getValue();
+private:
+    Callback onChange;
+};
 
 } /* namespace avitab */
+
+#endif /* SRC_GUI_TOOLKIT_WIDGETS_SLIDER_H_ */

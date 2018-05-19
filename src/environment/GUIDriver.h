@@ -38,8 +38,8 @@ public:
 
     virtual int getWheelDirection() = 0;
 
-    virtual void brighter() = 0;
-    virtual void darker() = 0;
+    virtual void setBrightness(float b) = 0;
+    virtual float getBrightness() = 0;
 
     virtual ~GUIDriver();
 protected:
