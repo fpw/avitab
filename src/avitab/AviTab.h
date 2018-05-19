@@ -34,6 +34,8 @@ public:
     AviTab(std::shared_ptr<Environment> environment);
     void startApp();
     void toggleTablet();
+    void zoomIn();
+    void zoomOut();
     void stopApp();
 
     // App API

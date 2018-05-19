@@ -41,6 +41,8 @@ void AviTab::startApp() {
 
     env->createMenu("AviTab");
     env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
+    env->createCommand("AviTab/zoom_in", "Zoom In", std::bind(&AviTab::zoomIn, this));
+    env->createCommand("AviTab/zoom_out", "Zoom Out", std::bind(&AviTab::zoomOut, this));
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 
     guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
@@ -65,6 +67,24 @@ void AviTab::toggleTablet() {
     } catch (const std::exception &e) {
         logger::error("Exception in onShowTablet: %s", e.what());
     }
+}
+
+void AviTab::zoomIn() {
+    // called from environment thread
+    guiLib->runInGUI([this] () {
+        if (appLauncher) {
+            appLauncher->onMouseWheel(1, 0, 0);
+        }
+    });
+}
+
+void AviTab::zoomOut() {
+    // called from environment thread
+    guiLib->runInGUI([this] () {
+        if (appLauncher) {
+            appLauncher->onMouseWheel(-1, 0, 0);
+        }
+    });
 }
 
 void AviTab::createLayout() {
