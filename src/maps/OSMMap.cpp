@@ -81,6 +81,7 @@ void OSMMap::centerOnPlane(double latitude, double longitude, double heading) {
 void OSMMap::setZoom(int level) {
     if (level != this->zoomLevel) {
         this->zoomLevel = level;
+        tiles.cancelPendingRequests();
         updateImage();
     }
 }

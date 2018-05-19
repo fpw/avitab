@@ -59,8 +59,13 @@ std::shared_ptr<OSMTile> TileCache::getTile(int x, int y, int zoom) {
     return tile;
 }
 
+void TileCache::cancelPendingRequests() {
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    cancelDownloads = true;
+}
+
 void TileCache::flushCache() {
-    std::unique_lock<std::mutex> lock(cacheMutex);
+    std::lock_guard<std::mutex> lock(cacheMutex);
     if (tileCache.size() < CACHE_SIZE) {
         return;
     }
@@ -69,7 +74,7 @@ void TileCache::flushCache() {
         auto lastAccess = it->second->getLastAccess();
         auto now = std::chrono::high_resolution_clock::now();
         auto age = std::chrono::duration_cast<std::chrono::seconds>(now - lastAccess);
-        if (age.count() >= 10) {
+        if (age.count() >= 10 || (cancelDownloads && !it->second->hasImage())) {
             it = tileCache.erase(it);
         } else {
             ++it;
@@ -103,13 +108,20 @@ void TileCache::downloadLoop() {
                 break;
             }
             copy = tileCache;
+            cancelDownloads = false;
         }
 
         for (auto &it: copy) {
             auto &tile = it.second;
             if (!tile->hasImage()) {
-                auto image = downloadImage(tile->getURL());
-                tile->attachImage(image);
+                try {
+                    auto image = downloadImage(tile->getURL());
+                    tile->attachImage(image);
+                } catch (const std::out_of_range &e) {
+                    // thrown on cancel -> this DL was cancelled
+                    logger::info("Cancelled a pending download");
+                    break;
+                }
             }
         }
 
@@ -122,6 +134,9 @@ platform::Image TileCache::downloadImage(const std::string& url) {
     try {
         auto data = downloader.download(url, cancelDownloads);
         image = platform::loadImage(data);
+    } catch (const std::out_of_range &e) {
+        // thrown on cancel
+        throw;
     } catch (const std::exception &e) {
         logger::warn("Tile %s: %s", url.c_str(), e.what());
         image.height = OSMTile::HEIGHT;

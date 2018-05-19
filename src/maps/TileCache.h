@@ -37,6 +37,7 @@ public:
     TileCache();
     void setCacheDirectory(const std::string &path);
     std::shared_ptr<OSMTile> getTile(int x, int y, int zoom);
+    void cancelPendingRequests();
     ~TileCache();
 private:
     Downloader downloader;

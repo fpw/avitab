@@ -56,7 +56,8 @@ std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) 
     } else {
         logger::verbose("Downloading '%s'", url.c_str());
 
-        std::vector<uint8_t> res;
+        std::vector<uint8_t> downloadBuf;
+
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -66,13 +67,17 @@ std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) 
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &res);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
 
         CURLcode code = curl_easy_perform(curl);
 
         if (code != CURLE_OK) {
-            throw std::runtime_error(std::string("Download error: ") + curl_easy_strerror(code));
+            if (code == CURLE_ABORTED_BY_CALLBACK) {
+                throw std::out_of_range("Cancelled");
+            } else {
+                throw std::runtime_error(std::string("Download error: ") + curl_easy_strerror(code));
+            }
         }
 
         long httpStatus = 0;
@@ -82,9 +87,9 @@ std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) 
         }
 
         std::ofstream stream(cacheFileNative, std::ios::out | std::ios::binary);
-        stream.write(reinterpret_cast<const char *>(&res[0]), res.size());
+        stream.write(reinterpret_cast<const char *>(&downloadBuf[0]), downloadBuf.size());
 
-        return res;
+        return downloadBuf;
     }
 }
 
