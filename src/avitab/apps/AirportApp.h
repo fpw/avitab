@@ -49,9 +49,6 @@ private:
     std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
 
-    void suspend() override;
-    void resume() override;
-
     void removeTab(const Button &closeButton);
     void resetLayout();
     void onSearchEntered(const std::string &code);

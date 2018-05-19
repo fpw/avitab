@@ -33,26 +33,6 @@ RouteApp::RouteApp(FuncsPtr appFuncs):
     showDeparturePage();
 }
 
-void RouteApp::suspend() {
-    if (departureField) {
-        departureField->setShowCursor(false);
-    }
-
-    if (arrivalField) {
-        arrivalField->setShowCursor(false);
-    }
-}
-
-void RouteApp::resume() {
-    if (departureField) {
-        departureField->setShowCursor(true);
-    }
-
-    if (arrivalField) {
-        arrivalField->setShowCursor(true);
-    }
-}
-
 void RouteApp::showDeparturePage() {
     reset();
 
@@ -63,7 +43,6 @@ void RouteApp::showDeparturePage() {
 
     departureField = std::make_shared<TextArea>(window, "");
     departureField->setMultiLine(false);
-    departureField->setShowCursor(false);
     departureField->alignBelow(label);
 
     checkBox = std::make_shared<Checkbox>(window, "Upper airways");
@@ -116,7 +95,6 @@ void RouteApp::showArrivalPage() {
 
     arrivalField = std::make_shared<TextArea>(window, "");
     arrivalField->setMultiLine(false);
-    arrivalField->setShowCursor(false);
     arrivalField->alignBelow(label);
 
     keys = std::make_shared<Keyboard>(window, arrivalField);

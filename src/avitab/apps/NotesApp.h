@@ -31,8 +31,6 @@ namespace avitab {
 class NotesApp: public App {
 public:
     NotesApp(FuncsPtr appFuncs);
-    void suspend() override;
-    void resume() override;
 private:
     bool keyboardMode = false;
 

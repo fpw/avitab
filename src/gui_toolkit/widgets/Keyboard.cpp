@@ -50,8 +50,6 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
         return LV_RES_OK;
     });
 
-    target->setShowCursor(false);
-
     setObj(keys);
 }
 

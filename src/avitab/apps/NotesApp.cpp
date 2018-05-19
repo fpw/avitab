@@ -51,18 +51,6 @@ NotesApp::NotesApp(FuncsPtr appFuncs):
     createLayout();
 }
 
-void NotesApp::suspend() {
-    if (textArea) {
-        textArea->setShowCursor(false);
-    }
-}
-
-void NotesApp::resume() {
-    if (textArea) {
-        textArea->setShowCursor(true);
-    }
-}
-
 void NotesApp::createLayout() {
     if (textArea) {
         text = textArea->getText();
@@ -76,7 +64,6 @@ void NotesApp::createLayout() {
         textArea = std::make_shared<TextArea>(window, text);
         textArea->setDimensions(window->getContentWidth(), window->getContentHeight());
         keys = std::make_shared<Keyboard>(window, textArea);
-        textArea->setShowCursor(true);
     } else {
         scratchPad = std::make_shared<PixMap>(window);
         scratchPad->draw(image);

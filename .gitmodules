@@ -1,3 +1,4 @@
 [submodule "lib/lvgl"]
 	path = lib/lvgl
 	url = https://github.com/littlevgl/lvgl.git
+	branch = beta

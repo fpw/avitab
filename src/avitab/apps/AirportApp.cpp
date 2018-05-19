@@ -48,18 +48,6 @@ void AirportApp::resetLayout() {
     keys->setPosition(-5, searchPage->getContentHeight() - 90);
 }
 
-void AirportApp::suspend() {
-    if (searchField) {
-        searchField->setShowCursor(false);
-    }
-}
-
-void AirportApp::resume() {
-    if (searchField) {
-        searchField->setShowCursor(true);
-    }
-}
-
 void AirportApp::onSearchEntered(const std::string& code) {
     auto world = api().getNavWorld();
 
