@@ -41,7 +41,7 @@ private:
     std::shared_ptr<Slider> brightnessSlider;
     std::shared_ptr<Button> pauseButton, nextButton, prevButton;
     std::shared_ptr<Label> brightLabel, mediaLabel;
-    std::shared_ptr<Button> closeButton;
+    std::shared_ptr<Button> closeButton, metarReloadButton;
 
     Timer tickTimer;
     std::string curTimeString;
