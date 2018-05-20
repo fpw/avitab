@@ -55,6 +55,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
 
 PLUGIN_API int XPluginEnable(void) {
     try {
+        XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
         if (environment) {
             aviTab = std::make_unique<avitab::AviTab>(environment);
             aviTab->startApp();

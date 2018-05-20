@@ -74,11 +74,6 @@ std::string nativeToUTF8(const std::string& native) {
     WideCharToMultiByte(CP_UTF8, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
     return res;
 }
-#elif defined __APPLE__
-std::string nativeToUTF8(const std::string& native) {
-    auto root = std::regex_replace(native, std::regex("^OS X:"), ":");
-    return std::regex_replace(root, std::regex(":"), "/");
-}
 #else
 std::string nativeToUTF8(const std::string& native) {
     return native;
