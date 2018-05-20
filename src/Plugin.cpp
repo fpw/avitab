@@ -32,6 +32,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
     strncpy(outSignature, "org.solhost.folko.avitab", 255);
 
     try {
+        XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
         curl_global_init(CURL_GLOBAL_ALL);
 
         environment = std::make_shared<avitab::XPlaneEnvironment>();
@@ -55,7 +56,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
 
 PLUGIN_API int XPluginEnable(void) {
     try {
-        XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
         if (environment) {
             aviTab = std::make_unique<avitab::AviTab>(environment);
             aviTab->startApp();
