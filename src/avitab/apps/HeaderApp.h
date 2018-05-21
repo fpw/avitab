@@ -22,6 +22,7 @@
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Checkbox.h"
 #include "src/gui_toolkit/widgets/Slider.h"
 #include "src/gui_toolkit/Timer.h"
 #include <array>
@@ -39,6 +40,7 @@ private:
 
     std::shared_ptr<Container> prefContainer;
     std::shared_ptr<Slider> brightnessSlider;
+    std::shared_ptr<Checkbox> fpsCheckbox;
     std::shared_ptr<Button> pauseButton, nextButton, prevButton;
     std::shared_ptr<Label> brightLabel, mediaLabel;
     std::shared_ptr<Button> closeButton, metarReloadButton;
@@ -46,6 +48,7 @@ private:
     Timer tickTimer;
     std::string curTimeString;
 
+    bool showFps = false;
     std::array<float, 30> fpsRingBuffer;
     int fpsRingCursor = 0;
 

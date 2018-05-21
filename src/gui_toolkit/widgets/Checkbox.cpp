@@ -29,6 +29,19 @@ Checkbox::Checkbox(WidgetPtr parent, const std::string& caption):
     setObj(cb);
 }
 
+void Checkbox::setCallback(Callback cb) {
+    onToggle = cb;
+
+    lv_obj_set_free_ptr(obj(), this);
+    lv_cb_set_action(obj(), [] (lv_obj_t *cb) -> lv_res_t {
+        Checkbox *us = reinterpret_cast<Checkbox *>(lv_obj_get_free_ptr(cb));
+        if (us) {
+            us->onToggle(us->isChecked());
+        }
+        return LV_RES_OK;
+    });
+}
+
 void Checkbox::setChecked(bool check) {
     lv_cb_set_checked(obj(), check);
 }

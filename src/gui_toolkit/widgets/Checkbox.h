@@ -19,15 +19,21 @@
 #define SRC_GUI_TOOLKIT_WIDGETS_CHECKBOX_H_
 
 #include "Widget.h"
+#include <functional>
 #include <string>
 
 namespace avitab {
 
 class Checkbox: public Widget {
 public:
+    using Callback = std::function<void(bool)>;
+
     Checkbox(WidgetPtr parent, const std::string &caption);
+    void setCallback(Callback cb);
     void setChecked(bool check);
     bool isChecked();
+private:
+    Callback onToggle;
 };
 
 } /* namespace avitab */

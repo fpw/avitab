@@ -35,6 +35,10 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     settingsButton->setCallback([this] (const Button &) { toggleSettings(); });
     settingsButton->alignLeftInParent(HOR_PADDING);
 
+    fpsLabel = std::make_shared<Label>(container, "-- FPS");
+    fpsLabel->alignRightOf(settingsButton);
+    fpsLabel->setVisible(showFps);
+
     homeButton = std::make_shared<Button>(container, Widget::Symbol::HOME);
     homeButton->setCallback([this] (const Button &) { api().onHomeButton(); });
     homeButton->centerInParent();
@@ -50,11 +54,8 @@ void HeaderApp::createSettingsContainer() {
     prefContainer = std::make_shared<Container>();
     prefContainer->setDimensions(ui->getWidth() / 2, ui->getHeight() / 2);
     prefContainer->centerInParent();
-    prefContainer->setFit(false, true);
+    prefContainer->setFit(true, true);
     prefContainer->setVisible(false);
-
-    fpsLabel = std::make_shared<Label>(prefContainer, "-- FPS");
-    fpsLabel->alignInTopRight(HOR_PADDING);
 
     brightLabel = std::make_shared<Label>(prefContainer, "Brightness");
     brightLabel->alignLeftInParent(HOR_PADDING);
@@ -62,6 +63,11 @@ void HeaderApp::createSettingsContainer() {
     brightnessSlider->setValue(api().getBrightness() * 100);
     brightnessSlider->setCallback([this] (int brightness) { onBrightnessChange(brightness); });
     brightnessSlider->alignRightOf(brightLabel, HOR_PADDING);
+
+    fpsCheckbox = std::make_shared<Checkbox>(prefContainer, "Show FPS");
+    fpsCheckbox->setChecked(showFps);
+    fpsCheckbox->setCallback([this] (bool checked) { showFps = checked; fpsLabel->setVisible(showFps); });
+    fpsCheckbox->alignRightOf(brightnessSlider);
 
     mediaLabel = std::make_shared<Label>(prefContainer, "Ext. Media");
     mediaLabel->alignBelow(brightLabel, VERT_PADDING);
@@ -124,7 +130,7 @@ void HeaderApp::updateFPS() {
         float avgFps = getAverageFPS();
         if (avgFps > 0) {
             fpsLabel->setTextFormatted("%.0f FPS", avgFps);
-            fpsLabel->alignInTopRight(HOR_PADDING);
+            fpsLabel->alignRightOf(settingsButton);
         }
     }
 }
