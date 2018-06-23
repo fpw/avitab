@@ -19,6 +19,7 @@
 #include <stb/stb_image.h>
 #include <stdexcept>
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 #include "Image.h"
 #include "src/Logger.h"
