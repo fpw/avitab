@@ -21,7 +21,7 @@
 #include <memory>
 #include <atomic>
 #include <chrono>
-#include "src/platform/ImageLoader.h"
+#include "src/libimg/Image.h"
 
 namespace maps {
 
@@ -36,14 +36,14 @@ public:
     int getY() const;
     int getZoom() const;
     std::string getURL();
-    void attachImage(const platform::Image &image);
+    void attachImage(img::Image &&image);
     bool hasImage();
-    const platform::Image &getImage();
+    const img::Image &getImage();
     const TimeStamp &getLastAccess();
 private:
     std::atomic_bool imageReady { false };
     int x, y, zoomLevel;
-    platform::Image image {};
+    img::Image image;
     TimeStamp lastAccess;
 };
 

@@ -38,12 +38,13 @@ public:
     using RasterBuf = std::shared_ptr<std::vector<uint32_t>>;
 
     RasterJob(fz_context *fzCtx, const std::string &path);
-    void setOutputBuf(RasterBuf buf, int initialWidth);
+    void setOutputBuf(RasterBuf buf, int width, int height);
     void rasterize(std::promise<JobInfo> result);
     void nextPage();
     void prevPage();
-    void zoomIn();
-    void zoomOut();
+    void setScale(float s);
+    float getScale() const;
+    void pan(int vx, int vy);
     void rotateRight();
 
     ~RasterJob();
@@ -54,21 +55,27 @@ private:
 
     // Document info, re-used
     fz_document *doc = nullptr;
-    fz_page *page = nullptr;
+    fz_display_list *displayList = nullptr;
     int curPage = -1;
     int totalPages = 0;
 
     // Output parameters
     RasterBuf outBuf;
-    int outWidth = -1;
+    int outStartX = 0, outStartY = 0;
+    int outWidth = 0, outHeight = 0;
     int requestedPage = 0;
+    float scale = 1.0f;
     int rotateAngle = 0;
+    float cx = 0, cy = 0;
 
     void doWork(JobInfo &info);
     void openDocument(JobInfo &info);
     void loadPage(int pageNum);
     fz_matrix calculateTransformation();
     void rasterPage(JobInfo &info, fz_matrix &scaleMatrix);
+
+    void pushCenter();
+    void popCenter();
 
 };
 

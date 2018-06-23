@@ -24,7 +24,7 @@
 #include "src/gui_toolkit/widgets/Keyboard.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Button.h"
-#include "src/platform/ImageLoader.h"
+#include "src/libimg/Image.h"
 
 namespace avitab {
 
@@ -34,7 +34,6 @@ public:
 private:
     bool keyboardMode = false;
 
-    platform::Image image;
     int drawPosX = 0, drawPosY = 0;
     std::string text;
 
@@ -43,6 +42,8 @@ private:
     std::shared_ptr<Keyboard> keys;
     std::shared_ptr<PixMap> scratchPad;
     std::shared_ptr<Button> keyboardButton;
+
+    img::Image image;
 
     void createLayout();
     void onDraw(int x, int y, bool start, bool stop);

@@ -20,7 +20,7 @@
 
 #include <memory>
 #include <functional>
-#include "src/platform/ImageLoader.h"
+#include "src/libimg/Image.h"
 #include "TileCache.h"
 #include "Downloader.h"
 #include "OSMTile.h"
@@ -53,7 +53,7 @@ public:
     // Call periodically to refresh tiles that were pending
     void doWork();
 
-    const platform::Image &getImage() const;
+    const img::Image &getImage() const;
 
 private:
     // Center position of the map image
@@ -61,12 +61,12 @@ private:
     int zoomLevel = 12;
 
     // Actual map image
-    platform::Image mapImage;
+    img::Image mapImage;
     RedrawCallback onRedrawNeeded;
 
     // Overlays
     double planeLat = 0, planeLong = 0, planeHeading = 0;
-    platform::Image planeIcon;
+    img::Image planeIcon;
 
     // Tiles
     TileCache tiles;

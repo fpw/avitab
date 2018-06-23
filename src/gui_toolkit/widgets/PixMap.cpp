@@ -27,8 +27,8 @@ PixMap::PixMap(WidgetPtr parent):
     setObj(img);
 }
 
-void PixMap::draw(const platform::Image& img) {
-    draw(img.pixels.data(), img.width, img.height);
+void PixMap::draw(const img::Image& img) {
+    draw(img.getPixels(), img.getWidth(), img.getHeight());
 }
 
 void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {

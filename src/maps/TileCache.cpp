@@ -47,7 +47,7 @@ std::shared_ptr<OSMTile> TileCache::getTile(int x, int y, int zoom) {
     auto url = tile->getURL();
     if (downloader.isCached(url)) {
         auto image = downloadImage(url);
-        tile->attachImage(image);
+        tile->attachImage(std::move(image));
     }
 
     tileCache.insert(std::make_pair(idx, tile));
@@ -116,7 +116,7 @@ void TileCache::downloadLoop() {
             if (!tile->hasImage()) {
                 try {
                     auto image = downloadImage(tile->getURL());
-                    tile->attachImage(image);
+                    tile->attachImage(std::move(image));
                 } catch (const std::out_of_range &e) {
                     // thrown on cancel -> this DL was cancelled
                     logger::info("Cancelled a pending download");
@@ -129,21 +129,19 @@ void TileCache::downloadLoop() {
     }
 }
 
-platform::Image TileCache::downloadImage(const std::string& url) {
-    platform::Image image {};
+img::Image TileCache::downloadImage(const std::string& url) {
+    img::Image img;
     try {
         auto data = downloader.download(url, cancelDownloads);
-        image = platform::loadImage(data);
+        img.loadEncodedData(data);
     } catch (const std::out_of_range &e) {
         // thrown on cancel
         throw;
     } catch (const std::exception &e) {
         logger::warn("Tile %s: %s", url.c_str(), e.what());
-        image.height = OSMTile::HEIGHT;
-        image.width = OSMTile::WIDTH;
-        image.pixels.resize(OSMTile::WIDTH * OSMTile::HEIGHT, 0xFF800000);
+        img.resize(OSMTile::HEIGHT, OSMTile::WIDTH, img::COLOR_RED);
     }
-    return image;
+    return img;
 }
 
 TileCache::~TileCache() {

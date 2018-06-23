@@ -16,3 +16,7 @@ add_library(avitab_gui_lvgl_widgets
     DropDownList.cpp
     Slider.cpp
 )
+
+target_link_libraries(avitab_gui_lvgl_widgets
+    img_main
+)

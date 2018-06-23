@@ -28,9 +28,8 @@ OSMTile::OSMTile(int x, int y, int zoom):
     zoomLevel(zoom)
 {
     if (!checkAndFixCoordinates(x, y, zoom)) {
-        image.width = WIDTH;
-        image.height = HEIGHT;
-        image.pixels.resize(image.width * image.height, 0);
+        // show out of bounds as transparent
+        image.resize(WIDTH, HEIGHT, img::COLOR_TRANSPARENT);
         imageReady = true;
     }
     this->x = x;
@@ -58,8 +57,8 @@ std::string OSMTile::getURL() {
     return urlStream.str();
 }
 
-void OSMTile::attachImage(const platform::Image& image) {
-    this->image = image;
+void OSMTile::attachImage(img::Image &&image) {
+    this->image = std::move(image);
     imageReady = true;
 }
 
@@ -67,7 +66,7 @@ bool OSMTile::hasImage() {
     return imageReady;
 }
 
-const platform::Image& OSMTile::getImage() {
+const img::Image &OSMTile::getImage() {
     if (!hasImage()) {
         throw std::runtime_error("Image not ready");
     }

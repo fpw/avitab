@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "NotesApp.h"
-#include "src/platform/Platform.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -25,6 +25,8 @@ NotesApp::NotesApp(FuncsPtr appFuncs):
     App(appFuncs),
     window(std::make_shared<Window>(getUIContainer(), "Notes"))
 {
+    image.resize(window->getContentWidth(), window->getContentHeight(), img::COLOR_WHITE);
+
     window->setOnClose([this] () { exit(); });
 
     window->addSymbol(Widget::Symbol::COPY, [this] () {
@@ -33,7 +35,7 @@ NotesApp::NotesApp(FuncsPtr appFuncs):
         }
 
         if (scratchPad) {
-            std::fill(image.pixels.begin(), image.pixels.end(), 0xFFFFFFFF);
+            image.clear();
             scratchPad->invalidate();
         }
     });
@@ -43,10 +45,6 @@ NotesApp::NotesApp(FuncsPtr appFuncs):
         keyboardButton->setToggleState(keyboardMode);
         createLayout();
     });
-
-    image.height = window->getContentHeight();
-    image.width = window->getContentWidth();
-    image.pixels.resize(image.height * image.width, 0xFFFFFFFF);
 
     createLayout();
 }
@@ -75,12 +73,12 @@ void NotesApp::createLayout() {
 }
 
 void NotesApp::onDraw(int x, int y, bool start, bool stop) {
-    if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
+    if (x < 0 || x >= image.getWidth() || y < 0 || y >= image.getHeight()) {
         return;
     }
 
     if (!start && !stop) {
-        platform::drawLine(image, drawPosX, drawPosY, x, y, 0xFF000000);
+        image.drawLine(drawPosX, drawPosY, x, y, 0xFF000000);
         if (scratchPad) {
             scratchPad->invalidate();
         }

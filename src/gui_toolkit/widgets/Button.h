@@ -22,7 +22,7 @@
 #include <vector>
 #include <string>
 #include "Widget.h"
-#include "src/platform/ImageLoader.h"
+#include "src/libimg/Image.h"
 
 namespace avitab {
 
@@ -30,7 +30,7 @@ class Button: public Widget {
 public:
     using ButtonCallback = std::function<void(const Button &)>;
     Button(WidgetPtr parent, const std::string &text);
-    Button(WidgetPtr parent, const platform::Image &icon, const std::string &caption);
+    Button(WidgetPtr parent, img::Image &&icon, const std::string &caption);
     Button(WidgetPtr parent, Symbol smb);
     Button(WidgetPtr parent, lv_obj_t *obj);
 
@@ -38,7 +38,7 @@ public:
     void setToggleable(bool toggleable);
     void setToggleState(bool toggled);
 private:
-    platform::Image iconData;
+    img::Image iconData;
     lv_img_t iconImage;
     lv_style_t styleWhenPressed, styleWhenReleased;
     ButtonCallback callbackFunc;

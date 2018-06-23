@@ -23,11 +23,9 @@
 
 namespace maps {
 
-OSMMap::OSMMap(int width, int height)
+OSMMap::OSMMap(int width, int height):
+    mapImage(width, height, img::COLOR_TRANSPARENT)
 {
-    mapImage.width = width;
-    mapImage.height = height;
-    mapImage.pixels.resize(mapImage.width * mapImage.height);
 }
 
 void OSMMap::setRedrawCallback(RedrawCallback cb) {
@@ -41,7 +39,7 @@ void OSMMap::setCacheDirectory(const std::string& path) {
 void OSMMap::setOverlayDirectory(const std::string& path) {
     std::string name = "if_icon-plane_211875.png";
     try {
-        planeIcon = platform::loadImage(path + name);
+        planeIcon.loadImageFile(path + name);
     } catch (const std::exception &e) {
         logger::warn("Couldn't load icon %s: %s", name.c_str(), e.what());
     }
@@ -124,7 +122,7 @@ void OSMMap::doWork() {
 }
 
 void OSMMap::updateImage() {
-    std::fill(mapImage.pixels.begin(), mapImage.pixels.end(), 0);
+    mapImage.clear(0);
 
     double centerX = longitudeToX(centerLong, zoomLevel);
     double centerY = latitudeToY(centerLat, zoomLevel);
@@ -134,8 +132,8 @@ void OSMMap::updateImage() {
     int yOff = (centerY - (int) centerY) * OSMTile::HEIGHT;
 
     // Center tile's upper left position
-    int centerPosX = mapImage.width / 2 - xOff;
-    int centerPosY = mapImage.height / 2 - yOff;
+    int centerPosX = mapImage.getWidth() / 2 - xOff;
+    int centerPosY = mapImage.getHeight() / 2 - yOff;
 
     pendingTiles = false;
     for (int y = -TILE_RADIUS; y <= TILE_RADIUS; y++) {
@@ -143,8 +141,7 @@ void OSMMap::updateImage() {
             try {
                 auto tile = tiles.getTile(((int) centerX) + x, ((int) centerY) + y, zoomLevel);
                 if (tile->hasImage()) {
-                    platform::copyImage(tile->getImage(), mapImage,
-                            centerPosX + x * OSMTile::WIDTH, centerPosY + y * OSMTile::HEIGHT);
+                    mapImage.drawImage(tile->getImage(), centerPosX + x * OSMTile::WIDTH, centerPosY + y * OSMTile::HEIGHT);
                 } else {
                     pendingTiles = true;
                 }
@@ -161,7 +158,7 @@ void OSMMap::updateImage() {
     }
 }
 
-const platform::Image& OSMMap::getImage() const {
+const img::Image& OSMMap::getImage() const {
     return mapImage;
 }
 
@@ -169,10 +166,10 @@ void OSMMap::drawOverlays() {
     int px = 0, py = 0;
     positionToPixel(planeLat, planeLong, px, py);
 
-    px -= planeIcon.width / 2;
-    py -= planeIcon.height / 2;
+    px -= planeIcon.getWidth() / 2;
+    py -= planeIcon.getHeight() / 2;
 
-    platform::blendImage(planeIcon, planeHeading, mapImage, px, py);
+    mapImage.blendImage(planeIcon, px, py, planeHeading);
 }
 
 void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
@@ -184,16 +181,16 @@ void OSMMap::positionToPixel(double lat, double lon, int& px, int& py) const {
     double tx = longitudeToX(lon, zoomLevel);
     double ty = latitudeToY(lat, zoomLevel);
 
-    px = mapImage.width / 2 + (tx - cx) * OSMTile::WIDTH;
-    py = mapImage.height / 2 + (ty - cy) * OSMTile::HEIGHT;
+    px = mapImage.getWidth() / 2 + (tx - cx) * OSMTile::WIDTH;
+    py = mapImage.getHeight() / 2 + (ty - cy) * OSMTile::HEIGHT;
 }
 
 void OSMMap::pixelToPosition(int px, int py, double& lat, double& lon) const {
     double cx = longitudeToX(centerLong, zoomLevel);
     double cy = latitudeToY(centerLat, zoomLevel);
 
-    double x = cx + (px - mapImage.width / 2.0) / OSMTile::WIDTH;
-    double y = cy + (py - mapImage.height / 2.0) / OSMTile::HEIGHT;
+    double x = cx + (px - mapImage.getWidth() / 2.0) / OSMTile::WIDTH;
+    double y = cy + (py - mapImage.getHeight() / 2.0) / OSMTile::HEIGHT;
 
     lat = yToLatitude(y, zoomLevel);
     lon = xToLongitude(x, zoomLevel);

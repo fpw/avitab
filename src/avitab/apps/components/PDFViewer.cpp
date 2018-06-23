@@ -31,7 +31,13 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
     window->hideScrollbars();
     window->setOnClose([this] () { exit(); });
 
-    pixMap->enablePanning();
+    width = window->getContentWidth();
+    height = window->getContentHeight();
+    rasterBuffer->resize(width * height);
+
+    pixMap->setClickable(true);
+    pixMap->setClickHandler([this] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
+    pixMap->draw(rasterBuffer->data(), width, height);
 
     setupCallbacks();
 }
@@ -53,7 +59,7 @@ void PDFViewer::showDirectory(const std::vector<std::string>& fileNamesUtf8, siz
 
 void PDFViewer::createJob() {
     rasterJob = api().createRasterJob(fileNames[fileIndex]);
-    rasterJob->setOutputBuf(rasterBuffer, window->getContentWidth());
+    rasterJob->setOutputBuf(rasterBuffer, width, height);
     updateJob();
 }
 
@@ -64,11 +70,26 @@ void PDFViewer::updateJob() {
 
     try {
         rasterJob->rasterize(std::move(infoPromise));
-        JobInfo info = infoFuture.get();
-        pixMap->draw(rasterBuffer->data(), info.width, info.height);
-        pixMap->centerInParent();
+        infoFuture.get();
+        pixMap->invalidate();
     } catch (const std::exception &e) {
         logger::warn("Couldn't render page: %s", e.what());
+    }
+}
+
+void PDFViewer::onPan(int x, int y, bool start, bool end) {
+    if (start) {
+        panStartX = x;
+        panStartY = y;
+    } else if (!end) {
+        int vx = panStartX - x;
+        int vy = panStartY - y;
+        if (vx != 0 || vy != 0) {
+            rasterJob->pan(vx, vy);
+            updateJob();
+        }
+        panStartX = x;
+        panStartY = y;
     }
 }
 
@@ -118,15 +139,21 @@ void PDFViewer::onPrevPage() {
 
 void PDFViewer::onPlus() {
     if (rasterJob) {
-        rasterJob->zoomIn();
+        float scale = rasterJob->getScale();
+        scale += 0.2f;
+        rasterJob->setScale(scale);
         updateJob();
     }
 }
 
 void PDFViewer::onMinus() {
     if (rasterJob) {
-        rasterJob->zoomOut();
-        updateJob();
+        float scale = rasterJob->getScale();
+        scale -= 0.2f;
+        if (scale > 0.001) {
+            rasterJob->setScale(scale);
+            updateJob();
+        }
     }
 }
 

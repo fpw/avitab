@@ -32,11 +32,11 @@ Button::Button(WidgetPtr parent, const std::string& text):
     setObj(button);
 }
 
-Button::Button(WidgetPtr parent, const platform::Image &icon, const std::string& caption):
+Button::Button(WidgetPtr parent, img::Image &&icon, const std::string& caption):
     Widget(parent)
 {
-    iconData = icon;
-    iconImage = toLVImage(iconData.pixels.data(), iconData.width, iconData.height);
+    iconData = std::move(icon);
+    iconImage = toLVImage(iconData.getPixels(), iconData.getWidth(), iconData.getHeight());
 
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
     lv_cont_set_fit(button, true, true);

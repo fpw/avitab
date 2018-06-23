@@ -54,7 +54,7 @@ private:
     void flushCache();
     bool hasWork();
     void downloadLoop();
-    platform::Image downloadImage(const std::string &url);
+    img::Image downloadImage(const std::string &url);
 };
 
 } /* namespace maps */

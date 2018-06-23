@@ -28,6 +28,12 @@ Window::Window(WidgetPtr parent, const std::string& title):
     lv_obj_set_free_ptr(win, this);
     setObj(win);
 
+    lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT_SCRL));
+    scrlStyle.body.padding.hor = 0;
+    scrlStyle.body.padding.ver = 0;
+    scrlStyle.body.padding.inner = 0;
+    lv_win_set_style(win, LV_WIN_STYLE_CONTENT_SCRL, &scrlStyle);
+
     setDimensions(parent->getWidth(), parent->getHeight());
 }
 
@@ -45,7 +51,7 @@ int Window::getContentWidth() {
 
 int Window::getContentHeight() {
     lv_win_ext_t *ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
-    return lv_obj_get_height(ext->page) - 25;
+    return lv_obj_get_height(ext->page) - 10;
 }
 
 void Window::setOnClose(WindowCallback cb) {

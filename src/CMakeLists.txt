@@ -5,6 +5,7 @@ find_package(CURL REQUIRED)
 include_directories(${LIBCURL_INCLUDE_DIR})
 add_definitions(-DCURL_STATICLIB)
 
+add_subdirectory(libimg)
 add_subdirectory(libxdata)
 add_subdirectory(maps)
 add_subdirectory(environment)

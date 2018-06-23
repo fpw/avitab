@@ -45,6 +45,11 @@ private:
     std::unique_ptr<RasterJob> rasterJob;
     std::shared_ptr<std::vector<uint32_t>> rasterBuffer;
 
+    int width = 0, height = 0;
+    int panStartX = 0, panStartY = 0;
+
+    void onPan(int x, int y, bool start, bool end);
+
     void setupCallbacks();
     void onNextPage();
     void onPrevPage();
