@@ -20,7 +20,7 @@
 
 #include <string>
 #include <memory>
-#include <json/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 namespace avitab {
 

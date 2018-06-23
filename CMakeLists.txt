@@ -12,6 +12,7 @@ include_directories("${PROJECT_SOURCE_DIR}")
 
 include_directories("/usr/local/include")
 include_directories("lib")
+include_directories("lib/json/include")
 include_directories("/opt/XSDK/CHeaders")
 
 if(WIN32)

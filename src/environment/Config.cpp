@@ -16,7 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include <json/json.hpp>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 #include "Config.h"
 

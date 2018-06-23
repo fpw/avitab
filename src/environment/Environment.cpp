@@ -18,7 +18,6 @@
 
 #include "Environment.h"
 #include "src/Logger.h"
-#include "json/json.hpp"
 
 namespace avitab {
 
