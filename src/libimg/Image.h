@@ -39,7 +39,7 @@ public:
 
     // Reset content
     void resize(int width, int height, uint32_t color);
-    void loadImageFile(const std::string &nativePath);
+    void loadImageFile(const std::string &utf8Path);
     void loadEncodedData(const std::vector<uint8_t> &encodedImage);
     void setPixels(uint8_t *data, int srcWidth, int srcHeight);
 

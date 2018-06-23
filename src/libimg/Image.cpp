@@ -23,6 +23,7 @@
 #include <cmath>
 #include "Image.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace img {
 
@@ -51,7 +52,8 @@ Image& Image::operator =(Image&& other) {
     return *this;
 }
 
-void Image::loadImageFile(const std::string& nativePath) {
+void Image::loadImageFile(const std::string& utf8Path) {
+    std::string nativePath = platform::UTF8ToNative(utf8Path);
     int nChannels = 4;
     int nComponents = 0;
     int imgWidth, imgHeight;
