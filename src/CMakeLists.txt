@@ -20,6 +20,7 @@ set(CommonLibs
     avitab_platform
     maps
     curl
+    detex
 )
 
 # X-Plane plugin
