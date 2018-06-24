@@ -26,8 +26,6 @@
 #include <vector>
 #include "src/environment/GUIDriver.h"
 #include "src/gui_toolkit/widgets/Screen.h"
-#include "src/gui_toolkit/rasterizers/DocumentRasterizer.h"
-#include "src/gui_toolkit/rasterizers/RasterJob.h"
 
 namespace avitab {
 
@@ -47,8 +45,6 @@ public:
     void setBrightness(float b);
     float getBrightness();
 
-    std::unique_ptr<RasterJob> createRasterJob(const std::string &document);
-
     std::shared_ptr<Screen> &screen();
 
     // call can be any task except for the GUI task
@@ -62,7 +58,6 @@ private:
     static bool lvglIsInitialized;
     static LVGLToolkit *instance;
     MouseWheelCallback onMouseWheel;
-    DocumentRasterizer docRasterizer;
     std::mutex guiMutex;
     std::vector<GUITask> pendingTasks;
     std::shared_ptr<GUIDriver> driver;

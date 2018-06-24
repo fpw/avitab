@@ -23,9 +23,13 @@
 #include <string>
 #include <memory>
 #include "src/avitab/apps/App.h"
+#include "src/gui_toolkit/Timer.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
-#include "src/gui_toolkit/rasterizers/RasterJob.h"
+#include "src/libimg/Image.h"
+#include "src/libimg/stitcher/Stitcher.h"
+#include "src/maps/OverlayedMap.h"
+#include "src/maps/PDFSource.h"
 
 namespace avitab {
 
@@ -38,12 +42,15 @@ public:
 private:
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;
+    Timer updateTimer;
 
     std::vector<std::string> fileNames;
     size_t fileIndex = 0;
 
-    std::unique_ptr<RasterJob> rasterJob;
-    std::shared_ptr<std::vector<uint32_t>> rasterBuffer;
+    std::shared_ptr<img::Image> rasterImage;
+    std::shared_ptr<maps::PDFSource> source;
+    std::shared_ptr<img::Stitcher> stitcher;
+    std::unique_ptr<maps::OverlayedMap> map;
 
     int width = 0, height = 0;
     int panStartX = 0, panStartY = 0;
@@ -51,6 +58,7 @@ private:
     void onPan(int x, int y, bool start, bool end);
 
     void setupCallbacks();
+    bool onTimer();
     void onNextPage();
     void onPrevPage();
     void onNextFile();
@@ -59,8 +67,7 @@ private:
     void onMinus();
     void onRotate();
 
-    void createJob();
-    void updateJob();
+    void loadCurrentFile();
 };
 
 } /* namespace avitab */

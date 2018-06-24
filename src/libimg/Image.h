@@ -26,6 +26,7 @@
 namespace img {
 
 constexpr const uint32_t COLOR_TRANSPARENT  = 0;
+constexpr const uint32_t COLOR_BLACK        = 0xFF000000;
 constexpr const uint32_t COLOR_WHITE        = 0xFFFFFFFF;
 constexpr const uint32_t COLOR_RED          = 0xFF800000;
 

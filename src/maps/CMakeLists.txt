@@ -3,4 +3,5 @@ add_library(maps
     XPlaneSource.cpp
     Downloader.cpp
     OverlayedMap.cpp
+    PDFSource.cpp
 )

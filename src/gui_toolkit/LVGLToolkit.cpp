@@ -129,10 +129,6 @@ std::shared_ptr<Screen> &LVGLToolkit::screen() {
     return mainScreen;
 }
 
-std::unique_ptr<RasterJob> LVGLToolkit::createRasterJob(const std::string& document) {
-    return docRasterizer.createJob(document);
-}
-
 void LVGLToolkit::setMouseWheelCallback(MouseWheelCallback cb) {
     onMouseWheel = cb;
 }

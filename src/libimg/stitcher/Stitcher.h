@@ -41,6 +41,7 @@ public:
     void setZoomLevel(int level);
     int getZoomLevel();
 
+    void purgeTiles();
     void updateImage();
     void doWork();
 
@@ -48,7 +49,7 @@ public:
     std::shared_ptr<TileSource> getTileSource();
 
 private:
-    Image emptyTile, errorTile;
+    Image emptyTile, errorTile, loadingTile;
     std::shared_ptr<Image> dstImage;
     std::shared_ptr<TileSource> tileSource;
     TileCache tileCache;

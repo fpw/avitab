@@ -152,10 +152,6 @@ float AviTab::getBrightness() {
     return guiLib->getBrightness();
 }
 
-std::unique_ptr<RasterJob> AviTab::createRasterJob(const std::string& path) {
-    return guiLib->createRasterJob(path);
-}
-
 std::shared_ptr<xdata::World> AviTab::getNavWorld() {
     return env->getNavWorld();
 }

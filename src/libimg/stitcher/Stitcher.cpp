@@ -78,6 +78,11 @@ std::shared_ptr<Image> Stitcher::getImage() {
     return dstImage;
 }
 
+void Stitcher::purgeTiles() {
+    tileCache.purge();
+    updateImage();
+}
+
 std::shared_ptr<TileSource> Stitcher::getTileSource() {
     return tileSource;
 }
@@ -102,39 +107,31 @@ void Stitcher::updateImage() {
 
     pendingTiles = false;
 
-    img::Image emptyTile, errorTile;
     emptyTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_TRANSPARENT);
     errorTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_RED);
+    loadingTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_BLACK);
 
     for (int y = -radiusY; y <= radiusY; y++) {
         for (int x = -radiusX; x <= radiusX; x++) {
             int tileX = ((int) centerX) + x;
             int tileY = ((int) centerY) + y;
 
-            bool gotTile = false;
-            bool gotError = false;
-            if (tileSource->checkAndCorrectTileCoordinates(tileX, tileY, zoomLevel)) {
-                std::shared_ptr<img::Image> tile;
-                try {
-                    tile = tileCache.getTile(tileX, tileY, zoomLevel);
-                } catch (const std::exception &e) {
-                    gotError = true;
-                }
-
-                if (tile) {
-                    dstImage->drawImage(*tile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
-                    gotTile = true;
-                } else {
-                    pendingTiles = true;
-                }
+            if (!tileSource->checkAndCorrectTileCoordinates(tileX, tileY, zoomLevel)) {
+                dstImage->drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                continue;
+            }
+            std::shared_ptr<img::Image> tile;
+            try {
+                tile = tileCache.getTile(tileX, tileY, zoomLevel);
+            } catch (const std::exception &e) {
+                dstImage->drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
             }
 
-            if (!gotTile) {
-                if (gotError) {
-                    dstImage->drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
-                } else {
-                    dstImage->drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
-                }
+            if (tile) {
+                dstImage->drawImage(*tile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+            } else {
+                pendingTiles = true;
+                dstImage->drawImage(loadingTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
             }
         }
     }

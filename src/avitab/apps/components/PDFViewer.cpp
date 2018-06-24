@@ -22,9 +22,9 @@ namespace avitab {
 
 PDFViewer::PDFViewer(FuncsPtr appFuncs):
     App(appFuncs),
-    window(std::make_shared<Window>(getUIContainer(), "PDF Viewer")),
+    window(std::make_shared<Window>(getUIContainer(), "Document Viewer")),
     pixMap(std::make_unique<PixMap>(window)),
-    rasterBuffer(std::make_shared<std::vector<uint32_t>>())
+    updateTimer(std::bind(&PDFViewer::onTimer, this), 200)
 {
     // TODO are there PDFs with alpha masks on non-white background?
     window->setBackgroundWhite();
@@ -33,13 +33,21 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
 
     width = window->getContentWidth();
     height = window->getContentHeight();
-    rasterBuffer->resize(width * height);
+
+    rasterImage = std::make_shared<img::Image>(window->getContentWidth(), window->getContentHeight(), img::COLOR_TRANSPARENT);
 
     pixMap->setClickable(true);
     pixMap->setClickHandler([this] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
-    pixMap->draw(rasterBuffer->data(), width, height);
+    pixMap->draw(*rasterImage);
 
     setupCallbacks();
+}
+
+bool PDFViewer::onTimer() {
+    if (map) {
+        map->doWork();
+    }
+    return true;
 }
 
 void PDFViewer::showFile(const std::string& nameUtf8) {
@@ -47,34 +55,25 @@ void PDFViewer::showFile(const std::string& nameUtf8) {
     fileNames.push_back(nameUtf8);
     fileIndex = 0;
 
-    createJob();
+    loadCurrentFile();
 }
 
 void PDFViewer::showDirectory(const std::vector<std::string>& fileNamesUtf8, size_t startIndex) {
     fileNames = fileNamesUtf8;
     fileIndex = startIndex;
 
-    createJob();
+    loadCurrentFile();
 }
 
-void PDFViewer::createJob() {
-    rasterJob = api().createRasterJob(fileNames[fileIndex]);
-    rasterJob->setOutputBuf(rasterBuffer, width, height);
-    updateJob();
-}
+void PDFViewer::loadCurrentFile() {
+    source = std::make_shared<maps::PDFSource>(fileNames[fileIndex]);
+    stitcher = std::make_shared<img::Stitcher>(rasterImage, source);
+    stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
-void PDFViewer::updateJob() {
-    // TODO: For now it's ok to do this synchronously
-    std::promise<JobInfo> infoPromise;
-    std::future<JobInfo> infoFuture = infoPromise.get_future();
-
-    try {
-        rasterJob->rasterize(std::move(infoPromise));
-        infoFuture.get();
-        pixMap->invalidate();
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't render page: %s", e.what());
-    }
+    map = std::make_unique<maps::OverlayedMap>(stitcher);
+    map->setOverlayDirectory(api().getDataPath() + "icons/");
+    map->setRedrawCallback([this] () { pixMap->invalidate(); });
+    map->updateImage();
 }
 
 void PDFViewer::onPan(int x, int y, bool start, bool end) {
@@ -85,8 +84,7 @@ void PDFViewer::onPan(int x, int y, bool start, bool end) {
         int vx = panStartX - x;
         int vy = panStartY - y;
         if (vx != 0 || vy != 0) {
-            rasterJob->pan(vx, vy);
-            updateJob();
+            stitcher->pan(vx, vy);
         }
         panStartX = x;
         panStartY = y;
@@ -110,7 +108,7 @@ void PDFViewer::onNextFile() {
         fileIndex = 0;
     }
     logger::info("Showing file %d of %d", fileIndex + 1, fileNames.size());
-    createJob();
+    loadCurrentFile();
 }
 
 void PDFViewer::onPrevFile() {
@@ -120,48 +118,36 @@ void PDFViewer::onPrevFile() {
         fileIndex = fileNames.size() - 1;
     }
     logger::info("Showing file %d of %d", fileIndex + 1, fileNames.size());
-    createJob();
+    loadCurrentFile();
 }
 
 void PDFViewer::onNextPage() {
-    if (rasterJob) {
-        rasterJob->nextPage();
-        updateJob();
+    if (source) {
+        source->nextPage();
+        stitcher->purgeTiles();
     }
 }
 
 void PDFViewer::onPrevPage() {
-    if (rasterJob) {
-        rasterJob->prevPage();
-        updateJob();
+    if (source) {
+        source->prevPage();
+        stitcher->purgeTiles();
     }
 }
 
 void PDFViewer::onPlus() {
-    if (rasterJob) {
-        float scale = rasterJob->getScale();
-        scale += 0.2f;
-        rasterJob->setScale(scale);
-        updateJob();
+    if (map) {
+        map->zoomIn();
     }
 }
 
 void PDFViewer::onMinus() {
-    if (rasterJob) {
-        float scale = rasterJob->getScale();
-        scale -= 0.2f;
-        if (scale > 0.001) {
-            rasterJob->setScale(scale);
-            updateJob();
-        }
+    if (map) {
+        map->zoomOut();
     }
 }
 
 void PDFViewer::onRotate() {
-    if (rasterJob) {
-        rasterJob->rotateRight();
-        updateJob();
-    }
 }
 
 void PDFViewer::onMouseWheel(int dir, int x, int y) {

@@ -178,6 +178,14 @@ void TileCache::enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> 
     memoryCache.insert(std::make_pair(tileSource->getFilePathForTile(x, y, zoom), entry));
 }
 
+void TileCache::purge() {
+    // gets called unlocked
+    cancelPendingRequests();
+
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    memoryCache.clear();
+}
+
 void TileCache::cancelPendingRequests() {
     std::lock_guard<std::mutex> lock(cacheMutex);
     tileSource->cancelPendingLoads();

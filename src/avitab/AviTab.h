@@ -41,7 +41,6 @@ public:
     // App API
     void setBrightness(float brightness) override;
     float getBrightness() override;
-    std::unique_ptr<RasterJob> createRasterJob(const std::string &path) override;
     void executeLater(std::function<void()> func) override;
     std::string getDataPath() override;
     std::string getEarthTexturePath() override;
