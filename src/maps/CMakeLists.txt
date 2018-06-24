@@ -1,6 +1,6 @@
 add_library(maps
+    OpenTopoSource.cpp
+    XPlaneSource.cpp
     Downloader.cpp
-    OSMMap.cpp
-    OSMTile.cpp
-    TileCache.cpp
+    OverlayedMap.cpp
 )

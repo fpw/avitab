@@ -48,7 +48,7 @@ private:
     Timer tickTimer;
     std::string curTimeString;
 
-    bool showFps = false;
+    bool showFps = true;
     std::array<float, 30> fpsRingBuffer;
     int fpsRingCursor = 0;
 

@@ -18,12 +18,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstring>
-#include <thread>
-#include <fstream>
 #include <curl/curl.h>
 #include "Downloader.h"
 #include "src/Logger.h"
-#include "src/platform/Platform.h"
 
 namespace maps {
 
@@ -34,63 +31,40 @@ Downloader::Downloader() {
     }
 }
 
-void Downloader::setCacheDirectory(const std::string& cache) {
-    platform::mkdir(cache);
-    cacheDir = cache;
-}
-
-bool Downloader::isCached(const std::string& url) {
-    std::string cacheFileUTF8 = urlToCacheName(url);
-    std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
-    return platform::fileExists(cacheFileUTF8);
-}
-
 std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) {
-    std::string cacheFileUTF8 = urlToCacheName(url);
-    std::string cacheFileNative = platform::UTF8ToNative(cacheFileUTF8);
+    logger::verbose("Downloading '%s'", url.c_str());
 
-    if (platform::fileExists(cacheFileUTF8)) {
-        std::ifstream stream(cacheFileNative, std::ios::in | std::ios::binary);
-        std::vector<uint8_t> res((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-        return res;
-    } else {
-        logger::verbose("Downloading '%s'", url.c_str());
+    std::vector<uint8_t> downloadBuf;
 
-        std::vector<uint8_t> downloadBuf;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
 
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
-        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
+    CURLcode code = curl_easy_perform(curl);
 
-        CURLcode code = curl_easy_perform(curl);
-
-        if (code != CURLE_OK) {
-            if (code == CURLE_ABORTED_BY_CALLBACK) {
-                throw std::out_of_range("Cancelled");
-            } else {
-                throw std::runtime_error(std::string("Download error: ") + curl_easy_strerror(code));
-            }
+    if (code != CURLE_OK) {
+        if (code == CURLE_ABORTED_BY_CALLBACK) {
+            throw std::out_of_range("Cancelled");
+        } else {
+            throw std::runtime_error(std::string("Download error: ") + curl_easy_strerror(code));
         }
-
-        long httpStatus = 0;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
-        if (httpStatus != 200) {
-            throw std::runtime_error(std::string("Download error - HTTP status " + std::to_string(httpStatus)));
-        }
-
-        std::ofstream stream(cacheFileNative, std::ios::out | std::ios::binary);
-        stream.write(reinterpret_cast<const char *>(&downloadBuf[0]), downloadBuf.size());
-
-        return downloadBuf;
     }
+
+    long httpStatus = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
+    if (httpStatus != 200) {
+        throw std::runtime_error(std::string("Download error - HTTP status " + std::to_string(httpStatus)));
+    }
+
+    return downloadBuf;
 }
 
 size_t Downloader::onData(void* buffer, size_t size, size_t nmemb, void* vecPtr) {
@@ -107,26 +81,6 @@ size_t Downloader::onData(void* buffer, size_t size, size_t nmemb, void* vecPtr)
 int Downloader::onProgress(void* client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow) {
     bool *cancel = reinterpret_cast<bool *>(client);
     return *cancel;
-}
-
-std::string Downloader::urlToCacheName(const std::string& url) {
-    auto it = url.find("://");
-    if (it == std::string::npos) {
-        throw std::runtime_error("Invalid URL format");
-    }
-
-    std::string name = cacheDir;
-
-    std::stringstream urlStr(url.substr(it + 3));
-    std::string part;
-    while (std::getline(urlStr, part, '/')) {
-        name += "/" + part;
-        if (!urlStr.eof()) {
-            platform::mkdir(name);
-        }
-    }
-
-    return name;
 }
 
 Downloader::~Downloader() {

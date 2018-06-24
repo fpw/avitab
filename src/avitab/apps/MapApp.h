@@ -21,11 +21,13 @@
 #include <memory>
 #include <vector>
 #include "App.h"
-#include "src/maps/OSMMap.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/Timer.h"
+#include "src/libimg/stitcher/Stitcher.h"
+#include "src/libimg/Image.h"
+#include "src/maps/OverlayedMap.h"
 
 namespace avitab {
 
@@ -36,7 +38,10 @@ public:
     void suspend() override;
     void resume() override;
 private:
-    std::unique_ptr<maps::OSMMap> map;
+    std::shared_ptr<img::Image> mapImage;
+    std::shared_ptr<img::Stitcher> mapStitcher;
+    std::unique_ptr<maps::OverlayedMap> map;
+
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;

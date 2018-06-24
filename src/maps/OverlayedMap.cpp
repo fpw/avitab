@@ -1,0 +1,157 @@
+/*
+ *   AviTab - Aviator's Virtual Tablet
+ *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Affero General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Affero General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Affero General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include <src/maps/OverlayedMap.h>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+#include "src/Logger.h"
+
+namespace maps {
+
+OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
+    mapImage(stitchedMap->getImage()),
+    tileSource(stitchedMap->getTileSource()),
+    stitcher(stitchedMap)
+{
+    /*
+     * This class is injected between a stitcher and its client:
+     * Whenever the stitcher redraws, we draw our overlays and then
+     * call the client.
+     */
+
+    stitcher->setRedrawCallback([this] () { drawOverlays(); });
+}
+
+void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
+    onOverlaysDrawn = cb;
+}
+
+void OverlayedMap::setOverlayDirectory(const std::string& path) {
+    std::string planeIconName = "if_icon-plane_211875.png";
+    try {
+        planeIcon.loadImageFile(path + planeIconName);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
+    }
+}
+
+void OverlayedMap::centerOnWorldPos(double latitude, double longitude) {
+    if (!tileSource->supportsWorldCoords()) {
+        return;
+    }
+
+    int zoomLevel = stitcher->getZoomLevel();
+    auto centerXY = tileSource->worldToXY(longitude, latitude, zoomLevel);
+    stitcher->setCenter(centerXY.x, centerXY.y);
+}
+
+void OverlayedMap::setPlanePosition(double latitude, double longitude, double heading) {
+    if (!tileSource->supportsWorldCoords()) {
+        return;
+    }
+
+    double deltaLat = std::abs(latitude - this->planeLat);
+    double deltaLon = std::abs(longitude - this->planeLong);
+    double deltaHeading = std::abs(heading - this->planeHeading);
+
+    if (deltaLat > 0.0000001 || deltaLon > 0.0000001 || deltaHeading > 0.1) {
+        planeLat = latitude;
+        planeLong = longitude;
+        planeHeading = heading;
+        stitcher->updateImage();
+    }
+}
+
+void OverlayedMap::centerOnPlane(double latitude, double longitude, double heading) {
+    if (!tileSource->supportsWorldCoords()) {
+        return;
+    }
+
+    planeLat = latitude;
+    planeLong = longitude;
+    planeHeading = heading;
+    centerOnWorldPos(latitude, longitude);
+}
+
+void OverlayedMap::pan(int dx, int dy) {
+    stitcher->pan(dx, dy);
+}
+
+void OverlayedMap::zoomIn() {
+    int zoomLevel = stitcher->getZoomLevel();
+    stitcher->setZoomLevel(zoomLevel + 1);
+}
+
+void OverlayedMap::zoomOut() {
+    int zoomLevel = stitcher->getZoomLevel();
+    stitcher->setZoomLevel(zoomLevel - 1);
+}
+
+void OverlayedMap::updateImage() {
+    stitcher->updateImage();
+}
+
+void OverlayedMap::doWork() {
+    stitcher->doWork();
+}
+
+void OverlayedMap::drawOverlays() {
+    if (tileSource->supportsWorldCoords()) {
+        int px = 0, py = 0;
+        positionToPixel(planeLat, planeLong, px, py);
+
+        px -= planeIcon.getWidth() / 2;
+        py -= planeIcon.getHeight() / 2;
+
+        mapImage->blendImage(planeIcon, px, py, planeHeading);
+    }
+
+    if (onOverlaysDrawn) {
+        onOverlaysDrawn();
+    }
+}
+
+void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py) const {
+    int zoomLevel = stitcher->getZoomLevel();
+    auto dim = tileSource->getTileDimensions(zoomLevel);
+
+    // Center tile num
+    auto centerXY = stitcher->getCenter();
+
+    // Target tile num
+    auto tileXY = tileSource->worldToXY(lon, lat, zoomLevel);
+
+    px = mapImage->getWidth() / 2 + (tileXY.x - centerXY.x) * dim.x;
+    py = mapImage->getHeight() / 2 + (tileXY.y - centerXY.y) * dim.y;
+}
+
+void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) const {
+    int zoomLevel = stitcher->getZoomLevel();
+    auto dim = tileSource->getTileDimensions(zoomLevel);
+
+    auto centerXY = stitcher->getCenter();
+
+    double x = centerXY.x + (px - mapImage->getWidth() / 2.0) / dim.x;
+    double y = centerXY.y + (py - mapImage->getHeight() / 2.0) / dim.y;
+
+    auto world = tileSource->xyToWorld(x, y, zoomLevel);
+    lat = world.y;
+    lon = world.x;
+}
+
+} /* namespace maps */

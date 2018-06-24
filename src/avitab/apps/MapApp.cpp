@@ -17,6 +17,7 @@
  */
 #include "MapApp.h"
 #include "src/Logger.h"
+#include "src/maps/OpenTopoSource.h"
 
 namespace avitab {
 
@@ -31,16 +32,21 @@ MapApp::MapApp(FuncsPtr funcs):
     trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
     trackButton->setToggleState(trackPlane);
 
-    map = std::make_unique<maps::OSMMap>(window->getContentWidth(), window->getContentHeight());
-    map->setCacheDirectory(api().getDataPath() + "MapTiles/");
+    auto tileSource = std::make_shared<maps::OpenTopoSource>();
+    mapImage = std::make_shared<img::Image>(window->getContentWidth(), window->getContentHeight(), img::COLOR_TRANSPARENT);
+    mapStitcher = std::make_shared<img::Stitcher>(mapImage, tileSource);
+    mapStitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
+
+    map = std::make_unique<maps::OverlayedMap>(mapStitcher);
     map->setOverlayDirectory(api().getDataPath() + "icons/");
+    map->setRedrawCallback([this] () { onRedrawNeeded(); });
+    map->updateImage();
 
     mapWidget = std::make_shared<PixMap>(window);
     mapWidget->setClickable(true);
     mapWidget->setClickHandler([this] (int x, int y, bool pr, bool rel) { onMapPan(x, y, pr, rel); });
 
-    map->setRedrawCallback([this] () { onRedrawNeeded(); });
-    mapWidget->draw(map->getImage());
+    mapWidget->draw(*mapImage);
 
     onTimer();
 }
@@ -94,6 +100,7 @@ void MapApp::onMinusButton() {
 void MapApp::onTrackButton() {
     trackPlane = !trackPlane;
     trackButton->setToggleState(trackPlane);
+    onTimer();
 }
 
 bool MapApp::onTimer() {

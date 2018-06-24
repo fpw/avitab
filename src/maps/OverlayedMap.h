@@ -15,71 +15,53 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OSMMAP_H_
-#define SRC_MAPS_OSMMAP_H_
+#ifndef SRC_MAPS_STITCHED_MAP_H_
+#define SRC_MAPS_STITCHED_MAP_H_
 
 #include <memory>
 #include <functional>
-#include "src/libimg/Image.h"
-#include "TileCache.h"
-#include "Downloader.h"
-#include "OSMTile.h"
+#include "src/libimg/stitcher/Stitcher.h"
 
 namespace maps {
 
-class OSMMap {
+class OverlayedMap {
 public:
-    static constexpr const int TILE_RADIUS = 2;
-    static constexpr const int ZOOM_MIN = 0;
-    static constexpr const int ZOOM_MAX = 17;
-
-    using RedrawCallback = std::function<void()>;
-
-    OSMMap(int width, int height);
-    void setRedrawCallback(RedrawCallback cb);
-    void setCacheDirectory(const std::string &path);
+    using OverlaysDrawnCallback = std::function<void(void)>;
+    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
     void setOverlayDirectory(const std::string &path);
+    void setRedrawCallback(OverlaysDrawnCallback cb);
 
-    void setCenter(double latitude, double longitude);
-    void moveCenterTo(int x, int y);
     void pan(int dx, int dy);
 
-    void setPlanePosition(double latitude, double longitude, double heading);
+    void centerOnWorldPos(double latitude, double longitude);
     void centerOnPlane(double latitude, double longitude, double heading);
+    void setPlanePosition(double latitude, double longitude, double heading);
 
+    void updateImage();
     void zoomIn();
     void zoomOut();
 
     // Call periodically to refresh tiles that were pending
     void doWork();
 
-    const img::Image &getImage() const;
-
 private:
-    // Center position of the map image
-    double centerLat = 0, centerLong = 0;
-    int zoomLevel = 12;
-
-    // Actual map image
-    img::Image mapImage;
-    RedrawCallback onRedrawNeeded;
+    // Data
+    std::shared_ptr<img::Image> mapImage;
+    std::shared_ptr<img::TileSource> tileSource;
+    OverlaysDrawnCallback onOverlaysDrawn;
 
     // Overlays
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
 
     // Tiles
-    TileCache tiles;
-    bool pendingTiles = false;
+    std::shared_ptr<img::Stitcher> stitcher;
 
-    void updateImage();
     void drawOverlays();
-    void setZoom(int level);
-
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
 };
 
 } /* namespace maps */
 
-#endif /* SRC_MAPS_OSMMAP_H_ */
+#endif /* SRC_MAPS_STITCHED_MAP_H_ */
