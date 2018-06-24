@@ -97,7 +97,7 @@ bool OpenTopoSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string OpenTopoSource::suggestFilePathForTile(int x, int y, int zoom) {
+std::string OpenTopoSource::getFilePathForTile(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
@@ -108,10 +108,13 @@ std::string OpenTopoSource::suggestFilePathForTile(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::vector<uint8_t> OpenTopoSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int x, int y, int zoom) {
     cancelToken = false;
-    std::string path = suggestFilePathForTile(x, y, zoom);
-    return downloader.download("https://" + path, cancelToken);
+    std::string path = getFilePathForTile(x, y, zoom);
+    auto data = downloader.download("https://" + path, cancelToken);
+    auto image = std::make_unique<img::Image>();
+    image->loadEncodedData(data);
+    return image;
 }
 
 void OpenTopoSource::cancelPendingLoads() {

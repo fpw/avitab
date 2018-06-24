@@ -67,7 +67,8 @@ private:
     void loadLoop();
     bool hasWork();
     void flushCache();
-    void getAndCache(int x, int y, int zoom);
+    void loadAndCacheTile(int x, int y, int zoom);
+    void enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> img);
 };
 
 } /* namespace img */

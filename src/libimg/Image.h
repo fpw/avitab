@@ -43,6 +43,9 @@ public:
     void loadEncodedData(const std::vector<uint8_t> &encodedImage);
     void setPixels(uint8_t *data, int srcWidth, int srcHeight);
 
+    // No effect if not loaded via loadEncodedData!
+    void storeAndClearEncodedData(const std::string &utf8Path);
+
     int getWidth() const;
     int getHeight() const;
     const uint32_t *getPixels() const;
@@ -55,6 +58,7 @@ public:
 private:
     int width = 0;
     int height = 0;
+    std::unique_ptr<std::vector<uint8_t>> encodedData;
     std::unique_ptr<std::vector<uint32_t>> pixels;
 };
 

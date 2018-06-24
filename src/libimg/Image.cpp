@@ -21,6 +21,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
+#include <fstream>
 #include "Image.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -49,6 +50,7 @@ Image& Image::operator =(Image&& other) {
     width = other.width;
     height = other.height;
     pixels = std::move(other.pixels);
+    encodedData = std::move(other.encodedData);
     return *this;
 }
 
@@ -69,13 +71,16 @@ void Image::loadImageFile(const std::string& utf8Path) {
 }
 
 void Image::loadEncodedData(const std::vector<uint8_t>& encodedImage) {
+    encodedData = std::make_unique<std::vector<uint8_t>>(encodedImage);
+
     int nChannels = 4;
     int nComponents = 0;
     int imgWidth, imgHeight;
-    uint8_t *decodedData = stbi_load_from_memory(encodedImage.data(), encodedImage.size(),
+    uint8_t *decodedData = stbi_load_from_memory(encodedData->data(), encodedData->size(),
             &imgWidth, &imgHeight, &nComponents, nChannels);
 
     if (!decodedData) {
+        encodedData.reset();
         throw std::runtime_error(std::string("Couldn't decode image: ") + stbi_failure_reason());
     }
 
@@ -98,6 +103,22 @@ void Image::setPixels(uint8_t* data, int srcWidth, int srcHeight) {
     this->width = srcWidth;
     this->height = srcHeight;
 }
+
+void Image::storeAndClearEncodedData(const std::string& utf8Path) {
+    if (!encodedData) {
+        return;
+    }
+
+    auto path = platform::getDirNameFromPath(utf8Path);
+    platform::mkpath(path);
+
+    std::string nativeName = platform::UTF8ToNative(utf8Path);
+    std::ofstream stream(nativeName, std::ios::out | std::ios::binary);
+    stream.write(reinterpret_cast<const char *>(encodedData->data()), encodedData->size());
+
+    encodedData.reset();
+}
+
 
 void Image::resize(int width, int height, uint32_t color) {
     this->width = width;

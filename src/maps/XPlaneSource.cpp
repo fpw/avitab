@@ -19,6 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include <detex/detex.h>
 
 namespace maps {
 
@@ -55,7 +56,7 @@ bool XPlaneSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
     return true;
 }
 
-std::string XPlaneSource::suggestFilePathForTile(int x, int y, int zoom) {
+std::string XPlaneSource::getFilePathForTile(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
@@ -66,11 +67,10 @@ std::string XPlaneSource::suggestFilePathForTile(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::vector<uint8_t> XPlaneSource::loadTileImage(int x, int y, int zoom) {
-    std::vector<uint8_t> res;
+std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) {
     // need to convert from x, y to world to figure out directory
     // then create a web mercator image
-    return res;
+    return nullptr;
 }
 
 void XPlaneSource::cancelPendingLoads() {

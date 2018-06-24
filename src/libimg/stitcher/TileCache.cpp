@@ -71,7 +71,7 @@ std::shared_ptr<Image> TileCache::getTile(int x, int y, int zoom) {
 
 std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
     // gets called with locked mutex
-    auto it = memoryCache.find(tileSource->suggestFilePathForTile(x, y, zoom));
+    auto it = memoryCache.find(tileSource->getFilePathForTile(x, y, zoom));
     if (it == memoryCache.end()) {
         return nullptr;
     }
@@ -83,21 +83,15 @@ std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
 
 std::shared_ptr<Image> TileCache::getFromDisk(int x, int y, int zoom) {
     // gets called with locked mutex
-    std::string fileName = cacheDir + "/" + tileSource->suggestFilePathForTile(x, y, zoom);
+    std::string fileName = cacheDir + "/" + tileSource->getFilePathForTile(x, y, zoom);
     if (!platform::fileExists(fileName)) {
         return nullptr;
     }
 
-    std::ifstream stream(platform::UTF8ToNative(fileName), std::ios::in | std::ios::binary);
-    std::vector<uint8_t> data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-
-    auto img = std::make_shared<Image>();
-    img->loadEncodedData(data);
-
     // upon loading: insert into memory cache for next access
-    auto timeStamp = std::chrono::steady_clock::now();
-    MemCacheEntry entry(img, timeStamp);
-    memoryCache.insert(std::make_pair(tileSource->suggestFilePathForTile(x, y, zoom), entry));
+    auto img = std::make_shared<Image>();
+    img->loadImageFile(fileName);
+    enterMemoryCache(x, y, zoom, img);
 
     return img;
 }
@@ -144,18 +138,18 @@ void TileCache::loadLoop() {
             int x = std::get<0>(coords);
             int y = std::get<1>(coords);
             int zoom = std::get<2>(coords);
-            getAndCache(x, y, zoom);
+            loadAndCacheTile(x, y, zoom);
         }
 
         flushCache();
     }
 }
 
-void TileCache::getAndCache(int x, int y, int zoom) {
+void TileCache::loadAndCacheTile(int x, int y, int zoom) {
     // gets called unlocked
-    std::vector<uint8_t> data;
+    std::shared_ptr<Image> image;
     try {
-        data = tileSource->loadTileImage(x, y, zoom);
+        image = tileSource->loadTileImage(x, y, zoom);
     } catch (const std::out_of_range &e) {
         // cancelled
         return;
@@ -166,26 +160,18 @@ void TileCache::getAndCache(int x, int y, int zoom) {
         return;
     }
 
-    auto image = std::make_shared<Image>();
-    image->loadEncodedData(data);
-
-    std::string fileName = tileSource->suggestFilePathForTile(x, y, zoom);
+    std::string fileName = tileSource->getFilePathForTile(x, y, zoom);
 
     std::lock_guard<std::mutex> lock(cacheMutex);
+    enterMemoryCache(x, y, zoom, image);
+    image->storeAndClearEncodedData(cacheDir + "/" + fileName);
+}
 
-    std::stringstream nameStream(fileName);
-    std::string part;
-    std::string name;
-    while (std::getline(nameStream, part, '/')) {
-       name += "/" + part;
-       if (!nameStream.eof()) {
-           platform::mkdir(cacheDir + name);
-       }
-    }
-
-    std::string nativeName = platform::UTF8ToNative(cacheDir + "/" + fileName);
-    std::ofstream stream(nativeName, std::ios::out | std::ios::binary);
-    stream.write(reinterpret_cast<const char *>(&data[0]), data.size());
+void TileCache::enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> img) {
+    // gets called with locked mutex
+    auto timeStamp = std::chrono::steady_clock::now();
+    MemCacheEntry entry(img, timeStamp);
+    memoryCache.insert(std::make_pair(tileSource->getFilePathForTile(x, y, zoom), entry));
 }
 
 void TileCache::cancelPendingRequests() {

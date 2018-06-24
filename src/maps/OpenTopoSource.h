@@ -39,8 +39,8 @@ public:
 
     // Query and load tile information
     bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
-    std::string suggestFilePathForTile(int x, int y, int zoom) override;
-    std::vector<uint8_t> loadTileImage(int x, int y, int zoom) override;
+    std::string getFilePathForTile(int x, int y, int zoom) override;
+    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
 
     // If world position is supported
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;

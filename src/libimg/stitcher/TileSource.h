@@ -20,7 +20,6 @@
 
 #include "src/libimg/Image.h"
 #include <string>
-#include <vector>
 
 namespace img {
 
@@ -46,8 +45,8 @@ public:
 
     // Query and load tile information
     virtual bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) = 0;
-    virtual std::string suggestFilePathForTile(int x, int y, int zoom) = 0;
-    virtual std::vector<uint8_t> loadTileImage(int x, int y, int zoom) = 0;
+    virtual std::string getFilePathForTile(int x, int y, int zoom) = 0;
+    virtual std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) = 0;
 
     // World position support
     virtual Point<double> worldToXY(double lon, double lat, int zoom) = 0;

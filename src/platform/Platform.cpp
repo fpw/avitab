@@ -23,6 +23,7 @@
 #include <libgen.h>
 #include <algorithm>
 #include <regex>
+#include <algorithm>
 #include "Platform.h"
 #include "src/Logger.h"
 
@@ -164,6 +165,25 @@ void mkdir(const std::string& utf8Path) {
 #else
     ::mkdir(utf8Path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
+}
+
+void mkpath(const std::string& utf8Path) {
+    std::string path = utf8Path;
+    std::replace(path.begin(), path.end(), '\\', '/');
+
+    for (std::string::iterator iter = path.begin(); iter != path.end(); ) {
+        std::string::iterator newIter = std::find(iter, path.end(), '/');
+        std::string newPath = std::string(path.begin(), newIter);
+
+        if (!fileExists(newPath + "/")) {
+            mkdir(newPath);
+        }
+
+        iter = newIter;
+        if (newIter != path.end()) {
+            ++iter;
+        }
+    }
 }
 
 std::string getLocalTime(const std::string &format) {
