@@ -46,6 +46,7 @@ public:
 
     // Can be called from any thread
     std::string getProgramPath() override;
+    std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
     std::shared_ptr<xdata::XData> getNavData() override;
@@ -62,7 +63,7 @@ private:
 
     // Cached data
     DataCache dataCache;
-    std::string pluginPath;
+    std::string pluginPath, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
 
     // State

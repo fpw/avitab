@@ -18,12 +18,15 @@
 #ifndef SRC_MAPS_XPLANESOURCE_H_
 #define SRC_MAPS_XPLANESOURCE_H_
 
+#include <string>
 #include "src/libimg/stitcher/TileSource.h"
 
 namespace maps {
 
 class XPlaneSource: public img::TileSource {
 public:
+    XPlaneSource(const std::string &xplaneDir);
+
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;
@@ -39,6 +42,8 @@ public:
     bool supportsWorldCoords() override;
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
+private:
+    std::string baseDir;
 };
 
 } /* namespace maps */

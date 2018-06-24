@@ -138,7 +138,11 @@ void TileCache::loadLoop() {
             int x = std::get<0>(coords);
             int y = std::get<1>(coords);
             int zoom = std::get<2>(coords);
-            loadAndCacheTile(x, y, zoom);
+            if (!getFromMemory(x, y, zoom)) {
+                // some sources load multiple x/y/zoom tiles at once, so it could already
+                // be loaded from another pair
+                loadAndCacheTile(x, y, zoom);
+            }
         }
 
         flushCache();
@@ -155,7 +159,7 @@ void TileCache::loadAndCacheTile(int x, int y, int zoom) {
         return;
     } catch (const std::exception &e) {
         // some error
-        logger::verbose("Marking tile %d/%d/%d as error", zoom, x, y);
+        logger::verbose("Marking tile %d/%d/%d as error: %s", zoom, x, y, e.what());
         errorSet.insert(TileCoords(x, y, zoom));
         return;
     }

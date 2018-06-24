@@ -40,7 +40,6 @@ MapApp::MapApp(FuncsPtr funcs):
     map = std::make_unique<maps::OverlayedMap>(mapStitcher);
     map->setOverlayDirectory(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
-    map->updateImage();
 
     mapWidget = std::make_shared<PixMap>(window);
     mapWidget->setClickable(true);

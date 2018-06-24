@@ -31,8 +31,8 @@ XPlaneEnvironment::XPlaneEnvironment() {
     pluginPath = platform::nativeToUTF8(getPluginPath());
     flightLoopId = createFlightLoop();
 
-    std::string rootPath = platform::nativeToUTF8(getXPlanePath());
-    xplaneData = std::make_shared<xdata::XData>(rootPath);
+    xplaneRootPath = platform::nativeToUTF8(getXPlanePath());
+    xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
 
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
@@ -163,6 +163,10 @@ std::string XPlaneEnvironment::getAirplanePath() {
 
 std::string XPlaneEnvironment::getProgramPath() {
     return pluginPath;
+}
+
+std::string XPlaneEnvironment::getEarthTexturePath() {
+    return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
 
 void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {

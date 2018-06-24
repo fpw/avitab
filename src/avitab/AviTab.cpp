@@ -168,6 +168,10 @@ std::string AviTab::getDataPath() {
     return env->getProgramPath();
 }
 
+std::string AviTab::getEarthTexturePath() {
+    return env->getEarthTexturePath();
+}
+
 std::string AviTab::getAirplanePath() {
     return env->getAirplanePath();
 }

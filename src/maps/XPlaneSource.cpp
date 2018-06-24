@@ -19,9 +19,17 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include <cstdio>
 #include <detex/detex.h>
+#include "src/platform/Platform.h"
+#include "src/Logger.h"
 
 namespace maps {
+
+XPlaneSource::XPlaneSource(const std::string& xplaneDir):
+    baseDir(xplaneDir)
+{
+}
 
 int XPlaneSource::getMinZoomLevel() {
     return 0;
@@ -61,16 +69,32 @@ std::string XPlaneSource::getFilePathForTile(int x, int y, int zoom) {
         throw std::runtime_error("Invalid coordinates");
     }
 
-    std::ostringstream nameStream;
-    nameStream << "XPlane";
-    nameStream << zoom << "/" << x << "/" << y << ".png";
-    return nameStream.str();
+    char name[255];
+
+    std::sprintf(name, "%+03d%+04d.dds", y * 10, x * 10);
+    logger::verbose("%d, %d is %s", x, y, name);
+    return std::string(name);
 }
 
 std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) {
-    // need to convert from x, y to world to figure out directory
-    // then create a web mercator image
-    return nullptr;
+    std::string file = getFilePathForTile(x, y, zoom);
+    std::string path = baseDir + file;
+
+    detexTexture *texture;
+    if (!detexLoadTextureFile(path.c_str(), &texture)) {
+        throw std::runtime_error("Couldn't load DDS: " + path);
+    }
+
+    auto image = std::make_unique<img::Image>(texture->width, texture->height, 0);
+    uint8_t *buffer = (uint8_t *) image->getPixels();
+
+    if (!detexDecompressTextureLinear(texture, buffer, DETEX_PIXEL_FORMAT_BGRA8)) {
+        free(texture);
+        throw std::runtime_error("Couldn't uncompress DDS: " + path);
+    }
+
+    free(texture);
+    return image;
 }
 
 void XPlaneSource::cancelPendingLoads() {
@@ -80,11 +104,11 @@ void XPlaneSource::resumeLoading() {
 }
 
 img::Point<double> XPlaneSource::worldToXY(double lon, double lat, int zoom) {
-    return img::Point<double>{lon, lat};
+    return img::Point<double>{lon / 10, lat / 10};
 }
 
 img::Point<double> XPlaneSource::xyToWorld(double x, double y, int zoom) {
-    return img::Point<double>{x, y};
+    return img::Point<double>{x * 10, y * 10};
 }
 
 } /* namespace maps */

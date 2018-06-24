@@ -59,6 +59,7 @@ public:
 
     // Can be called from any thread
     virtual std::string getProgramPath() = 0;
+    virtual std::string getEarthTexturePath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual EnvData getData(const std::string &dataRef) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;

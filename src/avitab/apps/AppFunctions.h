@@ -34,6 +34,7 @@ public:
     virtual std::unique_ptr<RasterJob> createRasterJob(const std::string &path) = 0;
     virtual void executeLater(std::function<void()> func) = 0;
     virtual std::string getDataPath() = 0;
+    virtual std::string getEarthTexturePath() = 0;
     virtual std::string getAirplanePath() = 0;
     virtual EnvData getDataRef(const std::string &dataRef) = 0;
     virtual std::shared_ptr<Container> createGUIContainer() = 0;

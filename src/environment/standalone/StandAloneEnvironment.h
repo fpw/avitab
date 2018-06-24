@@ -43,6 +43,7 @@ public:
 
     // Can be called from any thread
     std::string getProgramPath() override;
+    std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     EnvData getData(const std::string &dataRef) override;
     std::shared_ptr<xdata::XData> getNavData() override;
@@ -51,7 +52,7 @@ public:
 
     virtual ~StandAloneEnvironment();
 private:
-    std::string ourPath;
+    std::string ourPath, xplaneRootPath;
     std::shared_ptr<SDLGUIDriver> driver;
     std::shared_ptr<xdata::XData> xplaneData;
     std::map<std::string, EnvData> simulatedData;

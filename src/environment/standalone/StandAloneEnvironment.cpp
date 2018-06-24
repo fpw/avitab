@@ -33,7 +33,8 @@ StandAloneEnvironment::StandAloneEnvironment() {
         throw std::runtime_error("Couldn't find our path");
     }
 
-    xplaneData = std::make_shared<xdata::XData>(findXPlaneInstallationPath());
+    xplaneRootPath = findXPlaneInstallationPath();
+    xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
 
     EnvData data {};
 
@@ -73,6 +74,10 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
     std::string installDir;
     std::getline(file, installDir);
     return installDir;
+}
+
+std::string StandAloneEnvironment::getEarthTexturePath() {
+    return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
 
 void StandAloneEnvironment::eventLoop() {
