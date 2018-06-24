@@ -38,6 +38,10 @@ bool OpenTopoSource::supportsWorldCoords() {
     return true;
 }
 
+img::Point<double> OpenTopoSource::suggestInitialCenter() {
+    return img::Point<double>{0, 0};
+}
+
 img::Point<int> OpenTopoSource::getTileDimensions(int zoom) {
     return img::Point<int>{256, 256};
 }

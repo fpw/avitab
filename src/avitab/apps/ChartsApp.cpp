@@ -41,7 +41,7 @@ void ChartsApp::showFileSelect() {
     fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
         onSelect(entries, i);
     });
-    fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg)$");
+    fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
     fileSelect->showDirectory(currentPath);
     childApp = std::move(fileSelect);
 }

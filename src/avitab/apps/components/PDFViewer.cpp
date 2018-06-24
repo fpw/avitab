@@ -66,6 +66,10 @@ void PDFViewer::showDirectory(const std::vector<std::string>& fileNamesUtf8, siz
 }
 
 void PDFViewer::loadCurrentFile() {
+    map.reset();
+    stitcher.reset();
+    source.reset();
+
     source = std::make_shared<maps::PDFSource>(fileNames[fileIndex]);
     stitcher = std::make_shared<img::Stitcher>(rasterImage, source);
     stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");

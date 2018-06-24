@@ -43,6 +43,10 @@ int XPlaneSource::getInitialZoomLevel() {
     return 9;
 }
 
+img::Point<double> XPlaneSource::suggestInitialCenter() {
+    return img::Point<double>{0, 0};
+}
+
 bool XPlaneSource::supportsWorldCoords() {
     return true;
 }

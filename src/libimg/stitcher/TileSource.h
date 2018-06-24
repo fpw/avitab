@@ -35,6 +35,7 @@ public:
     virtual int getMinZoomLevel() = 0;
     virtual int getMaxZoomLevel() = 0;
     virtual int getInitialZoomLevel() = 0;
+    virtual Point<double> suggestInitialCenter() = 0;
     virtual Point<int> getTileDimensions(int zoom) = 0;
     virtual bool supportsWorldCoords() = 0;
     virtual Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) = 0;

@@ -26,6 +26,9 @@ Stitcher::Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> 
     tileCache(source)
 {
     zoomLevel = source->getInitialZoomLevel();
+    auto center = source->suggestInitialCenter();
+    centerX = center.x;
+    centerY = center.y;
 }
 
 void Stitcher::setCacheDirectory(const std::string& utf8Path) {

@@ -35,7 +35,15 @@ int PDFSource::getMaxZoomLevel() {
 }
 
 int PDFSource::getInitialZoomLevel() {
-    return 0;
+    return -2;
+}
+
+img::Point<double> maps::PDFSource::suggestInitialCenter() {
+    int tileSize = rasterizer.getTileSize();
+    double width = rasterizer.getPageWidth(getInitialZoomLevel());
+    double height = rasterizer.getPageHeight(getInitialZoomLevel());
+
+    return img::Point<double>{width / tileSize / 2.0, height / tileSize / 2.0};
 }
 
 bool PDFSource::supportsWorldCoords() {

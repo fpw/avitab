@@ -208,6 +208,7 @@ void TileCache::flushCache() {
 }
 
 TileCache::~TileCache() {
+    logger::verbose("~TileCache");
     {
         std::lock_guard<std::mutex> lock(cacheMutex);
         keepAlive = false;

@@ -29,6 +29,7 @@ public:
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;
+    img::Point<double> suggestInitialCenter() override;
     bool supportsWorldCoords() override;
     img::Point<int> getTileDimensions(int zoom) override;
     img::Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) override;
