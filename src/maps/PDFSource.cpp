@@ -17,13 +17,23 @@
  */
 #include <stdexcept>
 #include <sstream>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include "PDFSource.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace maps {
 
-PDFSource::PDFSource(const std::string& file) {
-    rasterizer.loadDocument(file);
+PDFSource::PDFSource(const std::string& file):
+    utf8FileName(file)
+{
+    rasterizer.loadDocument(utf8FileName);
+    try {
+        loadCalibration();
+    } catch (const std::exception &e) {
+        logger::info("No calibration: %s", e.what());
+    }
 }
 
 int PDFSource::getMinZoomLevel() {
@@ -136,10 +146,23 @@ void PDFSource::attachCalibration2(double x, double y, double lat, double lon, i
     regLon2 = lon;
     logger::verbose("x2: %g, y2: %g, lat2: %g, lon2: %g", regX2, regY2, lat, lon);
 
+    calculateCalibration();
+    try {
+        storeCalibration();
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't store calibration: %s", e.what());
+    }
+}
+
+void PDFSource::calculateCalibration() {
     double deltaX = regX1 - regX2;
     double deltaLon = regLon1 - regLon2;
     double deltaY = regY1 - regY2;
     double deltaLat = regLat1 - regLat2;
+
+    if (deltaX == 0 || deltaY == 0) {
+        return;
+    }
 
     coverLon = deltaLon / deltaX; // total longitudes covered
     coverLat = deltaLat / deltaY;
@@ -156,7 +179,6 @@ void PDFSource::attachCalibration2(double x, double y, double lat, double lon, i
     } else {
         topLatitude = regLat2 - coverLat * regY2;
     }
-
     calibrated = true;
 }
 
@@ -176,6 +198,53 @@ img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
     double lat = 0;
     double lon = 0;
     return img::Point<double>{lat, lon};
+}
+
+void PDFSource::storeCalibration() {
+    nlohmann::json json;
+
+    json["calibration"] =
+                    {
+                        {"x1", regX1},
+                        {"y1", regY1},
+                        {"longitude1", regLon1},
+                        {"latitude1", regLat1},
+
+                        {"x2", regX2},
+                        {"y2", regY2},
+                        {"longitude2", regLon2},
+                        {"latitude2", regLat2},
+                    };
+
+    std::string calFileName = platform::UTF8ToNative(utf8FileName + ".json");
+    std::ofstream jsonFile(calFileName);
+    jsonFile << json;
+}
+
+void PDFSource::loadCalibration() {
+    std::string calFileName = platform::UTF8ToNative(utf8FileName + ".json");
+    std::ifstream jsonFile(calFileName);
+
+    if (jsonFile.fail()) {
+        return;
+    }
+
+    nlohmann::json json;
+    jsonFile >> json;
+
+    using j = nlohmann::json;
+
+    regLon1 = json[j::json_pointer("/calibration/longitude1")];
+    regLat1 = json[j::json_pointer("/calibration/latitude1")];
+    regX1 = json[j::json_pointer("/calibration/x1")];
+    regY1 = json[j::json_pointer("/calibration/y1")];
+
+    regLon2 = json[j::json_pointer("/calibration/longitude2")];
+    regLat2 = json[j::json_pointer("/calibration/latitude2")];
+    regX2 = json[j::json_pointer("/calibration/x2")];
+    regY2 = json[j::json_pointer("/calibration/y2")];
+
+    calculateCalibration();
 }
 
 } /* namespace maps */

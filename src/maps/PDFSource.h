@@ -51,12 +51,17 @@ public:
     void nextPage();
     void prevPage();
 private:
+    std::string utf8FileName;
     img::Rasterizer rasterizer;
     bool calibrated = false;
     double regX1{}, regY1{}, regLat1{}, regLon1{};
     double regX2{}, regY2{}, regLat2{}, regLon2{};
     double leftLongitude{}, coverLon{};
     double topLatitude{}, coverLat{};
+
+    void calculateCalibration();
+    void storeCalibration();
+    void loadCalibration();
 };
 
 } /* namespace maps */

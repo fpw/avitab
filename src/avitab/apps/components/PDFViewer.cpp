@@ -94,6 +94,8 @@ void PDFViewer::loadCurrentFile() {
 
 void PDFViewer::onPan(int x, int y, bool start, bool end) {
     if (start) {
+        trackPlane = false;
+        trackButton->setToggleState(trackPlane);
         panStartX = x;
         panStartY = y;
     } else if (!end) {
