@@ -41,7 +41,7 @@ public:
 
     ~Rasterizer();
 private:
-    bool logLoadTimes = true;
+    bool logLoadTimes = false;
     int tileSize = 1024;
     int totalPages = 0;
     int currentPageNum = 0;

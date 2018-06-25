@@ -33,6 +33,7 @@ public:
     void setOnCancel(Callback cb);
     void setOnOk(Callback cb);
     void hideEnterKey();
+    void setNumericLayout();
 private:
     std::shared_ptr<TextArea> targetText;
     Callback onCancel;

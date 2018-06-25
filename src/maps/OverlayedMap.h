@@ -41,6 +41,12 @@ public:
     void zoomIn();
     void zoomOut();
 
+    bool isCalibrated();
+    void beginCalibration();
+    void setCalibrationPoint1(double lat, double lon);
+    void setCalibrationPoint2(double lat, double lon);
+    int getCalibrationStep() const;
+
     // Call periodically to refresh tiles that were pending
     void doWork();
 
@@ -53,6 +59,7 @@ private:
     // Overlays
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
+    int calibrationStep = 0;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;

@@ -44,9 +44,21 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
 }
 
 bool PDFViewer::onTimer() {
-    if (map) {
-        map->doWork();
+    if (!map) {
+        return true;
     }
+
+    double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
+    double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
+    float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+
+    if (trackPlane) {
+        map->centerOnPlane(planeLat, planeLon, planeHeading);
+    } else {
+        map->setPlanePosition(planeLat, planeLon, planeHeading);
+    }
+
+    map->doWork();
     return true;
 }
 
@@ -103,6 +115,7 @@ void PDFViewer::setupCallbacks() {
     window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onNextPage, this));
     window->addSymbol(Widget::Symbol::LEFT, std::bind(&PDFViewer::onPrevPage, this));
     window->addSymbol(Widget::Symbol::ROTATE, std::bind(&PDFViewer::onRotate, this));
+    trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&PDFViewer::onTrackingButton, this));
 }
 
 void PDFViewer::onNextFile() {
@@ -160,6 +173,101 @@ void PDFViewer::onMouseWheel(int dir, int x, int y) {
     } else if (dir < 0) {
         onMinus();
     }
+}
+
+void PDFViewer::onTrackingButton() {
+    if (!map) {
+        return;
+    }
+
+    if (!map->isCalibrated()) {
+        int step = map->getCalibrationStep();
+        switch (step) {
+        case 0:
+            startCalibrationStep1();
+            break;
+        case 1:
+            startCalibrationStep2();
+            break;
+        case 2:
+            finishCalibration();
+            break;
+        }
+        return;
+    }
+
+    // at this point we have a calibrated image
+    trackPlane = !trackPlane;
+    trackButton->setToggleState(trackPlane);
+    onTimer();
+}
+
+void PDFViewer::startCalibrationStep1() {
+    messageBox = std::make_unique<MessageBox>(
+            getUIContainer(),
+                "The current file is not calibrated.\n"
+                "You need to select two points that are far away from each other.\n"
+                "I will show a red square first - center it above a known location and enter its coordinates, then click the tracking icon again.\n"
+                "The square will then turn blue.\n"
+                "Move the square to a different location and enter its coordinates, then click the tracking icon again."
+            );
+    messageBox->addButton("Ok", [this] () {
+        messageBox.reset();
+        if (map) {
+            map->beginCalibration();
+        }
+    });
+    messageBox->centerInParent();
+
+    coordsField = std::make_shared<TextArea>(window, "1.234, 2.345");
+    coordsField->setDimensions(window->getContentWidth(), 40);
+    coordsField->alignInTopLeft();
+
+    keyboard = std::make_unique<Keyboard>(window, coordsField);
+    keyboard->setNumericLayout();
+    keyboard->setDimensions(window->getContentWidth(), 80);
+    keyboard->alignInBottomCenter();
+}
+
+void PDFViewer::startCalibrationStep2() {
+    std::string coords = coordsField->getText();
+    auto it = coords.find(',');
+    if (it == coords.npos) {
+        return;
+    }
+
+    try {
+        std::string latStr(coords.begin(), coords.begin() + it);
+        std::string lonStr(coords.begin() + it + 1, coords.end());
+        double lat = std::stod(latStr);
+        double lon = std::stod(lonStr);
+        map->setCalibrationPoint1(lat, lon);
+    } catch (...) {
+        return;
+    }
+}
+
+void PDFViewer::finishCalibration() {
+    std::string coords = coordsField->getText();
+    auto it = coords.find(',');
+    if (it == coords.npos) {
+        return;
+    }
+
+    try {
+        std::string latStr(coords.begin(), coords.begin() + it);
+        std::string lonStr(coords.begin() + it + 1, coords.end());
+        double lat = std::stod(latStr);
+        double lon = std::stod(lonStr);
+        map->setCalibrationPoint2(lat, lon);
+    } catch (...) {
+        return;
+    }
+
+    keyboard.reset();
+    coordsField.reset();
+
+    onTimer();
 }
 
 } /* namespace avitab */

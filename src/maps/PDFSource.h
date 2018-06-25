@@ -45,10 +45,18 @@ public:
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
+    void attachCalibration1(double x, double y, double lat, double lon, int zoom) override;
+    void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
+
     void nextPage();
     void prevPage();
 private:
     img::Rasterizer rasterizer;
+    bool calibrated = false;
+    double regX1{}, regY1{}, regLat1{}, regLon1{};
+    double regX2{}, regY2{}, regLat2{}, regLon2{};
+    double leftLongitude{}, coverLon{};
+    double topLatitude{}, coverLat{};
 };
 
 } /* namespace maps */

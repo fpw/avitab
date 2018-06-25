@@ -76,4 +76,13 @@ void Keyboard::hideEnterKey() {
     lv_kb_set_map(obj(), defaultMapWithoutEnter);
 }
 
+void Keyboard::setNumericLayout() {
+    static const char * kb_map_num[] = {
+            "+/-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n",
+            ",", "\202Del", SYMBOL_LEFT, SYMBOL_RIGHT, ""
+    };
+
+    lv_kb_set_map(obj(), kb_map_num);
+}
+
 } /* namespace avitab */

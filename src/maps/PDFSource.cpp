@@ -47,7 +47,7 @@ img::Point<double> maps::PDFSource::suggestInitialCenter() {
 }
 
 bool PDFSource::supportsWorldCoords() {
-    return false;
+    return calibrated;
 }
 
 img::Point<int> PDFSource::getTileDimensions(int zoom) {
@@ -115,12 +115,67 @@ void PDFSource::prevPage() {
     }
 }
 
+void PDFSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {
+    int tileSize = rasterizer.getTileSize();
+    regX1 = x * tileSize / rasterizer.getPageWidth(zoom);
+    regY1 = y * tileSize / rasterizer.getPageHeight(zoom);
+    regLat1 = lat;
+    regLon1 = lon;
+    logger::verbose("x1: %g, y1: %g, lat1: %g, lon1: %g", regX1, regY1, regLat1, regLon1);
+}
+
+void PDFSource::attachCalibration2(double x, double y, double lat, double lon, int zoom) {
+    if (lat == regLat1 && lon == regLon1) {
+        throw std::runtime_error("Must be two different points");
+    }
+
+    int tileSize = rasterizer.getTileSize();
+    regX2 = x * tileSize / rasterizer.getPageWidth(zoom);
+    regY2 = y * tileSize / rasterizer.getPageHeight(zoom);
+    regLat2 = lat;
+    regLon2 = lon;
+    logger::verbose("x2: %g, y2: %g, lat2: %g, lon2: %g", regX2, regY2, lat, lon);
+
+    double deltaX = regX1 - regX2;
+    double deltaLon = regLon1 - regLon2;
+    double deltaY = regY1 - regY2;
+    double deltaLat = regLat1 - regLat2;
+
+    coverLon = deltaLon / deltaX; // total longitudes covered
+    coverLat = deltaLat / deltaY;
+
+    // increase accuracy by choosing the right-most point for the left longitude
+    if (regX1 > regX2) {
+        leftLongitude = regLon1 - coverLon * regX1;
+    } else {
+        leftLongitude = regLon2 - coverLon * regX2;
+    }
+
+    if (regY1 > regY2) {
+        topLatitude = regLat1 - coverLat * regY1;
+    } else {
+        topLatitude = regLat2 - coverLat * regY2;
+    }
+
+    calibrated = true;
+}
+
 img::Point<double> PDFSource::worldToXY(double lon, double lat, int zoom) {
-    throw std::runtime_error("Unuspported");
+    int tileSize = rasterizer.getTileSize();
+
+    double normX = (lon - leftLongitude) / coverLon;
+    double normY = (lat - topLatitude) / coverLat;
+
+    double x = normX * rasterizer.getPageWidth(zoom) / tileSize;
+    double y = normY * rasterizer.getPageHeight(zoom) / tileSize;
+
+    return img::Point<double>{x, y};
 }
 
 img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
-    throw std::runtime_error("Unuspported");
+    double lat = 0;
+    double lon = 0;
+    return img::Point<double>{lat, lon};
 }
 
 } /* namespace maps */

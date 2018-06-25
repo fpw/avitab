@@ -121,6 +121,21 @@ void OverlayedMap::drawOverlays() {
         mapImage->blendImage(planeIcon, px, py, planeHeading);
     }
 
+    if (calibrationStep != 0) {
+        uint32_t color = img::COLOR_WHITE;
+        if (calibrationStep == 1) {
+            color = img::COLOR_RED;
+        } else if (calibrationStep == 2) {
+            color = img::COLOR_BLUE;
+        }
+        int centerX = mapImage->getWidth() / 2;
+        int centerY = mapImage->getHeight() / 2;
+        mapImage->drawLine(centerX - 5, centerY - 5, centerX + 5, centerY - 5, color);
+        mapImage->drawLine(centerX - 5, centerY + 5, centerX + 5, centerY + 5, color);
+        mapImage->drawLine(centerX - 5, centerY - 5, centerX - 5, centerY + 5, color);
+        mapImage->drawLine(centerX + 5, centerY - 5, centerX + 5, centerY + 5, color);
+    }
+
     if (onOverlaysDrawn) {
         onOverlaysDrawn();
     }
@@ -153,5 +168,35 @@ void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) con
     lat = world.y;
     lon = world.x;
 }
+
+bool OverlayedMap::isCalibrated() {
+    return tileSource->supportsWorldCoords();
+}
+
+void OverlayedMap::beginCalibration() {
+    calibrationStep = 1;
+    updateImage();
+}
+
+void OverlayedMap::setCalibrationPoint1(double lat, double lon) {
+    auto center = stitcher->getCenter();
+    tileSource->attachCalibration1(center.x, center.y, lat, lon, stitcher->getZoomLevel());
+
+    calibrationStep = 2;
+    updateImage();
+}
+
+void OverlayedMap::setCalibrationPoint2(double lat, double lon) {
+    auto center = stitcher->getCenter();
+    tileSource->attachCalibration2(center.x, center.y, lat, lon, stitcher->getZoomLevel());
+
+    calibrationStep = 0;
+    updateImage();
+}
+
+int OverlayedMap::getCalibrationStep() const {
+    return calibrationStep;
+}
+
 
 } /* namespace maps */
