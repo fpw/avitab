@@ -214,10 +214,12 @@ void PDFViewer::startCalibrationStep1() {
                 "Move the square to a different location and enter its coordinates, then click the tracking icon again."
             );
     messageBox->addButton("Ok", [this] () {
-        messageBox.reset();
-        if (map) {
-            map->beginCalibration();
-        }
+        api().executeLater([this] () {
+            messageBox.reset();
+            if (map) {
+                map->beginCalibration();
+            }
+        });
     });
     messageBox->centerInParent();
 

@@ -154,11 +154,22 @@ void PDFSource::attachCalibration2(double x, double y, double lat, double lon, i
     }
 }
 
+double mercator(double phi) {
+    // = arsinh(tan(phi))
+    double sinPhi = std::sin(phi * M_PI / 180.0);
+    return 0.5 * std::log((1 + sinPhi) / (1 - sinPhi)) * 180.0 / M_PI;
+}
+
+double gudermann(double y) {
+    return std::atan(std::sinh(y * M_PI / 180.0)) * 180.0 / M_PI;
+}
+
 void PDFSource::calculateCalibration() {
     double deltaX = regX1 - regX2;
     double deltaLon = regLon1 - regLon2;
+
     double deltaY = regY1 - regY2;
-    double deltaLat = regLat1 - regLat2;
+    double deltaLat = mercator(regLat1) - mercator(regLat2);
 
     if (deltaX == 0 || deltaY == 0) {
         return;
@@ -175,10 +186,11 @@ void PDFSource::calculateCalibration() {
     }
 
     if (regY1 > regY2) {
-        topLatitude = regLat1 - coverLat * regY1;
+        topLatitude = mercator(regLat1) - coverLat * regY1;
     } else {
-        topLatitude = regLat2 - coverLat * regY2;
+        topLatitude = mercator(regLat2) - coverLat * regY2;
     }
+
     calibrated = true;
 }
 
@@ -186,7 +198,7 @@ img::Point<double> PDFSource::worldToXY(double lon, double lat, int zoom) {
     int tileSize = rasterizer.getTileSize();
 
     double normX = (lon - leftLongitude) / coverLon;
-    double normY = (lat - topLatitude) / coverLat;
+    double normY = (mercator(lat) - topLatitude) / coverLat;
 
     double x = normX * rasterizer.getPageWidth(zoom) / tileSize;
     double y = normY * rasterizer.getPageHeight(zoom) / tileSize;
