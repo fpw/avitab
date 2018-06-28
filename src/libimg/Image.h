@@ -54,9 +54,13 @@ public:
     uint32_t *getPixels();
 
     void clear(uint32_t background = 0xFFFFFFFF);
+    void scale(int newWidth, int newHeight);
     void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
     void drawImage(const Image &src, int dstX, int dstY);
+    void copyTo(Image &dst, int srcX, int srcY, bool flipBG);
     void blendImage(const Image &src, int dstX, int dstY, double angle);
+
+    virtual ~Image() = default;
 private:
     int width = 0;
     int height = 0;

@@ -4,4 +4,5 @@ add_library(maps
     Downloader.cpp
     OverlayedMap.cpp
     PDFSource.cpp
+    GeoTIFFSource.cpp
 )

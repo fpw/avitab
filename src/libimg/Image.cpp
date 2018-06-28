@@ -16,7 +16,9 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#include <stb/stb_image_resize.h>
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
@@ -146,6 +148,15 @@ void Image::clear(uint32_t background) {
     std::fill(pixels->begin(), pixels->end(), background);
 }
 
+void Image::scale(int newWidth, int newHeight) {
+    Image scaled(newWidth, newHeight, 0);
+
+    stbir_resize_uint8((uint8_t *) getPixels(), width, height, 0,
+                       (uint8_t *) scaled.getPixels(), newWidth, newHeight, 0, 4);
+
+    *this = std::move(scaled);
+}
+
 void Image::drawLine(int x1, int y1, int x2, int y2, uint32_t color) {
     int dx = std::abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
     int dy = -std::abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
@@ -207,6 +218,40 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
         if (copyWidth > 0) {
             std::memcpy(dstPtr + dstYClip * width + dstXClip,
                         srcPtr + srcY * srcWidth + srcX,
+                        copyWidth * sizeof(uint32_t));
+        }
+    }
+}
+
+void Image::copyTo(Image& dst, int srcX, int srcY, bool flipBG) {
+    int copyWidth = dst.getWidth();
+    int copyHeight = dst.getHeight();
+    int dstWidth = dst.getWidth();
+
+    uint32_t *dstPtr = dst.getPixels();
+    const uint32_t *srcPtr = getPixels();
+
+    for (int y = 0; y < copyHeight; y++) {
+        if (srcY + y < 0 || srcY + y >= height) {
+            continue;
+        }
+
+        if (srcX + copyWidth >= width) {
+            copyWidth = width - srcX;
+        }
+
+        if (flipBG) {
+            for (int x = 0; x < copyWidth; x++) {
+                int argb = srcPtr[(srcY + y) * width + srcX + x];
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >>  8) & 0xFF;
+                int b = (argb >>  0) & 0xFF;
+                dstPtr[y * dstWidth + x] = (a << 24) | (b << 16) | (g << 8) | r;
+            }
+        } else {
+            std::memcpy(dstPtr + y * dstWidth,
+                        srcPtr + (srcY + y) * width + srcX,
                         copyWidth * sizeof(uint32_t));
         }
     }

@@ -19,6 +19,8 @@ set(CommonLibs
     avitab_app_components
     avitab_platform
     maps
+    geotiff
+    proj
     curl
     detex
 )
