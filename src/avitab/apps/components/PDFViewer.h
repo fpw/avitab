@@ -23,11 +23,9 @@
 #include <string>
 #include <memory>
 #include "src/avitab/apps/App.h"
-#include "src/gui_toolkit/Timer.h"
 #include "src/gui_toolkit/widgets/Window.h"
-#include "src/gui_toolkit/widgets/MessageBox.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
-#include "src/gui_toolkit/widgets/Keyboard.h"
+#include "src/gui_toolkit/Timer.h"
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
@@ -42,13 +40,8 @@ public:
     void showDirectory(const std::vector<std::string> &fileNamesUtf8, size_t startIndex);
     void onMouseWheel(int dir, int x, int y) override;
 private:
-    bool trackPlane = false;
     std::shared_ptr<Window> window;
     std::unique_ptr<PixMap> pixMap;
-    std::unique_ptr<MessageBox> messageBox;
-    std::shared_ptr<TextArea> coordsField;
-    std::unique_ptr<Keyboard> keyboard;
-    std::shared_ptr<Button> trackButton;
     Timer updateTimer;
 
     std::vector<std::string> fileNames;
@@ -62,8 +55,6 @@ private:
     int width = 0, height = 0;
     int panStartX = 0, panStartY = 0;
 
-    void onPan(int x, int y, bool start, bool end);
-
     void setupCallbacks();
     bool onTimer();
     void onNextPage();
@@ -73,11 +64,7 @@ private:
     void onPlus();
     void onMinus();
     void onRotate();
-
-    void onTrackingButton();
-    void startCalibrationStep1();
-    void startCalibrationStep2();
-    void finishCalibration();
+    void onPan(int x, int y, bool start, bool end);
 
     void loadCurrentFile();
 };

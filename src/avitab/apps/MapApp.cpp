@@ -23,6 +23,9 @@
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
 
+// Some library includes <windows.h> :-(
+#undef MessageBox
+
 namespace avitab {
 
 MapApp::MapApp(FuncsPtr funcs):
@@ -283,8 +286,94 @@ void MapApp::onMinusButton() {
 }
 
 void MapApp::onTrackButton() {
+    if (!map->isCalibrated()) {
+        int step = map->getCalibrationStep();
+        switch (step) {
+        case 0:
+            startCalibrationStep1();
+            break;
+        case 1:
+            startCalibrationStep2();
+            break;
+        case 2:
+            finishCalibration();
+            break;
+        }
+        return;
+    }
+
     trackPlane = !trackPlane;
     trackButton->setToggleState(trackPlane);
+    onTimer();
+}
+
+void MapApp::startCalibrationStep1() {
+    messageBox = std::make_unique<avitab::MessageBox>(
+            getUIContainer(),
+                "The current file is not calibrated.\n"
+                "You need to select two points that are far away from each other.\n"
+                "I will show a red square first - center it above a known location and enter its coordinates, then click the tracking icon again.\n"
+                "The square will then turn blue.\n"
+                "Move the square to a different location and enter its coordinates, then click the tracking icon again."
+            );
+    messageBox->addButton("Ok", [this] () {
+        api().executeLater([this] () {
+            messageBox.reset();
+            if (map) {
+                map->beginCalibration();
+            }
+        });
+    });
+    messageBox->centerInParent();
+
+    coordsField = std::make_shared<TextArea>(window, "1.234, 2.345");
+    coordsField->setDimensions(window->getContentWidth(), 40);
+    coordsField->alignInTopLeft();
+
+    keyboard = std::make_unique<Keyboard>(window, coordsField);
+    keyboard->setNumericLayout();
+    keyboard->setDimensions(window->getContentWidth(), 80);
+    keyboard->alignInBottomCenter();
+}
+
+void MapApp::startCalibrationStep2() {
+    std::string coords = coordsField->getText();
+    auto it = coords.find(',');
+    if (it == coords.npos) {
+        return;
+    }
+
+    try {
+        std::string latStr(coords.begin(), coords.begin() + it);
+        std::string lonStr(coords.begin() + it + 1, coords.end());
+        double lat = std::stod(latStr);
+        double lon = std::stod(lonStr);
+        map->setCalibrationPoint1(lat, lon);
+    } catch (...) {
+        return;
+    }
+}
+
+void MapApp::finishCalibration() {
+    std::string coords = coordsField->getText();
+    auto it = coords.find(',');
+    if (it == coords.npos) {
+        return;
+    }
+
+    try {
+        std::string latStr(coords.begin(), coords.begin() + it);
+        std::string lonStr(coords.begin() + it + 1, coords.end());
+        double lat = std::stod(latStr);
+        double lon = std::stod(lonStr);
+        map->setCalibrationPoint2(lat, lon);
+    } catch (...) {
+        return;
+    }
+
+    keyboard.reset();
+    coordsField.reset();
+
     onTimer();
 }
 

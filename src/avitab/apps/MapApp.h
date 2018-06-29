@@ -27,6 +27,9 @@
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
+#include "src/gui_toolkit/widgets/MessageBox.h"
+#include "src/gui_toolkit/widgets/TextArea.h"
+#include "src/gui_toolkit/widgets/Keyboard.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libimg/stitcher/TileSource.h"
@@ -63,6 +66,10 @@ private:
     std::shared_ptr<Container> settingsContainer, chooserContainer;
     std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton;
 
+    std::unique_ptr<MessageBox> messageBox;
+    std::shared_ptr<TextArea> coordsField;
+    std::unique_ptr<Keyboard> keyboard;
+
     Timer updateTimer;
     bool trackPlane = true;
     bool suspended = true;
@@ -76,13 +83,16 @@ private:
     void selectMercator();
     void selectEPSG();
 
+    bool onTimer();
     void onRedrawNeeded();
     void onSettingsButton();
     void onMapPan(int x, int y, bool start, bool end);
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();
-    bool onTimer();
+    void startCalibrationStep1();
+    void startCalibrationStep2();
+    void finishCalibration();
 };
 
 } /* namespace avitab */
