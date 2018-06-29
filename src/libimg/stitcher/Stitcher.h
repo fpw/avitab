@@ -55,7 +55,7 @@ private:
     RedrawCallback onRedraw;
     int zoomLevel = 0;
     double centerX = 0, centerY = 0;
-    bool pendingTiles = false;
+    bool pendingTiles = true;
 };
 
 } /* namespace img */

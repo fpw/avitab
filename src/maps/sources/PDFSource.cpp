@@ -37,15 +37,15 @@ PDFSource::PDFSource(const std::string& file):
 }
 
 int PDFSource::getMinZoomLevel() {
-    return -4;
+    return -5;
 }
 
 int PDFSource::getMaxZoomLevel() {
-    return 20;
+    return 5;
 }
 
 int PDFSource::getInitialZoomLevel() {
-    return -2;
+    return -1;
 }
 
 img::Point<double> maps::PDFSource::suggestInitialCenter() {

@@ -3,4 +3,5 @@ add_library(map_sources
     OpenTopoSource.cpp
     PDFSource.cpp
     GeoTIFFSource.cpp
+    EPSGSource.cpp
 )

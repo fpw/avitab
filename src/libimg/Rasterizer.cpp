@@ -182,7 +182,11 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
 }
 
 float Rasterizer::zoomToScale(int zoom) const {
-    return 1 + zoom * 0.2;
+    if (zoom >= 0) {
+        return 1 << zoom;
+    } else {
+        return 1.0 / (1 << -zoom);
+    }
 }
 
 void Rasterizer::freeCurrentDocument() {

@@ -21,6 +21,7 @@
 #include <memory>
 #include <vector>
 #include "App.h"
+#include "src/avitab/apps/components/FileChooser.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
@@ -49,6 +50,7 @@ private:
         EPSG3857,
     };
 
+    std::unique_ptr<FileChooser> fileChooser;
     MapSource sourceType = MapSource::OPEN_TOPO;
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
@@ -58,7 +60,7 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;
-    std::shared_ptr<Container> settingsContainer;
+    std::shared_ptr<Container> settingsContainer, chooserContainer;
     std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton;
 
     Timer updateTimer;
@@ -70,6 +72,9 @@ private:
     void createSettingsLayout();
     void setMapSource(MapSource style);
     void setTileSource(std::shared_ptr<img::TileSource> source);
+    void selectGeoTIFF();
+    void selectMercator();
+    void selectEPSG();
 
     void onRedrawNeeded();
     void onSettingsButton();

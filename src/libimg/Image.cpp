@@ -165,7 +165,9 @@ void Image::drawLine(int x1, int y1, int x2, int y2, uint32_t color) {
     uint32_t *data = getPixels();
 
     if (x1 == x2 && y1 == y2) {
-        data[y1 * width + x1] = color;
+        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
+            data[y1 * width + x1] = color;
+        }
     }
 
     while (x1 != x2 || y1 != y2) {
@@ -184,6 +186,10 @@ void Image::drawLine(int x1, int y1, int x2, int y2, uint32_t color) {
             err += dx;
             y1 += sy;
         }
+    }
+
+    if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
+        data[y1 * width + x1] = color;
     }
 }
 

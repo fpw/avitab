@@ -21,6 +21,7 @@
 #include "src/maps/sources/GeoTIFFSource.h"
 #include "src/maps/sources/PDFSource.h"
 #include "src/maps/sources/XPlaneSource.h"
+#include "src/maps/sources/EPSGSource.h"
 
 namespace avitab {
 
@@ -44,7 +45,13 @@ MapApp::MapApp(FuncsPtr funcs):
 
     createSettingsLayout();
 
-    setMapSource(MapSource::XPLANE);
+    auto ui = getUIContainer();
+    chooserContainer = std::make_shared<Container>();
+    chooserContainer->setDimensions(ui->getWidth() * 0.75, ui->getHeight() * 0.75);
+    chooserContainer->centerInParent();
+    chooserContainer->setVisible(false);
+
+    setMapSource(MapSource::OPEN_TOPO);
 
     mapWidget->draw(*mapImage);
     onTimer();
@@ -116,17 +123,99 @@ void MapApp::setMapSource(MapSource style) {
         setTileSource(newSource);
         break;
     case MapSource::GEOTIFF:
-        break;
-    case MapSource::EPSG3857:
+        selectGeoTIFF();
         break;
     case MapSource::MERCATOR:
+        selectMercator();
+        break;
+    case MapSource::EPSG3857:
+        selectEPSG();
         break;
     }
 
     settingsContainer->setVisible(false);
 }
 
+void MapApp::selectGeoTIFF() {
+    fileChooser = std::make_unique<FileChooser>();
+    fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/GeoTIFFs/");
+    fileChooser->setFilterRegex("\\.(tif|tiff)$");
+    fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
+        api().executeLater([this, selectedUTF8] () {
+            try {
+                auto geoSource = std::make_shared<maps::GeoTIFFSource>(selectedUTF8);
+                setTileSource(geoSource);
+                fileChooser.reset();
+                chooserContainer->setVisible(false);
+            } catch (const std::exception &e) {
+                logger::warn("Couldn't open GeoTIFF %s: %s", selectedUTF8.c_str(), e.what());
+            }
+        });
+    });
+    fileChooser->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            fileChooser.reset();
+            chooserContainer->setVisible(false);
+        });
+    });
+    fileChooser->show(chooserContainer, "Select a GeoTIFF");
+    chooserContainer->setVisible(true);
+}
+
+void MapApp::selectMercator() {
+    fileChooser = std::make_unique<FileChooser>();
+    fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/Mercator/");
+    fileChooser->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
+    fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
+        api().executeLater([this, selectedUTF8] () {
+            try {
+                auto pdfSource = std::make_shared<maps::PDFSource>(selectedUTF8);
+                setTileSource(pdfSource);
+                fileChooser.reset();
+                chooserContainer->setVisible(false);
+            } catch (const std::exception &e) {
+                logger::warn("Couldn't open Mercator %s: %s", selectedUTF8.c_str(), e.what());
+            }
+        });
+    });
+    fileChooser->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            fileChooser.reset();
+            chooserContainer->setVisible(false);
+        });
+    });
+    fileChooser->show(chooserContainer, "Select a Mercator map image");
+    chooserContainer->setVisible(true);
+}
+
+void MapApp::selectEPSG() {
+    fileChooser = std::make_unique<FileChooser>();
+    fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/EPSG-3857/");
+    fileChooser->setDirectorySelect(true);
+    fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
+        api().executeLater([this, selectedUTF8] () {
+            try {
+                auto epsgSource = std::make_shared<maps::EPSGSource>(selectedUTF8);
+                setTileSource(epsgSource);
+                fileChooser.reset();
+                chooserContainer->setVisible(false);
+            } catch (const std::exception &e) {
+                logger::warn("Couldn't open EPSG %s: %s", selectedUTF8.c_str(), e.what());
+            }
+        });
+    });
+    fileChooser->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            fileChooser.reset();
+            chooserContainer->setVisible(false);
+        });
+    });
+    fileChooser->show(chooserContainer, "Select a SlippyTiles directory");
+    chooserContainer->setVisible(true);
+}
+
 void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
+    mapImage->clear(img::COLOR_TRANSPARENT);
     map.reset();
     mapStitcher.reset();
     tileSource = source;
