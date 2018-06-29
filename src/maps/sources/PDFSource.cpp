@@ -97,7 +97,8 @@ std::string PDFSource::getUniqueTileName(int x, int y, int zoom) {
     }
 
     std::ostringstream nameStream;
-    nameStream << zoom << "/" << x << "/" << y << "/" << rasterizer.getCurrentPageNum();
+    nameStream << zoom << "/" << x << "/" << y << "/";
+    nameStream << rasterizer.getCurrentPageNum() << "/" << rasterizer.getRotationAngle();
     return nameStream.str();
 }
 
@@ -123,6 +124,10 @@ void PDFSource::prevPage() {
     if (curPage - 1 >= 0) {
         rasterizer.loadPage(curPage - 1);
     }
+}
+
+void PDFSource::rotateRight() {
+    rasterizer.rotateRight();
 }
 
 void PDFSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {

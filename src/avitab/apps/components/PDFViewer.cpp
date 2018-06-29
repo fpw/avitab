@@ -145,6 +145,10 @@ void PDFViewer::onMinus() {
 }
 
 void PDFViewer::onRotate() {
+    if (source) {
+        source->rotateRight();
+        stitcher->updateImage();
+    }
 }
 
 void PDFViewer::onMouseWheel(int dir, int x, int y) {

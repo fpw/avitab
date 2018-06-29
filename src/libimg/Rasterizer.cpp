@@ -102,11 +102,19 @@ void Rasterizer::loadPage(int pageNum) {
 }
 
 int Rasterizer::getPageWidth(int zoom) const {
-    return currentPageWidth * zoomToScale(zoom);
+    if (rotAngle == 0 || rotAngle == 180) {
+        return currentPageWidth * zoomToScale(zoom);
+    } else {
+        return currentPageHeight * zoomToScale(zoom);
+    }
 }
 
 int Rasterizer::getPageHeight(int zoom) const {
-    return currentPageHeight * zoomToScale(zoom);
+    if (rotAngle == 0 || rotAngle == 180) {
+        return currentPageHeight * zoomToScale(zoom);
+    } else {
+        return currentPageWidth * zoomToScale(zoom);
+    }
 }
 
 int Rasterizer::getPageCount() const {
@@ -117,32 +125,68 @@ int Rasterizer::getCurrentPageNum() const {
     return currentPageNum;
 }
 
+void Rasterizer::rotateRight() {
+    rotAngle = (rotAngle + 90) % 360;
+}
+
+int Rasterizer::getRotationAngle() {
+    return rotAngle;
+}
+
 std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
     loadPage(currentPageNum);
 
+    int maxX = getPageWidth(zoom) / tileSize;
+    int maxY = getPageHeight(zoom) / tileSize;
+
+    switch (rotAngle) {
+    case 0:
+        break;
+    case 90:
+        x = maxX - x;
+        std::swap(x, y);
+        break;
+    case 180:
+        x = maxX - x;
+        y = maxY - y;
+        break;
+    case 270:
+        y = maxY - y;
+        std::swap(x, y);
+        break;
+    }
+
     if (logLoadTimes) {
-        logger::info("Loading tile %d, %d, %d", x, y, zoom);
+        logger::info("Loading tile %d, %d, %d, %d", x, y, zoom, rotAngle);
     }
 
     auto image = std::make_unique<Image>(tileSize, tileSize, 0);
 
     int outStartX = tileSize * x;
     int outStartY = tileSize * y;
+
     int outWidth = image->getWidth();
     int outHeight = image->getHeight();
 
     float scale = zoomToScale(zoom);
     fz_matrix scaleMatrix;
     fz_scale(&scaleMatrix, scale, scale);
+    fz_pre_rotate(&scaleMatrix, rotAngle);
 
-    fz_pixmap *pix;
+    fz_rect clipBoxR;
+    clipBoxR.x0 = outStartX;
+    clipBoxR.x1 = outStartX + outWidth;
+    clipBoxR.y0 = outStartY;
+    clipBoxR.y1 = outStartY + outHeight;
+
+    fz_matrix scaleMatrix2;
+    fz_rotate(&scaleMatrix2, rotAngle);
+    fz_transform_rect(&clipBoxR, &scaleMatrix2);
 
     fz_irect clipBox;
-    clipBox.x0 = outStartX;
-    clipBox.x1 = outStartX + outWidth;
-    clipBox.y0 = outStartY;
-    clipBox.y1 = outStartY + outHeight;
+    fz_irect_from_rect(&clipBox, &clipBoxR);
 
+    fz_pixmap *pix;
     fz_try(ctx) {
         uint8_t *outBuf = (uint8_t *) image->getPixels();
         pix = fz_new_pixmap_with_data(ctx, fz_device_bgr(ctx), outWidth, outHeight, nullptr, 1, outWidth * 4, outBuf);
@@ -162,6 +206,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
         dev = fz_new_draw_device_with_bbox(ctx, &scaleMatrix, pix, &clipBox);
         fz_run_display_list(ctx, currentPageList, dev, &fz_identity, nullptr, nullptr);
         fz_close_device(ctx, dev);
+        fz_drop_device(ctx, dev);
 
         if (logLoadTimes) {
             auto endAt = std::chrono::high_resolution_clock::now();

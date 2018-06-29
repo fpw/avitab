@@ -205,6 +205,7 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
 
     for (int srcY = 0; srcY < srcHeight; srcY++) {
         int dstYClip = dstY + srcY;
+
         if (dstYClip < 0 || dstYClip >= height) {
             continue;
         }
@@ -221,11 +222,13 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
             copyWidth = width - dstX;
         }
 
-        if (copyWidth > 0) {
-            std::memcpy(dstPtr + dstYClip * width + dstXClip,
-                        srcPtr + srcY * srcWidth + srcX,
-                        copyWidth * sizeof(uint32_t));
+        if (copyWidth <= 0) {
+            continue;
         }
+
+        std::memcpy(dstPtr + dstYClip * width + dstXClip,
+                    srcPtr + srcY * srcWidth + srcX,
+                    copyWidth * sizeof(uint32_t));
     }
 }
 
