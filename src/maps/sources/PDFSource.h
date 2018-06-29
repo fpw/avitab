@@ -50,7 +50,6 @@ public:
 
     void nextPage();
     void prevPage();
-    void rotateRight();
 private:
     std::string utf8FileName;
     img::Rasterizer rasterizer;

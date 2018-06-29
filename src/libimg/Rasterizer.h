@@ -32,8 +32,6 @@ public:
     int getTileSize();
     void loadDocument(const std::string &file);
     void loadPage(int pageNum);
-    void rotateRight();
-    int getRotationAngle();
     int getPageWidth(int zoom) const;
     int getPageHeight(int zoom) const;
     std::unique_ptr<Image> loadTile(int x, int y, int zoom);
@@ -44,7 +42,6 @@ public:
     ~Rasterizer();
 private:
     bool logLoadTimes = true;
-    int rotAngle = 0;
     int tileSize = 1024;
     int totalPages = 0;
     int currentPageNum = 0;

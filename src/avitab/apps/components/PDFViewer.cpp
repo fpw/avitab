@@ -26,8 +26,6 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
     pixMap(std::make_unique<PixMap>(window)),
     updateTimer(std::bind(&PDFViewer::onTimer, this), 200)
 {
-    // TODO are there PDFs with alpha masks on non-white background?
-    window->setBackgroundWhite();
     window->hideScrollbars();
     window->setOnClose([this] () { exit(); });
 
@@ -146,8 +144,6 @@ void PDFViewer::onMinus() {
 
 void PDFViewer::onRotate() {
     if (source) {
-        source->rotateRight();
-        stitcher->updateImage();
     }
 }
 
