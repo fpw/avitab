@@ -91,13 +91,13 @@ bool PDFSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
     return true;
 }
 
-std::string PDFSource::getFilePathForTile(int x, int y, int zoom) {
+std::string PDFSource::getUniqueTileName(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
     std::ostringstream nameStream;
-    nameStream << zoom << "/" << x << "/" << y;
+    nameStream << zoom << "/" << x << "/" << y << "/" << rasterizer.getCurrentPageNum();
     return nameStream.str();
 }
 
@@ -120,7 +120,7 @@ void PDFSource::nextPage() {
 
 void PDFSource::prevPage() {
     int curPage = rasterizer.getCurrentPageNum();
-    if (curPage - 1 > 0) {
+    if (curPage - 1 >= 0) {
         rasterizer.loadPage(curPage - 1);
     }
 }

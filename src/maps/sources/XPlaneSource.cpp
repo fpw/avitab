@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <cstdio>
-#include <detex/detex.h>
+#include "src/libimg/DDSImage.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
 
@@ -36,11 +36,11 @@ int XPlaneSource::getMinZoomLevel() {
 }
 
 int XPlaneSource::getMaxZoomLevel() {
-    return 9;
+    return MAX_MIPMAP_LVL + 1;
 }
 
 int XPlaneSource::getInitialZoomLevel() {
-    return 9;
+    return MAX_MIPMAP_LVL;
 }
 
 img::Point<double> XPlaneSource::suggestInitialCenter() {
@@ -52,7 +52,12 @@ bool XPlaneSource::supportsWorldCoords() {
 }
 
 img::Point<int> XPlaneSource::getTileDimensions(int zoom) {
-    int dim = 1024 / (1 << (9 - zoom));
+    int dim;
+    if (zoom < MAX_MIPMAP_LVL) {
+        dim = 1024 / (1 << (MAX_MIPMAP_LVL - zoom));
+    } else {
+        dim = 1024 * (1 << (zoom - MAX_MIPMAP_LVL));
+    }
     return img::Point<int>{dim, dim};
 }
 
@@ -60,7 +65,7 @@ img::Point<double> XPlaneSource::transformZoomedPoint(double oldX, double oldY, 
     return img::Point<double>{oldX, oldY};
 }
 
-bool XPlaneSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
+bool XPlaneSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     auto world = xyToWorld(x, y, zoom);
     if (world.x < -180 || world.x >= 180 || world.y < -90 || world.y >= 90) {
         return false;
@@ -68,36 +73,40 @@ bool XPlaneSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
     return true;
 }
 
-std::string XPlaneSource::getFilePathForTile(int x, int y, int zoom) {
+std::string XPlaneSource::getUniqueTileName(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
-    char name[255];
-
-    std::sprintf(name, "%+03d%+04d.dds", y * 10, x * 10);
-    logger::verbose("%d, %d is %s", x, y, name);
-    return std::string(name);
+    std::ostringstream nameStream;
+    nameStream << zoom << "/" << x << "/" << y;
+    return nameStream.str();
 }
 
 std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) {
-    std::string file = getFilePathForTile(x, y, zoom);
-    std::string path = baseDir + file;
+    char name[32];
+    std::sprintf(name, "%+03d%+04d.dds", -y * 10 + 80, x * 10 - 180);
+    std::string path = baseDir + name;
 
-    detexTexture *texture;
-    if (!detexLoadTextureFile(path.c_str(), &texture)) {
-        throw std::runtime_error("Couldn't load DDS: " + path);
+    if (!platform::fileExists(path)) {
+        auto dim = getTileDimensions(zoom);
+        return std::make_unique<img::Image>(dim.x, dim.y, WATER_COLOR);
     }
 
-    auto image = std::make_unique<img::Image>(texture->width, texture->height, 0);
-    uint8_t *buffer = (uint8_t *) image->getPixels();
+    int mipLevel = MAX_MIPMAP_LVL - zoom;
 
-    if (!detexDecompressTextureLinear(texture, buffer, DETEX_PIXEL_FORMAT_BGRA8)) {
-        free(texture);
-        throw std::runtime_error("Couldn't uncompress DDS: " + path);
+    if (mipLevel < 0) {
+        mipLevel = 0;
     }
 
-    free(texture);
+    auto image = std::make_unique<img::DDSImage>(path, mipLevel);
+    image->alphaBlend(WATER_COLOR);
+
+    if (zoom > MAX_MIPMAP_LVL) {
+        auto dim = getTileDimensions(zoom);
+        image->scale(dim.x, dim.y);
+    }
+
     return image;
 }
 
@@ -108,11 +117,17 @@ void XPlaneSource::resumeLoading() {
 }
 
 img::Point<double> XPlaneSource::worldToXY(double lon, double lat, int zoom) {
-    return img::Point<double>{lon / 10, lat / 10};
+    double x = (lon + 180) / 10;
+    double y = (-lat + 90) / 10;
+
+    return img::Point<double>{x, y};
 }
 
 img::Point<double> XPlaneSource::xyToWorld(double x, double y, int zoom) {
-    return img::Point<double>{x * 10, y * 10};
+    double lon = x * 10 - 180;
+    double lat = y * 10 - 90;
+
+    return img::Point<double>{lon, lat};
 }
 
 } /* namespace maps */

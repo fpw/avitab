@@ -94,7 +94,7 @@ bool GeoTIFFSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string GeoTIFFSource::getFilePathForTile(int x, int y, int zoom) {
+std::string GeoTIFFSource::getUniqueTileName(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
@@ -110,7 +110,7 @@ std::unique_ptr<img::Image> GeoTIFFSource::loadTileImage(int x, int y, int zoom)
     tiff.loadFullImage();
 
     auto img = std::make_unique<img::Image>(tileSize / scale, tileSize / scale, 0);
-    tiff.copyTo(*img, x * tileSize / scale, y * tileSize / scale, true);
+    tiff.copyTo(*img, x * tileSize / scale, y * tileSize / scale);
     img->scale(tileSize, tileSize);
 
     return img;

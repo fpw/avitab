@@ -143,14 +143,14 @@ void PDFViewer::onPrevFile() {
 void PDFViewer::onNextPage() {
     if (source) {
         source->nextPage();
-        stitcher->purgeTiles();
+        stitcher->updateImage();
     }
 }
 
 void PDFViewer::onPrevPage() {
     if (source) {
         source->prevPage();
-        stitcher->purgeTiles();
+        stitcher->updateImage();
     }
 }
 

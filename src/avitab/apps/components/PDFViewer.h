@@ -31,7 +31,7 @@
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
-#include "src/maps/PDFSource.h"
+#include "src/maps/sources/PDFSource.h"
 
 namespace avitab {
 

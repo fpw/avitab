@@ -96,9 +96,9 @@ void Image::setPixels(uint8_t* data, int srcWidth, int srcHeight) {
     uint32_t *dstData = pixels->data();
 
     for (int i = 0; i < srcWidth * srcHeight * 4; i += 4) {
-        uint32_t argb = data[i + 3] << 24  |
-                       (data[i + 0] << 16) |
-                       (data[i + 1] << 8)  |
+        uint32_t argb = (data[i + 3] << 24) |
+                        (data[i + 0] << 16) |
+                        (data[i + 1] << 8)  |
                         data[i + 2];
         dstData[i / 4] = argb;
     }
@@ -211,7 +211,7 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
             dstXClip = 0;
             copyWidth -= -dstX;
         }
-        if (dstX + copyWidth >= width) {
+        if (dstX + copyWidth > width) {
             copyWidth = width - dstX;
         }
 
@@ -223,7 +223,7 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
     }
 }
 
-void Image::copyTo(Image& dst, int srcX, int srcY, bool flipBG) {
+void Image::copyTo(Image& dst, int srcX, int srcY) {
     int copyWidth = dst.getWidth();
     int copyHeight = dst.getHeight();
     int dstWidth = dst.getWidth();
@@ -236,24 +236,13 @@ void Image::copyTo(Image& dst, int srcX, int srcY, bool flipBG) {
             continue;
         }
 
-        if (srcX + copyWidth >= width) {
+        if (srcX + copyWidth > width) {
             copyWidth = width - srcX;
         }
 
-        if (flipBG) {
-            for (int x = 0; x < copyWidth; x++) {
-                int argb = srcPtr[(srcY + y) * width + srcX + x];
-                int a = (argb >> 24) & 0xFF;
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >>  8) & 0xFF;
-                int b = (argb >>  0) & 0xFF;
-                dstPtr[y * dstWidth + x] = (a << 24) | (b << 16) | (g << 8) | r;
-            }
-        } else {
-            std::memcpy(dstPtr + y * dstWidth,
-                        srcPtr + (srcY + y) * width + srcX,
-                        copyWidth * sizeof(uint32_t));
-        }
+        std::memcpy(dstPtr + y * dstWidth,
+                    srcPtr + (srcY + y) * width + srcX,
+                    copyWidth * sizeof(uint32_t));
     }
 }
 
@@ -295,5 +284,36 @@ void Image::blendImage(const Image& src, int dstX, int dstY, double angle) {
     }
 }
 
+void Image::alphaBlend(uint32_t color) {
+    // background
+    float ba = (int) ((color >> 24) & 0xFF) / 255.0;
+    float br = (int) ((color >> 16) & 0xFF) / 255.0;
+    float bg = (int) ((color >>  8) & 0xFF) / 255.0;
+    float bb = (int) ((color >>  0) & 0xFF) / 255.0;
+
+
+    for (int y = 0; y < height; y++) {
+        uint32_t *ptr = getPixels() + y * width;
+        for (int x = 0; x < width; x++) {
+            int foreCol = ptr[x];
+
+            // foreground
+            float fa = (int) ((foreCol >> 24) & 0xFF) / 255.0;
+            float fr = (int) ((foreCol >> 16) & 0xFF) / 255.0;
+            float fg = (int) ((foreCol >>  8) & 0xFF) / 255.0;
+            float fb = (int) ((foreCol >>  0) & 0xFF) / 255.0;
+
+            float a = fa + ba * (1 - fa);
+            float r = (fr * fa + br * ba * (1 - fa)) / a;
+            float g = (fg * fa + bg * ba * (1 - fa)) / a;
+            float b = (fb * fa + bb * ba * (1 - fa)) / a;
+
+            ptr[x] =  (uint8_t(a * 255) << 24)
+                    | (uint8_t(r * 255) << 16)
+                    | (uint8_t(g * 255) << 8)
+                    | (uint8_t(b * 255) << 0);
+        }
+    }
+}
 
 } /* namespace img */

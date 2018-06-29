@@ -41,7 +41,6 @@ public:
     void setZoomLevel(int level);
     int getZoomLevel();
 
-    void purgeTiles();
     void updateImage();
     void doWork();
 

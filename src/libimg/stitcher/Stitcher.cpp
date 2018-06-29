@@ -81,11 +81,6 @@ std::shared_ptr<Image> Stitcher::getImage() {
     return dstImage;
 }
 
-void Stitcher::purgeTiles() {
-    tileCache.purge();
-    updateImage();
-}
-
 std::shared_ptr<TileSource> Stitcher::getTileSource() {
     return tileSource;
 }
@@ -123,11 +118,13 @@ void Stitcher::updateImage() {
                 dstImage->drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
                 continue;
             }
+
             std::shared_ptr<img::Image> tile;
             try {
                 tile = tileCache.getTile(tileX, tileY, zoomLevel);
             } catch (const std::exception &e) {
                 dstImage->drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                continue;
             }
 
             if (tile) {

@@ -40,7 +40,7 @@ public:
     img::Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) override;
 
     bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
-    std::string getFilePathForTile(int x, int y, int zoom) override;
+    std::string getUniqueTileName(int x, int y, int zoom) override;
     std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
     void cancelPendingLoads() override;
     void resumeLoading() override;

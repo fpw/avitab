@@ -15,38 +15,43 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_XPLANESOURCE_H_
-#define SRC_MAPS_XPLANESOURCE_H_
+#ifndef SRC_MAPS_OPENTOPOSOURCE_H_
+#define SRC_MAPS_OPENTOPOSOURCE_H_
 
-#include <string>
 #include "src/libimg/stitcher/TileSource.h"
+#include "src/maps/Downloader.h"
 
 namespace maps {
 
-class XPlaneSource: public img::TileSource {
+class OpenTopoSource: public img::TileSource {
 public:
-    XPlaneSource(const std::string &xplaneDir);
-
+    // Basic information
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;
     img::Point<double> suggestInitialCenter() override;
+    bool supportsWorldCoords() override;
     img::Point<int> getTileDimensions(int zoom) override;
     img::Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) override;
 
-    bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
-    std::string getFilePathForTile(int x, int y, int zoom) override;
-    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
+    // Control the underlying loader
     void cancelPendingLoads() override;
     void resumeLoading() override;
 
-    bool supportsWorldCoords() override;
+    // Query and load tile information
+    bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
+    std::string getUniqueTileName(int x, int y, int zoom) override;
+    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
+
+    // If world position is supported
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
+
 private:
-    std::string baseDir;
+    bool cancelToken = false;
+    Downloader downloader;
 };
 
 } /* namespace maps */
 
-#endif /* SRC_MAPS_XPLANESOURCE_H_ */
+#endif /* SRC_MAPS_OPENTOPOSOURCE_H_ */

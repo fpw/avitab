@@ -17,22 +17,28 @@
  */
 #include "MapApp.h"
 #include "src/Logger.h"
-#include "src/maps/OpenTopoSource.h"
+#include "src/maps/sources/OpenTopoSource.h"
+#include "src/maps/sources/GeoTIFFSource.h"
+#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/XPlaneSource.h"
 
 namespace avitab {
 
 MapApp::MapApp(FuncsPtr funcs):
     App(funcs),
-    window(std::make_shared<Window>(getUIContainer(), "Map Data (c) OpenStreetMap + SRTM, Map Style (c) OpenTopoMap.org")),
+    window(std::make_shared<Window>(getUIContainer(), "")),
     updateTimer(std::bind(&MapApp::onTimer, this), 200)
 {
+
+    // Map Data (c) OpenStreetMap + SRTM, Map Style (c) OpenTopoMap.org
+
     window->setOnClose([this] () { exit(); });
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&MapApp::onMinusButton, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&MapApp::onPlusButton, this));
     trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
     trackButton->setToggleState(trackPlane);
 
-    auto tileSource = std::make_shared<maps::OpenTopoSource>();
+    tileSource = std::make_shared<maps::XPlaneSource>(api().getEarthTexturePath());
     mapImage = std::make_shared<img::Image>(window->getContentWidth(), window->getContentHeight(), img::COLOR_TRANSPARENT);
     mapStitcher = std::make_shared<img::Stitcher>(mapImage, tileSource);
     mapStitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");

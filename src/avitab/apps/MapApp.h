@@ -26,6 +26,7 @@
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/stitcher/Stitcher.h"
+#include "src/libimg/stitcher/TileSource.h"
 #include "src/libimg/Image.h"
 #include "src/maps/OverlayedMap.h"
 
@@ -38,6 +39,7 @@ public:
     void suspend() override;
     void resume() override;
 private:
+    std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::Stitcher> mapStitcher;
     std::unique_ptr<maps::OverlayedMap> map;

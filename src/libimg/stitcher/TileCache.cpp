@@ -71,7 +71,7 @@ std::shared_ptr<Image> TileCache::getTile(int x, int y, int zoom) {
 
 std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
     // gets called with locked mutex
-    auto it = memoryCache.find(tileSource->getFilePathForTile(x, y, zoom));
+    auto it = memoryCache.find(tileSource->getUniqueTileName(x, y, zoom));
     if (it == memoryCache.end()) {
         return nullptr;
     }
@@ -83,7 +83,7 @@ std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
 
 std::shared_ptr<Image> TileCache::getFromDisk(int x, int y, int zoom) {
     // gets called with locked mutex
-    std::string fileName = cacheDir + "/" + tileSource->getFilePathForTile(x, y, zoom);
+    std::string fileName = cacheDir + "/" + tileSource->getUniqueTileName(x, y, zoom);
     if (!platform::fileExists(fileName)) {
         return nullptr;
     }
@@ -164,7 +164,7 @@ void TileCache::loadAndCacheTile(int x, int y, int zoom) {
         return;
     }
 
-    std::string fileName = tileSource->getFilePathForTile(x, y, zoom);
+    std::string fileName = tileSource->getUniqueTileName(x, y, zoom);
 
     std::lock_guard<std::mutex> lock(cacheMutex);
     enterMemoryCache(x, y, zoom, image);
@@ -175,15 +175,7 @@ void TileCache::enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> 
     // gets called with locked mutex
     auto timeStamp = std::chrono::steady_clock::now();
     MemCacheEntry entry(img, timeStamp);
-    memoryCache.insert(std::make_pair(tileSource->getFilePathForTile(x, y, zoom), entry));
-}
-
-void TileCache::purge() {
-    // gets called unlocked
-    cancelPendingRequests();
-
-    std::lock_guard<std::mutex> lock(cacheMutex);
-    memoryCache.clear();
+    memoryCache.insert(std::make_pair(tileSource->getUniqueTileName(x, y, zoom), entry));
 }
 
 void TileCache::cancelPendingRequests() {

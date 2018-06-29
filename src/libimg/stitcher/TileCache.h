@@ -39,7 +39,6 @@ public:
     void setCacheDirectory(const std::string &utf8Path);
     std::shared_ptr<Image> getTile(int x, int y, int zoom);
     void cancelPendingRequests();
-    void purge();
     ~TileCache();
 private:
     static constexpr const int CACHE_SECONDS = 30;

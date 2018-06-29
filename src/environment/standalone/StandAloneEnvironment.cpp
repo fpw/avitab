@@ -38,11 +38,11 @@ StandAloneEnvironment::StandAloneEnvironment() {
 
     EnvData data {};
 
-    data.doubleValue = 53.8019434;
-    setData("sim/flightmodel/position/latitude", data);
-
     data.doubleValue = 10.7017287;
     setData("sim/flightmodel/position/longitude", data);
+
+    data.doubleValue = 53.8019434;
+    setData("sim/flightmodel/position/latitude", data);
 
     data.floatValue = 70;
     setData("sim/flightmodel/position/psi", data);

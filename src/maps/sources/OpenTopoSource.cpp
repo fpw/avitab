@@ -101,7 +101,7 @@ bool OpenTopoSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string OpenTopoSource::getFilePathForTile(int x, int y, int zoom) {
+std::string OpenTopoSource::getUniqueTileName(int x, int y, int zoom) {
     if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
@@ -114,7 +114,7 @@ std::string OpenTopoSource::getFilePathForTile(int x, int y, int zoom) {
 
 std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int x, int y, int zoom) {
     cancelToken = false;
-    std::string path = getFilePathForTile(x, y, zoom);
+    std::string path = getUniqueTileName(x, y, zoom);
     auto data = downloader.download("https://" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data);

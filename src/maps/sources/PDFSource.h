@@ -15,43 +15,55 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OPENTOPOSOURCE_H_
-#define SRC_MAPS_OPENTOPOSOURCE_H_
+#ifndef SRC_MAPS_PDFSOURCE_H_
+#define SRC_MAPS_PDFSOURCE_H_
 
+#include <string>
 #include "src/libimg/stitcher/TileSource.h"
-#include "Downloader.h"
+#include "src/libimg/Rasterizer.h"
 
 namespace maps {
 
-class OpenTopoSource: public img::TileSource {
+class PDFSource: public img::TileSource {
 public:
-    // Basic information
+    PDFSource(const std::string &file);
+
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;
     img::Point<double> suggestInitialCenter() override;
-    bool supportsWorldCoords() override;
     img::Point<int> getTileDimensions(int zoom) override;
     img::Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) override;
 
-    // Control the underlying loader
+    bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
+    std::string getUniqueTileName(int x, int y, int zoom) override;
+    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
     void cancelPendingLoads() override;
     void resumeLoading() override;
 
-    // Query and load tile information
-    bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
-    std::string getFilePathForTile(int x, int y, int zoom) override;
-    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
-
-    // If world position is supported
+    bool supportsWorldCoords() override;
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
+    void attachCalibration1(double x, double y, double lat, double lon, int zoom) override;
+    void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
+
+    void nextPage();
+    void prevPage();
 private:
-    bool cancelToken = false;
-    Downloader downloader;
+    std::string utf8FileName;
+    img::Rasterizer rasterizer;
+    bool calibrated = false;
+    double regX1{}, regY1{}, regLat1{}, regLon1{};
+    double regX2{}, regY2{}, regLat2{}, regLon2{};
+    double leftLongitude{}, coverLon{};
+    double topLatitude{}, coverLat{};
+
+    void calculateCalibration();
+    void storeCalibration();
+    void loadCalibration();
 };
 
 } /* namespace maps */
 
-#endif /* SRC_MAPS_OPENTOPOSOURCE_H_ */
+#endif /* SRC_MAPS_PDFSOURCE_H_ */

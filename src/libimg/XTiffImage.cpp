@@ -75,6 +75,18 @@ void XTiffImage::loadFullImage() {
         throw std::runtime_error("Couldn't read TIFF");
     }
 
+    uint8_t *data = (uint8_t *) getPixels();
+
+    // libtiff actually loads ARGB and there is no easy way to change that
+    for (int y = 0; y < fullHeight; y++) {
+        for (int x = 0; x < fullWidth; x++) {
+            int g = data[4 * x + 2];
+            data[4 * x + 2] = data[4 * x + 0];
+            data[4 * x + 0] = g;
+        }
+        data += 4 * fullWidth;
+    }
+
     fullImageLoaded = true;
 }
 
