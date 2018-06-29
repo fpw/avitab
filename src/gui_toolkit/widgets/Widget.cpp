@@ -180,6 +180,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::NONE:      return nullptr;
     case Symbol::CLOSE:     return SYMBOL_CLOSE;
     case Symbol::SETTINGS:  return SYMBOL_SETTINGS;
+    case Symbol::LIST:      return SYMBOL_LIST;
     case Symbol::LEFT:      return SYMBOL_LEFT;
     case Symbol::RIGHT:     return SYMBOL_RIGHT;
     case Symbol::UP:        return SYMBOL_UP;

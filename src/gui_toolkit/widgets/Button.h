@@ -37,6 +37,7 @@ public:
     void setCallback(ButtonCallback cb);
     void setToggleable(bool toggleable);
     void setToggleState(bool toggled);
+    void setFit(bool hor, bool vert);
 private:
     img::Image iconData;
     lv_img_t iconImage;

@@ -66,10 +66,15 @@ img::Point<double> XPlaneSource::transformZoomedPoint(double oldX, double oldY, 
 }
 
 bool XPlaneSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
-    auto world = xyToWorld(x, y, zoom);
-    if (world.x < -180 || world.x >= 180 || world.y < -90 || world.y >= 90) {
+    if (y < 0 || y >= 180 / 10) {
         return false;
     }
+
+    if (x < 0) {
+        x = 360 / 10 + x;
+    }
+    x %= 360 / 10;
+
     return true;
 }
 

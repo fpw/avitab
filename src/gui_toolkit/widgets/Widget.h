@@ -28,7 +28,7 @@ class Widget {
 public:
     enum class Symbol {
         NONE,
-        CLOSE, SETTINGS,
+        CLOSE, SETTINGS, LIST,
         LEFT, RIGHT, UP, DOWN, ROTATE,
         PREV, NEXT, PAUSE,
         PLUS, MINUS,

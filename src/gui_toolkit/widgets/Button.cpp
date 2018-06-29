@@ -85,6 +85,10 @@ Button::Button(WidgetPtr parent, lv_obj_t* obj):
     setManagedObj(obj);
 }
 
+void Button::setFit(bool hor, bool vert) {
+    lv_cont_set_fit(obj(), hor, vert);
+}
+
 void Button::setCallback(ButtonCallback cb) {
     callbackFunc = cb;
     lv_obj_set_free_ptr(obj(), this);

@@ -24,6 +24,8 @@
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Container.h"
+#include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libimg/stitcher/TileSource.h"
@@ -39,6 +41,15 @@ public:
     void suspend() override;
     void resume() override;
 private:
+    enum class MapSource {
+        OPEN_TOPO,
+        XPLANE,
+        MERCATOR,
+        GEOTIFF,
+        EPSG3857,
+    };
+
+    MapSource sourceType = MapSource::OPEN_TOPO;
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::Stitcher> mapStitcher;
@@ -47,13 +58,21 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;
+    std::shared_ptr<Container> settingsContainer;
+    std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton;
+
     Timer updateTimer;
     bool trackPlane = true;
     bool suspended = true;
 
     int panPosX = 0, panPosY = 0;
 
+    void createSettingsLayout();
+    void setMapSource(MapSource style);
+    void setTileSource(std::shared_ptr<img::TileSource> source);
+
     void onRedrawNeeded();
+    void onSettingsButton();
     void onMapPan(int x, int y, bool start, bool end);
     void onPlusButton();
     void onMinusButton();
