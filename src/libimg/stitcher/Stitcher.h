@@ -44,11 +44,14 @@ public:
     void updateImage();
     void doWork();
 
+    void rotateRight();
+
     std::shared_ptr<Image> getImage();
     std::shared_ptr<TileSource> getTileSource();
 
 private:
     Image emptyTile, errorTile, loadingTile;
+    Image tmpImage;
     std::shared_ptr<Image> dstImage;
     std::shared_ptr<TileSource> tileSource;
     TileCache tileCache;
@@ -56,6 +59,7 @@ private:
     int zoomLevel = 0;
     double centerX = 0, centerY = 0;
     bool pendingTiles = true;
+    int rotAngle = 0;
 };
 
 } /* namespace img */

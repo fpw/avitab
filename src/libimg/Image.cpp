@@ -325,4 +325,80 @@ void Image::alphaBlend(uint32_t color) {
     }
 }
 
+void Image::rotate0(Image& dst) {
+    int yOffset = height / 2 - dst.height / 2;
+    int xOffset = width / 2 - dst.width / 2;
+    int copyWidth = dst.width;
+
+    uint32_t *srcPtr = getPixels();
+    uint32_t *dstPtr = dst.getPixels();
+
+    for (int y = 0; y < dst.height; y++) {
+        int srcY = y + yOffset;
+        int srcX = xOffset;
+        memcpy(dstPtr + y * dst.width, srcPtr + srcY * width + srcX, copyWidth * 4);
+    }
+}
+
+void Image::rotate90(Image &dst) {
+    uint32_t *srcPtr = getPixels();
+    uint32_t *dstPtr = dst.getPixels();
+
+    int xOffset = width / 2 - dst.height / 2;
+    int yOffset = height / 2 - dst.width / 2;
+
+    for (int y = 0; y < dst.height; y++) {
+        int srcX = xOffset + y;
+
+        for (int x = 0; x < dst.width; x++) {
+            int srcY = width - 1 - yOffset - x;
+            dstPtr[y * dst.width + x] = srcPtr[srcY * width + srcX];
+        }
+    }
+}
+
+void Image::rotate180(Image &dst) {
+    int yOffset = height / 2 - dst.height / 2;
+    int xOffset = width / 2 - dst.width / 2;
+    int copyWidth = dst.width;
+
+    uint32_t *srcPtr = getPixels();
+    uint32_t *dstPtr = dst.getPixels();
+
+    for (int y = 0; y < dst.height; y++) {
+        int srcY = height - 1 - yOffset - y;
+        int srcX = xOffset;
+        for (int x = srcX; x < copyWidth; x++) {
+            dstPtr[y * dst.width + x] = srcPtr[srcY * width + (width - x - 1)];
+        }
+    }
+}
+
+void Image::rotate270(Image &dst) {
+    uint32_t *srcPtr = getPixels();
+    uint32_t *dstPtr = dst.getPixels();
+
+    int xOffset = width / 2 - dst.height / 2;
+    int yOffset = height / 2 - dst.width / 2;
+
+    for (int y = 0; y < dst.height; y++) {
+        int srcX = height - 1 - xOffset - y;
+
+        for (int x = 0; x < dst.width; x++) {
+            int srcY = yOffset + x;
+            dstPtr[y * dst.width + x] = srcPtr[srcY * width + srcX];
+        }
+    }
+}
+
+void Image::rotate(Image& dst, int angle) {
+    dst.clear(0);
+    switch (angle) {
+    case 0:     rotate0(dst);   break;
+    case 90:    rotate90(dst);  break;
+    case 180:   rotate180(dst); break;
+    case 270:   rotate270(dst); break;
+    }
+}
+
 } /* namespace img */

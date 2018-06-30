@@ -62,6 +62,12 @@ public:
     void blendImage(const Image &src, int dstX, int dstY, double angle);
     void alphaBlend(uint32_t color);
 
+    void rotate0(Image &dst);
+    void rotate90(Image &dst);
+    void rotate180(Image &dst);
+    void rotate270(Image &dst);
+    void rotate(Image &dst, int angle);
+
     virtual ~Image() = default;
 private:
     int width = 0;

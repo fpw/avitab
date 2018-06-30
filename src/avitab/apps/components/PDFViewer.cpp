@@ -143,7 +143,8 @@ void PDFViewer::onMinus() {
 }
 
 void PDFViewer::onRotate() {
-    if (source) {
+    if (stitcher) {
+        stitcher->rotateRight();
     }
 }
 

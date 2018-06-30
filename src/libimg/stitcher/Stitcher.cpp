@@ -29,6 +29,9 @@ Stitcher::Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> 
     auto center = source->suggestInitialCenter();
     centerX = center.x;
     centerY = center.y;
+
+    int max = std::max(dstImage->getWidth(), dstImage->getHeight());
+    tmpImage.resize(max, max, 0);
 }
 
 void Stitcher::setCacheDirectory(const std::string& utf8Path) {
@@ -53,8 +56,24 @@ img::Point<double> Stitcher::getCenter() const {
 
 void Stitcher::pan(int dx, int dy) {
     auto dim = tileSource->getTileDimensions(zoomLevel);
-    centerX += dx / (double) dim.x;
-    centerY += dy / (double) dim.y;
+    switch (rotAngle) {
+    case 0:
+        centerX += dx / (double) dim.x;
+        centerY += dy / (double) dim.y;
+        break;
+    case 90:
+        centerX += dy / (double) dim.y;
+        centerY -= dx / (double) dim.x;
+        break;
+    case 180:
+        centerX -= dx / (double) dim.x;
+        centerY -= dy / (double) dim.y;
+        break;
+    case 270:
+        centerX -= dy / (double) dim.y;
+        centerY += dx / (double) dim.x;
+        break;
+    }
     updateImage();
 }
 
@@ -85,12 +104,17 @@ std::shared_ptr<TileSource> Stitcher::getTileSource() {
     return tileSource;
 }
 
+void Stitcher::rotateRight() {
+    rotAngle = (rotAngle + 90) % 360;
+    updateImage();
+}
+
 void Stitcher::updateImage() {
     auto dim = tileSource->getTileDimensions(zoomLevel);
     int tileEdgeWidth = dim.x;
     int tileEdgeHeight = dim.y;
-    int dstWidth = dstImage->getWidth();
-    int dstHeight = dstImage->getHeight();
+    int dstWidth = tmpImage.getWidth();
+    int dstHeight = tmpImage.getHeight();
 
     // The center pixel's position offset inside the center tile
     int xOff = (centerX - (int) centerX) * tileEdgeWidth;
@@ -100,8 +124,8 @@ void Stitcher::updateImage() {
     int centerPosX = dstWidth / 2 - xOff;
     int centerPosY = dstHeight / 2 - yOff;
 
-    int radiusX = (dstWidth / 2.0) / tileEdgeWidth + 1.5;
-    int radiusY = (dstHeight / 2.0) / tileEdgeHeight + 1.5;
+    int radiusX = (dstWidth / 2.0) / tileEdgeWidth + 1;
+    int radiusY = (dstHeight / 2.0) / tileEdgeHeight + 1;
 
     pendingTiles = false;
 
@@ -115,7 +139,7 @@ void Stitcher::updateImage() {
             int tileY = ((int) centerY) + y;
 
             if (!tileSource->checkAndCorrectTileCoordinates(tileX, tileY, zoomLevel)) {
-                dstImage->drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                tmpImage.drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
                 continue;
             }
 
@@ -123,18 +147,20 @@ void Stitcher::updateImage() {
             try {
                 tile = tileCache.getTile(tileX, tileY, zoomLevel);
             } catch (const std::exception &e) {
-                dstImage->drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                tmpImage.drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
                 continue;
             }
 
             if (tile) {
-                dstImage->drawImage(*tile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                tmpImage.drawImage(*tile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
             } else {
                 pendingTiles = true;
-                dstImage->drawImage(loadingTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                tmpImage.drawImage(loadingTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
             }
         }
     }
+
+    tmpImage.rotate(*dstImage, rotAngle);
 
     if (onRedraw) {
         onRedraw();
