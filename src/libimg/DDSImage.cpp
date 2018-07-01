@@ -41,6 +41,7 @@ DDSImage::DDSImage(const std::string& utf8Path, int mipLevel) {
     }
 
     for (int i = 0; i < numMipsLoaded; i++) {
+        free(textures[i]->data);
         free(textures[i]);
     }
     free(textures);
