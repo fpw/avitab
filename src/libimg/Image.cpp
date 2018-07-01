@@ -214,12 +214,12 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
         int srcX = 0;
         int dstXClip = dstX;
         if (dstXClip < 0) {
-            srcX = -dstX;
             dstXClip = 0;
+            srcX = -dstX;
             copyWidth -= -dstX;
         }
-        if (dstX + copyWidth > width) {
-            copyWidth = width - dstX;
+        if (dstXClip + copyWidth > width) {
+            copyWidth = width - dstXClip;
         }
 
         if (copyWidth <= 0) {

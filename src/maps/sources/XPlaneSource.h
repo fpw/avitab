@@ -44,8 +44,8 @@ public:
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 private:
-    static constexpr const uint32_t WATER_COLOR = 0xFF064273;
-    static constexpr const int MAX_MIPMAP_LVL = 6;
+    const uint32_t WATER_COLOR = 0xFF064273;
+    const int MAX_MIPMAP_LVL = 6;
 
     std::string baseDir;
 };
