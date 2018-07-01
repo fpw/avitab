@@ -31,7 +31,7 @@ Stitcher::Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> 
     centerY = center.y;
 
     int max = std::max(dstImage->getWidth(), dstImage->getHeight());
-    tmpImage.resize(max, max, 0);
+    unrotatedImage.resize(max, max, 0);
 }
 
 void Stitcher::setCacheDirectory(const std::string& utf8Path) {
@@ -109,12 +109,12 @@ void Stitcher::rotateRight() {
     updateImage();
 }
 
-void Stitcher::updateImage() {
+void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) {
     auto dim = tileSource->getTileDimensions(zoomLevel);
     int tileEdgeWidth = dim.x;
     int tileEdgeHeight = dim.y;
-    int dstWidth = tmpImage.getWidth();
-    int dstHeight = tmpImage.getHeight();
+    int dstWidth = unrotatedImage.getWidth();
+    int dstHeight = unrotatedImage.getHeight();
 
     // The center pixel's position offset inside the center tile
     int xOff = (centerX - (int) centerX) * tileEdgeWidth;
@@ -127,11 +127,11 @@ void Stitcher::updateImage() {
     int radiusX = (dstWidth / 2.0) / tileEdgeWidth + 1;
     int radiusY = (dstHeight / 2.0) / tileEdgeHeight + 1;
 
-    pendingTiles = false;
-
     emptyTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_TRANSPARENT);
     errorTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_RED);
     loadingTile.resize(tileEdgeWidth, tileEdgeHeight, img::COLOR_BLACK);
+
+    pendingTiles = false;
 
     for (int y = -radiusY; y <= radiusY; y++) {
         for (int x = -radiusX; x <= radiusX; x++) {
@@ -139,7 +139,7 @@ void Stitcher::updateImage() {
             int tileY = ((int) centerY) + y;
 
             if (!tileSource->checkAndCorrectTileCoordinates(tileX, tileY, zoomLevel)) {
-                tmpImage.drawImage(emptyTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, emptyTile);
                 continue;
             }
 
@@ -147,20 +147,26 @@ void Stitcher::updateImage() {
             try {
                 tile = tileCache.getTile(tileX, tileY, zoomLevel);
             } catch (const std::exception &e) {
-                tmpImage.drawImage(errorTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, errorTile);
                 continue;
             }
 
             if (tile) {
-                tmpImage.drawImage(*tile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, *tile);
             } else {
                 pendingTiles = true;
-                tmpImage.drawImage(loadingTile, centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight);
+                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, loadingTile);
             }
         }
     }
+}
 
-    tmpImage.rotate(*dstImage, rotAngle);
+void Stitcher::updateImage() {
+    forEachTileInView([this] (int x, int y, img::Image &tile) {
+        unrotatedImage.drawImage(tile, x, y);
+    });
+
+    unrotatedImage.rotate(*dstImage, rotAngle);
 
     if (onRedraw) {
         onRedraw();
@@ -170,6 +176,13 @@ void Stitcher::updateImage() {
 void Stitcher::doWork() {
     if (pendingTiles) {
         updateImage();
+    } else {
+        // when there is nothing to do, load all tiles from the memory
+        // cache anyways in order to touch the cache time so that
+        // the tiles in sight are not flushed
+        forEachTileInView([this] (int x, int y, img::Image &tile) {
+            // do nothing, just touch the cache
+        });
     }
 }
 

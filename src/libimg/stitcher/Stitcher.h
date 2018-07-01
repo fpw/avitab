@@ -51,7 +51,7 @@ public:
 
 private:
     Image emptyTile, errorTile, loadingTile;
-    Image tmpImage;
+    Image unrotatedImage;
     std::shared_ptr<Image> dstImage;
     std::shared_ptr<TileSource> tileSource;
     TileCache tileCache;
@@ -60,6 +60,8 @@ private:
     double centerX = 0, centerY = 0;
     bool pendingTiles = true;
     int rotAngle = 0;
+
+    void forEachTileInView(std::function<void(int, int, img::Image &)> f);
 };
 
 } /* namespace img */
