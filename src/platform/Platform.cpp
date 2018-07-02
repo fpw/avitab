@@ -135,11 +135,14 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 }
 
 std::string realPath(const std::string& utf8Path) {
-    char realPathRes[AVITAB_PATH_LEN_MAX];
-    if (!realpath(utf8Path.c_str(), realPathRes)) {
+    std::string nativePath = UTF8ToNative(utf8Path);
+    char *res = realpath(nativePath.c_str(), nullptr);
+    if (!res) {
         throw std::runtime_error("realpath failed");
     }
-    return std::string(realPathRes);
+    std::string resStr(res);
+    free(res);
+    return resStr;
 }
 
 std::string getFileNameFromPath(const std::string& utf8Path) {
