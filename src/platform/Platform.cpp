@@ -136,7 +136,9 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 
 std::string realPath(const std::string& utf8Path) {
     char realPath[AVITAB_PATH_LEN_MAX];
-    realpath(utf8Path.c_str(), realPath);
+    if (!realpath(utf8Path.c_str(), realPath)) {
+        throw std::runtime_error("realpath failed");
+    }
     return realPath;
 }
 

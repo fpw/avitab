@@ -49,7 +49,7 @@ private:
     std::string curTimeString;
 
     bool showFps = true;
-    std::array<float, 30> fpsRingBuffer;
+    std::array<float, 30> fpsRingBuffer{};
     int fpsRingCursor = 0;
 
     void createSettingsContainer();
