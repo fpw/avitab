@@ -54,7 +54,6 @@ private:
     };
 
     std::unique_ptr<FileChooser> fileChooser;
-    MapSource sourceType = MapSource::OPEN_TOPO;
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::Stitcher> mapStitcher;
