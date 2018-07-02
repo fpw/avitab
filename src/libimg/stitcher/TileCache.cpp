@@ -24,9 +24,9 @@
 namespace img {
 
 TileCache::TileCache(std::shared_ptr<TileSource> source):
-    tileSource(source),
-    loaderThread(std::make_unique<std::thread>(&TileCache::loadLoop, this))
+    tileSource(source)
 {
+    loaderThread = std::make_unique<std::thread>(&TileCache::loadLoop, this);
 }
 
 void TileCache::setCacheDirectory(const std::string& utf8Path) {
