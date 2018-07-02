@@ -70,6 +70,7 @@ void Rasterizer::loadDocument(const std::string& utf8Path) {
         fz_bound_page(ctx, page, &rect);
         currentPageWidth = rect.x1 - rect.x0;
         currentPageHeight = rect.y1 - rect.y0;
+        fz_drop_page(ctx, page);
     } fz_catch(ctx) {
         fz_drop_document(ctx, doc);
         throw std::runtime_error("Cannot get first page size: " + std::string(fz_caught_message(ctx)));

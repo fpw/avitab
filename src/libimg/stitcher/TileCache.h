@@ -41,7 +41,7 @@ public:
     void cancelPendingRequests();
     ~TileCache();
 private:
-    static constexpr const int CACHE_SECONDS = 3;
+    static constexpr const int CACHE_SECONDS = 30;
     using TimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
     using TileCoords = std::tuple<int, int, int>;
     using MemCacheEntry = std::tuple<std::shared_ptr<Image>, TimeStamp>;
