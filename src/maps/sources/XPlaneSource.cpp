@@ -70,10 +70,10 @@ bool XPlaneSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
         return false;
     }
 
-    if (x < 0) {
-        x = 360 / 10 + x;
+    if (x < 0 || x >= 360 / 10) {
+        // disable wrapping for now because it is broken on higher layers
+        return false;
     }
-    x %= 360 / 10;
 
     return true;
 }

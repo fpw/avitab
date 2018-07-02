@@ -94,10 +94,11 @@ bool EPSGSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
         return false;
     }
 
-    if (x < 0) {
-        x = endXY + x;
+    if (x < 0 || (uint32_t) x >= endXY) {
+        // disable wrapping for now because it is broken on higher layers
+        return false;
     }
-    x = x % endXY;
+
     return true;
 }
 
