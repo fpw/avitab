@@ -15,6 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifdef _WIN32
+#   define WIN32_LEAN_AND_MEAN
+#   define _WIN32_WINNT 0x0600
+#   include <windows.h>
+#   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
+#endif
+
 #include <ctime>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -41,12 +48,6 @@
 
 // The maximum length that WE support
 #define AVITAB_PATH_LEN_MAX 2048
-
-#ifdef _WIN32
-#   define WIN32_LEAN_AND_MEAN
-#   include <windows.h>
-#   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
-#endif
 
 namespace platform {
 
@@ -93,6 +94,21 @@ std::string UTF8ToNative(const std::string& utf8) {
 #else
 std::string UTF8ToNative(const std::string& utf8) {
     return utf8;
+}
+#endif
+
+#ifdef _WIN32
+std::string getProgramPath() {
+    char buf[AVITAB_PATH_LEN_MAX];
+    DWORD size = AVITAB_PATH_LEN_MAX;
+    HANDLE proc = GetCurrentProcess();
+    QueryFullProcessImageNameA(proc, 0, buf, &size);
+
+    std::string path = nativeToUTF8(std::string(buf));
+    return getDirNameFromPath(path) + "/";
+}
+#else
+std::string getProgramPath() {
 }
 #endif
 

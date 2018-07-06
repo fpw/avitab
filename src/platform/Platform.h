@@ -47,6 +47,7 @@ constexpr size_t getMaxPathLen();
 std::string nativeToUTF8(const std::string &native);
 std::string UTF8ToNative(const std::string &utf8);
 
+std::string getProgramPath();
 std::vector<DirEntry> readDirectory(const std::string &utf8Path);
 std::string realPath(const std::string &utf8Path);
 std::string getFileNameFromPath(const std::string &utf8Path);

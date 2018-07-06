@@ -15,10 +15,10 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_
-#define SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_
+#ifndef SRC_ENVIRONMENT_STANDALONE_GLFWGUIDRIVER_H_
+#define SRC_ENVIRONMENT_STANDALONE_GLFWGUIDRIVER_H_
 
-#include <SDL2/SDL.h>
+#include <GLFW/glfw3.h>
 #include <vector>
 #include <mutex>
 #include <atomic>
@@ -26,7 +26,7 @@
 
 namespace avitab {
 
-class SDLGUIDriver: public GUIDriver {
+class GlfwGUIDriver: public GUIDriver {
 public:
     void init(int width, int height) override;
     void createWindow(const std::string &title) override;
@@ -38,23 +38,26 @@ public:
     bool handleEvents();
     uint32_t getLastDrawTime();
 
-    void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
+    void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *newData) override;
     void readPointerState(int &x, int &y, bool &pressed) override;
     int getWheelDirection() override;
+    ~GlfwGUIDriver();
 private:
     std::mutex driverMutex;
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    SDL_Texture *texture = nullptr;
+    GLFWwindow *window {};
+    GLuint textureId{};
     std::atomic<uint32_t> lastDrawTime {0};
     float brightness = 1;
+    bool needsRedraw = false;
 
     std::atomic_int mouseX {0}, mouseY {0}, wheelDir {0};
     bool mousePressed {false};
 
+    void createTexture();
+    void render();
     void onQuit();
 };
 
 } /* namespace avitab */
 
-#endif /* SRC_ENVIRONMENT_STANDALONE_SDLGUIDRIVER_H_ */
+#endif /* SRC_ENVIRONMENT_STANDALONE_GLFWGUIDRIVER_H_ */

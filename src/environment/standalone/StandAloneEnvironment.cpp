@@ -16,7 +16,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include <SDL2/SDL.h>
 #include <fstream>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
@@ -25,13 +24,7 @@
 namespace avitab {
 
 StandAloneEnvironment::StandAloneEnvironment() {
-    char *path = SDL_GetBasePath();
-    if (path) {
-        ourPath = path;
-        SDL_free(path);
-    } else {
-        throw std::runtime_error("Couldn't find our path");
-    }
+    ourPath = platform::getProgramPath();
 
     xplaneRootPath = findXPlaneInstallationPath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
@@ -96,7 +89,7 @@ void StandAloneEnvironment::setData(const std::string& dataRef, EnvData value) {
 }
 
 std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
-    driver = std::make_shared<SDLGUIDriver>();
+    driver = std::make_shared<GlfwGUIDriver>();
     return std::make_shared<LVGLToolkit>(driver);
 }
 

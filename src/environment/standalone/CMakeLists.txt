@@ -1,6 +1,6 @@
 add_library(avitab_env_standalone
     StandAloneEnvironment.cpp
-    SDLGUIDriver.cpp
+    GlfwGUIDriver.cpp
 )
 
 target_link_libraries(avitab_env_standalone

@@ -62,7 +62,6 @@ install(TARGETS avitab_plugin
 endif(WIN32)
 
 # Standalone program
-find_package(SDL2 REQUIRED)
 add_executable(AviTab-standalone StandAlone.cpp Logger.cpp)
 target_link_libraries(AviTab-standalone
     ${CommonLibs}
@@ -74,14 +73,15 @@ if(WIN32)
         -static
         -static-libgcc
         -static-libstdc++
-        -lSDL2main -lSDL2 -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid
         ws2_32
         crypt32
+        glfw3
+        opengl32
         -Wl,--subsystem,windows
     )
 else()
     target_link_libraries(AviTab-standalone
-        ${SDL2_LIBRARIES}
+        glfw
     )
 endif(WIN32)
 

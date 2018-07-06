@@ -18,10 +18,10 @@
 #ifndef SRC_ENVIRONMENT_STANDALONE_STANDALONEENVIRONMENT_H_
 #define SRC_ENVIRONMENT_STANDALONE_STANDALONEENVIRONMENT_H_
 
+#include "GlfwGUIDriver.h"
 #include <memory>
 #include <map>
 #include "src/environment/Environment.h"
-#include "SDLGUIDriver.h"
 
 namespace avitab {
 
@@ -53,7 +53,7 @@ public:
     virtual ~StandAloneEnvironment();
 private:
     std::string ourPath, xplaneRootPath;
-    std::shared_ptr<SDLGUIDriver> driver;
+    std::shared_ptr<GlfwGUIDriver> driver;
     std::shared_ptr<xdata::XData> xplaneData;
     std::map<std::string, EnvData> simulatedData;
 
