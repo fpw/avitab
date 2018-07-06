@@ -47,8 +47,8 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_RESIZABLE, false);
-    window = glfwCreateWindow(winWidth, winHeight, title.c_str(), nullptr, nullptr);
+    glfwWindowHint(GLFW_RESIZABLE, true);
+    window = glfwCreateWindow(winWidth * 1.5, winHeight * 1.5, title.c_str(), nullptr, nullptr);
 
     if (!window) {
         throw std::runtime_error("Couldn't create GLFW window");
@@ -59,8 +59,10 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, [] (GLFWwindow *wnd, double x, double y) {
         GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
-        us->mouseX = x;
-        us->mouseY = y;
+        int w, h;
+        glfwGetWindowSize(wnd, &w, &h);
+        us->mouseX = x / w * us->width();
+        us->mouseY = y / h * us->height();
     });
     glfwSetMouseButtonCallback(window, [] (GLFWwindow *wnd, int button, int action, int flags) {
         GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
@@ -78,6 +80,7 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
             us->wheelDir = 0;
         }
     });
+    glfwSetWindowAspectRatio(window, winWidth, winHeight);
 
     createTexture();
 }
