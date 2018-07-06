@@ -18,11 +18,11 @@ if(WIN32)
 elseif(APPLE)
     target_link_libraries(avitab_env_standalone
         "-framework OpenGL"
-        glfw3
+        glfw
     )
 elseif(UNIX)
     target_link_libraries(avitab_env_standalone
         GL
-        glfw3
+        glfw
     )
 endif()
