@@ -34,6 +34,7 @@ if(WIN32)
         XPLM_64
         ws2_32
         crypt32
+        xtiff
     )
 elseif(APPLE)
 target_link_libraries(avitab_plugin

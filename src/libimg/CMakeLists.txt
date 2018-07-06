@@ -13,7 +13,13 @@ target_link_libraries(img_main
     mupdfthird
     detex
     tiff
-    xtiff
     lzma
     jpeg
 )
+
+if(WIN32)
+    target_link_libraries(img_main
+        xtiff
+    )
+endif(WIN32)
+
