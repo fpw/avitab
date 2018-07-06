@@ -76,8 +76,6 @@ if(WIN32)
         -static-libstdc++
         ws2_32
         crypt32
-        glfw3
-        opengl32
         -Wl,--subsystem,windows
     )
 else()

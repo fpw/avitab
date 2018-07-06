@@ -9,3 +9,20 @@ target_link_libraries(avitab_env_standalone
     avitab_platform
     xdata_main
 )
+
+if(WIN32)
+    target_link_libraries(avitab_env_standalone
+        opengl32
+        glfw3
+    )
+elseif(APPLE)
+    target_link_libraries(avitab_env_standalone
+        "-framework OpenGL"
+        glfw3
+    )
+elseif(UNIX)
+    target_link_libraries(avitab_env_standalone
+        GL
+        glfw3
+    )
+endif()
