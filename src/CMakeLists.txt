@@ -78,9 +78,5 @@ if(WIN32)
         crypt32
         -Wl,--subsystem,windows
     )
-else()
-    target_link_libraries(AviTab-standalone
-        glfw
-    )
 endif(WIN32)
 
