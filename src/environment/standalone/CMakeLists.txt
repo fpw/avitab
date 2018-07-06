@@ -24,5 +24,6 @@ elseif(UNIX)
     target_link_libraries(avitab_env_standalone
         GL
         glfw
+        pthread
     )
 endif()

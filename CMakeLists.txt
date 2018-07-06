@@ -20,6 +20,12 @@ if(WIN32)
     link_directories("/usr/local/lib")
 endif(WIN32)
 
+if(APPLE)
+    include_directories("/usr/include/geotiff")
+elseif(UNIX)
+    include_directories("/usr/include/geotiff")
+endif()
+
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
