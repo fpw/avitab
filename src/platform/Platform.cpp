@@ -20,6 +20,8 @@
 #   define _WIN32_WINNT 0x0600
 #   include <windows.h>
 #   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
+#else
+#   include <unistd.h>
 #endif
 
 #include <ctime>
@@ -109,6 +111,10 @@ std::string getProgramPath() {
 }
 #else
 std::string getProgramPath() {
+    char buf[AVITAB_PATH_LEN_MAX];
+    getcwd(buf, sizeof(buf));
+    std::string path = nativeToUTF8(buf) + "/";
+    return path;
 }
 #endif
 

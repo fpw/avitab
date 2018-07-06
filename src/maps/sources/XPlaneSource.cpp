@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <cstdio>
+#include <memory>
 #include "src/libimg/DDSImage.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
@@ -104,7 +105,7 @@ std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) 
         mipLevel = 0;
     }
 
-    auto image = std::make_unique<img::DDSImage>(path, mipLevel);
+    std::unique_ptr<img::Image>(image) = std::make_unique<img::DDSImage>(path, mipLevel);
     image->alphaBlend(WATER_COLOR);
 
     if (zoom > MAX_MIPMAP_LVL) {
