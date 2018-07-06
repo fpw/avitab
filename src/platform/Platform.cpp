@@ -112,7 +112,9 @@ std::string getProgramPath() {
 #else
 std::string getProgramPath() {
     char buf[AVITAB_PATH_LEN_MAX];
-    getcwd(buf, sizeof(buf));
+    if (!getcwd(buf, sizeof(buf))) {
+        throw std::runtime_error("Couldn't get current directory");
+    }
     std::string path = nativeToUTF8(buf) + "/";
     return path;
 }
