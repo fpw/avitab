@@ -57,6 +57,7 @@ void XData::load() {
     loadMetar();
     auto duration = std::chrono::high_resolution_clock::now() - startAt;
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    world->registerNavNodes();
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 

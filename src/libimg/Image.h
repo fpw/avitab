@@ -31,6 +31,7 @@ constexpr const uint32_t COLOR_WHITE        = 0xFFFFFFFF;
 constexpr const uint32_t COLOR_RED          = 0xFF800000;
 constexpr const uint32_t COLOR_LIGHT_RED    = 0xFFFF0000;
 constexpr const uint32_t COLOR_BLUE         = 0xFF0000FF;
+constexpr const uint32_t COLOR_YELLOW       = 0xFF808000;
 
 class Image {
 public:

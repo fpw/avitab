@@ -131,7 +131,7 @@ img::Point<double> XPlaneSource::worldToXY(double lon, double lat, int zoom) {
 
 img::Point<double> XPlaneSource::xyToWorld(double x, double y, int zoom) {
     double lon = x * 10 - 180;
-    double lat = y * 10 - 90;
+    double lat = -(y * 10 - 90);
 
     return img::Point<double>{lon, lat};
 }

@@ -145,6 +145,10 @@ void Airport::forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f
     }
 }
 
+bool Airport::hasOnlyHeliports() const {
+    return runways.empty();
+}
+
 void Airport::addSID(std::shared_ptr<SID> sid) {
     sids.insert(std::make_pair(sid->getID(), sid));
 }

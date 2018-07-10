@@ -35,6 +35,7 @@ constexpr const double KM_TO_NM = 0.539957;
 class World {
 public:
     static constexpr const int MAX_SEARCH_RESULTS = 10;
+    using NodeAcceptor = std::function<void(const NavNode &node)>;
 
     World();
 
@@ -51,6 +52,9 @@ public:
     void cancelLoading();
     bool shouldCancelLoading() const;
 
+    void registerNavNodes();
+    void visitNodes(const Location &upLeft, const Location &lowRight, NodeAcceptor f);
+
 private:
     std::atomic_bool loadCancelled { false };
 
@@ -63,7 +67,11 @@ private:
 
     // Unique within airway level
     std::multimap<std::string, std::shared_ptr<Airway>> airways;
+
+    // To search by location
+    std::map<std::pair<int, int>, std::vector<std::shared_ptr<NavNode>>> allNodes;
 };
+
 
 } /* namespace xdata */
 

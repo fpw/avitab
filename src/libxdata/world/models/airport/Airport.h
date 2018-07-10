@@ -73,6 +73,8 @@ public:
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
     void addHeliport(std::shared_ptr<Heliport> port);
 
+    bool hasOnlyHeliports() const;
+
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);

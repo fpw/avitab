@@ -50,6 +50,10 @@ void OverlayedMap::setOverlayDirectory(const std::string& path) {
     }
 }
 
+void OverlayedMap::setNavWorld(std::shared_ptr<xdata::World> world) {
+    navWorld = world;
+}
+
 void OverlayedMap::centerOnWorldPos(double latitude, double longitude) {
     if (!tileSource->supportsWorldCoords()) {
         return;
@@ -92,6 +96,10 @@ void OverlayedMap::centerOnPlane(double latitude, double longitude, double headi
     centerOnWorldPos(latitude, longitude);
 }
 
+void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
+    pixelToPosition(mapImage->getWidth() / 2, mapImage->getHeight() / 2, latitude, longitude);
+}
+
 void OverlayedMap::pan(int dx, int dy) {
     stitcher->pan(dx, dy);
 }
@@ -123,6 +131,10 @@ void OverlayedMap::drawOverlays() {
         py -= planeIcon.getHeight() / 2;
 
         mapImage->blendImage(planeIcon, px, py, planeHeading);
+
+        if (navWorld) {
+            drawDataOverlays();
+        }
     }
 
     if (calibrationStep != 0) {
@@ -147,6 +159,78 @@ void OverlayedMap::drawOverlays() {
 
     if (onOverlaysDrawn) {
         onOverlaysDrawn();
+    }
+}
+
+void OverlayedMap::drawDataOverlays() {
+    double leftLon, rightLon;
+    double upLat, bottomLat;
+    pixelToPosition(0, 0, upLat, leftLon);
+    pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomLat, rightLon);
+
+    xdata::Location upLeft { upLat, leftLon };
+    xdata::Location downRight { bottomLat, rightLon };
+
+    navWorld->visitNodes(upLeft, downRight, [this] (const xdata::NavNode &node) {
+        auto airport = dynamic_cast<const xdata::Airport *>(&node);
+        if (airport) {
+            drawAirport(*airport);
+        }
+
+        auto fix = dynamic_cast<const xdata::Fix *>(&node);
+        if (fix) {
+            drawFix(*fix);
+        }
+    });
+}
+
+void OverlayedMap::drawAirport(const xdata::Airport& airport) {
+    auto &loc = airport.getLocation();
+    int px, py;
+    positionToPixel(loc.latitude, loc.longitude, px, py);
+
+    if (airport.hasOnlyHeliports()) {
+        mapImage->drawLine(px - 1, py - 1, px + 1, py + 1, img::COLOR_LIGHT_RED);
+        mapImage->drawLine(px - 1, py + 1, px + 1, py - 1, img::COLOR_LIGHT_RED);
+    } else {
+        mapImage->drawLine(px - 1, py - 1, px + 1, py + 1, img::COLOR_RED);
+        mapImage->drawLine(px - 1, py + 1, px + 1, py - 1, img::COLOR_RED);
+    }
+}
+
+void OverlayedMap::drawFix(const xdata::Fix& fix) {
+    auto &loc = fix.getLocation();
+    int px, py;
+    positionToPixel(loc.latitude, loc.longitude, px, py);
+
+    auto ndb = fix.getNDB();
+    auto vor = fix.getVOR();
+    auto dme = fix.getDME();
+
+    mapImage->drawLine(px - 3, py - 3, px + 3, py + 3, img::COLOR_BLUE);
+    mapImage->drawLine(px - 3, py + 3, px + 3, py - 3, img::COLOR_BLUE);
+
+    if (vor) {
+        mapImage->drawLine(px + 10, py - 20, px + 20, py, img::COLOR_BLUE);
+        mapImage->drawLine(px + 20, py, px + 10, py + 20, img::COLOR_BLUE);
+        mapImage->drawLine(px + 10, py + 20, px - 10, py + 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - 10, py + 20, px - 20, py, img::COLOR_BLUE);
+        mapImage->drawLine(px - 20, py, px - 10, py - 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - 10, py - 20, px + 10, py - 20, img::COLOR_BLUE);
+    }
+
+    if (dme) {
+        mapImage->drawLine(px - 20, py - 20, px + 20, py - 20, img::COLOR_BLUE);
+        mapImage->drawLine(px + 20, py - 20, px + 20, py + 20, img::COLOR_BLUE);
+        mapImage->drawLine(px + 20, py + 20, px - 20, py + 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - 20, py + 20, px - 20, py - 20, img::COLOR_BLUE);
+    }
+
+    if (ndb) {
+        mapImage->drawLine(px - 10, py - 10, px + 10, py - 10, img::COLOR_RED);
+        mapImage->drawLine(px + 10, py - 10, px + 10, py + 10, img::COLOR_RED);
+        mapImage->drawLine(px + 10, py + 10, px - 10, py + 10, img::COLOR_RED);
+        mapImage->drawLine(px - 10, py + 10, px - 10, py - 10, img::COLOR_RED);
     }
 }
 

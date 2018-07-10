@@ -43,7 +43,12 @@ public:
     void attachDME(std::shared_ptr<DME> dmeInfo);
     void attachVOR(std::shared_ptr<VOR> vorInfo);
     void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
+
+    std::shared_ptr<NDB> getNDB() const;
+    std::shared_ptr<DME> getDME() const;
+    std::shared_ptr<VOR> getVOR() const;
     std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
+
 private:
     std::shared_ptr<Region> region;
     std::string id;

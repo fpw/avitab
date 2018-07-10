@@ -15,6 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sstream>
+#include <iomanip>
 #include "MapApp.h"
 #include "src/Logger.h"
 #include "src/maps/sources/OpenTopoSource.h"
@@ -231,6 +233,7 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     map = std::make_unique<maps::OverlayedMap>(mapStitcher);
     map->setOverlayDirectory(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
+    map->setNavWorld(api().getNavWorld());
 
     onTimer();
 }
@@ -251,6 +254,14 @@ void MapApp::onRedrawNeeded() {
     if (!suspended) {
         mapWidget->invalidate();
     }
+
+    std::ostringstream str;
+    double lat, lon;
+    map->getCenterLocation(lat, lon);
+
+    str << std::fixed << std::setprecision(3);
+    str << lat << ", " << lon << ", zoom: " << mapStitcher->getZoomLevel();
+    window->setCaption(str.str());
 }
 
 void MapApp::onMapPan(int x, int y, bool start, bool end) {

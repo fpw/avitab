@@ -129,4 +129,43 @@ void World::addFix(std::shared_ptr<Fix> fix) {
     fixes.insert(std::make_pair(fix->getID(), fix));
 }
 
+void World::registerNavNodes() {
+    for (auto it: airports) {
+        auto node = it.second;
+        auto &loc = node->getLocation();
+        int lat = (int) loc.latitude;
+        int lon = (int) loc.longitude;
+
+        allNodes[std::make_pair(lat, lon)].push_back(node);
+    }
+
+    for (auto it: fixes) {
+        auto node = it.second;
+        auto &loc = node->getLocation();
+        int lat = (int) loc.latitude;
+        int lon = (int) loc.longitude;
+
+        allNodes[std::make_pair(lat, lon)].push_back(node);
+    }
+}
+
+void World::visitNodes(const Location& upLeft, const Location& lowRight, NodeAcceptor f) {
+    int lat1 = (int) std::ceil(upLeft.latitude);
+    int lat2 = (int) std::floor(lowRight.latitude);
+    int lon1 = (int) std::floor(upLeft.longitude);
+    int lon2 = (int) std::ceil(lowRight.longitude);
+
+    for (int lat = lat2; lat <= lat1; lat++) {
+        for (int lon = lon1; lon <= lon2; lon++) {
+            auto it = allNodes.find(std::make_pair(lat, lon));
+            if (it == allNodes.end()) {
+                continue;
+            }
+            for (auto node: it->second) {
+                f(*node);
+            }
+        }
+    }
+}
+
 } /* namespace xdata */

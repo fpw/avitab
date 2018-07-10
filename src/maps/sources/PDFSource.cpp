@@ -230,7 +230,7 @@ img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
 
     lat = invMercator(lat);
 
-    return img::Point<double>{lat, lon};
+    return img::Point<double>{lon, lat};
 }
 
 void PDFSource::storeCalibration() {

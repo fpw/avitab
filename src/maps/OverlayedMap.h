@@ -21,6 +21,7 @@
 #include <memory>
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
+#include "src/libxdata/world/World.h"
 
 namespace maps {
 
@@ -30,12 +31,14 @@ public:
     OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
     void setOverlayDirectory(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
+    void setNavWorld(std::shared_ptr<xdata::World> world);
 
     void pan(int dx, int dy);
 
     void centerOnWorldPos(double latitude, double longitude);
     void centerOnPlane(double latitude, double longitude, double heading);
     void setPlanePosition(double latitude, double longitude, double heading);
+    void getCenterLocation(double &latitude, double &longitude);
 
     void updateImage();
     void zoomIn();
@@ -57,6 +60,7 @@ private:
     OverlaysDrawnCallback onOverlaysDrawn;
 
     // Overlays
+    std::shared_ptr<xdata::World> navWorld;
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
     int calibrationStep = 0;
@@ -65,6 +69,10 @@ private:
     std::shared_ptr<img::Stitcher> stitcher;
 
     void drawOverlays();
+    void drawDataOverlays();
+    void drawAirport(const xdata::Airport &airport);
+    void drawFix(const xdata::Fix &fix);
+
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
 };

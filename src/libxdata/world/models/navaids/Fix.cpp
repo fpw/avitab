@@ -62,6 +62,18 @@ void Fix::attachVOR(std::shared_ptr<VOR> vorInfo) {
     vor = vorInfo;
 }
 
+std::shared_ptr<NDB> Fix::getNDB() const {
+    return ndb;
+}
+
+std::shared_ptr<DME> Fix::getDME() const {
+    return dme;
+}
+
+std::shared_ptr<VOR> Fix::getVOR() const {
+    return vor;
+}
+
 std::shared_ptr<ILSLocalizer> Fix::getILSLocalizer() const {
     return ilsLoc;
 }
