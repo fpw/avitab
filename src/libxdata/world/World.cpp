@@ -150,10 +150,10 @@ void World::registerNavNodes() {
 }
 
 void World::visitNodes(const Location& upLeft, const Location& lowRight, NodeAcceptor f) {
-    int lat1 = (int) std::ceil(upLeft.latitude);
-    int lat2 = (int) std::floor(lowRight.latitude);
-    int lon1 = (int) std::floor(upLeft.longitude);
-    int lon2 = (int) std::ceil(lowRight.longitude);
+    int lat1 = (int) std::ceil(std::min(90.0, upLeft.latitude));
+    int lat2 = (int) std::floor(std::max(-90.0, lowRight.latitude));
+    int lon1 = (int) std::floor(std::max(-180.0, upLeft.longitude));
+    int lon2 = (int) std::ceil(std::min(180.0, lowRight.longitude));
 
     for (int lat = lat2; lat <= lat1; lat++) {
         for (int lon = lon1; lon <= lon2; lon++) {

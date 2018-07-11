@@ -70,8 +70,8 @@ private:
 
     void drawOverlays();
     void drawDataOverlays();
-    void drawAirport(const xdata::Airport &airport);
-    void drawFix(const xdata::Fix &fix);
+    void drawAirport(const xdata::Airport &airport, double scale);
+    void drawFix(const xdata::Fix &fix, double scale);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
