@@ -212,7 +212,7 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
     auto vor = fix.getVOR();
     auto dme = fix.getDME();
 
-    double r = scale * 0.1;
+    double r = scale * 0.05;
 
     mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
     mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
