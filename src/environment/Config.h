@@ -30,6 +30,7 @@ public:
 
     std::string getString(const std::string &pointer);
     bool getBool(const std::string &pointer);
+    int getInt(const std::string &pointer);
 private:
     std::shared_ptr<nlohmann::json> config;
 };

@@ -38,6 +38,8 @@ public:
 
     void setMouseWheelCallback(MouseWheelCallback cb);
     void createNativeWindow(const std::string &title);
+    void createPanel(int left, int bottom, int width, int height);
+    void hidePanel();
     void pauseNativeWindow();
     bool hasNativeWindow();
     void signalStop();

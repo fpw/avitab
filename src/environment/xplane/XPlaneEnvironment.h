@@ -72,6 +72,9 @@ private:
     std::map<XPLMCommandRef, RegisteredCommand> commandHandlers;
     int subMenuIdx = -1;
     XPLMMenuID subMenu = nullptr;
+    std::shared_ptr<int> panelPowered, panelEnabled;
+    std::shared_ptr<float> brightness;
+    XPLMDataRef panelPoweredRef{}, panelEnabledRef{}, brightnessRef{};
 
     std::string getXPlanePath();
     std::string getPluginPath();

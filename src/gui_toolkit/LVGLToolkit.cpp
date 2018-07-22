@@ -27,8 +27,7 @@ bool LVGLToolkit::lvglIsInitialized = false;
 LVGLToolkit *LVGLToolkit::instance = nullptr;
 
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
-    driver(drv),
-    guiActive(false)
+    driver(drv)
 {
     instance = this;
 
@@ -42,6 +41,12 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         lv_theme_set_current(theme);
         lvglIsInitialized = true;
     }
+
+    // if keepAlive if true, the window was hidden without us noticing
+    // so it's enough to re-create it without starting rendering again
+    mainScreen = std::make_shared<Screen>();
+    guiActive = true;
+    guiThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
 }
 
 int LVGLToolkit::getFrameWidth() {
@@ -93,14 +98,6 @@ void LVGLToolkit::initInputDriver() {
 
 void LVGLToolkit::createNativeWindow(const std::string& title) {
     driver->createWindow(title);
-
-    if (!guiActive) {
-        // if keepAlive if true, the window was hidden without us noticing
-        // so it's enough to re-create it without starting rendering again
-        mainScreen = std::make_shared<Screen>();
-        guiActive = true;
-        guiThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
-    }
 }
 
 bool LVGLToolkit::hasNativeWindow() {
@@ -109,6 +106,14 @@ bool LVGLToolkit::hasNativeWindow() {
 
 void LVGLToolkit::pauseNativeWindow() {
     driver->killWindow();
+}
+
+void LVGLToolkit::createPanel(int left, int bottom, int width, int height) {
+    driver->createPanel(left, bottom, width, height);
+}
+
+void LVGLToolkit::hidePanel() {
+    driver->hidePanel();
 }
 
 void LVGLToolkit::signalStop() {
@@ -121,6 +126,7 @@ void LVGLToolkit::destroyNativeWindow() {
         guiThread->join();
         guiThread.reset();
         mainScreen.reset();
+        driver->hidePanel();
         driver->killWindow();
     }
 }

@@ -47,4 +47,8 @@ bool Config::getBool(const std::string& pointer) {
     return (*config)[json::json_pointer(pointer)];
 }
 
+int Config::getInt(const std::string& pointer) {
+    return (*config)[json::json_pointer(pointer)];
+}
+
 } /* namespace avitab */

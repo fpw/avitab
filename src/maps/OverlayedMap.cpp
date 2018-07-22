@@ -133,7 +133,7 @@ void OverlayedMap::drawOverlays() {
         mapImage->blendImage(planeIcon, px, py, planeHeading);
 
         if (navWorld) {
-            drawDataOverlays();
+            // drawDataOverlays();
         }
     }
 

@@ -59,7 +59,7 @@ DataRef<bool>::operator bool() {
 template<>
 DataRef<float>::operator float() {
     if (handle) {
-        return XPLMGetDataf(handle) != 0;
+        return XPLMGetDataf(handle);
     } else {
         return overrideValue;
     }

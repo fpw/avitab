@@ -37,6 +37,7 @@ public:
     void zoomIn();
     void zoomOut();
     void stopApp();
+    void onPlaneLoad();
 
     // App API
     void setBrightness(float brightness) override;
@@ -67,6 +68,7 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
 
+    void createPanel();
     void createLayout();
     void showAppLauncher();
     void cleanupLayout();

@@ -19,6 +19,7 @@
 #include <future>
 #include "AviTab.h"
 #include "src/Logger.h"
+#include "src/environment/Config.h"
 #include "src/avitab/apps/HeaderApp.h"
 #include "src/avitab/apps/AppLauncher.h"
 
@@ -43,6 +44,7 @@ void AviTab::startApp() {
     env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
     env->createCommand("AviTab/zoom_in", "Zoom In", std::bind(&AviTab::zoomIn, this));
     env->createCommand("AviTab/zoom_out", "Zoom Out", std::bind(&AviTab::zoomOut, this));
+    env->createCommand("AviTab/Home", "Home Button", std::bind(&AviTab::onHomeButton, this));
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 
     guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
@@ -50,6 +52,8 @@ void AviTab::startApp() {
             appLauncher->onMouseWheel(dir, x, y);
         }
     });
+    createPanel();
+    guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
 }
 
 void AviTab::toggleTablet() {
@@ -58,14 +62,19 @@ void AviTab::toggleTablet() {
         if (!guiLib->hasNativeWindow()) {
             logger::info("Showing tablet");
             guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
-            // transfer program flow to GUI thread
-            guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
         } else {
             close();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in onShowTablet: %s", e.what());
     }
+}
+
+void AviTab::onPlaneLoad() {
+    // runs in environment thread
+    // close on plane reload to reset the VR window position
+    close();
+    createPanel();
 }
 
 void AviTab::zoomIn() {
@@ -84,6 +93,21 @@ void AviTab::zoomOut() {
             appLauncher->onMouseWheel(-1, 0, 0);
         }
     });
+}
+
+void AviTab::createPanel() {
+    auto cfgFile = getAirplanePath() + "/AviTab.json";
+    try {
+        Config cfg(cfgFile);
+        int left = cfg.getInt("/panel/left");
+        int bottom = cfg.getInt("/panel/bottom");
+        int width = cfg.getInt("/panel/width");
+        int height = cfg.getInt("/panel/height");
+        guiLib->createPanel(left, bottom, width, height);
+    } catch (const std::exception &e) {
+        logger::info("No panel config - window only mode");
+        guiLib->hidePanel();
+    }
 }
 
 void AviTab::createLayout() {

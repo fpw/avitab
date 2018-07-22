@@ -22,6 +22,8 @@
 #include <XPLM/XPLMDisplay.h>
 #include <atomic>
 #include <mutex>
+#include <memory>
+#include <vector>
 #include "src/environment/GUIDriver.h"
 #include "DataRef.h"
 
@@ -36,6 +38,12 @@ public:
     bool hasWindow() override;
     void killWindow() override;
 
+    void setPanelEnabledPtr(std::shared_ptr<int> panelEnabledPtr);
+    void setPanelPoweredPtr(std::shared_ptr<int> panelPoweredPtr);
+    void setBrightnessPtr(std::shared_ptr<float> brightnessPtr);
+    void createPanel(int left, int bottom, int width, int height) override;
+    void hidePanel() override;
+
     void readPointerState(int &x, int &y, bool &pressed) override;
     void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data) override;
 
@@ -45,17 +53,25 @@ public:
 
     ~XPlaneGUIDriver();
 private:
-    float brightness = 1.0f;
+    std::shared_ptr<float> brightness;
     DataRef<bool> isVrEnabled;
+    DataRef<float> clickX, clickY;
+    XPLMDataRef buttonRef{};
+    std::shared_ptr<int> panelPowered, panelEnabled;
     int textureId = -1;
-    XPLMWindowID window = nullptr;
+    XPLMWindowID window{}, captureWindow{};
     std::atomic_int mouseX {0}, mouseY {0};
     std::atomic_bool mousePressed {false};
     std::atomic_int mouseWheel {0};
     std::mutex drawMutex;
     bool needsRedraw = false;
+    float panelLeft = 0, panelBottom = 0, panelWidth = 0, panelHeight = 0;
+    std::vector<int> vrTriggerIndices;
+    bool mouseDownFromTrigger = false;
 
     void onDraw();
+    void onDrawPanel();
+    void redrawTexture();
     void renderWindowTexture(int left, int top, int right, int bottom);
     void correctRatio(int left, int top, int &right, int &bottom);
     bool onClick(int x, int y, XPLMMouseStatus status);
@@ -63,8 +79,13 @@ private:
     void onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus);
     XPLMCursorStatus getCursor(int x, int y);
     bool onMouseWheel(int x, int y, int wheel, int clicks);
-
     bool boxelToPixel(int bx, int by, int &px, int &py);
+
+    void setupVRCapture();
+    bool onClickCapture(int x, int y, XPLMMouseStatus status);
+    bool onMouseWheelCapture(int x, int y, int wheel, int clicks);
+
+    static int onDraw3D(XPLMDrawingPhase phase, int isBefore, void *ref);
 };
 
 } /* namespace avitab */
