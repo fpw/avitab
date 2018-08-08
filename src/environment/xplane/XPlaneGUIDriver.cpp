@@ -31,7 +31,7 @@
 namespace avitab {
 
 XPlaneGUIDriver::XPlaneGUIDriver():
-            brightness(std::make_shared<float>(1)),
+    brightness(std::make_shared<float>(1)),
     isVrEnabled("sim/graphics/VR/enabled", false),
     clickX("sim/graphics/view/click_3d_x_pixels", -1),
     clickY("sim/graphics/view/click_3d_y_pixels", -1)
@@ -216,6 +216,10 @@ void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height) {
 }
 
 void XPlaneGUIDriver::hidePanel() {
+    if (captureWindow) {
+        XPLMDestroyWindow(captureWindow);
+        captureWindow = {};
+    }
     XPLMUnregisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
 }
 

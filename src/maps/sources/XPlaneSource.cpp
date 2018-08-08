@@ -105,7 +105,7 @@ std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) 
         mipLevel = 0;
     }
 
-    std::unique_ptr<img::Image>(image) = std::make_unique<img::DDSImage>(path, mipLevel);
+    std::unique_ptr<img::Image> image = std::make_unique<img::DDSImage>(path, mipLevel);
     image->alphaBlend(WATER_COLOR);
 
     if (zoom > MAX_MIPMAP_LVL) {
