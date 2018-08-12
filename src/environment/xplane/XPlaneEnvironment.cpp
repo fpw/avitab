@@ -271,6 +271,11 @@ void XPlaneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
 }
 
+void XPlaneEnvironment::enableAndPowerPanel() {
+    *panelEnabled = true;
+    *panelPowered = true;
+}
+
 XPlaneEnvironment::~XPlaneEnvironment() {
     if (flightLoopId) {
         XPLMDestroyFlightLoop(flightLoopId);

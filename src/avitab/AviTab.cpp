@@ -103,7 +103,16 @@ void AviTab::createPanel() {
         int bottom = cfg.getInt("/panel/bottom");
         int width = cfg.getInt("/panel/width");
         int height = cfg.getInt("/panel/height");
+        bool enable = false;
+        try {
+            enable = cfg.getBool("/panel/enabled");
+        } catch (...) {
+        }
+
         guiLib->createPanel(left, bottom, width, height);
+        if (enable) {
+            env->enableAndPowerPanel();
+        }
     } catch (const std::exception &e) {
         logger::info("No panel config - window only mode");
         guiLib->hidePanel();

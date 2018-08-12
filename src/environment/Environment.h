@@ -66,6 +66,7 @@ public:
     std::shared_ptr<xdata::World> getNavWorld();
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
+    virtual void enableAndPowerPanel();
 
     virtual ~Environment() = default;
 protected:

@@ -104,4 +104,7 @@ void Environment::pauseEnvironmentJobs() {
     envCallbacks.clear();
 }
 
+void Environment::enableAndPowerPanel() {
+}
+
 }

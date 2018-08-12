@@ -52,6 +52,7 @@ public:
     std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
+    void enableAndPowerPanel() override;
 
     ~XPlaneEnvironment();
 private:
