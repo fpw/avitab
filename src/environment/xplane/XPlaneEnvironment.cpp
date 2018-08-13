@@ -300,6 +300,8 @@ XPlaneEnvironment::~XPlaneEnvironment() {
     }
     XPLMUnregisterDataAccessor(panelEnabledRef);
     XPLMUnregisterDataAccessor(panelPoweredRef);
+    XPLMUnregisterDataAccessor(brightnessRef);
+    XPLMUnregisterDataAccessor(isInMenuRef);
 
     logger::verbose("~XPlaneEnvironment");
     destroyMenu();
