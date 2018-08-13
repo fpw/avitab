@@ -88,6 +88,20 @@ XPlaneEnvironment::XPlaneEnvironment() {
             this, this
             );
 
+    isInMenuRef = XPLMRegisterDataAccessor("avitab/is_in_menu", xplmType_Int, false,
+            [] (void *ref) -> int {
+                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
+                return us->isInMenu;
+            },
+            nullptr,
+            nullptr, nullptr,
+            nullptr, nullptr,
+            nullptr, nullptr,
+            nullptr, nullptr,
+            nullptr, nullptr,
+            this, this
+            );
+
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
 
@@ -274,6 +288,10 @@ void XPlaneEnvironment::reloadMetar() {
 void XPlaneEnvironment::enableAndPowerPanel() {
     *panelEnabled = true;
     *panelPowered = true;
+}
+
+void XPlaneEnvironment::setIsInMenu(bool menu) {
+    isInMenu = menu;
 }
 
 XPlaneEnvironment::~XPlaneEnvironment() {

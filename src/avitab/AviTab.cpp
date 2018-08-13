@@ -45,6 +45,16 @@ void AviTab::startApp() {
     env->createCommand("AviTab/zoom_in", "Zoom In", std::bind(&AviTab::zoomIn, this));
     env->createCommand("AviTab/zoom_out", "Zoom Out", std::bind(&AviTab::zoomOut, this));
     env->createCommand("AviTab/Home", "Home Button", std::bind(&AviTab::onHomeButton, this));
+
+    // App commands
+    env->createCommand("AviTab/app_charts", "Charts App", std::bind(&AviTab::showApp, this, AppId::CHARTS));
+    env->createCommand("AviTab/app_airports", "Airports App", std::bind(&AviTab::showApp, this, AppId::AIRPORTS));
+    env->createCommand("AviTab/app_routes", "Routes App", std::bind(&AviTab::showApp, this, AppId::ROUTES));
+    env->createCommand("AviTab/app_maps", "Maps App", std::bind(&AviTab::showApp, this, AppId::MAPS));
+    env->createCommand("AviTab/app_plane_manual", "Plane Manual App", std::bind(&AviTab::showApp, this, AppId::PLANE_MANUAL));
+    env->createCommand("AviTab/app_notes", "Notes App", std::bind(&AviTab::showApp, this, AppId::NOTES));
+    env->createCommand("AviTab/app_about", "About App", std::bind(&AviTab::showApp, this, AppId::ABOUT));
+
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 
     guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
@@ -75,6 +85,11 @@ void AviTab::onPlaneLoad() {
     // close on plane reload to reset the VR window position
     close();
     createPanel();
+
+    guiLib->runInGUI([this] () {
+        cleanupLayout();
+        createLayout();
+    });
 }
 
 void AviTab::zoomIn() {
@@ -104,8 +119,13 @@ void AviTab::createPanel() {
         int width = cfg.getInt("/panel/width");
         int height = cfg.getInt("/panel/height");
         bool enable = false;
+        hideHeader = false;
         try {
             enable = cfg.getBool("/panel/enabled");
+        } catch (...) {
+        }
+        try {
+            hideHeader = cfg.getBool("/panel/hide_header");
         } catch (...) {
         }
 
@@ -115,6 +135,7 @@ void AviTab::createPanel() {
         }
     } catch (const std::exception &e) {
         logger::info("No panel config - window only mode");
+        hideHeader = false;
         guiLib->hidePanel();
     }
 }
@@ -137,11 +158,13 @@ void AviTab::createLayout() {
 
     loadLabel.reset();
 
-    if (!headerApp) {
-        headerApp = std::make_shared<HeaderApp>(this);
-        headContainer = headerApp->getUIContainer();
-        headContainer->setParent(screen);
-        headContainer->setVisible(true);
+    if (!hideHeader) {
+        if (!headerApp) {
+            headerApp = std::make_shared<HeaderApp>(this);
+            headContainer = headerApp->getUIContainer();
+            headContainer->setParent(screen);
+            headContainer->setVisible(true);
+        }
     }
 
     if (!appLauncher) {
@@ -158,12 +181,29 @@ void AviTab::showAppLauncher() {
     appLauncher->show();
 }
 
+void AviTab::showApp(AppId id) {
+    if (appLauncher) {
+        guiLib->runInGUI([this, id] () {
+            appLauncher->showApp(id);
+        });
+    }
+}
+
+void AviTab::setIsInMenu(bool inMenu) {
+    env->setIsInMenu(inMenu);
+}
+
 std::shared_ptr<Container> AviTab::createGUIContainer() {
     auto screen = guiLib->screen();
     auto container = std::make_shared<Container>(screen);
-    container->setPosition(0, 30);
     container->setVisible(false);
-    container->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+    if (hideHeader) {
+        container->setPosition(0, 0);
+        container->setDimensions(screen->getWidth(), screen->getHeight());
+    } else {
+        container->setPosition(0, 30);
+        container->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+    }
     return container;
 }
 
@@ -267,6 +307,7 @@ void AviTab::cleanupLayout() {
     headContainer.reset();
     centerContainer.reset();
     headerApp.reset();
+    appLauncher.reset();
 }
 
 AviTab::~AviTab() {

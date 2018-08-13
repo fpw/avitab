@@ -32,6 +32,15 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 
 void AirportApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
+
+    closeButton = std::make_shared<Button>(tabs, "X");
+    closeButton->alignInTopRight();
+    closeButton->setCallback([this] (const Button &button) {
+        api().executeLater([this, &button] () {
+            exit();
+        });
+    });
+
     searchPage = tabs->addTab(tabs, "Search");
 
     searchField = std::make_shared<TextArea>(searchPage, "");

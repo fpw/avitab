@@ -31,6 +31,7 @@ class AppLauncher: public App {
 public:
     using Callback = std::function<void()>;
     struct Entry {
+        AppId id;
         std::shared_ptr<App> app;
         std::shared_ptr<Button> button;
     };
@@ -38,12 +39,13 @@ public:
     AppLauncher(FuncsPtr appFuncs);
     void onMouseWheel(int dir, int x, int y) override;
     void show() override;
+    void showApp(AppId id);
 private:
     std::vector<Entry> entries;
     std::shared_ptr<App> activeApp;
 
     template<typename T>
-    void addEntry(const std::string &name, const std::string &icon);
+    void addEntry(const std::string &name, const std::string &icon, AppId id);
 };
 
 } /* namespace avitab */

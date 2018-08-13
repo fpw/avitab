@@ -54,10 +54,12 @@ public:
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
     void close() override;
+    void setIsInMenu(bool inMenu) override;
 
     ~AviTab();
 
 private:
+    bool hideHeader = false;
     std::shared_ptr<Environment> env;
     std::shared_ptr<LVGLToolkit> guiLib;
     std::shared_ptr<Label> loadLabel;
@@ -71,6 +73,7 @@ private:
     void createPanel();
     void createLayout();
     void showAppLauncher();
+    void showApp(AppId id);
     void cleanupLayout();
 };
 

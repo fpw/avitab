@@ -41,6 +41,7 @@ private:
     };
     std::vector<TabPage> pages;
 
+    std::shared_ptr<Button> closeButton;
     std::shared_ptr<Label> searchLabel;
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Page> searchPage;

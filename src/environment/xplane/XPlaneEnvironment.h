@@ -53,6 +53,7 @@ public:
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
     void enableAndPowerPanel() override;
+    void setIsInMenu(bool menu) override;
 
     ~XPlaneEnvironment();
 private:
@@ -75,7 +76,8 @@ private:
     XPLMMenuID subMenu = nullptr;
     std::shared_ptr<int> panelPowered, panelEnabled;
     std::shared_ptr<float> brightness;
-    XPLMDataRef panelPoweredRef{}, panelEnabledRef{}, brightnessRef{};
+    XPLMDataRef panelPoweredRef{}, panelEnabledRef{}, brightnessRef{}, isInMenuRef{};
+    bool isInMenu = false;
 
     std::string getXPlanePath();
     std::string getPluginPath();

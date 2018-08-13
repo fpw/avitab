@@ -67,6 +67,7 @@ public:
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
     virtual void enableAndPowerPanel();
+    virtual void setIsInMenu(bool menu);
 
     virtual ~Environment() = default;
 protected:

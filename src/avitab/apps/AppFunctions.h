@@ -26,6 +26,16 @@
 
 namespace avitab {
 
+enum class AppId {
+    CHARTS,
+    AIRPORTS,
+    ROUTES,
+    MAPS,
+    PLANE_MANUAL,
+    NOTES,
+    ABOUT,
+};
+
 class AppFunctions {
 public:
     virtual void setBrightness(float brightness) = 0;
@@ -42,6 +52,7 @@ public:
     virtual void reloadMetar() = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual void close() = 0;
+    virtual void setIsInMenu(bool inMenu) = 0;
     virtual ~AppFunctions() = default;
 };
 

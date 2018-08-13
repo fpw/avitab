@@ -107,4 +107,7 @@ void Environment::pauseEnvironmentJobs() {
 void Environment::enableAndPowerPanel() {
 }
 
+void Environment::setIsInMenu(bool menu) {
+}
+
 }

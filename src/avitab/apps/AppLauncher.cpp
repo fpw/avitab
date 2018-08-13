@@ -34,13 +34,13 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     getUIContainer()->setLayoutPretty();
     std::string root = api().getDataPath() + "icons/";
 
-    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png");
-    addEntry<AirportApp>("Airports", root + "if_xmag_3617.png");
-    addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png");
-    addEntry<MapApp>("Maps", root + "if_starthere_18227.png");
-    addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png");
-    addEntry<NotesApp>("Notes", root + "if_txt2_3783.png");
-    addEntry<About>("About", root + "if_Help_1493288.png");
+    addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png", AppId::CHARTS);
+    addEntry<AirportApp>("Airports", root + "if_xmag_3617.png", AppId::AIRPORTS);
+    addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png", AppId::ROUTES);
+    addEntry<MapApp>("Maps", root + "if_starthere_18227.png", AppId::MAPS);
+    addEntry<PlaneManualApp>("Plane Manual", root + "if_ilustracoes_04-11_1519786.png", AppId::PLANE_MANUAL);
+    addEntry<NotesApp>("Notes", root + "if_txt2_3783.png", AppId::NOTES);
+    addEntry<About>("About", root + "if_Help_1493288.png", AppId::ABOUT);
 }
 
 void AppLauncher::show() {
@@ -48,10 +48,26 @@ void AppLauncher::show() {
         activeApp->suspend();
     }
     App::show();
+    api().setIsInMenu(true);
+}
+
+void AppLauncher::showApp(AppId id) {
+    for (auto &entry: entries) {
+        if (entry.id == id) {
+            if (activeApp) {
+                activeApp->suspend();
+            }
+            activeApp = entry.app;
+            activeApp->resume();
+            activeApp->show();
+            api().setIsInMenu(false);
+            break;
+        }
+    }
 }
 
 template<typename T>
-void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
+void AppLauncher::addEntry(const std::string& name, const std::string& icon, AppId id) {
     auto app = startSubApp<T>();
     app->setOnExit([this] () {
         this->show();
@@ -65,18 +81,14 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon) {
     }
 
     Entry entry;
+    entry.id = id;
     entry.app = std::move(app);
     entry.button = std::make_shared<Button>(getUIContainer(), std::move(iconImg), name);
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;
     entry.button->setCallback([this, index] (const Button &) {
-        if (activeApp) {
-            activeApp->suspend();
-        }
-        activeApp = entries[index].app;
-        activeApp->resume();
-        activeApp->show();
+        showApp(entries[index].id);
     });
 }
 
