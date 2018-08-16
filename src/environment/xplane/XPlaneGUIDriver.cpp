@@ -507,10 +507,14 @@ bool XPlaneGUIDriver::onMouseWheelCapture(int x, int y, int wheel, int clicks) {
     guiX = (float) clickX;
     guiY = (float) clickY;
 
-    bool isInWindow = (guiX >= 0 && guiY >= 0);
+    bool isInWindow = false;
+    if (guiX >= panelLeft && guiX < panelLeft + panelWidth && guiY >= panelBottom && guiY < panelBottom + panelHeight) {
+        isInWindow = true;
+    }
+
     if (isInWindow) {
-        mouseX = guiX;
-        mouseY = 600 - guiY;
+        mouseX = (guiX - panelLeft) / panelWidth * width();
+        mouseY = (panelBottom + panelHeight - guiY) / panelHeight * height();
         mouseWheel = clicks;
         return true;
     }
