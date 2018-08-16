@@ -39,7 +39,10 @@ GeoTIFFSource::GeoTIFFSource(const std::string &utf8File) {
 }
 
 int GeoTIFFSource::getMinZoomLevel() {
-    return -10;
+    double maxDim = std::max(tiff.getFullWidth(), tiff.getFullHeight());
+    double minN = std::log2(maxDim / tileSize);
+
+    return -minN;
 }
 
 int GeoTIFFSource::getMaxZoomLevel() {
