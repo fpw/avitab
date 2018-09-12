@@ -27,13 +27,15 @@ namespace avitab {
 
 AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
-    guiLib(environment->createGUIToolkit())
+    guiLib(environment->createGUIToolkit()),
+    navigraph("charts-avitab")
 {
     // runs in environment thread, called by PluginStart
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
     env->resumeEnvironmentJobs();
+    logger::verbose("Navigraph link: %s", navigraph.generateLink().c_str());
 }
 
 void AviTab::startApp() {

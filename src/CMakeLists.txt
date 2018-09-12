@@ -7,6 +7,7 @@ add_definitions(-DCURL_STATICLIB)
 
 add_subdirectory(libimg)
 add_subdirectory(libxdata)
+add_subdirectory(libnavigraph)
 add_subdirectory(maps)
 add_subdirectory(environment)
 add_subdirectory(gui_toolkit)
@@ -18,6 +19,7 @@ set(CommonLibs
     avitab_apps
     avitab_app_components
     avitab_platform
+    navigraph
     maps
     curl
 )

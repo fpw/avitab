@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <future>
+#include "src/libnavigraph/NavigraphClient.h"
 #include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
@@ -69,6 +70,8 @@ private:
 
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
+
+    navigraph::NavigraphClient navigraph;
 
     void createPanel();
     void createLayout();
