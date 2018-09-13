@@ -28,15 +28,14 @@ namespace avitab {
 AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit()),
-    navigraph("charts-avitab")
+    navigraph(std::make_shared<navigraph::NavigraphClient>("charts-avitab"))
 {
     // runs in environment thread, called by PluginStart
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
     env->resumeEnvironmentJobs();
-    navigraph.startAuth();
-    logger::verbose("Navigraph link: %s", navigraph.generateLink().c_str());
+    navigraph->setCacheDirectory(env->getProgramPath() + "/Navigraph/");
 }
 
 void AviTab::startApp() {
@@ -56,6 +55,7 @@ void AviTab::startApp() {
     env->createCommand("AviTab/app_maps", "Maps App", std::bind(&AviTab::showApp, this, AppId::MAPS));
     env->createCommand("AviTab/app_plane_manual", "Plane Manual App", std::bind(&AviTab::showApp, this, AppId::PLANE_MANUAL));
     env->createCommand("AviTab/app_notes", "Notes App", std::bind(&AviTab::showApp, this, AppId::NOTES));
+    env->createCommand("AviTab/app_navigraph", "Navigraph App", std::bind(&AviTab::showApp, this, AppId::NAVIGRAPH));
     env->createCommand("AviTab/app_about", "About App", std::bind(&AviTab::showApp, this, AppId::ABOUT));
 
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
@@ -260,6 +260,10 @@ void AviTab::reloadMetar() {
     logger::info("Reloading METAR...");
     env->reloadMetar();
     logger::info("Done METAR");
+}
+
+std::shared_ptr<navigraph::NavigraphClient> AviTab::getNavigraph() {
+    return navigraph;
 }
 
 void AviTab::onHomeButton() {

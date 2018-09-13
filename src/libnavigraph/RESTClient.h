@@ -23,6 +23,7 @@
 #include <string>
 #include <map>
 #include <curl/curl.h>
+#undef MessageBox
 
 namespace navigraph {
 

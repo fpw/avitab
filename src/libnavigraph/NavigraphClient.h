@@ -31,16 +31,24 @@ class NavigraphClient {
 public:
     static constexpr const int AUTH_SERVER_PORT = 7890;
     NavigraphClient(const std::string &clientId);
+
+    bool isSupported();
+
+    void setCacheDirectory(const std::string &dir);
+
     std::string generateLink();
 
     void startAuth();
     void cancelAuth();
+
+    virtual ~NavigraphClient();
 
 private:
     bool cancelToken = false;
     RESTClient restClient;
     AuthServer server;
     Crypto crypto;
+    std::string cacheDir;
     std::string clientId;
     std::string verifier;
     std::string nonce, state;

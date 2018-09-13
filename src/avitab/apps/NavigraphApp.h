@@ -15,46 +15,28 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Container.h"
+#ifndef SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
+#define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
+
+#include <memory>
+#include "App.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Label.h"
 
 namespace avitab {
 
-Container::Container(WidgetPtr parent):
-    Widget(parent)
-{
-    lv_obj_t *cont = lv_cont_create(parentObj(), nullptr);
-    setObj(cont);
-}
+class NavigraphApp: public App {
+public:
+    NavigraphApp(FuncsPtr appFuncs);
+private:
+    std::shared_ptr<Window> window;
+    std::shared_ptr<Label> label;
+    std::shared_ptr<Button> loginButton;
 
-Container::Container():
-    Widget(nullptr)
-{
-    lv_obj_t *cont = lv_cont_create(lv_layer_top(), nullptr);
-    setObj(cont);
-}
-
-void Container::setLayoutRightColumns() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
-}
-
-void Container::setLayoutPretty() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
-}
-
-void Container::setLayoutRow() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_M);
-}
-
-void Container::setLayoutColumn() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_M);
-}
-
-void Container::setLayoutGrid() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_GRID);
-}
-
-void Container::setFit(bool horiz, bool vert) {
-    lv_cont_set_fit(obj(), horiz, vert);
-}
+    void onLogin();
+};
 
 } /* namespace avitab */
+
+#endif /* SRC_AVITAB_APPS_NAVIGRAPHAPP_H_ */

@@ -23,6 +23,7 @@
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/environment/EnvData.h"
 #include "src/libxdata/world/World.h"
+#include "src/libnavigraph/NavigraphClient.h"
 
 namespace avitab {
 
@@ -33,6 +34,7 @@ enum class AppId {
     MAPS,
     PLANE_MANUAL,
     NOTES,
+    NAVIGRAPH,
     ABOUT,
 };
 
@@ -53,6 +55,7 @@ public:
     virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;
+    virtual std::shared_ptr<navigraph::NavigraphClient> getNavigraph() = 0;
     virtual ~AppFunctions() = default;
 };
 

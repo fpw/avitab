@@ -56,6 +56,7 @@ public:
     void reloadMetar() override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
+    std::shared_ptr<navigraph::NavigraphClient> getNavigraph() override;
 
     ~AviTab();
 
@@ -71,7 +72,7 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
 
-    navigraph::NavigraphClient navigraph;
+    std::shared_ptr<navigraph::NavigraphClient> navigraph;
 
     void createPanel();
     void createLayout();

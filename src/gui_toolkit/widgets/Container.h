@@ -30,6 +30,7 @@ public:
     void setLayoutRightColumns();
     void setLayoutRow();
     void setLayoutColumn();
+    void setLayoutGrid();
     void setFit(bool horiz, bool vert);
 };
 

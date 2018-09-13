@@ -20,6 +20,7 @@
 #include <nlohmann/json.hpp>
 #include "NavigraphClient.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace navigraph {
 
@@ -31,6 +32,17 @@ NavigraphClient::NavigraphClient(const std::string& clientId):
     nonce = crypto.base64URLEncode(crypto.generateRandom(8));
 
     server.setAuthCallback([this] (const std::map<std::string, std::string> &reply) { onAuthReply(reply); });
+}
+
+void NavigraphClient::setCacheDirectory(const std::string& dir) {
+    cacheDir = dir;
+    if (!platform::fileExists(dir)) {
+        platform::mkdir(dir);
+    }
+}
+
+bool NavigraphClient::isSupported() {
+    return strlen(NAVIGRAPH_CLIENT_SECRET) > 0;
 }
 
 std::string NavigraphClient::generateLink() {
@@ -57,7 +69,7 @@ void NavigraphClient::startAuth() {
 void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &authInfo) {
     // called from the server thread!
 
-    if (strlen(NAVIGRAPH_CLIENT_SECRET) == 0) {
+    if (!isSupported()) {
         throw std::runtime_error("Sorry, self-compiled versions do not support the Navigraph integration");
     }
 
@@ -71,8 +83,6 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
      */
 
     std::map<std::string, std::string> replyFields;
-    std::string url = "https://identity.api.navigraph.com/connect/token";
-
     // check our state
     auto it = authInfo.find("state");
     if (it == authInfo.end()) {
@@ -103,7 +113,7 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
     replyFields["redirect_uri"] = std::string("http://127.0.0.1:") + std::to_string(AUTH_SERVER_PORT);
 
     cancelToken = false;
-    std::string reply = restClient.post(url, replyFields, cancelToken);
+    std::string reply = restClient.post("https://identity.api.navigraph.com/connect/token", replyFields, cancelToken);
     handleToken(reply);
 }
 
@@ -135,6 +145,10 @@ void NavigraphClient::useRefreshToken() {
 
     std::string reply = restClient.post(url, request, cancelToken);
     handleToken(reply);
+}
+
+NavigraphClient::~NavigraphClient() {
+    cancelAuth();
 }
 
 } /* namespace navigraph */

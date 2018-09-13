@@ -44,7 +44,7 @@ PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
     if (showError) {
         errorMsg = std::make_shared<MessageBox>(
                 getUIContainer(),
-                "Put your plane's manuals into the 'manuals' folder inside your aircraft folder.");
+                "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
         errorMsg->addButton("Ok", [this] () {
             showFileSelect();
             childApp->show();

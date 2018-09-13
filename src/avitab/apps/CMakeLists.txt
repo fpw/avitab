@@ -10,4 +10,5 @@ add_library(avitab_apps
     AirportApp.cpp
     RouteApp.cpp
     MapApp.cpp
+    NavigraphApp.cpp
 )
