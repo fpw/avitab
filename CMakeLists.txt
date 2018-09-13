@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.9)
 project(AviTab VERSION 0.2.4 DESCRIPTION "AviTab X-Plane plugin")
 
 
+if (NOT "$ENV{NAVIGRAPH_SECRET}" STREQUAL "")
+    set(NAVIGRAPH_SECRET "$ENV{NAVIGRAPH_SECRET}" CACHE INTERNAL "Copied from environment variable")
+endif()
+
 configure_file(
   "${PROJECT_SOURCE_DIR}/config.h.in"
   "${PROJECT_BINARY_DIR}/config.h"

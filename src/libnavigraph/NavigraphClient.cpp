@@ -16,99 +16,112 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include <curl/curl.h>
 #include <stdexcept>
-#include <algorithm>
-#include <mbedtls/base64.h>
-#include <mbedtls/md.h>
+#include <nlohmann/json.hpp>
 #include "NavigraphClient.h"
+#include "src/Logger.h"
 
 namespace navigraph {
 
 NavigraphClient::NavigraphClient(const std::string& clientId):
     clientId(clientId)
 {
-    mbedtls_ctr_drbg_init(&randomGenerator);
-    mbedtls_entropy_init(&entropySource);
+    verifier = crypto.base64URLEncode(crypto.generateRandom(32));
+    state = crypto.base64URLEncode(crypto.generateRandom(8));
+    nonce = crypto.base64URLEncode(crypto.generateRandom(8));
 
-    if (mbedtls_ctr_drbg_seed(&randomGenerator, mbedtls_entropy_func, &entropySource, nullptr, 0) != 0) {
-        mbedtls_ctr_drbg_free(&randomGenerator);
-        mbedtls_entropy_free(&entropySource);
-        throw std::runtime_error("Couldn't initialize random generator");
-    }
-
-    mbedtls_ctr_drbg_set_prediction_resistance(&randomGenerator, MBEDTLS_CTR_DRBG_PR_OFF);
-
-    verifier = base64URLEncode(generateRandom(32));
-    state = base64URLEncode(generateRandom(8));
-    nonce = base64URLEncode(generateRandom(8));
+    server.setAuthCallback([this] (const std::map<std::string, std::string> &reply) { onAuthReply(reply); });
 }
 
 std::string NavigraphClient::generateLink() {
     std::ostringstream url;
 
     url << "https://identity.api.navigraph.com/connect/authorize";
-    url << "?scope=" << urlEncode("openid charts userinfo");
-    url << "&response_type=" << urlEncode("code id_token");
-    url << "&client_id=" << urlEncode(clientId.c_str());
-    url << "&redirect_uri=" << urlEncode("http://127.0.0.1:7890");
+    url << "?scope=" << crypto.urlEncode("openid charts userinfo offline_access");
+    url << "&response_type=" << crypto.urlEncode("code id_token");
+    url << "&client_id=" << crypto.urlEncode(clientId.c_str());
+    url << "&redirect_uri=" << crypto.urlEncode(std::string("http://127.0.0.1:") + std::to_string(AUTH_SERVER_PORT));
     url << "&response_mode=form_post";
     url << "&state=" << state;
     url << "&nonce=" << nonce;
     url << "&code_challenge_method=S256";
-    url << "&code_challenge=" << base64URLEncode(sha256(verifier));
+    url << "&code_challenge=" << crypto.base64URLEncode(crypto.sha256(verifier));
 
     return url.str();
 }
 
-std::string NavigraphClient::urlEncode(const std::string& in) {
-    char *escaped = curl_escape(in.c_str(), 0);
-    std::string res = escaped;
-    curl_free(escaped);
-    return res;
+void NavigraphClient::startAuth() {
+    server.start(AUTH_SERVER_PORT);
 }
 
-std::vector<uint8_t> NavigraphClient::generateRandom(size_t len) {
-    std::vector<uint8_t> res(len);
-    if (mbedtls_ctr_drbg_random(&randomGenerator, res.data(), len) != 0) {
-        throw std::runtime_error("Couldn't generated random data");
+void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &authInfo) {
+    // called from the server thread!
+
+    if (strlen(NAVIGRAPH_CLIENT_SECRET) == 0) {
+        throw std::runtime_error("Sorry, self-compiled versions do not support the Navigraph integration");
     }
 
-    return res;
-}
+    /*
+     * Fields present:
+     *  code: the access code to request the API key
+     *  access_token: ?
+     *  scope: the grant we received, e.g. openid+charts+userinfo
+     *  session_state: the server's opaque state
+     *  state: the state that we passed in the link
+     */
 
-std::vector<uint8_t> NavigraphClient::sha256(const std::string& in) {
-    const mbedtls_md_info_t *info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    if (!info) {
-        throw std::runtime_error("Couldn't find SHA256");
+    std::map<std::string, std::string> replyFields;
+    std::string url = "https://identity.api.navigraph.com/connect/token";
+
+    // check our state
+    auto it = authInfo.find("state");
+    if (it == authInfo.end()) {
+        throw std::runtime_error("No state");
+    }
+    if (it->second != state) {
+        throw std::runtime_error("Invalid state, the link only works once!");
     }
 
-    size_t size = mbedtls_md_get_size(info);
+    // copy state
+    it = authInfo.find("session_state");
+    if (it == authInfo.end()) {
+        throw std::runtime_error("No session_state");
+    }
+    replyFields["session_state"] = it->second;
 
-    std::vector<uint8_t> hash(size);
-    mbedtls_md(info, (uint8_t *) in.data(), in.size(), hash.data());
+    // copy auth code
+    it = authInfo.find("code");
+    if (it == authInfo.end()) {
+        throw std::runtime_error("No auth code");
+    }
+    replyFields["code"] = it->second;
 
-    return hash;
+    replyFields["grant_type"] = "authorization_code";
+    replyFields["code_verifier"] = verifier;
+    replyFields["client_id"] = clientId;
+    replyFields["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
+    replyFields["redirect_uri"] = std::string("http://127.0.0.1:") + std::to_string(AUTH_SERVER_PORT);
+
+    cancelToken = false;
+    std::string reply = restClient.post(url, replyFields, cancelToken);
+    handleToken(reply);
 }
 
-std::string NavigraphClient::base64URLEncode(const std::vector<uint8_t>& in) {
-    size_t size;
-    mbedtls_base64_encode(nullptr, 0, &size, in.data(), in.size());
+void NavigraphClient::handleToken(const std::string& inputJson) {
+    nlohmann::json data = nlohmann::json::parse(inputJson);
 
-    std::string res(size + 1, '\0');
-    mbedtls_base64_encode((uint8_t *) res.data(), res.size(), &size, in.data(), in.size());
+    idToken = data["id_token"];
+    accessToken = data["access_token"];
+    refreshToken = data["refresh_token"];
 
-    std::replace(res.begin(), res.end(), '+', '-');
-    std::replace(res.begin(), res.end(), '/', '_');
-    res.erase(std::remove(res.begin(), res.end(), '='), res.end());
-    res.erase(std::remove(res.begin(), res.end(), '\0'), res.end());
+    // TODO verify id token with public key
 
-    return res;
+    restClient.setBearer(accessToken);
 }
 
-NavigraphClient::~NavigraphClient() {
-    mbedtls_ctr_drbg_free(&randomGenerator);
-    mbedtls_entropy_free(&entropySource);
+void NavigraphClient::cancelAuth() {
+    cancelToken = true;
+    server.stop();
 }
 
 } /* namespace navigraph */

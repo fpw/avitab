@@ -15,42 +15,31 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
-#define SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
+#ifndef SRC_LIBNAVIGRAPH_CRYPTO_H_
+#define SRC_LIBNAVIGRAPH_CRYPTO_H_
 
+#include <mbedtls/config.h>
+#include <mbedtls/platform.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 #include <string>
 #include <vector>
-#include <map>
-#include "Crypto.h"
-#include "AuthServer.h"
-#include "RESTClient.h"
 
 namespace navigraph {
 
-class NavigraphClient {
+class Crypto {
 public:
-    static constexpr const int AUTH_SERVER_PORT = 7890;
-    NavigraphClient(const std::string &clientId);
-    std::string generateLink();
-
-    void startAuth();
-    void cancelAuth();
-
+    Crypto();
+    std::vector<uint8_t> sha256(const std::string &in);
+    std::vector<uint8_t> generateRandom(size_t len);
+    std::string urlEncode(const std::string &in);
+    std::string base64URLEncode(const std::vector<uint8_t> &in);
+    virtual ~Crypto();
 private:
-    bool cancelToken = false;
-    RESTClient restClient;
-    AuthServer server;
-    Crypto crypto;
-    std::string clientId;
-    std::string verifier;
-    std::string nonce, state;
-
-    std::string accessToken, idToken, refreshToken;
-
-    void onAuthReply(const std::map<std::string, std::string> &authInfo);
-    void handleToken(const std::string &inputJson);
+    mbedtls_entropy_context entropySource;
+    mbedtls_ctr_drbg_context randomGenerator;
 };
 
 } /* namespace navigraph */
 
-#endif /* SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_ */
+#endif /* SRC_LIBNAVIGRAPH_CRYPTO_H_ */

@@ -18,11 +18,43 @@
 #ifndef SRC_LIBNAVIGRAPH_AUTHSERVER_H_
 #define SRC_LIBNAVIGRAPH_AUTHSERVER_H_
 
+#include <memory>
+#include <atomic>
+#include <thread>
+#include <string>
+#include <map>
+#include <functional>
+
 namespace navigraph {
 
 class AuthServer {
 public:
+    using AuthCallback = std::function<void(const std::map<std::string, std::string> &)>;
+
     AuthServer();
+    void setAuthCallback(AuthCallback cb);
+    void start(int port);
+    void stop();
+    virtual ~AuthServer();
+private:
+    enum class State {METHOD, URL, VERSION, FIELD, VALUE, POST_FIELD, POST_VALUE};
+
+    AuthCallback onAuth;
+
+    int srvSock = -1;
+    std::atomic_bool keepAlive { false };
+    std::unique_ptr<std::thread> serverThread;
+
+    State state = State::METHOD;
+    std::string method, url, version;
+    std::string curHeaderField, curHeaderValue;
+    std::string curPostField, curPostValue;
+    std::map<std::string, std::string> postFields;
+    size_t contentBytesLeft = 0;
+
+    void loop();
+    void handleClient(int client);
+    bool handleData(const std::string& data);
 };
 
 } /* namespace navigraph */

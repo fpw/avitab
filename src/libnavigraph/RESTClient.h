@@ -15,42 +15,31 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
-#define SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
+#ifndef SRC_LIBNAVIGRAPH_RESTCLIENT_H_
+#define SRC_LIBNAVIGRAPH_RESTCLIENT_H_
 
-#include <string>
 #include <vector>
+#include <cstdint>
+#include <string>
 #include <map>
-#include "Crypto.h"
-#include "AuthServer.h"
-#include "RESTClient.h"
+#include <curl/curl.h>
 
 namespace navigraph {
 
-class NavigraphClient {
+class RESTClient {
 public:
-    static constexpr const int AUTH_SERVER_PORT = 7890;
-    NavigraphClient(const std::string &clientId);
-    std::string generateLink();
-
-    void startAuth();
-    void cancelAuth();
-
+    void setBearer(const std::string &token);
+    std::string get(const std::string &url, bool &cancel);
+    std::string post(const std::string &url, const std::map<std::string, std::string> fields, bool &cancel);
 private:
-    bool cancelToken = false;
-    RESTClient restClient;
-    AuthServer server;
-    Crypto crypto;
-    std::string clientId;
-    std::string verifier;
-    std::string nonce, state;
+    std::string bearer;
 
-    std::string accessToken, idToken, refreshToken;
+    static size_t onData(void *buffer, size_t size, size_t nmemb, void *resPtr);
+    static int onProgress(void *client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow);
 
-    void onAuthReply(const std::map<std::string, std::string> &authInfo);
-    void handleToken(const std::string &inputJson);
+    std::string toPOSTString(const std::map<std::string, std::string> fields);
 };
 
 } /* namespace navigraph */
 
-#endif /* SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_ */
+#endif /* SRC_LIBNAVIGRAPH_RESTCLIENT_H_ */

@@ -35,6 +35,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
         env->loadNavWorldInBackground();
     }
     env->resumeEnvironmentJobs();
+    navigraph.startAuth();
     logger::verbose("Navigraph link: %s", navigraph.generateLink().c_str());
 }
 
