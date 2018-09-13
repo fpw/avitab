@@ -108,6 +108,8 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
 }
 
 void NavigraphClient::handleToken(const std::string& inputJson) {
+    // still in the server thread
+
     nlohmann::json data = nlohmann::json::parse(inputJson);
 
     idToken = data["id_token"];
@@ -115,13 +117,24 @@ void NavigraphClient::handleToken(const std::string& inputJson) {
     refreshToken = data["refresh_token"];
 
     // TODO verify id token with public key
-
-    restClient.setBearer(accessToken);
 }
 
 void NavigraphClient::cancelAuth() {
     cancelToken = true;
     server.stop();
+}
+
+void NavigraphClient::useRefreshToken() {
+    std::string url = "https://identity.api.navigraph.com/connect/token";
+
+    std::map<std::string, std::string> request;
+    request["grant_type"] = "refresh_token";
+    request["client_id"] = clientId;
+    request["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
+    request["refresh_token"] = refreshToken;
+
+    std::string reply = restClient.post(url, request, cancelToken);
+    handleToken(reply);
 }
 
 } /* namespace navigraph */

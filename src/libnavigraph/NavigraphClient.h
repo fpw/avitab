@@ -47,6 +47,8 @@ private:
 
     std::string accessToken, idToken, refreshToken;
 
+    void useRefreshToken();
+
     void onAuthReply(const std::map<std::string, std::string> &authInfo);
     void handleToken(const std::string &inputJson);
 };
