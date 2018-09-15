@@ -30,6 +30,7 @@ void RESTClient::setBearer(const std::string& token) {
 
 std::string RESTClient::get(const std::string& url, bool &cancel) {
     logger::verbose("GET '%s'", url.c_str());
+    cancel = false;
 
     std::vector<char> downloadBuf;
 
@@ -83,6 +84,7 @@ std::string RESTClient::get(const std::string& url, bool &cancel) {
 
 std::string RESTClient::post(const std::string& url, const std::map<std::string, std::string> fields, bool& cancel) {
     logger::verbose("POST '%s'", url.c_str());
+    cancel = false;
 
     std::string fieldStr = toPOSTString(fields);
 

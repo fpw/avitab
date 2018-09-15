@@ -30,10 +30,11 @@ namespace navigraph {
 class AuthServer {
 public:
     using AuthCallback = std::function<void(const std::map<std::string, std::string> &)>;
+    static constexpr const int AUTH_PORT = 7890;
 
     AuthServer();
     void setAuthCallback(AuthCallback cb);
-    void start(int port);
+    int start(); // returns port
     void stop();
     virtual ~AuthServer();
 private:

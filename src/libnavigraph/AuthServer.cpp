@@ -20,25 +20,25 @@
 #define _POSIX_SOURCE
 #include <unistd.h>
 #include "AuthServer.h"
+#include "src/Logger.h"
 
 #ifdef WIN32
 #include <windows.h>
+// close doesn't actually close sockets on Windows, there's a special API function for that <3
+#define close closesocket
 #endif
 
 namespace navigraph {
 
 AuthServer::AuthServer() {
-#ifdef WIN32
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-#endif
 }
 
 void AuthServer::setAuthCallback(AuthCallback cb) {
     onAuth = cb;
 }
 
-void AuthServer::start(int port) {
+int AuthServer::start() {
+    logger::verbose("Starting auth server");
     srvSock = socket(AF_INET, SOCK_STREAM, 0);
     if (srvSock < 0) {
         throw std::runtime_error("Couldn't create server socket");
@@ -50,11 +50,11 @@ void AuthServer::start(int port) {
     sockaddr_in serverAddr {};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    serverAddr.sin_port = htons(port);
+    serverAddr.sin_port = htons(AUTH_PORT);
 
     if (bind(srvSock, (sockaddr *) &serverAddr, sizeof(serverAddr)) < 0) {
         close(srvSock);
-        throw std::runtime_error("Couldn't bind server socket to port " + port);
+        throw std::runtime_error(std::string("Couldn't bind server socket"));
     }
 
     if (listen(srvSock, 5) < 0) {
@@ -64,36 +64,38 @@ void AuthServer::start(int port) {
 
     keepAlive = true;
     serverThread = std::make_unique<std::thread>(&AuthServer::loop, this);
+
+    return ntohs(serverAddr.sin_port);
 }
 
 void AuthServer::loop() {
+    sockaddr_in clientAddr {};
+    int clientLen = sizeof(clientAddr);
+
+    fd_set readSet;
+
+    timeval timeout{};
+    timeout.tv_usec = 1000 * 100;
+
     while (keepAlive) {
-        sockaddr_in clientAddr {};
-        int clientLen = sizeof(clientAddr);
-
-        fd_set readSet, masterSet;
-        FD_ZERO(&masterSet);
         FD_ZERO(&readSet);
-
-        FD_SET(srvSock, &masterSet);
+        FD_SET(srvSock, &readSet);
         int fdMax = srvSock;
-        readSet = masterSet;
 
-        timeval timeout{};
-        timeout.tv_usec = 1000 * 100;
         if (select(fdMax + 1, &readSet, nullptr, nullptr, &timeout) < 0) {
             break;
         }
 
         if (FD_ISSET(srvSock, &readSet)) {
+            logger::verbose("Accepting auth client");
             int clientSock = accept(srvSock, (sockaddr *) &clientAddr, &clientLen);
             handleClient(clientSock);
             shutdown(clientSock, SHUT_RDWR);
             close(clientSock);
         }
     }
-    shutdown(srvSock, SHUT_RDWR);
     close(srvSock);
+    logger::verbose("Shutdown auth server");
 }
 
 void AuthServer::handleClient(int client) {
@@ -108,16 +110,30 @@ void AuthServer::handleClient(int client) {
     curPostValue.clear();
     state = State::METHOD;
 
-    do {
-        char buf[255] = {0, };
-        int readNow = recv(client, buf, sizeof(buf), 0);
-        if (readNow <= 0) {
+    timeval timeout{};
+    timeout.tv_usec = 1000 * 100;
+
+    while (keepAlive) {
+        fd_set readSet;
+        FD_ZERO(&readSet);
+        FD_SET(client, &readSet);
+        int fdMax = client;
+
+        if (select(fdMax + 1, &readSet, nullptr, nullptr, &timeout) < 0) {
             break;
         }
-        if (!handleData(buf)) {
-            break;
+
+        if (FD_ISSET(client, &readSet)) {
+            char buf[255];
+            int readNow = recv(client, buf, sizeof(buf), 0);
+            if (readNow <= 0) {
+                break;
+            }
+            if (!handleData(std::string(buf, readNow))) {
+                break;
+            }
         }
-    } while (true);
+    }
 
     std::string reply;
     if (method == "POST") {
@@ -130,7 +146,7 @@ void AuthServer::handleClient(int client) {
             reply = std::string("HTTP/1.1 500 Internal Error\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab Error: ") + e.what();
         }
     } else {
-        reply = "HTTP/1.1 400 NOT FOUND\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab: 404 Not Found";
+        reply = "HTTP/1.1 404 NOT FOUND\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab: 404 Not Found";
     }
     send(client, reply.c_str(), reply.length(), 0);
 }
@@ -225,6 +241,7 @@ void AuthServer::stop() {
     keepAlive = false;
     if (serverThread) {
         serverThread->join();
+        serverThread.reset();
     }
 }
 

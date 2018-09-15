@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <thread>
+#include <memory>
 #include "Crypto.h"
 #include "AuthServer.h"
 #include "RESTClient.h"
@@ -29,33 +31,35 @@ namespace navigraph {
 
 class NavigraphClient {
 public:
-    static constexpr const int AUTH_SERVER_PORT = 7890;
     NavigraphClient(const std::string &clientId);
-
+    void setCacheDirectory(const std::string &dir);
     bool isSupported();
 
-    void setCacheDirectory(const std::string &dir);
+    bool canRelogin();
+    void relogin();
 
-    std::string generateLink();
-
-    void startAuth();
+    std::string startAuth();
     void cancelAuth();
 
     virtual ~NavigraphClient();
 
 private:
-    bool cancelToken = false;
+    std::string cacheDir;
+
     RESTClient restClient;
     AuthServer server;
     Crypto crypto;
-    std::string cacheDir;
+
+    // for auth process
+    int authPort = 0;
     std::string clientId;
     std::string verifier;
     std::string nonce, state;
 
+    // state
     std::string accessToken, idToken, refreshToken;
 
-    void useRefreshToken();
+    bool cancelToken = false;
 
     void onAuthReply(const std::map<std::string, std::string> &authInfo);
     void handleToken(const std::string &inputJson);

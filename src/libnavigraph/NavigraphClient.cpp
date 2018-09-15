@@ -27,10 +27,6 @@ namespace navigraph {
 NavigraphClient::NavigraphClient(const std::string& clientId):
     clientId(clientId)
 {
-    verifier = crypto.base64URLEncode(crypto.generateRandom(32));
-    state = crypto.base64URLEncode(crypto.generateRandom(8));
-    nonce = crypto.base64URLEncode(crypto.generateRandom(8));
-
     server.setAuthCallback([this] (const std::map<std::string, std::string> &reply) { onAuthReply(reply); });
 }
 
@@ -45,14 +41,41 @@ bool NavigraphClient::isSupported() {
     return strlen(NAVIGRAPH_CLIENT_SECRET) > 0;
 }
 
-std::string NavigraphClient::generateLink() {
+bool NavigraphClient::canRelogin() {
+    return !refreshToken.empty();
+}
+
+void NavigraphClient::relogin() {
+    if (refreshToken.empty()) {
+        throw std::runtime_error("No refresh token");
+    }
+
+    std::string url = "https://identity.api.navigraph.com/connect/token";
+    std::map<std::string, std::string> request;
+    request["grant_type"] = "refresh_token";
+    request["client_id"] = clientId;
+    request["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
+    request["refresh_token"] = refreshToken;
+
+    std::string reply = restClient.post(url, request, cancelToken);
+
+    handleToken(reply);
+}
+
+std::string NavigraphClient::startAuth() {
+    authPort = server.start();
+
     std::ostringstream url;
+
+    verifier = crypto.base64URLEncode(crypto.generateRandom(32));
+    state = crypto.base64URLEncode(crypto.generateRandom(8));
+    nonce = crypto.base64URLEncode(crypto.generateRandom(8));
 
     url << "https://identity.api.navigraph.com/connect/authorize";
     url << "?scope=" << crypto.urlEncode("openid charts userinfo offline_access");
     url << "&response_type=" << crypto.urlEncode("code id_token");
     url << "&client_id=" << crypto.urlEncode(clientId.c_str());
-    url << "&redirect_uri=" << crypto.urlEncode(std::string("http://127.0.0.1:") + std::to_string(AUTH_SERVER_PORT));
+    url << "&redirect_uri=" << crypto.urlEncode(std::string("http://127.0.0.1:") + std::to_string(authPort));
     url << "&response_mode=form_post";
     url << "&state=" << state;
     url << "&nonce=" << nonce;
@@ -62,16 +85,8 @@ std::string NavigraphClient::generateLink() {
     return url.str();
 }
 
-void NavigraphClient::startAuth() {
-    server.start(AUTH_SERVER_PORT);
-}
-
 void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &authInfo) {
     // called from the server thread!
-
-    if (!isSupported()) {
-        throw std::runtime_error("Sorry, self-compiled versions do not support the Navigraph integration");
-    }
 
     /*
      * Fields present:
@@ -110,9 +125,8 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
     replyFields["code_verifier"] = verifier;
     replyFields["client_id"] = clientId;
     replyFields["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
-    replyFields["redirect_uri"] = std::string("http://127.0.0.1:") + std::to_string(AUTH_SERVER_PORT);
+    replyFields["redirect_uri"] = std::string("http://127.0.0.1:") + std::to_string(authPort);
 
-    cancelToken = false;
     std::string reply = restClient.post("https://identity.api.navigraph.com/connect/token", replyFields, cancelToken);
     handleToken(reply);
 }
@@ -132,19 +146,6 @@ void NavigraphClient::handleToken(const std::string& inputJson) {
 void NavigraphClient::cancelAuth() {
     cancelToken = true;
     server.stop();
-}
-
-void NavigraphClient::useRefreshToken() {
-    std::string url = "https://identity.api.navigraph.com/connect/token";
-
-    std::map<std::string, std::string> request;
-    request["grant_type"] = "refresh_token";
-    request["client_id"] = clientId;
-    request["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
-    request["refresh_token"] = refreshToken;
-
-    std::string reply = restClient.post(url, request, cancelToken);
-    handleToken(reply);
 }
 
 NavigraphClient::~NavigraphClient() {

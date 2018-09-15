@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "NavigraphApp.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -24,22 +25,59 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
     window(std::make_shared<Window>(getUIContainer(), "Navigraph"))
 {
     window->setOnClose([this] () { exit(); });
+    reset();
+}
 
+void NavigraphApp::reset() {
+    label.reset();
     label = std::make_shared<Label>(window, "This app allows you to use your Navigraph account to access the chart cloud.\n"
                                             "For more information about Navigraph, see navigraph.com"
             );
     label->alignInTopLeft();
 
-    loginButton = std::make_shared<Button>(window, "Login");
-    loginButton->alignBelow(label);
-    loginButton->setCallback([this] (const Button &btn) {
-        api().executeLater([this] () { onLogin(); });
+    button.reset();
+    button = std::make_shared<Button>(window, "Login");
+    button->alignBelow(label);
+    button->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onLoginButton(); });
     });
 }
 
-void NavigraphApp::onLogin() {
+void NavigraphApp::onLoginButton() {
     label->setText("Please wait...");
-    loginButton.reset();
+    button.reset();
+
+    auto navigraph = api().getNavigraph();
+    if (navigraph->canRelogin()) {
+        relogin();
+        return;
+    }
+
+    auto link = navigraph->startAuth();
+    logger::info("Navigraph login link: %s", link.c_str());
+    label->setText("Access the URL in your log");
+
+    button = std::make_shared<Button>(window, "Cancel");
+    button->alignBelow(label);
+    button->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onCancelLoginButton(); });
+    });
+}
+
+void NavigraphApp::onCancelLoginButton() {
+    auto navigraph = api().getNavigraph();
+    navigraph->cancelAuth();
+    reset();
+}
+
+void NavigraphApp::relogin() {
+    auto navigraph = api().getNavigraph();
+
+    try {
+        navigraph->relogin();
+    } catch (const std::exception &e) {
+        label->setText(std::string("Error: ") + e.what());
+    }
 }
 
 } /* namespace avitab */

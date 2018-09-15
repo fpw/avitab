@@ -32,9 +32,12 @@ public:
 private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;
-    std::shared_ptr<Button> loginButton;
+    std::shared_ptr<Button> button;
 
-    void onLogin();
+    void reset();
+    void onLoginButton();
+    void onCancelLoginButton();
+    void relogin();
 };
 
 } /* namespace avitab */
