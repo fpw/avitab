@@ -23,6 +23,7 @@
 #include <map>
 #include <thread>
 #include <memory>
+#include <functional>
 #include "Crypto.h"
 #include "AuthServer.h"
 #include "RESTClient.h"
@@ -31,15 +32,19 @@ namespace navigraph {
 
 class NavigraphClient {
 public:
+    using AuthCallback = std::function<void()>;
+
     NavigraphClient(const std::string &clientId);
     void setCacheDirectory(const std::string &dir);
     bool isSupported();
 
     bool canRelogin();
-    void relogin();
+    void relogin(AuthCallback cb);
 
-    std::string startAuth();
+    std::string startAuth(AuthCallback cb);
     void cancelAuth();
+
+    bool isLoggedIn() const;
 
     virtual ~NavigraphClient();
 
@@ -57,6 +62,7 @@ private:
     std::string nonce, state;
 
     // state
+    AuthCallback onAuth;
     std::string accessToken, idToken, refreshToken;
 
     bool cancelToken = false;

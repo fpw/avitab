@@ -22,10 +22,20 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <stdexcept>
 #include <curl/curl.h>
 #undef MessageBox
 
 namespace navigraph {
+
+class HTTPException: public std::exception {
+public:
+    explicit HTTPException(int status);
+    const char *what();
+    int getStatusCode();
+private:
+    int status = 0;
+};
 
 class RESTClient {
 public:

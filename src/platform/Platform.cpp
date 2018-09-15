@@ -215,6 +215,11 @@ void mkpath(const std::string& utf8Path) {
     }
 }
 
+void removeFile(const std::string& utf8Path) {
+    std::string nativePath = UTF8ToNative(utf8Path);
+    ::remove(nativePath.c_str());
+}
+
 std::string getLocalTime(const std::string &format) {
     time_t now = time(nullptr);
     tm *local = localtime(&now);

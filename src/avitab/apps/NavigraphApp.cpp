@@ -44,16 +44,20 @@ void NavigraphApp::reset() {
 }
 
 void NavigraphApp::onLoginButton() {
-    label->setText("Please wait...");
     button.reset();
 
     auto navigraph = api().getNavigraph();
     if (navigraph->canRelogin()) {
+        label->setText("Please wait...");
         relogin();
         return;
     }
 
-    auto link = navigraph->startAuth();
+    auto link = navigraph->startAuth([this] () {
+        api().executeLater([this] () {
+            onAuthSuccess();
+        });
+    });
     logger::info("Navigraph login link: %s", link.c_str());
     label->setText("Access the URL in your log");
 
@@ -74,10 +78,24 @@ void NavigraphApp::relogin() {
     auto navigraph = api().getNavigraph();
 
     try {
-        navigraph->relogin();
+        navigraph->relogin([this] () {
+            api().executeLater([this] () {
+                onAuthSuccess();
+            });
+        });
     } catch (const std::exception &e) {
         label->setText(std::string("Error: ") + e.what());
+        button = std::make_shared<Button>(window, "Login");
+        button->alignBelow(label);
+        button->setCallback([this] (const Button &btn) {
+            api().executeLater([this] () { onLoginButton(); });
+        });
     }
+}
+
+void NavigraphApp::onAuthSuccess() {
+    label->setText("You are now logged in!");
+    button.reset();
 }
 
 } /* namespace avitab */

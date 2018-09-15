@@ -15,32 +15,16 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
-#define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
+#ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
+#define SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
 
-#include <memory>
-#include "App.h"
-#include "src/gui_toolkit/widgets/Window.h"
-#include "src/gui_toolkit/widgets/Button.h"
-#include "src/gui_toolkit/widgets/Label.h"
+namespace navigraph {
 
-namespace avitab {
-
-class NavigraphApp: public App {
+class NavigraphAPI {
 public:
-    NavigraphApp(FuncsPtr appFuncs);
-private:
-    std::shared_ptr<Window> window;
-    std::shared_ptr<Label> label;
-    std::shared_ptr<Button> button;
-
-    void reset();
-    void onLoginButton();
-    void onCancelLoginButton();
-    void relogin();
-    void onAuthSuccess();
+    NavigraphAPI();
 };
 
-} /* namespace avitab */
+} /* namespace navigraph */
 
-#endif /* SRC_AVITAB_APPS_NAVIGRAPHAPP_H_ */
+#endif /* SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_ */

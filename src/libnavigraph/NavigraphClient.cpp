@@ -17,6 +17,7 @@
  */
 #include <sstream>
 #include <stdexcept>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include "NavigraphClient.h"
 #include "src/Logger.h"
@@ -32,8 +33,14 @@ NavigraphClient::NavigraphClient(const std::string& clientId):
 
 void NavigraphClient::setCacheDirectory(const std::string& dir) {
     cacheDir = dir;
-    if (!platform::fileExists(dir)) {
-        platform::mkdir(dir);
+    if (!platform::fileExists(cacheDir)) {
+        platform::mkdir(cacheDir);
+    }
+
+    if (platform::fileExists(cacheDir + "/login_data")) {
+        std::ifstream tokenStream(platform::UTF8ToNative(cacheDir + "/login_data"));
+        std::getline(tokenStream, refreshToken);
+        logger::verbose("Loaded refresh token: %s", refreshToken.c_str());
     }
 }
 
@@ -45,7 +52,8 @@ bool NavigraphClient::canRelogin() {
     return !refreshToken.empty();
 }
 
-void NavigraphClient::relogin() {
+void NavigraphClient::relogin(AuthCallback cb) {
+    onAuth = cb;
     if (refreshToken.empty()) {
         throw std::runtime_error("No refresh token");
     }
@@ -56,13 +64,22 @@ void NavigraphClient::relogin() {
     request["client_id"] = clientId;
     request["client_secret"] = NAVIGRAPH_CLIENT_SECRET;
     request["refresh_token"] = refreshToken;
+    request["redirect_uri"] = std::string("http://127.0.0.1:") + std::to_string(authPort);
 
-    std::string reply = restClient.post(url, request, cancelToken);
-
+    std::string reply;
+    try {
+        reply = restClient.post(url, request, cancelToken);
+    } catch (const HTTPException &e) {
+        // token no longer valid
+        platform::removeFile(cacheDir + "/login_data");
+        refreshToken.clear();
+        throw std::runtime_error("Login no longer valid, try again");
+    }
     handleToken(reply);
 }
 
-std::string NavigraphClient::startAuth() {
+std::string NavigraphClient::startAuth(AuthCallback cb) {
+    onAuth = cb;
     authPort = server.start();
 
     std::ostringstream url;
@@ -141,11 +158,20 @@ void NavigraphClient::handleToken(const std::string& inputJson) {
     refreshToken = data["refresh_token"];
 
     // TODO verify id token with public key
+    std::ofstream refreshFile(platform::UTF8ToNative(cacheDir) + "/login_data");
+    refreshFile << refreshToken;
+
+    cancelAuth();
+
+    onAuth();
 }
 
 void NavigraphClient::cancelAuth() {
     cancelToken = true;
-    server.stop();
+}
+
+bool NavigraphClient::isLoggedIn() const {
+    return !accessToken.empty();
 }
 
 NavigraphClient::~NavigraphClient() {

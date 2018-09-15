@@ -66,7 +66,7 @@ void AviTab::startApp() {
         }
     });
     createPanel();
-    guiLib->runInGUI(std::bind(&AviTab::createLayout, this));
+    guiLib->executeLater(std::bind(&AviTab::createLayout, this));
 }
 
 void AviTab::toggleTablet() {
@@ -89,7 +89,7 @@ void AviTab::onPlaneLoad() {
     close();
     createPanel();
 
-    guiLib->runInGUI([this] () {
+    guiLib->executeLater([this] () {
         cleanupLayout();
         createLayout();
     });
@@ -97,7 +97,7 @@ void AviTab::onPlaneLoad() {
 
 void AviTab::zoomIn() {
     // called from environment thread
-    guiLib->runInGUI([this] () {
+    guiLib->executeLater([this] () {
         if (appLauncher) {
             appLauncher->onMouseWheel(1, 0, 0);
         }
@@ -106,7 +106,7 @@ void AviTab::zoomIn() {
 
 void AviTab::zoomOut() {
     // called from environment thread
-    guiLib->runInGUI([this] () {
+    guiLib->executeLater([this] () {
         if (appLauncher) {
             appLauncher->onMouseWheel(-1, 0, 0);
         }
@@ -186,7 +186,7 @@ void AviTab::showAppLauncher() {
 
 void AviTab::showApp(AppId id) {
     if (appLauncher) {
-        guiLib->runInGUI([this, id] () {
+        guiLib->executeLater([this, id] () {
             appLauncher->showApp(id);
         });
     }

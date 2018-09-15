@@ -168,7 +168,7 @@ void LVGLToolkit::guiLoop() {
             // mutex by doing something in the environment
             std::vector<GUITask> tasks;
             {
-                std::lock_guard<std::mutex> lock(guiMutex);
+                std::lock_guard<std::recursive_mutex> lock(guiMutex);
                 tasks = pendingTasks;
                 pendingTasks.clear();
             }
@@ -200,12 +200,8 @@ void LVGLToolkit::guiLoop() {
     logger::verbose("LVGL thread destroyed");
 }
 
-void LVGLToolkit::runInGUI(GUITask func) {
-    std::lock_guard<std::mutex> lock(guiMutex);
-    executeLater(func);
-}
-
 void LVGLToolkit::executeLater(GUITask func) {
+    std::lock_guard<std::recursive_mutex> lock(guiMutex);
     if (guiActive) {
         pendingTasks.push_back(func);
     }

@@ -142,6 +142,7 @@ void AuthServer::handleClient(int client) {
                 onAuth(postFields);
                 reply = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab: Success, you can close this tab now!";
             }
+            keepAlive = false;
         } catch (const std::exception &e) {
             reply = std::string("HTTP/1.1 500 Internal Error\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab Error: ") + e.what();
         }

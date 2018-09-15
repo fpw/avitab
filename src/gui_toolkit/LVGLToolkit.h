@@ -49,10 +49,6 @@ public:
 
     std::shared_ptr<Screen> &screen();
 
-    // call can be any task except for the GUI task
-    void runInGUI(GUITask func);
-
-    // caller must be the GUI task
     void executeLater(GUITask func);
 
     ~LVGLToolkit();
@@ -60,7 +56,7 @@ private:
     static bool lvglIsInitialized;
     static LVGLToolkit *instance;
     MouseWheelCallback onMouseWheel;
-    std::mutex guiMutex;
+    std::recursive_mutex guiMutex;
     std::vector<GUITask> pendingTasks;
     std::shared_ptr<GUIDriver> driver;
     std::unique_ptr<std::thread> guiThread;

@@ -24,6 +24,18 @@
 
 namespace navigraph {
 
+HTTPException::HTTPException(int status) {
+    this->status = status;
+}
+
+const char* HTTPException::what() {
+    return "HTTP error";
+}
+
+int HTTPException::getStatusCode() {
+    return status;
+}
+
 void RESTClient::setBearer(const std::string& token) {
     bearer = token;
 }
@@ -74,7 +86,7 @@ std::string RESTClient::get(const std::string& url, bool &cancel) {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
     if (httpStatus != 200) {
         curl_easy_cleanup(curl);
-        throw std::runtime_error(std::string("GET error - HTTP status " + std::to_string(httpStatus)));
+        throw HTTPException(httpStatus);
     }
 
     curl_easy_cleanup(curl);
@@ -122,7 +134,7 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     std::string content = std::string(downloadBuf.data(), downloadBuf.size());
     if (httpStatus != 200) {
         curl_easy_cleanup(curl);
-        throw std::runtime_error(std::string("POST error - HTTP status " + std::to_string(httpStatus)) + ", reply: " + content);
+        throw HTTPException(httpStatus);
     }
 
     curl_easy_cleanup(curl);
