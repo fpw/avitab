@@ -32,6 +32,8 @@ public:
     NavigraphAPI(std::shared_ptr<NavigraphClient> client);
 
     void load();
+    bool isInDemoMode() const;
+    bool hasChartsFor(const std::string &icao);
     std::vector<std::shared_ptr<Chart>> getChartsFor(const std::string &icao);
     void loadChart(std::shared_ptr<Chart> chart);
 
@@ -44,6 +46,7 @@ private:
 
     void loadAirports();
     bool hasChartsSubscription();
+    bool canAccess(const std::string &icao);
 };
 
 } /* namespace navigraph */

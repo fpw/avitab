@@ -36,6 +36,10 @@ void NavigraphAPI::load() {
     }
 }
 
+bool NavigraphAPI::isInDemoMode() const {
+    return demoMode;
+}
+
 void NavigraphAPI::loadAirports() {
     long timestamp = client->getTimestamp("https://charts.api.navigraph.com/1/airports");
 
@@ -77,8 +81,22 @@ bool NavigraphAPI::hasChartsSubscription() {
     return false;
 }
 
-std::vector<std::shared_ptr<Chart> > navigraph::NavigraphAPI::getChartsFor(const std::string& icao) {
+bool NavigraphAPI::hasChartsFor(const std::string& icao) {
+    for (auto &e: *airportJson) {
+        if (e["icao_airport_identifier"] == icao) {
+            return canAccess(icao);
+        }
+    }
+
+    return false;
+}
+
+std::vector<std::shared_ptr<Chart>> NavigraphAPI::getChartsFor(const std::string& icao) {
     std::vector<std::shared_ptr<Chart>> res;
+
+    if (!canAccess(icao)) {
+        return res;
+    }
 
     auto lower = charts.lower_bound(icao);
     auto upper = charts.upper_bound(icao);
@@ -103,12 +121,23 @@ std::vector<std::shared_ptr<Chart> > navigraph::NavigraphAPI::getChartsFor(const
     return res;
 }
 
+bool NavigraphAPI::canAccess(const std::string& icao) {
+    if (demoMode) {
+        return icao == "LEAL" || icao == "KONT";
+    } else {
+        return true;
+    }
+}
+
 void NavigraphAPI::loadChart(std::shared_ptr<Chart> chart) {
     if (chart->isLoaded()) {
         return;
     }
 
     std::string icao = chart->getICAO();
+    if (!canAccess(icao)) {
+        throw std::runtime_error("Cannot access this chart in demo mode");
+    }
 
     std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/" + chart->getFileDay();
     std::string signedUrl = client->get(url);

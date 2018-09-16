@@ -17,6 +17,7 @@
  */
 #include "NavigraphApp.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -32,7 +33,8 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
 void NavigraphApp::reset() {
     label.reset();
     label = std::make_shared<Label>(window, "This app allows you to use your Navigraph account to access the chart cloud.\n"
-                                            "For more information about Navigraph, see navigraph.com"
+                                            "For more information about Navigraph, see navigraph.com\n"
+                                            "Clicking login will open your browser and prompt you to login to navigraph\n"
             );
     label->alignInTopLeft();
 
@@ -59,8 +61,10 @@ void NavigraphApp::onLoginButton() {
             onAuthSuccess();
         });
     });
+    platform::openBrowser(link);
     logger::info("Navigraph login link: %s", link.c_str());
-    label->setText("Access the URL in your log");
+    label->setText("Follow the instructions in your browser.\n"
+                   "If your browser didn't start, manually open the link in AviTab's log file");
 
     button = std::make_shared<Button>(window, "Cancel");
     button->alignBelow(label);
@@ -98,14 +102,14 @@ void NavigraphApp::relogin() {
 void NavigraphApp::onAuthSuccess() {
     auto navigraph = api().getNavigraph();
 
-    label->setText("You are now logged in!");
     button.reset();
 
     navigraphApi->load();
-    /*
-    auto charts = navigraphApi->getChartsFor("EDHL");
-    navigraphApi->loadChart(charts[0]);
-    */
+    if (navigraphApi->isInDemoMode()) {
+        label->setText("You are logged in but don't have a charts subscription. Only LEAL and KONT are usable in demo mode.");
+    } else {
+        label->setText("You are now logged in with a valid chart subscription!");
+    }
 }
 
 } /* namespace avitab */

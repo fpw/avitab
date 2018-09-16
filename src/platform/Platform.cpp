@@ -19,6 +19,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #   define _WIN32_WINNT 0x0600
 #   include <windows.h>
+#   include <shellapi.h>
 #   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
 #else
 #   include <unistd.h>
@@ -291,6 +292,18 @@ std::string upper(const std::string& in) {
     std::string res;
     std::transform(in.begin(), in.end(), std::back_inserter(res), ::toupper);
     return res;
+}
+
+void openBrowser(const std::string& url) {
+#ifdef _WIN32
+    ShellExecuteA(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#elif defined(__APPLE__)
+    std::string cmd = std::string("open \"") + url + "\"";
+    system(cmd.c_str());
+#else
+    std::string cmd = std::string("xdg-open \"") + url + "\"";
+    system(browser_cmd.c_str());
+#endif
 }
 
 }

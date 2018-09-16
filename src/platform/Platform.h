@@ -67,6 +67,8 @@ void controlMediaPlayer(MediaControl ctrl);
 std::string lower(const std::string &in);
 std::string upper(const std::string &in);
 
+void openBrowser(const std::string &url);
+
 }
 
 #endif /* SRC_PLATFORM_PLATFORM_H_ */
