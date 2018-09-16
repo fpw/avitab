@@ -39,6 +39,12 @@ int HTTPException::getStatusCode() const {
 
 void RESTClient::setBearer(const std::string& token) {
     bearer = token;
+    basicAuth = "";
+}
+
+void RESTClient::setBasicAuth(const std::string& basic) {
+    basicAuth = basic;
+    bearer = "";
 }
 
 std::string RESTClient::get(const std::string& url, bool &cancel) {
@@ -60,9 +66,14 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     if (!bearer.empty()) {
         list = curl_slist_append(list, std::string("Authorization: Bearer " + bearer).c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    } else if (!basicAuth.empty()) {
+        list = curl_slist_append(list, std::string("Authorization: Basic " + basicAuth).c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     }
 
     CURLcode code = curl_easy_perform(curl);
+    bearer.clear();
+    basicAuth.clear();
 
     if (list) {
         curl_slist_free_all(list);
@@ -97,10 +108,27 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     std::string fieldStr = toPOSTString(fields);
 
     CURL *curl = createCURL(url, cancel);
+
+    curl_slist *list = nullptr;
+    if (!bearer.empty()) {
+        list = curl_slist_append(list, std::string("Authorization: Bearer " + bearer).c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    } else if (!basicAuth.empty()) {
+        list = curl_slist_append(list, std::string("Authorization: Basic " + basicAuth).c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    }
+
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, fieldStr.length());
     curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, fieldStr.c_str());
 
     CURLcode code = curl_easy_perform(curl);
+    basicAuth.clear();
+    bearer.clear();
+
+    if (list) {
+        curl_slist_free_all(list);
+        list = nullptr;
+    }
 
     if (code != CURLE_OK) {
         if (code == CURLE_ABORTED_BY_CALLBACK) {
@@ -146,13 +174,13 @@ std::string RESTClient::getRedirect(const std::string& url, bool& cancel) {
     char *redir = nullptr;
     curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redir);
 
-    curl_easy_cleanup(curl);
-
+    std::string redirURL;
     if (redir) {
-        return std::string(redir);
-    } else {
-        return url;
+        redirURL = redir;
     }
+
+    curl_easy_cleanup(curl);
+    return redirURL;
 }
 
 long RESTClient::head(const std::string& url, bool& cancel) {

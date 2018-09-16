@@ -84,6 +84,18 @@ std::string Crypto::base64URLEncode(const std::vector<uint8_t>& in) {
     return res;
 }
 
+std::string Crypto::base64BasicAuthEncode(const std::string& user, const std::string& pw) {
+    std::string input = user + ":" + pw;
+
+    size_t size;
+    mbedtls_base64_encode(nullptr, 0, &size, (uint8_t *) input.data(), input.size());
+
+    std::string res(size + 1, '\0');
+    mbedtls_base64_encode((uint8_t *) res.data(), res.size(), &size, (uint8_t *) input.data(), input.size());
+
+    return res;
+}
+
 std::vector<uint8_t> Crypto::base64URLDecode(const std::string& in) {
     std::string cpy = in;
     std::replace(cpy.begin(), cpy.end(), '-', '+');

@@ -42,6 +42,7 @@ private:
 
 class RESTClient {
 public:
+    void setBasicAuth(const std::string &basic);
     void setBearer(const std::string &token);
     std::string get(const std::string &url, bool &cancel);
     std::vector<uint8_t> getBinary(const std::string &url, bool &cancel);
@@ -51,6 +52,7 @@ public:
 private:
     std::vector<uint8_t> downloadBuf;
     std::string bearer;
+    std::string basicAuth;
 
     CURL *createCURL(const std::string &url, bool &cancel);
     std::string toPOSTString(const std::map<std::string, std::string> fields);

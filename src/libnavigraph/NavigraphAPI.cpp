@@ -112,11 +112,13 @@ void NavigraphAPI::loadChart(std::shared_ptr<Chart> chart) {
 
     std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/" + chart->getFileDay();
     std::string signedUrl = client->get(url);
-    std::vector<uint8_t> png = client->getBinary(signedUrl);
+    std::vector<uint8_t> pngDay = client->getBinary(signedUrl);
 
     url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/" + chart->getFileNight();
     signedUrl = client->get(url);
-    png = client->getBinary(signedUrl);
+    std::vector<uint8_t> pngNight = client->getBinary(signedUrl);
+
+    chart->attachImages(pngDay, pngNight);
 }
 
 } /* namespace navigraph */
