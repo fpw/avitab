@@ -19,7 +19,9 @@
 #include <algorithm>
 #include <mbedtls/base64.h>
 #include <mbedtls/md.h>
+#include <mbedtls/rsa.h>
 #include <stdexcept>
+#include "src/Logger.h"
 #include "Crypto.h"
 
 namespace navigraph {
@@ -80,6 +82,56 @@ std::string Crypto::base64URLEncode(const std::vector<uint8_t>& in) {
     res.erase(std::remove(res.begin(), res.end(), '\0'), res.end());
 
     return res;
+}
+
+std::vector<uint8_t> Crypto::base64URLDecode(const std::string& in) {
+    std::string cpy = in;
+    std::replace(cpy.begin(), cpy.end(), '-', '+');
+    std::replace(cpy.begin(), cpy.end(), '_', '/');
+
+    while (cpy.size() % 4 != 0) {
+        cpy.push_back('=');
+    }
+
+    size_t size;
+    mbedtls_base64_decode(nullptr, 0, &size, (uint8_t *) cpy.c_str(), cpy.length());
+
+    std::vector<uint8_t> res(size);
+    if (mbedtls_base64_decode(res.data(), res.size(), &size, (uint8_t *) cpy.c_str(), cpy.length()) != 0) {
+        throw std::runtime_error("Invalid Base64 format");
+    }
+
+    return res;
+}
+
+bool Crypto::RSASHA256(const std::string& base64in, const std::string &sig, const std::string& n, const std::string& e) {
+    mbedtls_rsa_context rsa;
+
+    auto nBin = base64URLDecode(n);
+    auto eBin = base64URLDecode(e);
+
+    mbedtls_rsa_init(&rsa, MBEDTLS_RSA_PKCS_V15, 0);
+    mbedtls_rsa_import_raw(&rsa, nBin.data(), nBin.size(), nullptr, 0, nullptr, 0, nullptr, 0, eBin.data(), eBin.size());
+    if (mbedtls_rsa_complete(&rsa) != 0) {
+        mbedtls_rsa_free(&rsa);
+        throw std::runtime_error("Invalid RSA key");
+    }
+
+    auto sha = sha256(base64in);
+    auto sigBin = base64URLDecode(sig);
+    if (sigBin.size() != nBin.size()) {
+        mbedtls_rsa_free(&rsa);
+        throw std::runtime_error("Invalid signature size");
+    }
+
+    bool success = false;
+    if (mbedtls_rsa_pkcs1_verify(&rsa, nullptr, nullptr, MBEDTLS_RSA_PUBLIC,
+            MBEDTLS_MD_SHA256, 0, sha.data(), sigBin.data()) == 0)
+    {
+        success = true;
+    }
+
+    return success;
 }
 
 Crypto::~Crypto() {

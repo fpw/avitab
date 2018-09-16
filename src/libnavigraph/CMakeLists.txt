@@ -4,6 +4,7 @@ add_library(navigraph
     AuthServer.cpp
     RESTClient.cpp
     NavigraphAPI.cpp
+    Chart.cpp
 )
 
 target_link_libraries(navigraph

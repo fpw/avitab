@@ -37,11 +37,21 @@ void NavigraphClient::setCacheDirectory(const std::string& dir) {
         platform::mkdir(cacheDir);
     }
 
-    if (platform::fileExists(cacheDir + "/login_data")) {
-        std::ifstream tokenStream(platform::UTF8ToNative(cacheDir + "/login_data"));
-        std::getline(tokenStream, refreshToken);
-        logger::verbose("Loaded refresh token: %s", refreshToken.c_str());
+    tokenFile = cacheDir + "/tokens.json";
+
+    if (platform::fileExists(tokenFile)) {
+        std::ifstream tokenStream(platform::UTF8ToNative(tokenFile));
+        nlohmann::json tokens;
+        tokenStream >> tokens;
+        refreshToken = tokens["refresh_token"];
+        accessToken = tokens["access_token"];
+        idToken = tokens["id_token"];
+        loadIDToken(false);
     }
+}
+
+std::string NavigraphClient::getCacheDirectory() const {
+    return cacheDir;
 }
 
 bool NavigraphClient::isSupported() {
@@ -54,11 +64,26 @@ bool NavigraphClient::canRelogin() {
 
 void NavigraphClient::relogin(AuthCallback cb) {
     onAuth = cb;
-    if (refreshToken.empty()) {
-        throw std::runtime_error("No refresh token");
+
+    // check if the access token is still valid
+    bool valid = false;
+    try {
+        restClient.setBearer(accessToken);
+        restClient.get("https://subscriptions.api.navigraph.com/1/subscriptions/valid", cancelToken);
+        valid = true;
+    } catch (const HTTPException &e) {
+        if (e.getStatusCode() == HTTPException::NO_CONTENT) {
+            // no subscriptions but access token is valid
+            valid = true;
+        }
     }
 
-    std::string url = "https://identity.api.navigraph.com/connect/token";
+    if (valid) {
+        onAuth();
+        return;
+    }
+
+    // access token no longer valid, try refreshing it
     std::map<std::string, std::string> request;
     request["grant_type"] = "refresh_token";
     request["client_id"] = clientId;
@@ -68,10 +93,12 @@ void NavigraphClient::relogin(AuthCallback cb) {
 
     std::string reply;
     try {
-        reply = restClient.post(url, request, cancelToken);
+        reply = restClient.post("https://identity.api.navigraph.com/connect/token", request, cancelToken);
     } catch (const HTTPException &e) {
         // token no longer valid
-        platform::removeFile(cacheDir + "/login_data");
+        platform::removeFile(tokenFile);
+        accessToken.clear();
+        idToken.clear();
         refreshToken.clear();
         throw std::runtime_error("Login no longer valid, try again");
     }
@@ -108,7 +135,7 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
     /*
      * Fields present:
      *  code: the access code to request the API key
-     *  access_token: ?
+     *  id_token: the signed JWT token
      *  scope: the grant we received, e.g. openid+charts+userinfo
      *  session_state: the server's opaque state
      *  state: the state that we passed in the link
@@ -124,12 +151,13 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
         throw std::runtime_error("Invalid state, the link only works once!");
     }
 
-    // copy state
-    it = authInfo.find("session_state");
+    // check id token
+    it = authInfo.find("id_token");
     if (it == authInfo.end()) {
-        throw std::runtime_error("No session_state");
+        throw std::runtime_error("No ID token");
     }
-    replyFields["session_state"] = it->second;
+    idToken = it->second;
+    loadIDToken(true);
 
     // copy auth code
     it = authInfo.find("code");
@@ -149,7 +177,7 @@ void NavigraphClient::onAuthReply(const std::map<std::string, std::string> &auth
 }
 
 void NavigraphClient::handleToken(const std::string& inputJson) {
-    // still in the server thread
+    // can be from any thread
 
     nlohmann::json data = nlohmann::json::parse(inputJson);
 
@@ -157,25 +185,72 @@ void NavigraphClient::handleToken(const std::string& inputJson) {
     accessToken = data["access_token"];
     refreshToken = data["refresh_token"];
 
-    // TODO verify id token with public key
-    std::ofstream refreshFile(platform::UTF8ToNative(cacheDir) + "/login_data");
-    refreshFile << refreshToken;
+    loadIDToken(false);
 
-    cancelAuth();
+    std::ofstream tokenStream(platform::UTF8ToNative(tokenFile));
+    tokenStream << nlohmann::json {
+        {"refresh_token", refreshToken},
+        {"access_token", accessToken},
+        {"id_token", idToken},
+    };
+
+    server.stop();
 
     onAuth();
 }
 
+void NavigraphClient::loadIDToken(bool checkNonce) {
+    auto i1 = idToken.find('.');
+    std::string header = idToken.substr(0, i1);
+
+    auto i2 = idToken.substr(i1 + 1).find('.');
+    std::string payload = idToken.substr(i1 + 1, i2);
+
+    std::string sig = idToken.substr(i1 + 1 + i2 + 1);
+
+    std::string navigraph_N = "6TjdXuhh9mkBS5P_D0biAvI3z8oZwcs8q3JSQB_Lu2AAm-XoxrH1TomSnSrHg-HbCoNl-94cue1Dfff45dl0ay1WTb3W5vQJi1V6bMwCPP2UGjE6Y_mJe26Nn0UWaK82mURT3EfojtSbvoOJW4a7CpET986souhvhHq04iMCyoQkwSeJORJnOCCcwgIb50bdqfVRMKGmsR_3ImtRFyUekaHurhmt25CHFJhdh6kRrn5si7FJp93O44egIFdssWz5O5COBDEBTXZEH6ijg8uH4ada3xVelPmwTwWQzky_y5wKaAMe5SsYh8YLtcElkNY2s-Ii5oOspvtqK6tzRiXfWw";
+    std::string navigraph_E = "AQAB";
+
+    if (!crypto.RSASHA256(idToken.substr(0, i1 + 1 + i2), sig, navigraph_N, navigraph_E)) {
+        throw std::runtime_error("Invalid RS256 signature");
+    }
+
+    nlohmann::json data = nlohmann::json::parse(crypto.base64URLDecode(payload));
+    accountName = data["name"];
+    if (checkNonce) {
+        if (data["nonce"] != nonce) {
+            throw std::runtime_error("Invalid nonce");
+        }
+    }
+}
+
 void NavigraphClient::cancelAuth() {
-    cancelToken = true;
+    server.stop();
 }
 
 bool NavigraphClient::isLoggedIn() const {
     return !accessToken.empty();
 }
 
+std::string NavigraphClient::get(const std::string& url) {
+    restClient.setBearer(accessToken);
+    return restClient.get(url, cancelToken);
+}
+
+std::vector<uint8_t> navigraph::NavigraphClient::getBinary(const std::string& url) {
+    restClient.setBearer(accessToken);
+    return restClient.getBinary(url, cancelToken);
+}
+
+long NavigraphClient::getTimestamp(const std::string& url) {
+    restClient.setBearer(accessToken);
+
+    auto newUrl = restClient.getRedirect(url, cancelToken);
+    return restClient.head(newUrl, cancelToken);
+}
+
 NavigraphClient::~NavigraphClient() {
-    cancelAuth();
+    cancelToken = true;
 }
 
 } /* namespace navigraph */

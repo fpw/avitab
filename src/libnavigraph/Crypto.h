@@ -34,6 +34,8 @@ public:
     std::vector<uint8_t> generateRandom(size_t len);
     std::string urlEncode(const std::string &in);
     std::string base64URLEncode(const std::vector<uint8_t> &in);
+    std::vector<uint8_t> base64URLDecode(const std::string &in);
+    bool RSASHA256(const std::string &base64in, const std::string &sig, const std::string &n, const std::string &e);
     virtual ~Crypto();
 private:
     mbedtls_entropy_context entropySource;

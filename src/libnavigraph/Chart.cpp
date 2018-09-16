@@ -15,34 +15,39 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
-#define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
+#include <nlohmann/json.hpp>
+#include "Chart.h"
+#include "src/Logger.h"
 
-#include <memory>
-#include "App.h"
-#include "src/gui_toolkit/widgets/Window.h"
-#include "src/gui_toolkit/widgets/Button.h"
-#include "src/gui_toolkit/widgets/Label.h"
-#include "src/libnavigraph/NavigraphAPI.h"
+namespace navigraph {
 
-namespace avitab {
+Chart::Chart(const nlohmann::json &json) {
+    fileDay = json["file_day"];
+    fileNight = json["file_night"];
+    icao = json["icao_airport_identifier"];
+    section = json["type"]["section"];
+    desc = json["procedure_identifier"];
+}
 
-class NavigraphApp: public App {
-public:
-    NavigraphApp(FuncsPtr appFuncs);
-private:
-    std::shared_ptr<Window> window;
-    std::shared_ptr<Label> label;
-    std::shared_ptr<Button> button;
-    std::shared_ptr<navigraph::NavigraphAPI> navigraphApi;
+std::string Chart::getICAO() const {
+    return icao;
+}
 
-    void reset();
-    void onLoginButton();
-    void onCancelLoginButton();
-    void relogin();
-    void onAuthSuccess();
-};
+std::string Chart::getFileDay() const {
+    return fileDay;
+}
 
-} /* namespace avitab */
+std::string Chart::getFileNight() const {
+    return fileNight;
+}
 
-#endif /* SRC_AVITAB_APPS_NAVIGRAPHAPP_H_ */
+bool Chart::isLoaded() const {
+    return !pngDay.empty();
+}
+
+void Chart::attachImages(const std::vector<uint8_t>& day, const std::vector<uint8_t>& night) {
+    pngDay = day;
+    pngNight = night;
+}
+
+} /* namespace navigraph */

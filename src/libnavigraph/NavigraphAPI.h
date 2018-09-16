@@ -18,11 +18,32 @@
 #ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
 #define SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
 
+#include <memory>
+#include <vector>
+#include <map>
+#include <nlohmann/json_fwd.hpp>
+#include "NavigraphClient.h"
+#include "Chart.h"
+
 namespace navigraph {
 
 class NavigraphAPI {
 public:
-    NavigraphAPI();
+    NavigraphAPI(std::shared_ptr<NavigraphClient> client);
+
+    void load();
+    std::vector<std::shared_ptr<Chart>> getChartsFor(const std::string &icao);
+    void loadChart(std::shared_ptr<Chart> chart);
+
+private:
+    std::shared_ptr<nlohmann::json> airportJson;
+    std::shared_ptr<NavigraphClient> client;
+    bool demoMode = true;
+
+    std::multimap<std::string, std::shared_ptr<Chart>> charts;
+
+    void loadAirports();
+    bool hasChartsSubscription();
 };
 
 } /* namespace navigraph */

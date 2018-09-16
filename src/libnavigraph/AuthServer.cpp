@@ -38,6 +38,12 @@ void AuthServer::setAuthCallback(AuthCallback cb) {
 }
 
 int AuthServer::start() {
+    if (serverThread) {
+        keepAlive = false;
+        serverThread->join();
+        serverThread.reset();
+    }
+
     logger::verbose("Starting auth server");
     srvSock = socket(AF_INET, SOCK_STREAM, 0);
     if (srvSock < 0) {
@@ -239,15 +245,17 @@ bool AuthServer::handleData(const std::string& data) {
 }
 
 void AuthServer::stop() {
+    // could be called from the server thread, so no joining here
     keepAlive = false;
+}
+
+AuthServer::~AuthServer() {
+    keepAlive = false;
+
     if (serverThread) {
         serverThread->join();
         serverThread.reset();
     }
-}
-
-AuthServer::~AuthServer() {
-    stop();
 }
 
 } /* namespace navigraph */

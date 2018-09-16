@@ -36,6 +36,7 @@ public:
 
     NavigraphClient(const std::string &clientId);
     void setCacheDirectory(const std::string &dir);
+    std::string getCacheDirectory() const;
     bool isSupported();
 
     bool canRelogin();
@@ -45,11 +46,16 @@ public:
     void cancelAuth();
 
     bool isLoggedIn() const;
+    std::string get(const std::string &url);
+    std::vector<uint8_t> getBinary(const std::string &url);
+    long getTimestamp(const std::string &url);
 
     virtual ~NavigraphClient();
 
 private:
     std::string cacheDir;
+    std::string tokenFile;
+    std::string accountName;
 
     RESTClient restClient;
     AuthServer server;
@@ -69,6 +75,7 @@ private:
 
     void onAuthReply(const std::map<std::string, std::string> &authInfo);
     void handleToken(const std::string &inputJson);
+    void loadIDToken(bool checkNonce);
 };
 
 } /* namespace navigraph */

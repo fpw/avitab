@@ -26,13 +26,14 @@ namespace navigraph {
 
 HTTPException::HTTPException(int status) {
     this->status = status;
+    errorString = std::string("HTTP status ") + std::to_string(status);
 }
 
-const char* HTTPException::what() {
-    return "HTTP error";
+const char* HTTPException::what() const noexcept {
+    return errorString.c_str();
 }
 
-int HTTPException::getStatusCode() {
+int HTTPException::getStatusCode() const {
     return status;
 }
 
@@ -41,29 +42,25 @@ void RESTClient::setBearer(const std::string& token) {
 }
 
 std::string RESTClient::get(const std::string& url, bool &cancel) {
-    logger::verbose("GET '%s'", url.c_str());
-    cancel = false;
+    auto bin = getBinary(url, cancel);
+    return std::string((const char *) bin.data(), bin.size());
+}
 
-    std::vector<char> downloadBuf;
+std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel) {
+    auto it = url.find('?');
+    if (it != std::string::npos) {
+        logger::verbose("GET '%s'", url.substr(0, it).c_str());
+    } else {
+        logger::verbose("GET '%s'", url.c_str());
+    }
 
-    CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    CURL *curl = createCURL(url, cancel);
 
     curl_slist *list = nullptr;
     if (!bearer.empty()) {
         list = curl_slist_append(list, std::string("Authorization: Bearer " + bearer).c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
     }
-
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
 
     CURLcode code = curl_easy_perform(curl);
 
@@ -78,7 +75,7 @@ std::string RESTClient::get(const std::string& url, bool &cancel) {
             throw std::out_of_range("Cancelled");
         } else {
             curl_easy_cleanup(curl);
-            throw std::runtime_error(std::string("GET error: ") + curl_easy_strerror(code));
+            throw std::runtime_error(std::string("GET_BIN error: ") + curl_easy_strerror(code));
         }
     }
 
@@ -91,31 +88,17 @@ std::string RESTClient::get(const std::string& url, bool &cancel) {
 
     curl_easy_cleanup(curl);
 
-    return std::string(downloadBuf.data(), downloadBuf.size());
+    return downloadBuf;
 }
 
 std::string RESTClient::post(const std::string& url, const std::map<std::string, std::string> fields, bool& cancel) {
     logger::verbose("POST '%s'", url.c_str());
-    cancel = false;
 
     std::string fieldStr = toPOSTString(fields);
 
-    std::vector<char> downloadBuf;
-
-    CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    CURL *curl = createCURL(url, cancel);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, fieldStr.length());
     curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, fieldStr.c_str());
-
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
 
     CURLcode code = curl_easy_perform(curl);
 
@@ -131,7 +114,7 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
 
     long httpStatus = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
-    std::string content = std::string(downloadBuf.data(), downloadBuf.size());
+    std::string content = std::string((char *) downloadBuf.data(), downloadBuf.size());
     if (httpStatus != 200) {
         curl_easy_cleanup(curl);
         throw HTTPException(httpStatus);
@@ -140,6 +123,86 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     curl_easy_cleanup(curl);
 
     return content;
+}
+
+std::string RESTClient::getRedirect(const std::string& url, bool& cancel) {
+    logger::verbose("GET_REDIRECT '%s'", url.c_str());
+
+    CURL *curl = createCURL(url, cancel);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+
+    CURLcode code = curl_easy_perform(curl);
+
+    if (code != CURLE_OK) {
+        if (code == CURLE_ABORTED_BY_CALLBACK) {
+            curl_easy_cleanup(curl);
+            throw std::out_of_range("Cancelled");
+        } else {
+            curl_easy_cleanup(curl);
+            throw std::runtime_error(std::string("GET_REDIRECT error: ") + curl_easy_strerror(code));
+        }
+    }
+
+    char *redir = nullptr;
+    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redir);
+
+    curl_easy_cleanup(curl);
+
+    if (redir) {
+        return std::string(redir);
+    } else {
+        return url;
+    }
+}
+
+long RESTClient::head(const std::string& url, bool& cancel) {
+    auto it = url.find('?');
+    if (it != std::string::npos) {
+        logger::verbose("HEAD '%s'", url.substr(0, it).c_str());
+    } else {
+        logger::verbose("HEAD '%s'", url.c_str());
+    }
+
+    CURL *curl = createCURL(url, cancel);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+
+    CURLcode code = curl_easy_perform(curl);
+
+    if (code != CURLE_OK) {
+        if (code == CURLE_ABORTED_BY_CALLBACK) {
+            curl_easy_cleanup(curl);
+            throw std::out_of_range("Cancelled");
+        } else {
+            curl_easy_cleanup(curl);
+            throw std::runtime_error(std::string("HEAD error: ") + curl_easy_strerror(code));
+        }
+    }
+
+    long fileTime = -1;
+    curl_easy_getinfo(curl, CURLINFO_FILETIME, &fileTime);
+
+    curl_easy_cleanup(curl);
+
+    return fileTime;
+}
+
+CURL* RESTClient::createCURL(const std::string &url, bool &cancel) {
+    cancel = false;
+    downloadBuf.clear();
+
+    CURL *curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "AviTab " AVITAB_VERSION_STR);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, onProgress);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
+
+    return curl;
 }
 
 std::string RESTClient::toPOSTString(const std::map<std::string, std::string> fields) {
@@ -161,7 +224,7 @@ std::string RESTClient::toPOSTString(const std::map<std::string, std::string> fi
 }
 
 size_t RESTClient::onData(void* buffer, size_t size, size_t nmemb, void* vecPtr) {
-    std::vector<char> *vec = reinterpret_cast<std::vector<char> *>(vecPtr);
+    std::vector<uint8_t> *vec = reinterpret_cast<std::vector<uint8_t> *>(vecPtr);
     if (!vec) {
         return 0;
     }

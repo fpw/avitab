@@ -15,34 +15,33 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
-#define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
+#ifndef SRC_LIBNAVIGRAPH_CHART_H_
+#define SRC_LIBNAVIGRAPH_CHART_H_
 
-#include <memory>
-#include "App.h"
-#include "src/gui_toolkit/widgets/Window.h"
-#include "src/gui_toolkit/widgets/Button.h"
-#include "src/gui_toolkit/widgets/Label.h"
-#include "src/libnavigraph/NavigraphAPI.h"
+#include <nlohmann/json_fwd.hpp>
+#include <string>
+#include <vector>
 
-namespace avitab {
+namespace navigraph {
 
-class NavigraphApp: public App {
+class Chart {
 public:
-    NavigraphApp(FuncsPtr appFuncs);
+    Chart(const nlohmann::json &json);
+    std::string getICAO() const;
+    std::string getFileDay() const;
+    std::string getFileNight() const;
+    bool isLoaded() const;
+    void attachImages(const std::vector<uint8_t> &day, const std::vector<uint8_t> &night);
 private:
-    std::shared_ptr<Window> window;
-    std::shared_ptr<Label> label;
-    std::shared_ptr<Button> button;
-    std::shared_ptr<navigraph::NavigraphAPI> navigraphApi;
+    std::string fileDay, fileNight;
+    std::string icao;
+    std::string section;
+    std::string desc;
 
-    void reset();
-    void onLoginButton();
-    void onCancelLoginButton();
-    void relogin();
-    void onAuthSuccess();
+    std::vector<uint8_t> pngDay, pngNight;
+
 };
 
-} /* namespace avitab */
+} /* namespace navigraph */
 
-#endif /* SRC_AVITAB_APPS_NAVIGRAPHAPP_H_ */
+#endif /* SRC_LIBNAVIGRAPH_CHART_H_ */

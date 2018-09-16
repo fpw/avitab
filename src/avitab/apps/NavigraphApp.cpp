@@ -22,7 +22,8 @@ namespace avitab {
 
 NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
     App(appFuncs),
-    window(std::make_shared<Window>(getUIContainer(), "Navigraph"))
+    window(std::make_shared<Window>(getUIContainer(), "Navigraph")),
+    navigraphApi(std::make_shared<navigraph::NavigraphAPI>(appFuncs->getNavigraph()))
 {
     window->setOnClose([this] () { exit(); });
     reset();
@@ -85,6 +86,7 @@ void NavigraphApp::relogin() {
         });
     } catch (const std::exception &e) {
         label->setText(std::string("Error: ") + e.what());
+        button.reset();
         button = std::make_shared<Button>(window, "Login");
         button->alignBelow(label);
         button->setCallback([this] (const Button &btn) {
@@ -94,8 +96,16 @@ void NavigraphApp::relogin() {
 }
 
 void NavigraphApp::onAuthSuccess() {
+    auto navigraph = api().getNavigraph();
+
     label->setText("You are now logged in!");
     button.reset();
+
+    navigraphApi->load();
+    /*
+    auto charts = navigraphApi->getChartsFor("EDHL");
+    navigraphApi->loadChart(charts[0]);
+    */
 }
 
 } /* namespace avitab */

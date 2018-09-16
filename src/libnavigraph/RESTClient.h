@@ -30,10 +30,13 @@ namespace navigraph {
 
 class HTTPException: public std::exception {
 public:
+    static constexpr const int NO_CONTENT = 204;
+
     explicit HTTPException(int status);
-    const char *what();
-    int getStatusCode();
+    const char *what() const noexcept override;
+    int getStatusCode() const;
 private:
+    std::string errorString;
     int status = 0;
 };
 
@@ -41,14 +44,19 @@ class RESTClient {
 public:
     void setBearer(const std::string &token);
     std::string get(const std::string &url, bool &cancel);
+    std::vector<uint8_t> getBinary(const std::string &url, bool &cancel);
     std::string post(const std::string &url, const std::map<std::string, std::string> fields, bool &cancel);
+    std::string getRedirect(const std::string &url, bool &cancel);
+    long head(const std::string &Turl, bool &cancel);
 private:
+    std::vector<uint8_t> downloadBuf;
     std::string bearer;
+
+    CURL *createCURL(const std::string &url, bool &cancel);
+    std::string toPOSTString(const std::map<std::string, std::string> fields);
 
     static size_t onData(void *buffer, size_t size, size_t nmemb, void *resPtr);
     static int onProgress(void *client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow);
-
-    std::string toPOSTString(const std::map<std::string, std::string> fields);
 };
 
 } /* namespace navigraph */
