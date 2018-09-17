@@ -27,6 +27,8 @@
 namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
+    XPLMDebugString("AviTab version " AVITAB_VERSION_STR "\n");
+
     // Called by the X-Plane thread via StartPlugin
     pluginPath = platform::nativeToUTF8(getPluginPath());
     flightLoopId = createFlightLoop();
