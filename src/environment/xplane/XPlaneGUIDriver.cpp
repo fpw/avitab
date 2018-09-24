@@ -468,6 +468,10 @@ XPLMCursorStatus XPlaneGUIDriver::getCursor(int x, int y) {
 }
 
 bool XPlaneGUIDriver::onClickCapture(int x, int y, XPLMMouseStatus status) {
+    if (*panelEnabled == 0) {
+        return false;
+    }
+
     float tx = clickX;
     float ty = clickY;
 
@@ -502,6 +506,10 @@ bool XPlaneGUIDriver::onClickCapture(int x, int y, XPLMMouseStatus status) {
 }
 
 bool XPlaneGUIDriver::onMouseWheelCapture(int x, int y, int wheel, int clicks) {
+    if (*panelEnabled == 0) {
+        return false;
+    }
+
     int guiX, guiY;
 
     guiX = (float) clickX;
