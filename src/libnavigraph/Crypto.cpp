@@ -143,6 +143,7 @@ bool Crypto::RSASHA256(const std::string& base64in, const std::string &sig, cons
         success = true;
     }
 
+    mbedtls_rsa_free(&rsa);
     return success;
 }
 

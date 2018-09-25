@@ -5,6 +5,7 @@ add_library(img_main
     Rasterizer.cpp
     XTiffImage.cpp
     DDSImage.cpp
+    TTFStamper.cpp
 )
 
 target_link_libraries(img_main
