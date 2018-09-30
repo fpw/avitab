@@ -23,6 +23,7 @@
 #   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
 #else
 #   include <unistd.h>
+#   include <uuid/uuid.h>
 #endif
 
 #include <ctime>
@@ -33,6 +34,7 @@
 #include <libgen.h>
 #include <algorithm>
 #include <regex>
+#include <fstream>
 #include <algorithm>
 #include "Platform.h"
 #include "src/Logger.h"
@@ -292,6 +294,29 @@ std::string upper(const std::string& in) {
     std::string res;
     std::transform(in.begin(), in.end(), std::back_inserter(res), ::toupper);
     return res;
+}
+
+std::string getMachineID() {
+#ifdef _WIN32
+    char buf[255];
+    DWORD bufSiz = sizeof(buf);
+    RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Cryptography", "MachineGuid", RRF_RT_REG_SZ, nullptr, buf, &bufSiz);
+    return std::string(buf);
+#elif defined(__APPLE__)
+    uuid_t id;
+    timespec wait;
+    wait.tv_nsec = 0;
+    wait.tv_sec = 0;
+    gethostuuid(id, &wait);
+    char buf[48];
+    uuid_unparse(id, buf);
+    return std::string(buf);
+#else
+    std::ifstream idStream("/var/lib/dbus/machine-id");
+    std::string id;
+    idStream >> id;
+    return id;
+#endif
 }
 
 void openBrowser(const std::string& url) {

@@ -49,6 +49,7 @@ public:
     void submitCall(std::shared_ptr<BaseCall> call);
 
     // synchronous calls
+    bool hasLoggedInBefore() const;
     bool isSupported() const;
     std::string startAuthentication(std::function<void()> onAuth);
     void cancelAuth();

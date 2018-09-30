@@ -37,17 +37,14 @@ OIDCClient::OIDCClient(const std::string &clientId, const std::string &clientSec
 }
 
 void OIDCClient::setCacheDirectory(const std::string& dir) {
-    tokenFile = dir + "/tokens.json";
+    tokenFile = dir + "/login.avicrypt";
     if (platform::fileExists(tokenFile)) {
-        std::ifstream tokenStream(platform::UTF8ToNative(tokenFile));
-        nlohmann::json tokens;
-        tokenStream >> tokens;
-        refreshToken = tokens["refresh_token"];
-        accessToken = tokens["access_token"];
-        idToken = tokens["id_token"];
-        logger::verbose("Checking stored token");
-        loadIDToken(false);
+        loadTokens();
     }
+}
+
+bool OIDCClient::canRelogin() const {
+    return !refreshToken.empty();
 }
 
 bool OIDCClient::relogin() {
@@ -165,13 +162,7 @@ void OIDCClient::handleToken(const std::string& inputJson) {
 
     logger::verbose("Checking phase 2 token");
     loadIDToken(false);
-
-    std::ofstream tokenStream(platform::UTF8ToNative(tokenFile));
-    tokenStream << nlohmann::json {
-        {"refresh_token", refreshToken},
-        {"access_token", accessToken},
-        {"id_token", idToken},
-    };
+    storeTokens();
 }
 
 void OIDCClient::loadIDToken(bool checkNonce) {
@@ -269,6 +260,44 @@ void OIDCClient::tryWithRelogin(std::function<void()> f) {
             throw;
         }
     }
+}
+
+void OIDCClient::loadTokens() {
+    auto key = clientSecret + platform::getMachineID();
+
+    std::ifstream fileStream(platform::UTF8ToNative(tokenFile));
+    std::string line;
+    std::getline(fileStream, line);
+
+    auto tokenStr = crypto.aesDecrypt(line, key);
+
+    try {
+        nlohmann::json tokens = nlohmann::json::parse(tokenStr);
+        refreshToken = tokens["refresh_token"];
+        accessToken = tokens["access_token"];
+        idToken = tokens["id_token"];
+        logger::verbose("Checking stored token");
+        loadIDToken(false);
+    } catch (const std::exception &e) {
+        logger::error("Couldn't decrypt login");
+        refreshToken.clear();
+        accessToken.clear();
+        idToken.clear();
+    }
+}
+
+void OIDCClient::storeTokens() {
+    auto key = clientSecret + platform::getMachineID();
+
+    std::stringstream tokenStream;
+    tokenStream << nlohmann::json {
+        {"refresh_token", refreshToken},
+        {"access_token", accessToken},
+        {"id_token", idToken},
+    };
+
+    std::ofstream fileStream(platform::UTF8ToNative(tokenFile));
+    fileStream << crypto.aesEncrypt(tokenStream.str(), key);
 }
 
 OIDCClient::~OIDCClient() {

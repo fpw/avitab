@@ -36,6 +36,8 @@ Crypto::Crypto() {
         throw std::runtime_error("Couldn't initialize random generator");
     }
 
+    mbedtls_aes_init(&aesCtx);
+
     mbedtls_ctr_drbg_set_prediction_resistance(&randomGenerator, MBEDTLS_CTR_DRBG_PR_OFF);
 }
 
@@ -147,9 +149,49 @@ bool Crypto::RSASHA256(const std::string& base64in, const std::string &sig, cons
     return success;
 }
 
+std::string Crypto::aesEncrypt(const std::string& in, const std::string& key) {
+    auto sha = sha256(key);
+    mbedtls_aes_setkey_enc(&aesCtx, sha.data(), 256);
+
+    std::string inPadded = in;
+    while (inPadded.size() % 16 != 0) {
+        inPadded.push_back('\0');
+    }
+
+    auto iv = generateRandom(16);
+    auto ivStr = base64URLEncode(iv);
+
+    std::vector<uint8_t> out(inPadded.size());
+
+    mbedtls_aes_crypt_cbc(&aesCtx, MBEDTLS_AES_ENCRYPT, inPadded.length(), iv.data(), (uint8_t *) in.data(), out.data());
+
+    return ivStr + "." + base64URLEncode(out);
+}
+
+std::string Crypto::aesDecrypt(const std::string& in, const std::string& key) {
+    auto i1 = in.find('.');
+    std::string ivStr = in.substr(0, i1);
+    std::string payloadStr = in.substr(i1 + 1);
+
+    auto iv = base64URLDecode(ivStr);
+    auto cryptedData = base64URLDecode(payloadStr);
+
+    auto sha = sha256(key);
+    mbedtls_aes_setkey_dec(&aesCtx, sha.data(), 256);
+
+    std::vector<uint8_t> plain(cryptedData.size());
+
+    mbedtls_aes_crypt_cbc(&aesCtx, MBEDTLS_AES_DECRYPT, cryptedData.size(), iv.data(), cryptedData.data(), plain.data());
+
+    plain.push_back('\0');
+
+    return std::string((char *) plain.data());
+}
+
 Crypto::~Crypto() {
     mbedtls_ctr_drbg_free(&randomGenerator);
     mbedtls_entropy_free(&entropySource);
+    mbedtls_aes_free(&aesCtx);
 }
 
 } /* namespace navigraph */

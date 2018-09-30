@@ -27,14 +27,18 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
 {
     window->setOnClose([this] () { exit(); });
     reset();
-    onLoginButton();
+
+    auto navigraph = api().getNavigraph();
+    if (navigraph->hasLoggedInBefore()) {
+        onLoginButton();
+    }
 }
 
 void NavigraphApp::reset() {
     label.reset();
     label = std::make_shared<Label>(window,
             "This app allows you to use your Navigraph account to access the chart cloud.\n"
-            "For more information about Navigraph, see navigraph.com\n"
+            "For more information about Navigraph, visit navigraph.com\n"
         );
     label->setLongMode(true);
     label->alignInTopLeft();

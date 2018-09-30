@@ -22,6 +22,7 @@
 #include <mbedtls/platform.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#include <mbedtls/aes.h>
 #include <string>
 #include <vector>
 
@@ -37,10 +38,13 @@ public:
     std::string base64BasicAuthEncode(const std::string& user, const std::string& pw);
     std::vector<uint8_t> base64URLDecode(const std::string &in);
     bool RSASHA256(const std::string &base64in, const std::string &sig, const std::string &n, const std::string &e);
+    std::string aesEncrypt(const std::string &in, const std::string &key);
+    std::string aesDecrypt(const std::string &in, const std::string &key);
     virtual ~Crypto();
 private:
-    mbedtls_entropy_context entropySource;
-    mbedtls_ctr_drbg_context randomGenerator;
+    mbedtls_aes_context aesCtx {};
+    mbedtls_entropy_context entropySource {};
+    mbedtls_ctr_drbg_context randomGenerator {};
 };
 
 } /* namespace navigraph */

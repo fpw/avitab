@@ -42,6 +42,8 @@ public:
     OIDCClient(const std::string &clientId, const std::string &clientSecret);
     void setCacheDirectory(const std::string &dir);
 
+    bool canRelogin() const;
+
     std::string startAuth(AuthCallback cb);
     void cancelAuth();
 
@@ -81,6 +83,9 @@ private:
     void handleToken(const std::string &inputJson);
     void loadIDToken(bool checkNonce);
     void tryWithRelogin(std::function<void()> f);
+
+    void loadTokens();
+    void storeTokens();
 };
 
 } /* namespace navigraph */

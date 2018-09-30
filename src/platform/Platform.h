@@ -67,6 +67,8 @@ void controlMediaPlayer(MediaControl ctrl);
 std::string lower(const std::string &in);
 std::string upper(const std::string &in);
 
+std::string getMachineID();
+
 void openBrowser(const std::string &url);
 
 }

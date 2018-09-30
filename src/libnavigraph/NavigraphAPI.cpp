@@ -45,6 +45,10 @@ bool NavigraphAPI::isSupported() const {
     return strlen(NAVIGRAPH_CLIENT_SECRET) > 0;
 }
 
+bool NavigraphAPI::hasLoggedInBefore() const {
+    return oidc->canRelogin();
+}
+
 bool NavigraphAPI::hasWork() {
     // gets called with locked mutex
     if (!keepAlive) {
