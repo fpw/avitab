@@ -27,21 +27,39 @@
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/DropDownList.h"
+#include "src/gui_toolkit/Timer.h"
+#include "src/maps/sources/ImageSource.h"
+#include "src/maps/OverlayedMap.h"
+#include "src/libimg/stitcher/Stitcher.h"
 
 namespace avitab {
 
 class AirportApp: public App {
 public:
     AirportApp(FuncsPtr appFuncs);
+    void onMouseWheel(int dir, int x, int y) override;
 private:
     struct TabPage {
         std::shared_ptr<Page> page;
+        std::shared_ptr<Label> label;
         std::shared_ptr<Button> closeButton;
-        std::shared_ptr<Button> chartsButton;
+
+        navigraph::NavigraphAPI::ChartsList charts;
+        std::shared_ptr<Button> chartsButton, showChartButton;
+        std::shared_ptr<DropDownList> chartSelect;
+        std::shared_ptr<maps::ImageSource> mapSource;
+        std::shared_ptr<img::Image> mapImage;
+        std::shared_ptr<img::Stitcher> mapStitcher;
+        std::shared_ptr<maps::OverlayedMap> map;
+        std::shared_ptr<PixMap> pixMap;
+
+        int panPosX = 0, panPosY = 0;
     };
     std::vector<TabPage> pages;
 
+    Timer updateTimer;
     std::shared_ptr<Button> closeButton;
     std::shared_ptr<Label> searchLabel;
     std::shared_ptr<TabGroup> tabs;
@@ -62,9 +80,15 @@ private:
     std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
     std::string toWeatherInfo(std::shared_ptr<xdata::Airport> airport);
 
+    TabPage &findPage(std::shared_ptr<Page> page);
+
     void showCharts(std::shared_ptr<xdata::Airport> airport);
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts);
+    void onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart);
+    void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
+    void redrawPage(std::shared_ptr<Page> page);
+    bool onTimer();
 };
 
 } /* namespace avitab */

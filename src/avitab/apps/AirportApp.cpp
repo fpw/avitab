@@ -25,7 +25,8 @@
 namespace avitab {
 
 AirportApp::AirportApp(FuncsPtr appFuncs):
-    App(appFuncs)
+    App(appFuncs),
+    updateTimer(std::bind(&AirportApp::onTimer, this), 200)
 {
     resetLayout();
 }
@@ -227,6 +228,15 @@ std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
 
 }
 
+AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {
+    for (auto &tabPage: pages) {
+        if (tabPage.page == page) {
+            return tabPage;
+        }
+    }
+    throw std::runtime_error("Unknown page");
+}
+
 void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
     TabPage page;
     page.page = tabs->addTab(tabs, airport->getID() + " Charts");
@@ -234,36 +244,136 @@ void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
     page.closeButton->alignInTopRight();
     page.closeButton->setManaged();
 
+    pages.push_back(page);
+
     fillChartsPage(page.page, airport);
     tabs->showTab(page.page);
 
     page.closeButton->setCallback([this] (const Button &button) {
         api().executeLater([this, &button] { removeTab(button); });
     });
-
-    pages.push_back(page);
 }
 
 void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
     auto navigraph = api().getNavigraph();
 
+    TabPage &tab = findPage(page);
+    tab.label = std::make_shared<Label>(page, "Loading...");
+    tab.label->setLongMode(true);
+    tab.label->setDimensions(page->getContentWidth(), page->getHeight() - 40);
+    tab.label->setManaged();
+
     auto call = navigraph->getChartsFor(airport->getID());
-    call->andThen([this, page] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
+    call->andThen([this, page, &tab] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
         try {
             auto charts = res.get();
             api().executeLater([this, page, charts] { onChartsLoaded(page, charts); });
         } catch (const std::exception &e) {
-            Label widget(page, "");
-            widget.setLongMode(true);
-            widget.setTextFormatted("Error: %s", e.what());
-            widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
-            widget.setManaged();
+            tab.label->setTextFormatted("Error: %s", e.what());
         }
     });
     navigraph->submitCall(call);
 }
 
 void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts) {
+    TabPage &tab = findPage(page);
+    tab.label.reset();
+
+    std::vector<std::string> choices;
+    for (auto chart: charts) {
+        choices.push_back(chart->getDescription());
+    }
+
+    tab.mapImage = std::make_shared<img::Image>(page->getContentWidth(), page->getHeight() - 40, 0);
+
+    tab.charts = charts;
+    tab.chartSelect = std::make_shared<DropDownList>(page, choices);
+    tab.chartSelect->setManaged();
+
+    tab.pixMap = std::make_shared<PixMap>(page);
+    tab.pixMap->draw(*tab.mapImage);
+    tab.pixMap->setClickable(true);
+    tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
+    tab.pixMap->alignBelow(tab.chartSelect);
+    tab.pixMap->setManaged();
+
+    tab.showChartButton = std::make_shared<Button>(page, "Show");
+    tab.showChartButton->alignRightOf(tab.chartSelect);
+    tab.showChartButton->setManaged();
+    tab.showChartButton->setCallback([this, tab] (const Button &) {
+        int index = tab.chartSelect->getSelectedIndex();
+        auto navigraph = api().getNavigraph();
+        auto call = navigraph->loadChartImage(tab.charts.at(index));
+        call->andThen([this, tab] (std::future<std::shared_ptr<navigraph::Chart>> res) {
+            try {
+                auto chart = res.get();
+                api().executeLater([this, tab, chart] { onChartLoaded(tab.page, chart); });
+            } catch (const std::exception &e) {
+                tab.label->setTextFormatted("Error: %s", e.what());
+            }
+        });
+        navigraph->submitCall(call);
+    });
+}
+
+void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart) {
+    TabPage &tab = findPage(page);
+
+    tab.map.reset();
+    tab.mapStitcher.reset();
+    tab.mapSource.reset();
+
+    tab.mapSource = std::make_shared<maps::ImageSource>(chart->getDayImage());
+    tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
+    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher);
+    tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
+    tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
+    tab.map->setNavWorld(api().getNavWorld());
+
+    onTimer();
+}
+
+void AirportApp::onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end) {
+    TabPage &tab = findPage(page);
+
+    if (start) {
+        // trackPlane = false;
+    } else if (!end) {
+        int panVecX = tab.panPosX - x;
+        int panVecY = tab.panPosY - y;
+        tab.map->pan(panVecX, panVecY);
+    }
+    tab.panPosX = x;
+    tab.panPosY = y;
+}
+
+void AirportApp::redrawPage(std::shared_ptr<Page> page) {
+    TabPage &tab = findPage(page);
+    if (tab.pixMap) {
+        tab.pixMap->invalidate();
+    }
+}
+
+void AirportApp::onMouseWheel(int dir, int x, int y) {
+    for (auto &tab: pages) {
+        if (tab.map) {
+            if (dir > 0) {
+                tab.map->zoomIn();
+            } else {
+                tab.map->zoomOut();
+            }
+        }
+    }
+    onTimer();
+}
+
+bool AirportApp::onTimer() {
+    for (auto &tab: pages) {
+        if (tab.map) {
+            tab.map->doWork();
+        }
+    }
+    return true;
 }
 
 } /* namespace avitab */

@@ -27,6 +27,7 @@ public:
     Page(WidgetPtr parent);
     Page(WidgetPtr parent, lv_obj_t *page);
 
+    void clear();
     int getContentWidth();
     int getContentHeight();
     void setFit(bool horz, bool vert);

@@ -32,6 +32,10 @@ Page::Page(WidgetPtr parent, lv_obj_t *page):
     setManagedObj(page);
 }
 
+void Page::clear() {
+    lv_obj_clean(lv_page_get_scrl(obj()));
+}
+
 int Page::getContentWidth() {
     return lv_obj_get_width(lv_page_get_scrl(obj()));
 }
