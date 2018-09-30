@@ -52,7 +52,6 @@ private:
     std::shared_ptr<Keyboard> keys;
 
     void removeTab(const Button &closeButton);
-    void showCharts(std::shared_ptr<xdata::Airport> airport);
     void resetLayout();
     void onSearchEntered(const std::string &code);
     void onAirportSelected(std::shared_ptr<xdata::Airport> airport);
@@ -62,6 +61,10 @@ private:
     std::string toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type);
     std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
     std::string toWeatherInfo(std::shared_ptr<xdata::Airport> airport);
+
+    void showCharts(std::shared_ptr<xdata::Airport> airport);
+    void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
+    void onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts);
 };
 
 } /* namespace avitab */

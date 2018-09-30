@@ -27,6 +27,7 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
 {
     window->setOnClose([this] () { exit(); });
     reset();
+    onLoginButton();
 }
 
 void NavigraphApp::reset() {
@@ -54,21 +55,17 @@ void NavigraphApp::onLoginButton() {
 
     auto call = navigraph->init();
     call->andThen([this] (std::future<bool> result) {
-        api().executeLater([this, &result] () { onLoginReply(result); });
+        try {
+            result.get();
+            api().executeLater([this, &result] () { onAuthSuccess(); });
+        } catch (const navigraph::LoginException &e) {
+            api().executeLater([this, &result] () { onAuthRequired(); });
+        } catch (const std::exception &e) {
+            label->setTextFormatted("Error: %s", e.what());
+        }
     });
 
     navigraph->submitCall(call);
-}
-
-void NavigraphApp::onLoginReply(std::future<bool> &res) {
-    try {
-        res.get();
-        onAuthSuccess();
-    } catch (const navigraph::LoginException &e) {
-        onAuthRequired();
-    } catch (const std::exception &e) {
-        label->setTextFormatted("Error: %s", e.what());
-    }
 }
 
 void NavigraphApp::onAuthRequired() {

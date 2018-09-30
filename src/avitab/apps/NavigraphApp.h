@@ -19,7 +19,6 @@
 #define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
 
 #include <memory>
-#include <future>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
@@ -39,7 +38,6 @@ private:
 
     void reset();
     void onLoginButton();
-    void onLoginReply(std::future<bool> &res);
 
     void onAuthRequired();
     void onStartAuth();

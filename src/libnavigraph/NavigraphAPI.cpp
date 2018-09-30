@@ -45,37 +45,106 @@ bool NavigraphAPI::isSupported() const {
     return strlen(NAVIGRAPH_CLIENT_SECRET) > 0;
 }
 
+bool NavigraphAPI::hasWork() {
+    // gets called with locked mutex
+    if (!keepAlive) {
+        return true;
+    }
+
+    return !pendingCalls.empty();
+}
+
 void NavigraphAPI::workLoop() {
     while (keepAlive) {
         using namespace std::chrono_literals;
 
-        std::vector<std::shared_ptr<BaseCall>> callsCopy;
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            std::swap(callsCopy, pendingCalls);
+        std::unique_lock<std::mutex> lock(mutex);
+        workCondition.wait_for(lock, std::chrono::seconds(1), [this] () { return hasWork(); });
+
+        if (!keepAlive) {
+            break;
         }
+
+        // create copy to work on while locked so we can work unlocked
+        std::vector<std::shared_ptr<BaseCall>> callsCopy;
+        std::swap(callsCopy, pendingCalls);
+        lock.unlock();
 
         for (auto call: callsCopy) {
             call->exec();
         }
-
-        std::this_thread::sleep_for(100ms);
     }
 }
 
 void NavigraphAPI::submitCall(std::shared_ptr<BaseCall> call) {
     std::lock_guard<std::mutex> lock(mutex);
     pendingCalls.push_back(call);
+    workCondition.notify_one();
 }
 
 std::shared_ptr<APICall<bool>> NavigraphAPI::init() {
-    auto call = std::make_shared<navigraph::APICall<bool>>([this] {
+    auto call = std::make_shared<APICall<bool>>([this] {
         if (hasChartsSubscription()) {
             demoMode = false;
         }
         loadAirports();
         stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
         return demoMode;
+    });
+    return call;
+}
+
+std::shared_ptr<APICall<NavigraphAPI::ChartsList>> NavigraphAPI::getChartsFor(const std::string& icao) {
+    auto call = std::make_shared<APICall<ChartsList>>([this, icao] {
+        std::vector<std::shared_ptr<Chart>> res;
+
+        if (!canAccess(icao)) {
+            return res;
+        }
+
+        auto lower = charts.lower_bound(icao);
+        auto upper = charts.upper_bound(icao);
+        if (lower != upper) {
+            for (auto it = lower; it != upper; ++it) {
+                res.push_back(it->second);
+            }
+            return res;
+        }
+
+        // not cached -> load
+        std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/charts.json";
+        std::string signedUrl = oidc->get(url);
+        std::string content = oidc->get(signedUrl);
+
+        nlohmann::json chartData = nlohmann::json::parse(content);
+        for (auto chartJson: chartData["charts"]) {
+            auto chart = std::make_shared<Chart>(chartJson);
+            res.push_back(chart);
+            charts.insert(std::make_pair(icao, chart));
+        }
+        return res;
+    });
+    return call;
+}
+
+std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(std::shared_ptr<Chart> chart) {
+    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart] {
+        if (chart->isLoaded()) {
+            return chart;
+        }
+
+        std::string icao = chart->getICAO();
+        if (!canAccess(icao)) {
+            throw std::runtime_error("Cannot access this chart in demo mode");
+        }
+
+        std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
+
+        auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
+        auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
+        chart->attachImages(imgDay, imgNight);
+
+        return chart;
     });
     return call;
 }
@@ -153,59 +222,12 @@ bool NavigraphAPI::hasChartsFor(const std::string& icao) {
     return false;
 }
 
-std::vector<std::shared_ptr<Chart>> NavigraphAPI::getChartsFor(const std::string& icao) {
-    std::vector<std::shared_ptr<Chart>> res;
-
-    if (!canAccess(icao)) {
-        return res;
-    }
-
-    auto lower = charts.lower_bound(icao);
-    auto upper = charts.upper_bound(icao);
-    if (lower != upper) {
-        for (auto it = lower; it != upper; ++it) {
-            res.push_back(it->second);
-        }
-        return res;
-    }
-
-    // not cached -> load
-    std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/charts.json";
-    std::string signedUrl = oidc->get(url);
-    std::string content = oidc->get(signedUrl);
-
-    nlohmann::json chartData = nlohmann::json::parse(content);
-    for (auto chartJson: chartData["charts"]) {
-        auto chart = std::make_shared<Chart>(chartJson);
-        res.push_back(chart);
-        charts.insert(std::make_pair(icao, chart));
-    }
-    return res;
-}
-
 bool NavigraphAPI::canAccess(const std::string& icao) {
     if (demoMode) {
         return icao == "LEAL" || icao == "KONT";
     } else {
         return true;
     }
-}
-
-void NavigraphAPI::loadChart(std::shared_ptr<Chart> chart) {
-    if (chart->isLoaded()) {
-        return;
-    }
-
-    std::string icao = chart->getICAO();
-    if (!canAccess(icao)) {
-        throw std::runtime_error("Cannot access this chart in demo mode");
-    }
-
-    std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
-
-    auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
-    auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
-    chart->attachImages(imgDay, imgNight);
 }
 
 std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {
@@ -221,7 +243,11 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
 
 NavigraphAPI::~NavigraphAPI() {
     if (apiThread) {
-        keepAlive = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            keepAlive = false;
+            workCondition.notify_one();
+        }
         apiThread->join();
     }
 }

@@ -36,7 +36,7 @@ void AirportApp::resetLayout() {
     closeButton = std::make_shared<Button>(tabs, "X");
     closeButton->alignInTopRight();
     closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] () {
+        api().executeLater([this, &button] {
             exit();
         });
     });
@@ -52,8 +52,8 @@ void AirportApp::resetLayout() {
 
     keys = std::make_shared<Keyboard>(searchPage, searchField);
     keys->hideEnterKey();
-    keys->setOnCancel([this] () { searchField->setText(""); });
-    keys->setOnOk([this] () { onSearchEntered(searchField->getText()); });
+    keys->setOnCancel([this] { searchField->setText(""); });
+    keys->setOnOk([this] { onSearchEntered(searchField->getText()); });
     keys->setPosition(-5, searchPage->getContentHeight() - 90);
 }
 
@@ -109,7 +109,7 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
     tabs->showTab(page.page);
 
     page.closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] () {
+        api().executeLater([this, &button] {
             removeTab(button);
         });
     });
@@ -119,7 +119,7 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
         page.chartsButton->alignLeftOf(page.closeButton);
         page.chartsButton->setManaged();
         page.chartsButton->setCallback([this, airport] (const Button &button) {
-            api().executeLater([this, airport] () {
+            api().executeLater([this, airport] {
                 showCharts(airport);
             });
         });
@@ -136,10 +136,6 @@ void AirportApp::removeTab(const Button &closeButton) {
             break;
         }
     }
-}
-
-void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
-    logger::verbose("Showing charts for %s", airport->getID().c_str());
 }
 
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
@@ -229,6 +225,45 @@ std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
     str << metar << "\n";
     return str.str();
 
+}
+
+void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
+    TabPage page;
+    page.page = tabs->addTab(tabs, airport->getID() + " Charts");
+    page.closeButton = std::make_shared<Button>(page.page, "X");
+    page.closeButton->alignInTopRight();
+    page.closeButton->setManaged();
+
+    fillChartsPage(page.page, airport);
+    tabs->showTab(page.page);
+
+    page.closeButton->setCallback([this] (const Button &button) {
+        api().executeLater([this, &button] { removeTab(button); });
+    });
+
+    pages.push_back(page);
+}
+
+void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+    auto navigraph = api().getNavigraph();
+
+    auto call = navigraph->getChartsFor(airport->getID());
+    call->andThen([this, page] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
+        try {
+            auto charts = res.get();
+            api().executeLater([this, page, charts] { onChartsLoaded(page, charts); });
+        } catch (const std::exception &e) {
+            Label widget(page, "");
+            widget.setLongMode(true);
+            widget.setTextFormatted("Error: %s", e.what());
+            widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
+            widget.setManaged();
+        }
+    });
+    navigraph->submitCall(call);
+}
+
+void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts) {
 }
 
 } /* namespace avitab */
