@@ -284,18 +284,17 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
         choices.push_back(chart->getDescription());
     }
 
-    tab.mapImage = std::make_shared<img::Image>(page->getContentWidth(), page->getHeight() - 40, 0);
-
-    tab.charts = charts;
-    tab.chartSelect = std::make_shared<DropDownList>(page, choices);
-    tab.chartSelect->setManaged();
+    tab.mapImage = std::make_shared<img::Image>(page->getContentWidth(), page->getHeight() - 45, 0);
 
     tab.pixMap = std::make_shared<PixMap>(page);
     tab.pixMap->draw(*tab.mapImage);
     tab.pixMap->setClickable(true);
     tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
-    tab.pixMap->alignBelow(tab.chartSelect);
     tab.pixMap->setManaged();
+
+    tab.charts = charts;
+    tab.chartSelect = std::make_shared<DropDownList>(page, choices);
+    tab.chartSelect->setManaged();
 
     tab.showChartButton = std::make_shared<Button>(page, "Show");
     tab.showChartButton->alignRightOf(tab.chartSelect);
@@ -314,6 +313,8 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
         });
         navigraph->submitCall(call);
     });
+
+    tab.pixMap->alignBelow(tab.chartSelect);
 }
 
 void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart) {
@@ -341,7 +342,9 @@ void AirportApp::onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, 
     } else if (!end) {
         int panVecX = tab.panPosX - x;
         int panVecY = tab.panPosY - y;
-        tab.map->pan(panVecX, panVecY);
+        if (tab.map) {
+            tab.map->pan(panVecX, panVecY);
+        }
     }
     tab.panPosX = x;
     tab.panPosY = y;
