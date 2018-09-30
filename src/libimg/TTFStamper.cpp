@@ -1,5 +1,3 @@
-
-
 /*
  *   AviTab - Aviator's Virtual Tablet
  *   Copyright (C) 2018 Folke Will <folko@solhost.org>
@@ -82,8 +80,7 @@ void TTFStamper::setText(const std::string& newText) {
         for (int y = 0; y < y1 - y0; y++) {
             for (int x = 0; x < x1 - x0; x++) {
                 if (glyph[y][x]) {
-                    uint32_t *ptr = stamp.getPixels() + ((baseline + y0 + y) * stamp.getWidth()) + (size_t) (xPos + x0 + x);
-                    *ptr = glyph[y][x] << 24 | 0xFF0000;
+                    stamp.drawPixel(xPos + x0 + x, baseline + y0 + y, glyph[y][x] << 24 | 0x808080);
                 }
             }
         }
@@ -111,6 +108,10 @@ size_t TTFStamper::getTextWidth(const std::string& in, float size) {
     }
 
     return std::ceil(xPos);
+}
+
+void TTFStamper::applyStamp(Image &dst) {
+    dst.blendImage90(stamp, dst.getWidth() - stamp.getHeight() - 5, dst.getHeight() / 2 - stamp.getWidth() / 2);
 }
 
 // The following code is taken from ImgUi
@@ -221,6 +222,7 @@ unsigned int stb_decompress(unsigned char *output, const unsigned char *i, unsig
         if (stb__dout > output + olen)
             return 0;
     }
+    return 0;
 }
 
 //-----------------------------------------------------------------------------

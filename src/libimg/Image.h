@@ -44,7 +44,7 @@ public:
     // Reset content
     void resize(int width, int height, uint32_t color);
     void loadImageFile(const std::string &utf8Path);
-    void loadEncodedData(const std::vector<uint8_t> &encodedImage);
+    void loadEncodedData(const std::vector<uint8_t> &encodedImage, bool keepData);
     void setPixels(uint8_t *data, int srcWidth, int srcHeight);
 
     // No effect if not loaded via loadEncodedData!
@@ -57,12 +57,15 @@ public:
 
     void clear(uint32_t background = 0xFFFFFFFF);
     void scale(int newWidth, int newHeight);
+    void drawPixel(int x, int y, uint32_t color);
     void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
     void drawImage(const Image &src, int dstX, int dstY);
     void copyTo(Image &dst, int srcX, int srcY);
     void blendImage(const Image &src, int dstX, int dstY, double angle);
+    void blendImage90(const Image &src, int dstX, int dstY);
     void alphaBlend(uint32_t color);
 
+    // the source image must be square with edge len = max(srcWidth, srcHeight)
     void rotate0(Image &dst);
     void rotate90(Image &dst);
     void rotate180(Image &dst);

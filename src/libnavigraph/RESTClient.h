@@ -31,6 +31,7 @@ namespace navigraph {
 class HTTPException: public std::exception {
 public:
     static constexpr const int NO_CONTENT = 204;
+    static constexpr const int UNAUTHORIZED = 401;
 
     explicit HTTPException(int status);
     const char *what() const noexcept override;

@@ -17,6 +17,7 @@
  */
 #include <fstream>
 #include <iomanip>
+#include <chrono>
 #include <nlohmann/json.hpp>
 #include "NavigraphAPI.h"
 #include "src/Logger.h"
@@ -24,16 +25,73 @@
 
 namespace navigraph {
 
-NavigraphAPI::NavigraphAPI(std::shared_ptr<NavigraphClient> client):
-    client(client)
+NavigraphAPI::NavigraphAPI(const std::string &cacheDirectory):
+    cacheDirectory(cacheDirectory),
+    oidc(std::make_shared<OIDCClient>("charts-avitab", NAVIGRAPH_CLIENT_SECRET))
 {
+    if (!platform::fileExists(cacheDirectory)) {
+        platform::mkdir(cacheDirectory);
+    }
+
+    oidc->setCacheDirectory(cacheDirectory);
+
+    if (isSupported()) {
+        keepAlive = true;
+        apiThread = std::make_unique<std::thread>(&NavigraphAPI::workLoop, this);
+    }
 }
 
-void NavigraphAPI::load() {
-    loadAirports();
-    if (hasChartsSubscription()) {
-        demoMode = false;
+bool NavigraphAPI::isSupported() const {
+    return strlen(NAVIGRAPH_CLIENT_SECRET) > 0;
+}
+
+void NavigraphAPI::workLoop() {
+    while (keepAlive) {
+        using namespace std::chrono_literals;
+
+        std::vector<std::shared_ptr<BaseCall>> callsCopy;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            std::swap(callsCopy, pendingCalls);
+        }
+
+        for (auto call: callsCopy) {
+            call->exec();
+        }
+
+        std::this_thread::sleep_for(100ms);
     }
+}
+
+void NavigraphAPI::submitCall(std::shared_ptr<BaseCall> call) {
+    std::lock_guard<std::mutex> lock(mutex);
+    pendingCalls.push_back(call);
+}
+
+std::shared_ptr<APICall<bool>> NavigraphAPI::init() {
+    auto call = std::make_shared<navigraph::APICall<bool>>([this] {
+        if (hasChartsSubscription()) {
+            demoMode = false;
+        }
+        loadAirports();
+        stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
+        return demoMode;
+    });
+    return call;
+}
+
+void NavigraphAPI::logout() {
+    airportJson.reset();
+    charts.clear();
+    oidc->logout();
+}
+
+std::string NavigraphAPI::startAuthentication(std::function<void()> onAuth) {
+    return oidc->startAuth(onAuth);
+}
+
+void NavigraphAPI::cancelAuth() {
+    oidc->cancelAuth();
 }
 
 bool NavigraphAPI::isInDemoMode() const {
@@ -41,17 +99,17 @@ bool NavigraphAPI::isInDemoMode() const {
 }
 
 void NavigraphAPI::loadAirports() {
-    long timestamp = client->getTimestamp("https://charts.api.navigraph.com/1/airports");
+    long timestamp = oidc->getTimestamp("https://charts.api.navigraph.com/1/airports");
 
-    std::string dir = client->getCacheDirectory();
+    std::string dir = cacheDirectory;
     std::string airportFileName = dir + "/airports_" + std::to_string(timestamp) + ".json";
 
     if (!platform::fileExists(airportFileName)) {
-        auto jsonData = client->get("https://charts.api.navigraph.com/1/airports");
+        auto jsonData = oidc->get("https://charts.api.navigraph.com/1/airports");
         nlohmann::json tmpJson = nlohmann::json::parse(jsonData);
 
         std::ofstream jsonStream(platform::UTF8ToNative(airportFileName));
-        jsonStream <<  std::setw(4) << tmpJson;
+        jsonStream << std::setw(4) << tmpJson;
     }
 
     std::ifstream jsonStream(platform::UTF8ToNative(airportFileName));
@@ -62,7 +120,7 @@ void NavigraphAPI::loadAirports() {
 bool NavigraphAPI::hasChartsSubscription() {
     std::string reply;
     try {
-        reply = client->get("https://subscriptions.api.navigraph.com/1/subscriptions/valid");
+        reply = oidc->get("https://subscriptions.api.navigraph.com/1/subscriptions/valid");
     } catch (const HTTPException &e) {
         if (e.getStatusCode() == HTTPException::NO_CONTENT) {
             return false;
@@ -82,6 +140,10 @@ bool NavigraphAPI::hasChartsSubscription() {
 }
 
 bool NavigraphAPI::hasChartsFor(const std::string& icao) {
+    if (!airportJson) {
+        return false;
+    }
+
     for (auto &e: *airportJson) {
         if (e["icao_airport_identifier"] == icao) {
             return canAccess(icao);
@@ -109,8 +171,8 @@ std::vector<std::shared_ptr<Chart>> NavigraphAPI::getChartsFor(const std::string
 
     // not cached -> load
     std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/charts.json";
-    std::string signedUrl = client->get(url);
-    std::string content = client->get(signedUrl);
+    std::string signedUrl = oidc->get(url);
+    std::string content = oidc->get(signedUrl);
 
     nlohmann::json chartData = nlohmann::json::parse(content);
     for (auto chartJson: chartData["charts"]) {
@@ -139,15 +201,29 @@ void NavigraphAPI::loadChart(std::shared_ptr<Chart> chart) {
         throw std::runtime_error("Cannot access this chart in demo mode");
     }
 
-    std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/" + chart->getFileDay();
-    std::string signedUrl = client->get(url);
-    std::vector<uint8_t> pngDay = client->getBinary(signedUrl);
+    std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
 
-    url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/" + chart->getFileNight();
-    signedUrl = client->get(url);
-    std::vector<uint8_t> pngNight = client->getBinary(signedUrl);
+    auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
+    auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
+    chart->attachImages(imgDay, imgNight);
+}
 
-    chart->attachImages(pngDay, pngNight);
+std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {
+    std::string signedUrl = oidc->get(url);
+    std::vector<uint8_t> pngData = oidc->getBinary(signedUrl);
+    auto img = std::make_shared<img::Image>();
+    img->loadEncodedData(pngData, false);
+
+    stamper.applyStamp(*img);
+
+    return img;
+}
+
+NavigraphAPI::~NavigraphAPI() {
+    if (apiThread) {
+        keepAlive = false;
+        apiThread->join();
+    }
 }
 
 } /* namespace navigraph */

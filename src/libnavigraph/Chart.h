@@ -19,8 +19,9 @@
 #define SRC_LIBNAVIGRAPH_CHART_H_
 
 #include <nlohmann/json_fwd.hpp>
+#include <memory>
 #include <string>
-#include <vector>
+#include "src/libimg/Image.h"
 
 namespace navigraph {
 
@@ -31,14 +32,19 @@ public:
     std::string getFileDay() const;
     std::string getFileNight() const;
     bool isLoaded() const;
-    void attachImages(const std::vector<uint8_t> &day, const std::vector<uint8_t> &night);
+    void attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night);
+
+    std::string getDescription() const;
+
+    std::shared_ptr<img::Image> getDayImage() const;
+    std::shared_ptr<img::Image> getNightImage() const;
 private:
     std::string fileDay, fileNight;
     std::string icao;
     std::string section;
     std::string desc;
 
-    std::vector<uint8_t> pngDay, pngNight;
+    std::shared_ptr<img::Image> imgDay, imgNight;
 
 };
 

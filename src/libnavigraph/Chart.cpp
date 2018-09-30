@@ -33,6 +33,10 @@ std::string Chart::getICAO() const {
     return icao;
 }
 
+std::string Chart::getDescription() const {
+    return desc;
+}
+
 std::string Chart::getFileDay() const {
     return fileDay;
 }
@@ -42,12 +46,20 @@ std::string Chart::getFileNight() const {
 }
 
 bool Chart::isLoaded() const {
-    return !pngDay.empty();
+    return imgDay && imgNight;
 }
 
-void Chart::attachImages(const std::vector<uint8_t>& day, const std::vector<uint8_t>& night) {
-    pngDay = day;
-    pngNight = night;
+void Chart::attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night) {
+    imgDay = day;
+    imgNight = night;
+}
+
+std::shared_ptr<img::Image> Chart::getDayImage() const {
+    return imgDay;
+}
+
+std::shared_ptr<img::Image> Chart::getNightImage() const {
+    return imgNight;
 }
 
 } /* namespace navigraph */

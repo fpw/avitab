@@ -118,7 +118,7 @@ std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int x, int y, int zoom
     std::string path = getUniqueTileName(x, y, zoom);
     auto data = downloader.download("https://" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
-    image->loadEncodedData(data);
+    image->loadEncodedData(data, true);
     return image;
 }
 

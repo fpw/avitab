@@ -20,7 +20,7 @@
 
 #include <memory>
 #include <future>
-#include "src/libnavigraph/NavigraphClient.h"
+#include "src/libnavigraph/NavigraphAPI.h"
 #include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
@@ -56,7 +56,7 @@ public:
     void reloadMetar() override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
-    std::shared_ptr<navigraph::NavigraphClient> getNavigraph() override;
+    std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() override;
 
     ~AviTab();
 
@@ -72,7 +72,7 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
 
-    std::shared_ptr<navigraph::NavigraphClient> navigraph;
+    std::shared_ptr<navigraph::NavigraphAPI> navigraphAPI;
 
     void createPanel();
     void createLayout();

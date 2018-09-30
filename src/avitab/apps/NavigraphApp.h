@@ -19,11 +19,12 @@
 #define SRC_AVITAB_APPS_NAVIGRAPHAPP_H_
 
 #include <memory>
+#include <future>
 #include "App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/Label.h"
-#include "src/libnavigraph/NavigraphAPI.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
 
 namespace avitab {
 
@@ -34,13 +35,19 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;
     std::shared_ptr<Button> button;
-    std::shared_ptr<navigraph::NavigraphAPI> navigraphApi;
+    std::shared_ptr<PixMap> pixmap;
 
     void reset();
     void onLoginButton();
+    void onLoginReply(std::future<bool> &res);
+
+    void onAuthRequired();
+    void onStartAuth();
+
     void onCancelLoginButton();
-    void relogin();
     void onAuthSuccess();
+
+    void onLogoutButton();
 };
 
 } /* namespace avitab */

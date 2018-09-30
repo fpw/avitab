@@ -1,6 +1,6 @@
 add_library(navigraph
     Crypto.cpp
-    NavigraphClient.cpp
+    OIDCClient.cpp
     AuthServer.cpp
     RESTClient.cpp
     NavigraphAPI.cpp

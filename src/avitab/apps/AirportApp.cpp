@@ -113,6 +113,18 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
             removeTab(button);
         });
     });
+
+    if (api().getNavigraph()->hasChartsFor(airport->getID())) {
+        page.chartsButton = std::make_shared<Button>(page.page, "Charts");
+        page.chartsButton->alignLeftOf(page.closeButton);
+        page.chartsButton->setManaged();
+        page.chartsButton->setCallback([this, airport] (const Button &button) {
+            api().executeLater([this, airport] () {
+                showCharts(airport);
+            });
+        });
+    }
+
     pages.push_back(page);
 }
 
@@ -124,6 +136,10 @@ void AirportApp::removeTab(const Button &closeButton) {
             break;
         }
     }
+}
+
+void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
+    logger::verbose("Showing charts for %s", airport->getID().c_str());
 }
 
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {

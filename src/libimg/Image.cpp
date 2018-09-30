@@ -72,7 +72,7 @@ void Image::loadImageFile(const std::string& utf8Path) {
     stbi_image_free(decodedData);
 }
 
-void Image::loadEncodedData(const std::vector<uint8_t>& encodedImage) {
+void Image::loadEncodedData(const std::vector<uint8_t>& encodedImage, bool keepData) {
     encodedData = std::make_unique<std::vector<uint8_t>>(encodedImage);
 
     int nChannels = 4;
@@ -89,6 +89,10 @@ void Image::loadEncodedData(const std::vector<uint8_t>& encodedImage) {
     setPixels(decodedData, imgWidth, imgHeight);
 
     stbi_image_free(decodedData);
+
+    if (!keepData) {
+        encodedData.reset();
+    }
 }
 
 void Image::setPixels(uint8_t* data, int srcWidth, int srcHeight) {
@@ -155,6 +159,15 @@ void Image::scale(int newWidth, int newHeight) {
                        (uint8_t *) scaled.getPixels(), newWidth, newHeight, 0, 4);
 
     *this = std::move(scaled);
+}
+
+void Image::drawPixel(int x, int y, uint32_t color) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        throw std::runtime_error("drawPixel: out of bounds");
+    }
+
+    uint32_t *data = getPixels();
+    data[y * width + x] = color;
 }
 
 void Image::drawLine(int x1, int y1, int x2, int y2, uint32_t color) {
@@ -293,6 +306,28 @@ void Image::blendImage(const Image& src, int dstX, int dstY, double angle) {
     }
 }
 
+void Image::blendImage90(const Image& src, int dstX, int dstY) {
+    int srcWidth = src.getWidth();
+    int srcHeight = src.getHeight();
+
+    uint32_t *dstPtr = getPixels();
+    const uint32_t *srcPtr = src.getPixels();
+
+    for (int y = dstY; y < dstY + srcWidth; y++) {
+        int srcX = srcWidth - 1 - (y - dstY);
+        for (int x = dstX; x < dstX + srcHeight; x++) {
+            int srcY = x - dstX;
+            if (srcX < 0 || srcX >= srcWidth|| srcY < 0 || srcY >= srcHeight) {
+                continue;
+            }
+            uint32_t srcColor = srcPtr[srcY * srcWidth + srcX];
+            if (srcColor & 0xFF000000) {
+                dstPtr[y * width + x] = 0xFF000000 | srcColor;
+            }
+        }
+    }
+}
+
 void Image::alphaBlend(uint32_t color) {
     // background
     float ba = (int) ((color >> 24) & 0xFF) / 255.0;
@@ -336,6 +371,9 @@ void Image::rotate0(Image& dst) {
     for (int y = 0; y < dst.height; y++) {
         int srcY = y + yOffset;
         int srcX = xOffset;
+        if (srcX < 0 || srcX + copyWidth - 1 >= width || srcY < 0 || srcY >= height) {
+            continue;
+        }
         memcpy(dstPtr + y * dst.width, srcPtr + srcY * width + srcX, copyWidth * 4);
     }
 }
@@ -352,6 +390,10 @@ void Image::rotate90(Image &dst) {
 
         for (int x = 0; x < dst.width; x++) {
             int srcY = width - 1 - yOffset - x;
+            if (srcX < 0 || srcX >= width || srcY < 0 || srcY >= height) {
+                continue;
+            }
+
             dstPtr[y * dst.width + x] = srcPtr[srcY * width + srcX];
         }
     }
@@ -360,16 +402,20 @@ void Image::rotate90(Image &dst) {
 void Image::rotate180(Image &dst) {
     int yOffset = height / 2 - dst.height / 2;
     int xOffset = width / 2 - dst.width / 2;
-    int copyWidth = dst.width;
 
     uint32_t *srcPtr = getPixels();
     uint32_t *dstPtr = dst.getPixels();
 
     for (int y = 0; y < dst.height; y++) {
         int srcY = height - 1 - yOffset - y;
-        int srcX = xOffset;
-        for (int x = srcX; x < copyWidth; x++) {
-            dstPtr[y * dst.width + x] = srcPtr[srcY * width + (width - x - 1)];
+        int startX = xOffset;
+        for (int x = startX; x < dst.width; x++) {
+            int srcX = width - x - 1;
+            if (srcX < 0 || srcX >= width || srcY < 0 || srcY >= height) {
+                continue;
+            }
+
+            dstPtr[y * dst.width + x] = srcPtr[srcY * width + srcX];
         }
     }
 }
@@ -386,6 +432,9 @@ void Image::rotate270(Image &dst) {
 
         for (int x = 0; x < dst.width; x++) {
             int srcY = yOffset + x;
+            if (srcX < 0 || srcX >= width || srcY < 0 || srcY >= height) {
+                continue;
+            }
             dstPtr[y * dst.width + x] = srcPtr[srcY * width + srcX];
         }
     }

@@ -15,8 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
-#define SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_
+#ifndef SRC_LIBNAVIGRAPH_OIDCCLIENT_H_
+#define SRC_LIBNAVIGRAPH_OIDCCLIENT_H_
 
 #include <string>
 #include <vector>
@@ -30,27 +30,30 @@
 
 namespace navigraph {
 
-class NavigraphClient {
+class LoginException: public std::exception {
+public:
+    const char *what() const noexcept override;
+};
+
+class OIDCClient {
 public:
     using AuthCallback = std::function<void()>;
 
-    NavigraphClient(const std::string &clientId);
+    OIDCClient(const std::string &clientId, const std::string &clientSecret);
     void setCacheDirectory(const std::string &dir);
-    std::string getCacheDirectory() const;
-    bool isSupported();
-
-    bool canRelogin();
-    void relogin(AuthCallback cb);
 
     std::string startAuth(AuthCallback cb);
     void cancelAuth();
 
-    bool isLoggedIn() const;
+    std::string getAccountName() const;
+
     std::string get(const std::string &url);
     std::vector<uint8_t> getBinary(const std::string &url);
     long getTimestamp(const std::string &url);
 
-    virtual ~NavigraphClient();
+    void logout();
+
+    virtual ~OIDCClient();
 
 private:
     std::string cacheDir;
@@ -63,7 +66,7 @@ private:
 
     // for auth process
     int authPort = 0;
-    std::string clientId;
+    std::string clientId, clientSecret;
     std::string verifier;
     std::string nonce, state;
 
@@ -73,11 +76,13 @@ private:
 
     bool cancelToken = false;
 
+    bool relogin();
     void onAuthReply(const std::map<std::string, std::string> &authInfo);
     void handleToken(const std::string &inputJson);
     void loadIDToken(bool checkNonce);
+    void tryWithRelogin(std::function<void()> f);
 };
 
 } /* namespace navigraph */
 
-#endif /* SRC_LIBNAVIGRAPH_NAVIGRAPHCLIENT_H_ */
+#endif /* SRC_LIBNAVIGRAPH_OIDCCLIENT_H_ */

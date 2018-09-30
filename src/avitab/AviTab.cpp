@@ -27,15 +27,14 @@ namespace avitab {
 
 AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
-    guiLib(environment->createGUIToolkit()),
-    navigraph(std::make_shared<navigraph::NavigraphClient>("charts-avitab"))
+    guiLib(environment->createGUIToolkit())
 {
     // runs in environment thread, called by PluginStart
+    navigraphAPI = std::make_shared<navigraph::NavigraphAPI>(env->getProgramPath() + "/Navigraph/");
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
     env->resumeEnvironmentJobs();
-    navigraph->setCacheDirectory(env->getProgramPath() + "/Navigraph/");
 }
 
 void AviTab::startApp() {
@@ -262,8 +261,8 @@ void AviTab::reloadMetar() {
     logger::info("Done METAR");
 }
 
-std::shared_ptr<navigraph::NavigraphClient> AviTab::getNavigraph() {
-    return navigraph;
+std::shared_ptr<navigraph::NavigraphAPI> AviTab::getNavigraph() {
+    return navigraphAPI;
 }
 
 void AviTab::onHomeButton() {

@@ -38,6 +38,7 @@ private:
     struct TabPage {
         std::shared_ptr<Page> page;
         std::shared_ptr<Button> closeButton;
+        std::shared_ptr<Button> chartsButton;
     };
     std::vector<TabPage> pages;
 
@@ -51,6 +52,7 @@ private:
     std::shared_ptr<Keyboard> keys;
 
     void removeTab(const Button &closeButton);
+    void showCharts(std::shared_ptr<xdata::Airport> airport);
     void resetLayout();
     void onSearchEntered(const std::string &code);
     void onAirportSelected(std::shared_ptr<xdata::Airport> airport);

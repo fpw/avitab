@@ -18,35 +18,64 @@
 #ifndef SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
 #define SRC_LIBNAVIGRAPH_NAVIGRAPHAPI_H_
 
+#include <string>
 #include <memory>
 #include <vector>
 #include <map>
+#include <thread>
+#include <atomic>
+#include <functional>
+#include <mutex>
 #include <nlohmann/json_fwd.hpp>
-#include "NavigraphClient.h"
+#include "src/libimg/Image.h"
+#include "src/libimg/TTFStamper.h"
+#include "OIDCClient.h"
+#include "APICall.h"
 #include "Chart.h"
 
 namespace navigraph {
 
 class NavigraphAPI {
 public:
-    NavigraphAPI(std::shared_ptr<NavigraphClient> client);
+    NavigraphAPI(const std::string &cacheDirectory);
 
-    void load();
-    bool isInDemoMode() const;
-    bool hasChartsFor(const std::string &icao);
+    bool isSupported() const;
+
+    std::shared_ptr<APICall<bool>> init();
     std::vector<std::shared_ptr<Chart>> getChartsFor(const std::string &icao);
     void loadChart(std::shared_ptr<Chart> chart);
 
+    void submitCall(std::shared_ptr<BaseCall> call);
+
+    std::string startAuthentication(std::function<void()> onAuth);
+    void cancelAuth();
+    bool isInDemoMode() const;
+    bool hasChartsFor(const std::string &icao);
+
+    void logout();
+
+    ~NavigraphAPI();
+
 private:
+    std::string cacheDirectory;
+    std::shared_ptr<OIDCClient> oidc;
     std::shared_ptr<nlohmann::json> airportJson;
-    std::shared_ptr<NavigraphClient> client;
+    img::TTFStamper stamper;
     bool demoMode = true;
 
+    std::mutex mutex;
+    std::atomic_bool keepAlive { false };
+    std::unique_ptr<std::thread> apiThread;
+    std::vector<std::shared_ptr<BaseCall>> pendingCalls;
+
     std::multimap<std::string, std::shared_ptr<Chart>> charts;
+
+    void workLoop();
 
     void loadAirports();
     bool hasChartsSubscription();
     bool canAccess(const std::string &icao);
+    std::shared_ptr<img::Image> getChartImageFromURL(const std::string &url);
 };
 
 } /* namespace navigraph */
