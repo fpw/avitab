@@ -42,13 +42,14 @@ int ImageSource::getMaxZoomLevel() {
 }
 
 int ImageSource::getInitialZoomLevel() {
-    return 0;
+    return -1;
 }
 
 img::Point<double> ImageSource::suggestInitialCenter() {
     int fullWidth = image->getWidth();
     int fullHeight = image->getHeight();
-    return img::Point<double>{fullWidth / 2.0 / TILE_SIZE, fullHeight / 2.0 / TILE_SIZE};
+    auto scale = zoomToScale(getInitialZoomLevel());
+    return img::Point<double>{fullWidth / 2.0 / TILE_SIZE * scale, fullHeight / 6.0 / TILE_SIZE * scale};
 }
 
 float ImageSource::zoomToScale(int zoom) {
