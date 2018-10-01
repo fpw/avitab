@@ -39,7 +39,7 @@ class OIDCClient {
 public:
     using AuthCallback = std::function<void()>;
 
-    OIDCClient(const std::string &clientId, const std::string &clientSecret);
+    OIDCClient(const std::string &clientId, const std::string &cryptedClientSecret);
     void setCacheDirectory(const std::string &dir);
 
     bool canRelogin() const;

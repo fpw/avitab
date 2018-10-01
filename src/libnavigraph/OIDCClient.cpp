@@ -29,11 +29,15 @@ const char* LoginException::what() const noexcept {
     return "Login required";
 }
 
-OIDCClient::OIDCClient(const std::string &clientId, const std::string &clientSecret):
-    clientId(clientId),
-    clientSecret(clientSecret)
+OIDCClient::OIDCClient(const std::string &clientId, const std::string &cryptedClientSecret):
+    clientId(clientId)
 {
     server.setAuthCallback([this] (const std::map<std::string, std::string> &reply) { onAuthReply(reply); });
+    if (!cryptedClientSecret.empty()) {
+        clientSecret = crypto.aesDecrypt(cryptedClientSecret,
+            "Please do not decrypt the client secret, using it in a modified AviTab violates Navigraph's license"
+            " and will lead to AviTab being banned");
+    }
 }
 
 void OIDCClient::setCacheDirectory(const std::string& dir) {
