@@ -73,6 +73,8 @@ void AirportApp::onSearchEntered(const std::string& code) {
         resultList.reset();
         nextButton.reset();
         return;
+    } else if (airports.size() == 1) {
+        onAirportSelected(airports.front());
     } else if (airports.size() >= xdata::World::MAX_SEARCH_RESULTS) {
         searchLabel->setText("Too many results, only showing first " + std::to_string(airports.size()));
     } else {
