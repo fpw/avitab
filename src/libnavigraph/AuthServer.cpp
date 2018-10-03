@@ -56,7 +56,7 @@ int AuthServer::start() {
     sockaddr_in serverAddr {};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    serverAddr.sin_port = htons(AUTH_PORT);
+    serverAddr.sin_port = 0;
 
     if (bind(srvSock, (sockaddr *) &serverAddr, sizeof(serverAddr)) < 0) {
         close(srvSock);
@@ -71,7 +71,11 @@ int AuthServer::start() {
     keepAlive = true;
     serverThread = std::make_unique<std::thread>(&AuthServer::loop, this);
 
-    return ntohs(serverAddr.sin_port);
+    sockaddr_in chosenAddr;
+    int size = sizeof(chosenAddr);
+    getsockname(srvSock, (sockaddr *) &chosenAddr, &size);
+
+    return ntohs(chosenAddr.sin_port);
 }
 
 void AuthServer::loop() {
