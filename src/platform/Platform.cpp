@@ -326,8 +326,11 @@ void openBrowser(const std::string& url) {
     std::string cmd = std::string("open \"") + url + "\"";
     system(cmd.c_str());
 #else
-    std::string cmd = std::string("xdg-open \"") + url + "\"";
-    system(browser_cmd.c_str());
+    std::string browser_cmd = std::string("xdg-open \"") + url + "\"";
+    auto res = system(browser_cmd.c_str());
+    if (res != 0) {
+        logger::warn("Couldn't launch browser: %d", res);
+    }
 #endif
 }
 

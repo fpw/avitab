@@ -17,7 +17,9 @@
  */
 #include <vector>
 #include <stdexcept>
+#ifndef _POSIX_SOURCE
 #define _POSIX_SOURCE
+#endif
 #include <unistd.h>
 #ifndef _WIN32
 #include <sys/socket.h>
