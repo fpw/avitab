@@ -19,6 +19,10 @@
 #include <stdexcept>
 #define _POSIX_SOURCE
 #include <unistd.h>
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#endif
 #include "AuthServer.h"
 #include "src/Logger.h"
 
@@ -72,7 +76,7 @@ int AuthServer::start() {
     serverThread = std::make_unique<std::thread>(&AuthServer::loop, this);
 
     sockaddr_in chosenAddr;
-    int size = sizeof(chosenAddr);
+    socklen_t size = sizeof(chosenAddr);
     getsockname(srvSock, (sockaddr *) &chosenAddr, &size);
 
     return ntohs(chosenAddr.sin_port);
@@ -80,7 +84,7 @@ int AuthServer::start() {
 
 void AuthServer::loop() {
     sockaddr_in clientAddr {};
-    int clientLen = sizeof(clientAddr);
+    socklen_t clientLen = sizeof(clientAddr);
 
     fd_set readSet;
 
