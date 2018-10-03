@@ -5,4 +5,5 @@ add_library(map_sources
     GeoTIFFSource.cpp
     EPSGSource.cpp
     ImageSource.cpp
+    Calibration.cpp
 )

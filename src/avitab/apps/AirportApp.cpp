@@ -326,12 +326,26 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     tab.mapStitcher.reset();
     tab.mapSource.reset();
 
-    tab.mapSource = std::make_shared<maps::ImageSource>(chart->getDayImage());
+    auto dayImage = chart->getDayImage();
+    tab.mapSource = std::make_shared<maps::ImageSource>(dayImage);
     tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
     tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher);
     tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
     tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
     tab.map->setNavWorld(api().getNavWorld());
+
+    auto geoRef = chart->getGeoReference();
+    if (geoRef.valid) {
+        try {
+            int w = dayImage->getWidth();
+            int h = dayImage->getHeight();
+            tab.mapSource->attachCalibration1(geoRef.x1 * w, geoRef.y1 * h, geoRef.lat1, geoRef.lon1, 0);
+            tab.mapSource->attachCalibration2(geoRef.x2 * w, geoRef.y2 * h, geoRef.lat2, geoRef.lon2, 0);
+        } catch (const std::exception &e) {
+            logger::verbose("Invalid geo reference for chart: %s", e.what());
+        }
+        logger::verbose("Attached geo-reference to chart");
+    }
 
     onTimer();
 }
@@ -373,8 +387,13 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 }
 
 bool AirportApp::onTimer() {
+    double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
+    double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
+    float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+
     for (auto &tab: pages) {
         if (tab.map) {
+            tab.map->setPlanePosition(planeLat, planeLon, planeHeading);
             tab.map->doWork();
         }
     }

@@ -37,14 +37,18 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
 void NavigraphApp::reset() {
     label.reset();
     label = std::make_shared<Label>(window,
-            "This app allows you to use your Navigraph account to access the chart cloud.\n"
-            "For more information about Navigraph, visit navigraph.com\n"
+            "Linking AviTab with your Navigraph account grants access to professional,\n"
+            "worldwide and updated airport and terminal charts from Jeppesen inside of AviTab.\n"
+            "For your security, you will need to link your account again after 30 days.\n"
+            "You can try out the app before subscribing by creating a free account \n"
+            "on navigraph.com and linking it to AviTab for demo access.\n"
+            "For full coverage, you will need a Navigraph Charts or Ultimate subscription."
         );
     label->setLongMode(true);
     label->alignInTopLeft();
 
     button.reset();
-    button = std::make_shared<Button>(window, "Login");
+    button = std::make_shared<Button>(window, "Link Navigraph Account");
     button->alignBelow(label);
     button->setCallback([this] (const Button &btn) {
         api().executeLater([this] () { onLoginButton(); });
@@ -75,10 +79,10 @@ void NavigraphApp::onLoginButton() {
 void NavigraphApp::onAuthRequired() {
     auto navigraph = api().getNavigraph();
 
-    label->setText("Authentication required\n"
+    label->setText("Linking required\n"
                    "Clicking the button will open your browser to login to your Navigraph account.\n"
                    "If your browser doesn't start, you can find the link to open in AviTab.log\n"
-                   "This process is required once every 30 days.");
+                   "This process is required only once every 30 days.");
 
     button.reset();
     button = std::make_shared<Button>(window, "Open Browser");
@@ -117,15 +121,18 @@ void NavigraphApp::onCancelLoginButton() {
 void NavigraphApp::onAuthSuccess() {
     auto navigraph = api().getNavigraph();
     if (navigraph->isInDemoMode()) {
-        label->setText("You are logged in but don't have a charts subscription.\n"
-                       "Only LEAL and KONT are usable in demo mode.");
+        label->setText("Your Navigraph account is linked but doesn't have a charts subscription.\n"
+                       "Only LEAL and KONT are usable in demo mode.\n"
+                       "Visit navigraph.com to subscribe to Navigraph Charts or Ultimate.\n"
+                       "Use the Airport app to access the demo charts.\n"
+                       "Use the home button or the X to close this app.\n");
     } else {
-        label->setText("You are now logged in! Use the airport app to access charts.\n"
-                       "Logging out will require a browser login again, it should only be used to switch accounts.\n");
+        label->setText("Your Navigraph account is now linked to AviTab! Use the Airport app to access charts.\n"
+                       "Use the home button or the X to close this app.\n");
     }
 
     button.reset();
-    button = std::make_shared<Button>(window, "Logout");
+    button = std::make_shared<Button>(window, "Switch Account");
     button->alignBelow(label);
     button->setCallback([this] (const Button &btn) {
         api().executeLater([this] () { onLogoutButton(); });

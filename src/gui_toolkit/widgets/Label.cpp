@@ -53,4 +53,8 @@ void Label::setTextFormatted(const std::string format, ...) {
     setText(formatted);
 }
 
+std::string Label::getText() {
+    return std::string(lv_label_get_text(obj()));
+}
+
 } /* namespace avitab */

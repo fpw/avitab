@@ -43,7 +43,7 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png", AppId::NOTES);
 
     if (api().getNavigraph()->isSupported()) {
-        addEntry<NavigraphApp>("Navigraph", root + "if_safari_246006.png", AppId::NAVIGRAPH);
+        addEntry<NavigraphApp>("Navigraph", root + "navigraph.png", AppId::NAVIGRAPH);
     }
 
     addEntry<About>("About", root + "if_Help_1493288.png", AppId::ABOUT);

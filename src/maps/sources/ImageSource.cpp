@@ -61,7 +61,21 @@ float ImageSource::zoomToScale(int zoom) {
 }
 
 bool ImageSource::supportsWorldCoords() {
-    return false;
+    return calibration.hasCalibration();
+}
+
+void ImageSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {
+    auto scale = zoomToScale(zoom);
+    double normX = x / scale;
+    double normY = y / scale;
+    calibration.setPoint1(normX, normY, lat, lon);
+}
+
+void ImageSource::attachCalibration2(double x, double y, double lat, double lon, int zoom) {
+    auto scale = zoomToScale(zoom);
+    double normX = x / scale;
+    double normY = y / scale;
+    calibration.setPoint2(normX, normY, lat, lon);
 }
 
 img::Point<int> ImageSource::getTileDimensions(int zoom) {
@@ -120,11 +134,21 @@ void ImageSource::resumeLoading() {
 }
 
 img::Point<double> ImageSource::worldToXY(double lon, double lat, int zoom) {
-    return img::Point<double>{lon, lat};
+    auto normXY = calibration.worldToPixels(lon, lat);
+
+    auto scale = zoomToScale(zoom);
+    double x = normXY.x / TILE_SIZE * scale;
+    double y = normXY.y / TILE_SIZE * scale;
+
+    return img::Point<double>{x, y};
 }
 
 img::Point<double> ImageSource::xyToWorld(double x, double y, int zoom) {
-    return img::Point<double>{x, y};
+    auto scale = zoomToScale(zoom);
+    double normX = x * TILE_SIZE / image->getWidth() * scale;
+    double normY = y * TILE_SIZE / image->getHeight() * scale;
+
+    return calibration.pixelsToWorld(normX, normY);
 }
 
 } /* namespace maps */

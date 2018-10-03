@@ -25,6 +25,12 @@
 
 namespace navigraph {
 
+struct ChartGEOReference {
+    double lon1, x1, lon2, x2;
+    double lat1, y1, lat2, y2;
+    bool valid = false;
+};
+
 class Chart {
 public:
     Chart(const nlohmann::json &json);
@@ -35,14 +41,17 @@ public:
     void attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night);
 
     std::string getDescription() const;
+    ChartGEOReference getGeoReference() const;
 
     std::shared_ptr<img::Image> getDayImage() const;
     std::shared_ptr<img::Image> getNightImage() const;
+
 private:
     std::string fileDay, fileNight;
     std::string icao;
     std::string section;
     std::string desc;
+    ChartGEOReference geoRef {};
 
     std::shared_ptr<img::Image> imgDay, imgNight;
 

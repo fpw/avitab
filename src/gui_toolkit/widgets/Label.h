@@ -30,6 +30,7 @@ public:
     void setLongMode(bool longText);
     void setText(const std::string &title);
     void setTextFormatted(const std::string format, ...);
+    std::string getText();
 };
 
 } /* namespace avitab */
