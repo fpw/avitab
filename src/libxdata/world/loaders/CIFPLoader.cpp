@@ -68,7 +68,7 @@ void CIFPLoader::loadSID(std::shared_ptr<Airport> airport, const CIFPData& proce
     loadEnroute(procedure, *sid, airport);
 
     airport->addSID(sid);
-    sid->iterate([this, &sid, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> finalFix) {
+    sid->iterate([&sid, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> finalFix) {
         if (finalFix->isGlobalFix()) {
             airport->connectTo(sid, finalFix);
         }
@@ -83,7 +83,7 @@ void CIFPLoader::loadSTAR(std::shared_ptr<Airport> airport, const CIFPData& proc
     loadRunwayTransition(procedure, *star, airport);
 
     airport->addSTAR(star);
-    star->iterate([this, &star, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> startFix, std::shared_ptr<NavNode> endPoint) {
+    star->iterate([&star, &airport] (std::shared_ptr<Runway> rw, std::shared_ptr<Fix> startFix, std::shared_ptr<NavNode> endPoint) {
         if (startFix->isGlobalFix()) {
             startFix->connectTo(star, airport);
         }
@@ -103,7 +103,7 @@ void CIFPLoader::loadApproach(std::shared_ptr<Airport> airport, const CIFPData& 
         startFix->connectTo(approach, airport);
     }
 
-    approach->iterateTransitions([this, &approach, &airport] (const std::string &name, std::shared_ptr<Fix> startFix, std::shared_ptr<Runway> rw) {
+    approach->iterateTransitions([&approach, &airport] (const std::string &name, std::shared_ptr<Fix> startFix, std::shared_ptr<Runway> rw) {
         if (startFix != nullptr && startFix->isGlobalFix()) {
             startFix->connectTo(approach, airport);
         }
@@ -114,7 +114,7 @@ void CIFPLoader::loadRunwayTransition(const CIFPData& procedure, Procedure &proc
     for (auto &entry: procedure.runwayTransitions) {
         auto nodes = convertFixes(airport, entry.second.fixes);
         std::string rwyName = entry.first;
-        forEveryMatchingRunway(rwyName, airport, [this, &nodes, &proc] (std::shared_ptr<Runway> rw) {
+        forEveryMatchingRunway(rwyName, airport, [&nodes, &proc] (std::shared_ptr<Runway> rw) {
             proc.attachRunwayTransition(rw, nodes);
         });
     }
@@ -132,7 +132,7 @@ void CIFPLoader::loadCommonRoutes(const CIFPData& procedure, Procedure& proc, co
             }
         } else {
             // a route segment that connects to a runway
-            forEveryMatchingRunway(rw, airport, [this, &nodes, &proc] (std::shared_ptr<Runway> rw) {
+            forEveryMatchingRunway(rw, airport, [&nodes, &proc] (std::shared_ptr<Runway> rw) {
                 proc.attachCommonRoute(rw, nodes);
             });
         }
@@ -167,7 +167,7 @@ void CIFPLoader::loadApproaches(const CIFPData& procedure, Approach& proc, const
 
 void CIFPLoader::forEveryMatchingRunway(const std::string& rwSpec, const std::shared_ptr<Airport> apt, std::function<void (std::shared_ptr<Runway>)> f) {
     if (rwSpec == "ALL") {
-        apt->forEachRunway([this, &f](std::shared_ptr<Runway> rw) {
+        apt->forEachRunway([&f](std::shared_ptr<Runway> rw) {
             f(rw);
         });
         return;
@@ -175,7 +175,7 @@ void CIFPLoader::forEveryMatchingRunway(const std::string& rwSpec, const std::sh
         std::string rwyName = rwSpec.substr(2);
         if (rwyName.back() == 'B') {
             // all runways with same prefix
-            apt->forEachRunway([this, &f, &rwyName] (std::shared_ptr<Runway> rw) {
+            apt->forEachRunway([&f, &rwyName] (std::shared_ptr<Runway> rw) {
                 if (rw->getID().substr(0, 2) == rwyName.substr(0, 2)) {
                     f(rw);
                 }
