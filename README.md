@@ -28,9 +28,9 @@ More screenshots here: [Screenshots](screenshots/)
 ## Installation
 
 * Download the latest release from the [release page](https://github.com/fpw/avitab/releases/latest)
-* Extract the archive and move the folder into your X-Plane/Resources/Plugins directory
+* Extract the archive and move the folder into your ``X-Plane/Resources/Plugins`` directory
 * Start X-Plane
-* Find a new menu inside the plugins directory to toggle the tablet
+* Find a new menu inside the ``plugins`` directory to toggle the tablet
 * Optionally, you can assign a key for this command (I prefer the right-hand lower trigger)
 
 ## Usage
@@ -40,7 +40,7 @@ When hovering over the edges of the tablet from a short distance, X-Plane will d
 The _upper_ bar can be used to grab the window and move it around inside the cockpit.
 
 ### Charts Viewer
-The charts viewer displays PDF files inside the charts/ subdirectory of the plugin directoy. You can add your
+The charts viewer displays PDF files inside the ``charts/`` subdirectory of the ``plugin/`` directoy. You can add your
 charts there, including subdirectories.
 
 ## Limitations
