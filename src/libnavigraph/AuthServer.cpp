@@ -30,6 +30,7 @@
 #include <windows.h>
 // close doesn't actually close sockets on Windows, there's a special API function for that <3
 #define close closesocket
+typedef int socklen_t;
 #endif
 
 namespace navigraph {
