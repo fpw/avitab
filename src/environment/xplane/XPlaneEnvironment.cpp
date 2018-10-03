@@ -271,7 +271,7 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
     std::promise<double> dataPromise;
     auto futureData = dataPromise.get_future();
 
-    runInEnvironment([&dataPromise, &lat, &lon, this] () {
+    runInEnvironment([&dataPromise, &lat, &lon] () {
         double variation = XPLMGetMagneticVariation(lat, lon);
         dataPromise.set_value(variation);
     });
