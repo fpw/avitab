@@ -66,6 +66,7 @@ bool OIDCClient::relogin() {
         reply = restClient.post("https://identity.api.navigraph.com/connect/token", request, cancelToken);
     } catch (const HTTPException &e) {
         // token no longer valid
+        logger::verbose("Refresh token no longer valid");
         logout();
         return false;
     }
@@ -76,7 +77,6 @@ bool OIDCClient::relogin() {
         logger::error("Relogin failed: %s", e.what());
         return false;
     }
-
     return true;
 }
 
@@ -159,7 +159,6 @@ void OIDCClient::handleToken(const std::string& inputJson) {
     // could be called from either thread
 
     nlohmann::json data = nlohmann::json::parse(inputJson);
-
     idToken = data["id_token"];
     accessToken = data["access_token"];
     refreshToken = data["refresh_token"];
@@ -194,13 +193,16 @@ void OIDCClient::loadIDToken(bool checkNonce) {
     logger::verbose("RSA-SHA256 signature: Check");
 
     nlohmann::json data = nlohmann::json::parse(crypto.base64URLDecode(payload));
-    accountName = data["name"];
     if (checkNonce) {
         if (data["nonce"] != nonce) {
             throw std::runtime_error("Invalid nonce");
         }
         logger::verbose("Nonce: Check");
     }
+    if (data["iss"] != "https://identity.api.navigraph.com") {
+        throw std::runtime_error("Invalid issuer in ID token");
+    }
+    accountName = data["preferred_username"];
 }
 
 void OIDCClient::cancelAuth() {
@@ -244,8 +246,11 @@ long OIDCClient::getTimestamp(const std::string& url) {
 }
 
 void OIDCClient::tryWithRelogin(std::function<void()> f) {
+    // no login yet -> try using the refresh token
     if (accessToken.empty()) {
-        throw LoginException();
+        if (!relogin()) {
+            throw LoginException();
+        }
     }
 
     try {
@@ -278,7 +283,6 @@ void OIDCClient::loadTokens() {
     try {
         nlohmann::json tokens = nlohmann::json::parse(tokenStr);
         refreshToken = tokens["refresh_token"];
-        accessToken = tokens["access_token"];
         idToken = tokens["id_token"];
         logger::verbose("Checking stored token");
         loadIDToken(false);
@@ -296,7 +300,6 @@ void OIDCClient::storeTokens() {
     std::stringstream tokenStream;
     tokenStream << nlohmann::json {
         {"refresh_token", refreshToken},
-        {"access_token", accessToken},
         {"id_token", idToken},
     };
 
