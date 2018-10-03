@@ -61,9 +61,9 @@ void NavigraphApp::onLoginButton() {
     call->andThen([this] (std::future<bool> result) {
         try {
             result.get();
-            api().executeLater([this, &result] () { onAuthSuccess(); });
+            api().executeLater([this] () { onAuthSuccess(); });
         } catch (const navigraph::LoginException &e) {
-            api().executeLater([this, &result] () { onAuthRequired(); });
+            api().executeLater([this] () { onAuthRequired(); });
         } catch (const std::exception &e) {
             label->setTextFormatted("Error: %s", e.what());
         }

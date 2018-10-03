@@ -73,15 +73,15 @@ void HeaderApp::createSettingsContainer() {
     mediaLabel->alignBelow(brightLabel, VERT_PADDING);
 
     prevButton = std::make_shared<Button>(prefContainer, Widget::Symbol::PREV);
-    prevButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PREV); });
+    prevButton->setCallback([] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PREV); });
     prevButton->alignBelow(brightnessSlider);
 
     pauseButton = std::make_shared<Button>(prefContainer, Widget::Symbol::PAUSE);
-    pauseButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PAUSE); });
+    pauseButton->setCallback([] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_PAUSE); });
     pauseButton->alignRightOf(prevButton);
 
     nextButton = std::make_shared<Button>(prefContainer, Widget::Symbol::NEXT);
-    nextButton->setCallback([this] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
+    nextButton->setCallback([] (const Button &) { platform::controlMediaPlayer(platform::MediaControl::MEDIA_NEXT); });
     nextButton->alignRightOf(pauseButton);
 
     closeButton = std::make_shared<Button>(prefContainer, "Close AviTab");

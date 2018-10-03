@@ -37,7 +37,7 @@ void AirportApp::resetLayout() {
     closeButton = std::make_shared<Button>(tabs, "X");
     closeButton->alignInTopRight();
     closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] {
+        api().executeLater([this] {
             exit();
         });
     });
