@@ -66,8 +66,7 @@ void Rasterizer::loadDocument(const std::string& utf8Path) {
     // get initial page size
     fz_try(ctx) {
         fz_page *page = fz_load_page(ctx, doc, 0);
-        fz_rect rect;
-        fz_bound_page(ctx, page, &rect);
+        fz_rect rect = fz_bound_page(ctx, page);
         currentPageWidth = rect.x1 - rect.x0;
         currentPageHeight = rect.y1 - rect.y0;
         fz_drop_page(ctx, page);
@@ -94,8 +93,7 @@ void Rasterizer::loadPage(int pageNum) {
         throw std::runtime_error("Cannot parse page: " + std::string(fz_caught_message(ctx)));
     }
 
-    fz_rect rect;
-    fz_bound_display_list(ctx, currentPageList, &rect);
+    fz_rect rect = fz_bound_display_list(ctx, currentPageList);
     currentPageWidth = rect.x1 - rect.x0;
     currentPageHeight = rect.y1 - rect.y0;
 
@@ -134,8 +132,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
     int outHeight = image->getHeight();
 
     float scale = zoomToScale(zoom);
-    fz_matrix scaleMatrix;
-    fz_scale(&scaleMatrix, scale, scale);
+    fz_matrix scaleMatrix = fz_scale(scale, scale);
 
     fz_irect clipBox;
     clipBox.x0 = outStartX;
@@ -159,7 +156,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
     fz_try(ctx) {
         auto startAt = std::chrono::high_resolution_clock::now();
 
-        dev = fz_new_draw_device_with_bbox(ctx, &scaleMatrix, pix, &clipBox);
+        dev = fz_new_draw_device_with_bbox(ctx, scaleMatrix, pix, &clipBox);
 
         // pre-fill page with white
         fz_path *path = fz_new_path(ctx);
@@ -169,10 +166,10 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
         fz_lineto(ctx, path, currentPageWidth, 0);
         fz_closepath(ctx, path);
         float white = 1.0f;
-        fz_fill_path(ctx, dev, path, 0, &fz_identity, fz_device_gray(ctx), &white, 1.0f, nullptr);
+        fz_fill_path(ctx, dev, path, 0, fz_identity, fz_device_gray(ctx), &white, 1.0f, nullptr);
         fz_drop_path(ctx, path);
 
-        fz_run_display_list(ctx, currentPageList, dev, &fz_identity, nullptr, nullptr);
+        fz_run_display_list(ctx, currentPageList, dev, fz_identity, fz_bound_path(ctx, path, nullptr, fz_identity), nullptr);
         fz_close_device(ctx, dev);
         fz_drop_device(ctx, dev);
 

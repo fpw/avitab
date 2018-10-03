@@ -11,11 +11,11 @@ add_library(img_main
 target_link_libraries(img_main
     img_stitcher
     mupdf
-    mupdfthird
+    mupdf-third
     detex
     tiff
+    mupdf-third
     lzma
-    jpeg
 )
 
 if(WIN32)
