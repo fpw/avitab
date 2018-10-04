@@ -29,6 +29,8 @@
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/DropDownList.h"
+#include "src/gui_toolkit/widgets/List.h"
+#include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/maps/sources/ImageSource.h"
 #include "src/maps/OverlayedMap.h"
@@ -43,12 +45,10 @@ public:
 private:
     struct TabPage {
         std::shared_ptr<Page> page;
+        std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
-        std::shared_ptr<Button> closeButton;
-
         navigraph::NavigraphAPI::ChartsList charts;
-        std::shared_ptr<Button> chartsButton, showChartButton;
-        std::shared_ptr<DropDownList> chartSelect;
+        std::shared_ptr<List> chartSelect;
         std::shared_ptr<maps::ImageSource> mapSource;
         std::shared_ptr<img::Image> mapImage;
         std::shared_ptr<img::Stitcher> mapStitcher;
@@ -60,16 +60,16 @@ private:
     std::vector<TabPage> pages;
 
     Timer updateTimer;
-    std::shared_ptr<Button> closeButton;
+    std::shared_ptr<Page> searchPage;
+    std::shared_ptr<Window> searchWindow;
     std::shared_ptr<Label> searchLabel;
     std::shared_ptr<TabGroup> tabs;
-    std::shared_ptr<Page> searchPage;
     std::shared_ptr<TextArea> searchField;
     std::shared_ptr<DropDownList> resultList;
     std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
 
-    void removeTab(const Button &closeButton);
+    void removeTab(std::shared_ptr<Page> page);
     void resetLayout();
     void onSearchEntered(const std::string &code);
     void onAirportSelected(std::shared_ptr<xdata::Airport> airport);
@@ -82,7 +82,7 @@ private:
 
     TabPage &findPage(std::shared_ptr<Page> page);
 
-    void showCharts(std::shared_ptr<xdata::Airport> airport);
+    void toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts);
     void onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart);

@@ -32,6 +32,10 @@ Page::Page(WidgetPtr parent, lv_obj_t *page):
     setManagedObj(page);
 }
 
+void Page::setShowScrollbar(bool show) {
+    lv_page_set_sb_mode(obj(), show ? LV_SB_MODE_AUTO : LV_SB_MODE_OFF);
+}
+
 void Page::clear() {
     lv_obj_clean(lv_page_get_scrl(obj()));
 }

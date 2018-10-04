@@ -28,8 +28,6 @@ Chart::Chart(const nlohmann::json &json) {
     section = json["type"]["section"];
     desc = json["procedure_identifier"];
 
-    logger::verbose("Chart: %s", json.dump(1).c_str());
-
     try {
         double width = json["bbox_local"][2];
         double height = json["bbox_local"][1];

@@ -145,8 +145,8 @@ img::Point<double> ImageSource::worldToXY(double lon, double lat, int zoom) {
 
 img::Point<double> ImageSource::xyToWorld(double x, double y, int zoom) {
     auto scale = zoomToScale(zoom);
-    double normX = x * TILE_SIZE / image->getWidth() * scale;
-    double normY = y * TILE_SIZE / image->getHeight() * scale;
+    double normX = x * TILE_SIZE / scale;
+    double normY = y * TILE_SIZE / scale;
 
     return calibration.pixelsToWorld(normX, normY);
 }

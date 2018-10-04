@@ -28,6 +28,7 @@ public:
     Page(WidgetPtr parent, lv_obj_t *page);
 
     void clear();
+    void setShowScrollbar(bool show);
     int getContentWidth();
     int getContentHeight();
     void setFit(bool horz, bool vert);

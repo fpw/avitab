@@ -34,28 +34,25 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 void AirportApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
 
-    closeButton = std::make_shared<Button>(tabs, "X");
-    closeButton->alignInTopRight();
-    closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this] {
-            exit();
-        });
-    });
-
     searchPage = tabs->addTab(tabs, "Search");
+    searchPage->setShowScrollbar(false);
+    searchWindow = std::make_shared<Window>(searchPage, "Search");
+    searchWindow->setDimensions(searchPage->getContentWidth(), searchPage->getHeight());
+    searchWindow->setOnClose([this] { exit(); });
 
-    searchField = std::make_shared<TextArea>(searchPage, "");
+    searchField = std::make_shared<TextArea>(searchWindow, "");
     searchField->alignInTopLeft();
     searchField->setDimensions(searchField->getWidth(), 30);
 
-    searchLabel = std::make_shared<Label>(searchPage, "Enter a keyword or ICAO code");
+    searchLabel = std::make_shared<Label>(searchWindow, "Enter a keyword or ICAO code");
     searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 5);
 
-    keys = std::make_shared<Keyboard>(searchPage, searchField);
+    keys = std::make_shared<Keyboard>(searchWindow, searchField);
     keys->hideEnterKey();
     keys->setOnCancel([this] { searchField->setText(""); });
     keys->setOnOk([this] { onSearchEntered(searchField->getText()); });
-    keys->setPosition(-5, searchPage->getContentHeight() - 90);
+    keys->setDimensions(searchWindow->getContentWidth(), keys->getHeight());
+    keys->setPosition(0, 120);
 }
 
 void AirportApp::onSearchEntered(const std::string& code) {
@@ -102,40 +99,41 @@ void AirportApp::onSearchEntered(const std::string& code) {
 }
 
 void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
-    TabPage page;
-    page.page = tabs->addTab(tabs, airport->getID());
-    page.closeButton = std::make_shared<Button>(page.page, "X");
-    page.closeButton->alignInTopRight();
-    page.closeButton->setManaged();
+    TabPage tab;
+    tab.page = tabs->addTab(tabs, airport->getID());
+    tab.page->setShowScrollbar(false);
+    tab.window = std::make_shared<Window>(tab.page, airport->getID());
+    tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight() - 15);
 
-    fillPage(page.page, airport);
-    tabs->showTab(page.page);
-
-    page.closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] {
-            removeTab(button);
+    auto page = tab.page;
+    tab.window->setOnClose([this, page] {
+        api().executeLater([this, page] {
+            removeTab(page);
         });
     });
 
+    tab.label = std::make_shared<Label>(tab.window, "");
+    tab.label->setLongMode(true);
+
     if (api().getNavigraph()->hasChartsFor(airport->getID())) {
-        page.chartsButton = std::make_shared<Button>(page.page, "Charts");
-        page.chartsButton->alignLeftOf(page.closeButton);
-        page.chartsButton->setManaged();
-        page.chartsButton->setCallback([this, airport] (const Button &button) {
-            api().executeLater([this, airport] {
-                showCharts(airport);
+        tab.window->addSymbol(Widget::Symbol::LIST, [this, airport, page] {
+            api().executeLater([this, airport, page] {
+                toggleCharts(page, airport);
             });
         });
     }
 
-    pages.push_back(page);
+    pages.push_back(tab);
+    fillPage(page, airport);
+    tabs->showTab(page);
 }
 
-void AirportApp::removeTab(const Button &closeButton) {
+void AirportApp::removeTab(std::shared_ptr<Page> page) {
     for (auto it = pages.begin(); it != pages.end(); ++it) {
-        if (it->closeButton.get() == &closeButton) {
-            tabs->removeTab(tabs->getTabIndex(it->page));
+        if (it->page == page) {
+            size_t index = tabs->getTabIndex(it->page);
             pages.erase(it);
+            tabs->removeTab(index);
             break;
         }
     }
@@ -151,11 +149,12 @@ void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Air
     str << "\n";
     str << toWeatherInfo(airport);
 
-    Label widget(page, "");
-    widget.setLongMode(true);
-    widget.setText(str.str());
-    widget.setDimensions(page->getContentWidth(), page->getHeight() - 40);
-    widget.setManaged();
+    TabPage &tab = findPage(page);
+    tab.chartSelect.reset();
+
+    tab.label->setText(str.str());
+    tab.label->setDimensions(tab.window->getContentWidth(), tab.window->getHeight());
+    tab.label->setVisible(true);
 }
 
 std::string AirportApp::toATCInfo(std::shared_ptr<xdata::Airport> airport) {
@@ -239,38 +238,29 @@ AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {
     throw std::runtime_error("Unknown page");
 }
 
-void AirportApp::showCharts(std::shared_ptr<xdata::Airport> airport) {
-    TabPage page;
-    page.page = tabs->addTab(tabs, airport->getID() + " Charts");
-    page.closeButton = std::make_shared<Button>(page.page, "X");
-    page.closeButton->alignInTopRight();
-    page.closeButton->setManaged();
-
-    pages.push_back(page);
-
-    fillChartsPage(page.page, airport);
-    tabs->showTab(page.page);
-
-    page.closeButton->setCallback([this] (const Button &button) {
-        api().executeLater([this, &button] { removeTab(button); });
-    });
+void AirportApp::toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+    TabPage &tab = findPage(page);
+    if (tab.charts.empty()) {
+        fillChartsPage(page, airport);
+    } else {
+        tab.charts.clear();
+        fillPage(page, airport);
+    }
 }
 
 void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
     auto navigraph = api().getNavigraph();
 
     TabPage &tab = findPage(page);
-    tab.label = std::make_shared<Label>(page, "Loading...");
-    tab.label->setLongMode(true);
-    tab.label->setDimensions(page->getContentWidth(), page->getHeight() - 40);
-    tab.label->setManaged();
+    tab.label->setText("Loading...");
 
     auto call = navigraph->getChartsFor(airport->getID());
-    call->andThen([this, page, &tab] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
+    call->andThen([this, page] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
         try {
             auto charts = res.get();
             api().executeLater([this, page, charts] { onChartsLoaded(page, charts); });
         } catch (const std::exception &e) {
+            TabPage &tab = findPage(page);
             tab.label->setTextFormatted("Error: %s", e.what());
         }
     });
@@ -279,52 +269,65 @@ void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdat
 
 void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts) {
     TabPage &tab = findPage(page);
-    tab.label.reset();
-
-    std::vector<std::string> choices;
-    for (auto chart: charts) {
-        choices.push_back(chart->getDescription());
-    }
-
-    tab.mapImage = std::make_shared<img::Image>(page->getContentWidth(), page->getHeight() - 45, 0);
-
-    tab.pixMap = std::make_shared<PixMap>(page);
-    tab.pixMap->draw(*tab.mapImage);
-    tab.pixMap->setClickable(true);
-    tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
-    tab.pixMap->setManaged();
-
+    tab.label->setVisible(false);
     tab.charts = charts;
-    tab.chartSelect = std::make_shared<DropDownList>(page, choices);
-    tab.chartSelect->setManaged();
+    tab.chartSelect = std::make_shared<List>(tab.window);
+    tab.chartSelect->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
+    for (size_t i = 0; i < charts.size(); i++) {
+        tab.chartSelect->add(charts[i]->getDescription(), i);
+    }
+    tab.chartSelect->centerInParent();
+    tab.chartSelect->setCallback([this, page] (int index) {
+        api().executeLater([this, page, index] {
+            TabPage &listTab = findPage(page);
+            auto chart = listTab.charts.at(index);
 
-    tab.showChartButton = std::make_shared<Button>(page, "Show");
-    tab.showChartButton->alignRightOf(tab.chartSelect);
-    tab.showChartButton->setManaged();
-    tab.showChartButton->setCallback([this, tab] (const Button &) {
-        int index = tab.chartSelect->getSelectedIndex();
-        auto navigraph = api().getNavigraph();
-        auto call = navigraph->loadChartImage(tab.charts.at(index));
-        call->andThen([this, tab] (std::future<std::shared_ptr<navigraph::Chart>> res) {
-            try {
-                auto chart = res.get();
-                api().executeLater([this, tab, chart] { onChartLoaded(tab.page, chart); });
-            } catch (const std::exception &e) {
-                tab.label->setTextFormatted("Error: %s", e.what());
-            }
+            TabPage newTab;
+            newTab.page = tabs->addTab(tabs, chart->getICAO() + " Chart");
+            newTab.page->setShowScrollbar(false);
+            auto newPage = newTab.page;
+
+            newTab.window = std::make_shared<Window>(newTab.page, chart->getICAO());
+            newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() - 15);
+            newTab.window->setOnClose([this, newPage] {
+                api().executeLater([this, newPage] {
+                    removeTab(newPage);
+                });
+            });
+
+            newTab.label = std::make_shared<Label>(newTab.window, "Loading...");
+            pages.push_back(newTab);
+            tabs->showTab(newTab.page);
+
+            auto navigraph = api().getNavigraph();
+            auto call = navigraph->loadChartImage(chart);
+            call->andThen([this, newPage] (std::future<std::shared_ptr<navigraph::Chart>> res) {
+                try {
+                    auto chart = res.get();
+                    api().executeLater([this, chart, newPage] { onChartLoaded(newPage, chart); });
+                } catch (const std::exception &e) {
+                    TabPage &tab = findPage(newPage);
+                    tab.label->setTextFormatted("Error: %s", e.what());
+                    tab.label->setVisible(true);
+                }
+            });
+            navigraph->submitCall(call);
         });
-        navigraph->submitCall(call);
     });
-
-    tab.pixMap->alignBelow(tab.chartSelect);
 }
 
 void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart) {
     TabPage &tab = findPage(page);
 
-    tab.map.reset();
-    tab.mapStitcher.reset();
-    tab.mapSource.reset();
+    tab.label->setVisible(false);
+
+    tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
+    tab.pixMap = std::make_shared<PixMap>(tab.window);
+    tab.pixMap->draw(*tab.mapImage);
+    tab.pixMap->setClickable(true);
+    tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
+    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
+    tab.pixMap->centerInParent();
 
     auto dayImage = chart->getDayImage();
     tab.mapSource = std::make_shared<maps::ImageSource>(dayImage);
