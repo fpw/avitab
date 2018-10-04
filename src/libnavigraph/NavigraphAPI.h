@@ -57,6 +57,8 @@ public:
     bool hasChartsFor(const std::string &icao);
     void logout();
 
+    void stop();
+
     ~NavigraphAPI();
 
 private:

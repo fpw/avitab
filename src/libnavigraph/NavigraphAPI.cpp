@@ -80,8 +80,24 @@ void NavigraphAPI::workLoop() {
     }
 }
 
+void NavigraphAPI::stop() {
+    if (apiThread) {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            keepAlive = false;
+            pendingCalls.clear();
+            workCondition.notify_one();
+        }
+        apiThread->join();
+        apiThread.reset();
+    }
+}
+
 void NavigraphAPI::submitCall(std::shared_ptr<BaseCall> call) {
     std::lock_guard<std::mutex> lock(mutex);
+    if (!keepAlive) {
+        return;
+    }
     pendingCalls.push_back(call);
     workCondition.notify_one();
 }
@@ -246,14 +262,7 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
 }
 
 NavigraphAPI::~NavigraphAPI() {
-    if (apiThread) {
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            keepAlive = false;
-            workCondition.notify_one();
-        }
-        apiThread->join();
-    }
+    stop();
 }
 
 } /* namespace navigraph */

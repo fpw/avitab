@@ -30,10 +30,10 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     guiLib(environment->createGUIToolkit())
 {
     // runs in environment thread, called by PluginStart
-    navigraphAPI = std::make_shared<navigraph::NavigraphAPI>(env->getProgramPath() + "/Navigraph/");
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
+    navigraphAPI = std::make_shared<navigraph::NavigraphAPI>(env->getProgramPath() + "/Navigraph/");
     env->resumeEnvironmentJobs();
 }
 
@@ -89,8 +89,22 @@ void AviTab::onPlaneLoad() {
     createPanel();
 
     guiLib->executeLater([this] () {
-        cleanupLayout();
-        createLayout();
+        auto screen = guiLib->screen();
+        if (hideHeader) {
+            headerApp.reset();
+            headContainer.reset();
+            centerContainer->setPosition(0, 0);
+            centerContainer->setDimensions(screen->getWidth(), screen->getHeight());
+        } else {
+            if (!headerApp) {
+                headerApp = std::make_shared<HeaderApp>(this);
+                headContainer = headerApp->getUIContainer();
+                headContainer->setParent(screen);
+                headContainer->setVisible(true);
+                centerContainer->setPosition(0, 30);
+                centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+            }
+        }
     });
 }
 
@@ -214,8 +228,16 @@ void AviTab::showGUIContainer(std::shared_ptr<Container> container) {
         centerContainer->setVisible(false);
     }
 
+    auto screen = guiLib->screen();
     centerContainer = container;
-    centerContainer->setParent(guiLib->screen());
+    centerContainer->setParent(screen);
+    if (hideHeader) {
+        centerContainer->setPosition(0, 0);
+        centerContainer->setDimensions(screen->getWidth(), screen->getHeight());
+    } else {
+        centerContainer->setPosition(0, 30);
+        centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+    }
     centerContainer->setVisible(true);
 }
 
@@ -279,14 +301,17 @@ void AviTab::close() {
 }
 
 void AviTab::stopApp() {
-    // runs in environment thread, called by PluginDisable
-    env->cancelNavWorldLoading();
-
     // This function is called by the environment
-    // and it will never call the environment callback
+    // and the environment will never call the environment callback
     // again. If the GUI is currently waiting on an environment
     // job to run, we would create a deadlock now. So for a proper
     // shutdown, we must do the following:
+
+    // Cancel the loading if it is still running
+    env->cancelNavWorldLoading();
+
+    // Stop the Navigraph API so it no longer calls the GUI
+    navigraphAPI->stop();
 
     // Tell the GUI to not execute more background jobs
     // after the current ones have finished
