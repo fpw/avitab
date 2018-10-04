@@ -27,6 +27,7 @@ Chart::Chart(const nlohmann::json &json) {
     icao = json["icao_airport_identifier"];
     section = json["type"]["section"];
     desc = json["procedure_identifier"];
+    index = json["index_number"];
 
     try {
         double width = json["bbox_local"][2];
@@ -49,7 +50,6 @@ Chart::Chart(const nlohmann::json &json) {
 
         geoRef.valid = true;
     } catch (...) {
-        logger::verbose("No geo-reference for chart %s", desc.c_str());
         geoRef.valid = false;
     }
 }
@@ -60,6 +60,10 @@ ChartGEOReference Chart::getGeoReference() const {
 
 std::string Chart::getICAO() const {
     return icao;
+}
+
+std::string Chart::getIndex() const {
+    return index;
 }
 
 std::string Chart::getDescription() const {

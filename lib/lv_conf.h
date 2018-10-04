@@ -219,7 +219,7 @@
 /*List (dependencies: lv_page, lv_btn, lv_label, (lv_img optionally for icons ))*/
 #define USE_LV_LIST     1
 #if USE_LV_LIST != 0
-#define LV_LIST_FOCUS_TIME  100 /*Default animation time of focusing to a list element [ms] (0: no animation)  */
+#define LV_LIST_FOCUS_TIME  0 /*Default animation time of focusing to a list element [ms] (0: no animation)  */
 #endif
 
 /*Drop down list (dependencies: lv_page, lv_label)*/

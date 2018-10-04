@@ -274,7 +274,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
     tab.chartSelect = std::make_shared<List>(tab.window);
     tab.chartSelect->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
     for (size_t i = 0; i < charts.size(); i++) {
-        tab.chartSelect->add(charts[i]->getDescription(), i);
+        tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getDescription(), i);
     }
     tab.chartSelect->centerInParent();
     tab.chartSelect->setCallback([this, page] (int index) {
@@ -283,11 +283,11 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             auto chart = listTab.charts.at(index);
 
             TabPage newTab;
-            newTab.page = tabs->addTab(tabs, chart->getICAO() + " Chart");
+            newTab.page = tabs->addTab(tabs, chart->getICAO() + " " + chart->getIndex());
             newTab.page->setShowScrollbar(false);
             auto newPage = newTab.page;
 
-            newTab.window = std::make_shared<Window>(newTab.page, chart->getICAO());
+            newTab.window = std::make_shared<Window>(newTab.page, chart->getDescription());
             newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() - 15);
             newTab.window->setOnClose([this, newPage] {
                 api().executeLater([this, newPage] {
@@ -320,6 +320,15 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     TabPage &tab = findPage(page);
 
     tab.label->setVisible(false);
+
+    tab.window->addSymbol(Widget::Symbol::MINUS, [this, page] {
+        TabPage &tab = findPage(page);
+        tab.map->zoomOut();
+    });
+    tab.window->addSymbol(Widget::Symbol::PLUS, [this, page] {
+        TabPage &tab = findPage(page);
+        tab.map->zoomIn();
+    });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
     tab.pixMap = std::make_shared<PixMap>(tab.window);
@@ -383,6 +392,13 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
                 tab.map->zoomIn();
             } else {
                 tab.map->zoomOut();
+            }
+        }
+        if (tab.chartSelect) {
+            if (dir > 0) {
+                tab.chartSelect->scrollUp();
+            } else {
+                tab.chartSelect->scrollDown();
             }
         }
     }

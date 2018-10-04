@@ -35,6 +35,7 @@ class Chart {
 public:
     Chart(const nlohmann::json &json);
     std::string getICAO() const;
+    std::string getIndex() const;
     std::string getFileDay() const;
     std::string getFileNight() const;
     bool isLoaded() const;
@@ -51,6 +52,7 @@ private:
     std::string icao;
     std::string section;
     std::string desc;
+    std::string index;
     ChartGEOReference geoRef {};
 
     std::shared_ptr<img::Image> imgDay, imgNight;

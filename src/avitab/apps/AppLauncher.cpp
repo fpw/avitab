@@ -32,7 +32,8 @@ namespace avitab {
 AppLauncher::AppLauncher(FuncsPtr appFuncs):
     App(appFuncs)
 {
-    getUIContainer()->setLayoutGrid();
+    auto cont = getUIContainer();
+    cont->setLayoutGrid();
     std::string root = api().getDataPath() + "icons/";
 
     addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png", AppId::CHARTS);
@@ -89,7 +90,7 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon, App
     Entry entry;
     entry.id = id;
     entry.app = std::move(app);
-    entry.button = std::make_shared<Button>(getUIContainer(), std::move(iconImg), name);
+    entry.button = std::make_shared<Button>(getUIContainer(), std::move(iconImg), name, 100);
     entries.push_back(entry);
 
     size_t index = entries.size() - 1;

@@ -30,7 +30,7 @@ class Button: public Widget {
 public:
     using ButtonCallback = std::function<void(const Button &)>;
     Button(WidgetPtr parent, const std::string &text);
-    Button(WidgetPtr parent, img::Image &&icon, const std::string &caption);
+    Button(WidgetPtr parent, img::Image &&icon, const std::string &caption, int width = -1);
     Button(WidgetPtr parent, Symbol smb);
     Button(WidgetPtr parent, lv_obj_t *obj);
 
