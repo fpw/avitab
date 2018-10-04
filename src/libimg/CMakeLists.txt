@@ -13,14 +13,24 @@ target_link_libraries(img_main
     mupdf
     mupdf-third
     detex
-    tiff
-    mupdf-third
-    lzma
 )
 
-if(WIN32)
+if(APPLE)
+elseif(UNIX)
     target_link_libraries(img_main
+        /home/folko/tiff-4.0.9/libtiff/.libs/libtiff.a
+        /home/folko/jbigkit-2.1/libjbig/libjbig.a
+        mupdf-third
+        /home/folko/liblzma/src/liblzma/.libs/liblzma.a
+        /home/folko/libgeotiff/libxtiff/.libs/libxtiff.a
+    )
+elseif(WIN32)
+    target_link_libraries(img_main
+        tiff
+        mupdf-third
+        lzma
         xtiff
     )
-endif(WIN32)
+endif()
+
 

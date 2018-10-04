@@ -27,6 +27,7 @@ if(APPLE)
     include_directories("/usr/include/geotiff")
 elseif(UNIX)
     include_directories("/usr/include/geotiff")
+    include_directories("/home/folko/mbedtls-2.12.0/include")
 endif()
 
 

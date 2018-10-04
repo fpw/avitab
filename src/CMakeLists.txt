@@ -21,8 +21,19 @@ set(CommonLibs
     avitab_platform
     navigraph
     maps
-    curl
 )
+
+if(APPLE)
+elseif(UNIX)
+    set(CommonLibs ${CommonLibs}
+        /home/folko/curl/lib/.libs/libcurl.a
+        /home/folko/mbedtls-2.12.0/build/library/libmbedtls.a
+        /home/folko/mbedtls-2.12.0/build/library/libmbedcrypto.a
+        /home/folko/mbedtls-2.12.0/build/library/libmbedx509.a
+    )
+elseif(WIN32)
+    set(CommonLibs ${CommonLibs} curl)
+endif()
 
 # X-Plane plugin
 add_library(avitab_plugin SHARED Plugin.cpp Logger.cpp)

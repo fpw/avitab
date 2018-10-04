@@ -5,8 +5,19 @@ add_library(maps
     OverlayedMap.cpp
 )
 
-target_link_libraries(maps
-    map_sources
-    geotiff
-    proj
-)
+if(APPLE)
+elseif(UNIX)
+    target_link_libraries(maps
+        map_sources
+        /home/folko/libgeotiff/.libs/libgeotiff.a
+        /home/folko/libgeotiff/libxtiff/.libs/libxtiff.a
+        /home/folko/proj-4.9.3/src/.libs/libproj.a
+    )
+elseif(WIN32)
+    target_link_libraries(maps
+        map_sources
+        geotiff
+        proj
+    )
+endif()
+
