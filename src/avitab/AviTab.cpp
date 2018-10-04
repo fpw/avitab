@@ -93,16 +93,20 @@ void AviTab::onPlaneLoad() {
         if (hideHeader) {
             headerApp.reset();
             headContainer.reset();
-            centerContainer->setPosition(0, 0);
-            centerContainer->setDimensions(screen->getWidth(), screen->getHeight());
+            if (centerContainer) {
+                centerContainer->setPosition(0, 0);
+                centerContainer->setDimensions(screen->getWidth(), screen->getHeight());
+            }
         } else {
             if (!headerApp) {
                 headerApp = std::make_shared<HeaderApp>(this);
                 headContainer = headerApp->getUIContainer();
                 headContainer->setParent(screen);
                 headContainer->setVisible(true);
-                centerContainer->setPosition(0, 30);
-                centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+                if (centerContainer) {
+                    centerContainer->setPosition(0, 30);
+                    centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - 30);
+                }
             }
         }
     });
