@@ -189,7 +189,7 @@ void Stitcher::doWork() {
         // when there is nothing to do, load all tiles from the memory
         // cache anyways in order to touch the cache time so that
         // the tiles in sight are not flushed
-        forEachTileInView([this] (int x, int y, img::Image &tile) {
+        forEachTileInView([] (int x, int y, img::Image &tile) {
             // do nothing, just touch the cache
         });
     }

@@ -16,6 +16,10 @@ target_link_libraries(img_main
 )
 
 if(APPLE)
+    target_link_libraries(img_main
+        /usr/local/lib/libtiff.a
+        mupdf-third
+    )
 elseif(UNIX)
     target_link_libraries(img_main
         /home/folko/tiff-4.0.9/libtiff/.libs/libtiff.a

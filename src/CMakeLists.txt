@@ -24,6 +24,13 @@ set(CommonLibs
 )
 
 if(APPLE)
+    set(CommonLibs ${CommonLibs}
+        /usr/local/opt/curl/lib/libcurl.a
+        "-framework CoreFoundation"
+        "-framework Security"
+        ldap
+        z
+    )
 elseif(UNIX)
     set(CommonLibs ${CommonLibs}
         /home/folko/curl/lib/.libs/libcurl.a
@@ -53,7 +60,7 @@ elseif(APPLE)
 target_link_libraries(avitab_plugin
     ${CommonLibs}
     avitab_env_xplane
-    "-framework XPLM"
+    "-F/opt/XSDK/Libraries/Mac -framework XPLM"
 )
 elseif(UNIX)
 target_link_libraries(avitab_plugin

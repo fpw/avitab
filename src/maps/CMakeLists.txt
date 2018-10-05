@@ -6,6 +6,11 @@ add_library(maps
 )
 
 if(APPLE)
+    target_link_libraries(maps
+        map_sources
+        /usr/local/lib/libgeotiff.a
+        /usr/local/lib/libproj.a
+    )
 elseif(UNIX)
     target_link_libraries(maps
         map_sources

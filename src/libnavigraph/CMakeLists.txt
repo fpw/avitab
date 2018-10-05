@@ -8,6 +8,9 @@ add_library(navigraph
 )
 
 if(APPLE)
+    target_link_libraries(navigraph
+        /usr/local/lib/libmbedcrypto.a
+    )
 elseif(UNIX)
     target_link_libraries(navigraph
         /home/folko/mbedtls-2.12.0/build/library/libmbedcrypto.a

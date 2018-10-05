@@ -24,6 +24,7 @@ if(WIN32)
 endif(WIN32)
 
 if(APPLE)
+    include_directories("/opt/mupdf/include")
     include_directories("/usr/include/geotiff")
 elseif(UNIX)
     include_directories("/usr/include/geotiff")
