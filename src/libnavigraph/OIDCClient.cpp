@@ -159,9 +159,9 @@ void OIDCClient::handleToken(const std::string& inputJson) {
     // could be called from either thread
 
     nlohmann::json data = nlohmann::json::parse(inputJson);
-    idToken = data["id_token"];
-    accessToken = data["access_token"];
-    refreshToken = data["refresh_token"];
+    idToken = data.at("id_token");
+    accessToken = data.at("access_token");
+    refreshToken = data.at("refresh_token");
 
     logger::verbose("Checking phase 2 token");
     loadIDToken(false);
@@ -194,21 +194,21 @@ void OIDCClient::loadIDToken(bool checkNonce) {
 
     nlohmann::json data = nlohmann::json::parse(crypto.base64URLDecode(payload));
     if (checkNonce) {
-        if (data["nonce"] != nonce) {
+        if (data.at("nonce") != nonce) {
             throw std::runtime_error("Invalid nonce");
         }
         logger::verbose("Nonce: Check");
     }
-    if (data["iss"] != "https://identity.api.navigraph.com") {
+    if (data.at("iss") != "https://identity.api.navigraph.com") {
         throw std::runtime_error("Invalid issuer in ID token");
     }
 
     try {
-        accountName = data["preferred_username"];
+        accountName = data.at("preferred_username");
     } catch (const std::exception &e) {
         // from times before we had the userinfo claim
         logger::info("Falling back to name instead of preferred_usnername due to old token");
-        accountName = data["name"];
+        accountName = data.at("name");
     }
 }
 
@@ -289,8 +289,8 @@ void OIDCClient::loadTokens() {
 
     try {
         nlohmann::json tokens = nlohmann::json::parse(tokenStr);
-        refreshToken = tokens["refresh_token"];
-        idToken = tokens["id_token"];
+        refreshToken = tokens.at("refresh_token");
+        idToken = tokens.at("id_token");
         logger::verbose("Checking stored token");
         loadIDToken(false);
     } catch (const std::exception &e) {

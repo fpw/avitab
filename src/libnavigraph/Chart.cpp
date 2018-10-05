@@ -22,26 +22,26 @@
 namespace navigraph {
 
 Chart::Chart(const nlohmann::json &json) {
-    fileDay = json["file_day"];
-    fileNight = json["file_night"];
-    icao = json["icao_airport_identifier"];
-    section = json["type"]["section"];
-    desc = json["procedure_identifier"];
-    index = json["index_number"];
+    fileDay = json.at("file_day");
+    fileNight = json.at("file_night");
+    icao = json.at("icao_airport_identifier");
+    section = json.at("type").at("section");
+    desc = json.at("procedure_identifier");
+    index = json.at("index_number");
 
     try {
-        double width = json["bbox_local"][2];
-        double height = json["bbox_local"][1];
+        double width = json.at("bbox_local").at(2);
+        double height = json.at("bbox_local").at(1);
 
-        geoRef.lon1 = json["planview"]["bbox_geo"][0];
-        geoRef.lat1 = json["planview"]["bbox_geo"][1];
-        geoRef.lon2 = json["planview"]["bbox_geo"][2];
-        geoRef.lat2 = json["planview"]["bbox_geo"][3];
+        geoRef.lon1 = json.at("planview").at("bbox_geo").at(0);
+        geoRef.lat1 = json.at("planview").at("bbox_geo").at(1);
+        geoRef.lon2 = json.at("planview").at("bbox_geo").at(2);
+        geoRef.lat2 = json.at("planview").at("bbox_geo").at(3);
 
-        geoRef.x1 = json["planview"]["bbox_local"][0];
-        geoRef.y1 = json["planview"]["bbox_local"][1];
-        geoRef.x2 = json["planview"]["bbox_local"][2];
-        geoRef.y2 = json["planview"]["bbox_local"][3];
+        geoRef.x1 = json.at("planview").at("bbox_local").at(0);
+        geoRef.y1 = json.at("planview").at("bbox_local").at(1);
+        geoRef.x2 = json.at("planview").at("bbox_local").at(2);
+        geoRef.y2 = json.at("planview").at("bbox_local").at(3);
 
         geoRef.x1 /= width;
         geoRef.x2 /= width;

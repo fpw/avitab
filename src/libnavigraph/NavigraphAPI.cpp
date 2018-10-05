@@ -137,7 +137,7 @@ std::shared_ptr<APICall<NavigraphAPI::ChartsList>> NavigraphAPI::getChartsFor(co
         std::string content = oidc->get(signedUrl);
 
         nlohmann::json chartData = nlohmann::json::parse(content);
-        for (auto chartJson: chartData["charts"]) {
+        for (auto chartJson: chartData.at("charts")) {
             auto chart = std::make_shared<Chart>(chartJson);
             res.push_back(chart);
             charts.insert(std::make_pair(icao, chart));
@@ -220,7 +220,7 @@ bool NavigraphAPI::hasChartsSubscription() {
 
     nlohmann::json data = nlohmann::json::parse(reply);
     for (auto sub: data) {
-        std::string type = sub["type"];
+        std::string type = sub.at("type");
         if (type.find("charts") != std::string::npos) {
             return true;
         }
@@ -234,7 +234,7 @@ bool NavigraphAPI::hasChartsFor(const std::string& icao) {
     }
 
     for (auto &e: *airportJson) {
-        if (e["icao_airport_identifier"] == icao) {
+        if (e.at("icao_airport_identifier") == icao) {
             return canAccess(icao);
         }
     }
