@@ -142,7 +142,7 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
     std::stringstream str;
 
-    str << airport->getName() + "\n";
+    str << airport->getName() + ", " + std::to_string(airport->getElevation()) + " feet AMSL\n";
     str << toATCInfo(airport);
     str << "\n";
     str << toRunwayInfo(airport);

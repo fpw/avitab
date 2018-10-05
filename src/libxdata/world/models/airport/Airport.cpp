@@ -36,6 +36,10 @@ void Airport::setElevation(int elevation) {
     this->elevation = elevation;
 }
 
+int Airport::getElevation() {
+    return elevation;
+}
+
 void Airport::setLocation(const Location& loc) {
     this->location = loc;
 }

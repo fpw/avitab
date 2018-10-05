@@ -53,6 +53,7 @@ public:
     Airport(const std::string &airportId);
     void setName(const std::string &name);
     void setElevation(int elevation);
+    int getElevation();
 
     const std::string& getID() const override;
     const Location &getLocation() const override;
