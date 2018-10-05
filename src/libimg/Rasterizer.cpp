@@ -169,7 +169,12 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
         fz_fill_path(ctx, dev, path, 0, fz_identity, fz_device_gray(ctx), &white, 1.0f, nullptr);
         fz_drop_path(ctx, path);
 
-        fz_run_display_list(ctx, currentPageList, dev, fz_identity, fz_bound_path(ctx, path, nullptr, fz_identity), nullptr);
+        fz_rect pageRect;
+        pageRect.x0 = 0;
+        pageRect.y0 = 0;
+        pageRect.x1 = currentPageWidth;
+        pageRect.y1 = currentPageHeight;
+        fz_run_display_list(ctx, currentPageList, dev, fz_identity, pageRect, nullptr);
         fz_close_device(ctx, dev);
         fz_drop_device(ctx, dev);
 
