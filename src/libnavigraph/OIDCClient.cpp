@@ -91,7 +91,7 @@ std::string OIDCClient::startAuth(AuthCallback cb) {
     nonce = crypto.base64URLEncode(crypto.generateRandom(8));
 
     url << "https://identity.api.navigraph.com/connect/authorize";
-    url << "?scope=" << crypto.urlEncode("openid charts offline_access");
+    url << "?scope=" << crypto.urlEncode("openid userinfo charts offline_access");
     url << "&response_type=" << crypto.urlEncode("code id_token");
     url << "&client_id=" << crypto.urlEncode(clientId.c_str());
     url << "&redirect_uri=" << crypto.urlEncode(std::string("http://127.0.0.1:") + std::to_string(authPort));
@@ -203,7 +203,13 @@ void OIDCClient::loadIDToken(bool checkNonce) {
         throw std::runtime_error("Invalid issuer in ID token");
     }
 
-    accountName = data["name"];
+    try {
+        accountName = data["preferred_username"];
+    } catch (const std::exception &e) {
+        // from times before we had the userinfo claim
+        logger::info("Falling back to name instead of preferred_usnername due to old token");
+        accountName = data["name"];
+    }
 }
 
 void OIDCClient::cancelAuth() {
