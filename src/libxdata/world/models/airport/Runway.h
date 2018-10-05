@@ -35,6 +35,7 @@ public:
     void setWidth(float w);
     void setLength(float l);
     void setLocation(const Location &loc);
+    float getLength() const; // can be NaN
 
     const std::string &getID() const override;
     const Location &getLocation() const override;

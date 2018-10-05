@@ -142,7 +142,7 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
     std::stringstream str;
 
-    str << airport->getName() + ", " + std::to_string(airport->getElevation()) + " feet AMSL\n";
+    str << airport->getName() + ", elevation " + std::to_string(airport->getElevation()) + " ft AMSL\n";
     str << toATCInfo(airport);
     str << "\n";
     str << toRunwayInfo(airport);
@@ -180,11 +180,15 @@ std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xda
 }
 
 std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
+    if (airport->hasOnlyHeliports()) {
+        return "No runways\n";
+    }
+
     std::stringstream str;
     str << std::fixed << std::setprecision(0);
     double magneticVariation = std::numeric_limits<double>::quiet_NaN();
 
-    str << "Runways\n";
+    str << "Runways - Report length inaccuracies to the scenery gateway\n";
     airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
         str << "    Runway " + rwy->getID();
         auto ils = rwy->getILSData();
@@ -202,12 +206,16 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
                 heading = 360 + heading;
             }
 
-            str << " with " << ils->getILSLocalizer()->getFrequency().getDescription();
-            str << ", ID " << ils->getID();
-            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
-            str << ", CRS " << heading << " degrees magnetic";
+            str << ", " << ils->getILSLocalizer()->getFrequency().getDescription();
+            str << " (ID " << ils->getID();
+            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString() << ")";
+            str << ", CRS " << heading << "° magnetic";
         } else {
             str << " without ILS";
+        }
+        float length = rwy->getLength();
+        if (!std::isnan(length)) {
+            str << ", " << std::to_string((int) (length * 3.28084 + 0.5)) << " ft";
         }
         str << "\n";
     });
@@ -328,6 +336,10 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     tab.window->addSymbol(Widget::Symbol::PLUS, [this, page] {
         TabPage &tab = findPage(page);
         tab.map->zoomIn();
+    });
+    tab.window->addSymbol(Widget::Symbol::ROTATE, [this, page] {
+        //TabPage &tab = findPage(page);
+        //tab.mapStitcher->rotateRight();
     });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);

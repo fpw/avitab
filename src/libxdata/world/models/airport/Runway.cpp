@@ -71,4 +71,8 @@ const Location &Runway::getLocation() const {
     return location;
 }
 
+float xdata::Runway::getLength() const {
+    return length;
+}
+
 } /* namespace xdata */
