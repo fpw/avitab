@@ -338,8 +338,8 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
         tab.map->zoomIn();
     });
     tab.window->addSymbol(Widget::Symbol::ROTATE, [this, page] {
-        //TabPage &tab = findPage(page);
-        //tab.mapStitcher->rotateRight();
+        TabPage &tab = findPage(page);
+        tab.mapStitcher->rotateRight();
     });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);

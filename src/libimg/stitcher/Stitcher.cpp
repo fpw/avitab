@@ -32,7 +32,7 @@ Stitcher::Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> 
     centerY = center.y;
 
     int max = std::max(dstImage->getWidth(), dstImage->getHeight());
-    unrotatedImage.resize(max, max, 0);
+    unrotatedImage = std::make_shared<Image>(max, max, 0);
 }
 
 void Stitcher::setCacheDirectory(const std::string& utf8Path) {
@@ -41,6 +41,10 @@ void Stitcher::setCacheDirectory(const std::string& utf8Path) {
 
 void Stitcher::setRedrawCallback(RedrawCallback cb) {
     onRedraw = cb;
+}
+
+void Stitcher::setPreRotateCallback(PreRotateCallback cb) {
+    onPreRotate = cb;
 }
 
 void Stitcher::setCenter(double x, double y) {
@@ -97,8 +101,8 @@ int Stitcher::getZoomLevel() {
     return zoomLevel;
 }
 
-std::shared_ptr<Image> Stitcher::getImage() {
-    return dstImage;
+std::shared_ptr<Image> Stitcher::getPreRotatedImage() {
+    return unrotatedImage;
 }
 
 std::shared_ptr<TileSource> Stitcher::getTileSource() {
@@ -114,8 +118,8 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
     auto dim = tileSource->getTileDimensions(zoomLevel);
     int tileEdgeWidth = dim.x;
     int tileEdgeHeight = dim.y;
-    int dstWidth = unrotatedImage.getWidth();
-    int dstHeight = unrotatedImage.getHeight();
+    int dstWidth = unrotatedImage->getWidth();
+    int dstHeight = unrotatedImage->getHeight();
 
     // The center pixel's position offset inside the center tile
     int xOff = (centerX - (int) centerX) * tileEdgeWidth;
@@ -164,10 +168,14 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
 
 void Stitcher::updateImage() {
     forEachTileInView([this] (int x, int y, img::Image &tile) {
-        unrotatedImage.drawImage(tile, x, y);
+        unrotatedImage->drawImage(tile, x, y);
     });
 
-    unrotatedImage.rotate(*dstImage, rotAngle);
+    if (onPreRotate) {
+        onPreRotate();
+    }
+
+    unrotatedImage->rotate(*dstImage, rotAngle);
 
     if (onRedraw) {
         onRedraw();

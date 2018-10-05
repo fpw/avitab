@@ -29,9 +29,11 @@ namespace img {
 class Stitcher {
 public:
     using RedrawCallback = std::function<void(void)>;
+    using PreRotateCallback = std::function<void(void)>;
 
     Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> source);
     void setCacheDirectory(const std::string &utf8Path);
+    void setPreRotateCallback(PreRotateCallback cb);
     void setRedrawCallback(RedrawCallback cb);
 
     void setCenter(double x, double y);
@@ -46,16 +48,17 @@ public:
 
     void rotateRight();
 
-    std::shared_ptr<Image> getImage();
+    std::shared_ptr<Image> getPreRotatedImage();
     std::shared_ptr<TileSource> getTileSource();
 
 private:
     Image emptyTile, errorTile, loadingTile;
-    Image unrotatedImage;
+    std::shared_ptr<Image> unrotatedImage;
     std::shared_ptr<Image> dstImage;
     std::shared_ptr<TileSource> tileSource;
     TileCache tileCache;
     RedrawCallback onRedraw;
+    PreRotateCallback onPreRotate;
     int zoomLevel = 0;
     double centerX = 0, centerY = 0;
     bool pendingTiles = true;

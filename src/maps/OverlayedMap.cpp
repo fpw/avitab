@@ -24,7 +24,7 @@
 namespace maps {
 
 OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
-    mapImage(stitchedMap->getImage()),
+    mapImage(stitchedMap->getPreRotatedImage()),
     tileSource(stitchedMap->getTileSource()),
     stitcher(stitchedMap)
 {
@@ -34,7 +34,12 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
      * call the client.
      */
 
-    stitcher->setRedrawCallback([this] () { drawOverlays(); });
+    stitcher->setPreRotateCallback([this] () { drawOverlays(); });
+    stitcher->setRedrawCallback([this] () {
+        if (onOverlaysDrawn) {
+            onOverlaysDrawn();
+        }
+    });
 }
 
 void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
@@ -155,10 +160,6 @@ void OverlayedMap::drawOverlays() {
 
         mapImage->drawLine(centerX - r / 2, centerY, centerX + r / 2, centerY, color);
         mapImage->drawLine(centerX, centerY + r / 2, centerX, centerY - r / 2, color);
-    }
-
-    if (onOverlaysDrawn) {
-        onOverlaysDrawn();
     }
 }
 
