@@ -188,7 +188,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     str << std::fixed << std::setprecision(0);
     double magneticVariation = std::numeric_limits<double>::quiet_NaN();
 
-    str << "Runways - Report length inaccuracies to the scenery gateway\n";
+    str << "Runways (Length in X-Plane might differ from real length):\n";
     airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
         str << "    Runway " + rwy->getID();
         auto ils = rwy->getILSData();
