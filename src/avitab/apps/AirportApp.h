@@ -47,8 +47,12 @@ private:
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
+        std::shared_ptr<xdata::Airport> airport;
+
+        std::string requestedList = "ROOT";
         navigraph::NavigraphAPI::ChartsList charts;
         std::shared_ptr<List> chartSelect;
+
         std::shared_ptr<maps::ImageSource> mapSource;
         std::shared_ptr<img::Image> mapImage;
         std::shared_ptr<img::Stitcher> mapStitcher;
@@ -89,6 +93,8 @@ private:
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
     void redrawPage(std::shared_ptr<Page> page);
     bool onTimer();
+
+    size_t countCharts(const navigraph::NavigraphAPI::ChartsList &list, const std::string &type);
 };
 
 } /* namespace avitab */

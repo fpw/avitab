@@ -36,6 +36,7 @@ public:
     Chart(const nlohmann::json &json);
     std::string getICAO() const;
     std::string getIndex() const;
+    std::string getSection() const;
     std::string getFileDay() const;
     std::string getFileNight() const;
     bool isLoaded() const;

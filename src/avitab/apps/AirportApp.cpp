@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 #include "AirportApp.h"
 #include "src/Logger.h"
 
@@ -72,6 +73,7 @@ void AirportApp::onSearchEntered(const std::string& code) {
         return;
     } else if (airports.size() == 1) {
         onAirportSelected(airports.front());
+        return;
     } else if (airports.size() >= xdata::World::MAX_SEARCH_RESULTS) {
         searchLabel->setText("Too many results, only showing first " + std::to_string(airports.size()));
     } else {
@@ -99,7 +101,15 @@ void AirportApp::onSearchEntered(const std::string& code) {
 }
 
 void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
+    for (auto tabPage: pages) {
+        if (tabPage.airport == airport) {
+            tabs->setActiveTab(tabs->getTabIndex(tabPage.page));
+            return;
+        }
+    }
+
     TabPage tab;
+    tab.airport = airport;
     tab.page = tabs->addTab(tabs, airport->getID());
     tab.page->setShowScrollbar(false);
     tab.window = std::make_shared<Window>(tab.page, airport->getID());
@@ -281,13 +291,42 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
     tab.charts = charts;
     tab.chartSelect = std::make_shared<List>(tab.window);
     tab.chartSelect->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
-    for (size_t i = 0; i < charts.size(); i++) {
-        tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getDescription(), i);
+
+    if (tab.requestedList == "ROOT") {
+        tab.chartSelect->add("Airport (" + std::to_string(countCharts(charts, "APT")) + ")", -1);
+        tab.chartSelect->add("Arrival (" + std::to_string(countCharts(charts, "ARR")) + ")", -2);
+        tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, "DEP")) + ")", -3);
+        tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, "APP")) + ")", -4);
+        tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, "REF")) + ")", -5);
+
+    } else {
+        tab.chartSelect->add("Back", Widget::Symbol::LEFT, -6);
+        for (size_t i = 0; i < charts.size(); i++) {
+            if (charts[i]->getSection() == tab.requestedList) {
+                tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getDescription(), i);
+            }
+        }
     }
+
     tab.chartSelect->centerInParent();
     tab.chartSelect->setCallback([this, page] (int index) {
         api().executeLater([this, page, index] {
             TabPage &listTab = findPage(page);
+
+            if (index < 0) {
+                switch (index) {
+                case -1: listTab.requestedList = "APT"; break;
+                case -2: listTab.requestedList = "ARR"; break;
+                case -3: listTab.requestedList = "DEP"; break;
+                case -4: listTab.requestedList = "APP"; break;
+                case -5: listTab.requestedList = "REF"; break;
+                case -6: listTab.requestedList = "ROOT"; break;
+                }
+                onChartsLoaded(page, listTab.charts);
+                return;
+            }
+
+
             auto chart = listTab.charts.at(index);
 
             TabPage newTab;
@@ -429,6 +468,10 @@ bool AirportApp::onTimer() {
         }
     }
     return true;
+}
+
+size_t AirportApp::countCharts(const navigraph::NavigraphAPI::ChartsList& list, const std::string& type) {
+    return std::count_if(list.begin(), list.end(), [&type] (auto chart) { return chart->getSection() == type; });
 }
 
 } /* namespace avitab */

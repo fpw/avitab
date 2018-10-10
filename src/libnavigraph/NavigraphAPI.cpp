@@ -161,8 +161,8 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(st
         std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
 
         auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
-        auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
-        chart->attachImages(imgDay, imgNight);
+        //auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
+        chart->attachImages(imgDay, nullptr);
 
         return chart;
     });

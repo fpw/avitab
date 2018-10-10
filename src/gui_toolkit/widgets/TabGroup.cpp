@@ -80,7 +80,7 @@ void TabGroup::removeTab(size_t i) {
     lv_obj_set_width(ext->indic, indic_width);
     lv_obj_set_x(ext->indic, indic_width * ext->tab_cur + style_tabs->body.padding.inner * ext->tab_cur + style_tabs->body.padding.hor);
 
-    setActiveTab(0);
+    setActiveTab(ext->tab_cnt - 1);
 }
 
 void TabGroup::clear() {

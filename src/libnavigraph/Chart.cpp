@@ -66,6 +66,10 @@ std::string Chart::getIndex() const {
     return index;
 }
 
+std::string Chart::getSection() const {
+    return section;
+}
+
 std::string Chart::getDescription() const {
     return desc;
 }
@@ -79,7 +83,7 @@ std::string Chart::getFileNight() const {
 }
 
 bool Chart::isLoaded() const {
-    return imgDay && imgNight;
+    return imgDay != nullptr;
 }
 
 void Chart::attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night) {
