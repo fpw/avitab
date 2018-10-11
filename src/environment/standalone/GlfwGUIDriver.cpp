@@ -80,6 +80,23 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
             us->wheelDir = 0;
         }
     });
+    glfwSetKeyCallback(window, [] (GLFWwindow *wnd, int key, int scanCode, int action, int mods) {
+        GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
+        if (us->wantsKeyInput() && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            if (key == GLFW_KEY_BACKSPACE) {
+                us->pushKeyInput('\b');
+            } else if (key == GLFW_KEY_ENTER) {
+                us->pushKeyInput('\n');
+            }
+        }
+    });
+    glfwSetCharCallback(window, [] (GLFWwindow *wnd, unsigned int c) {
+        GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
+        if (us->wantsKeyInput()) {
+            us->pushKeyInput(c & 0xFF);
+        }
+    });
+
     glfwSetWindowAspectRatio(window, winWidth, winHeight);
 
     createTexture();

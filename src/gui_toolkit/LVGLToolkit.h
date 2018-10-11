@@ -69,6 +69,10 @@ private:
     void initDisplayDriver();
     void initInputDriver();
     void guiLoop();
+    void handleMouseWheel();
+    void handleKeyboard();
+
+    lv_obj_t *searchActiveKeyboard(lv_obj_t *obj);
 };
 
 } /* namespace avitab */

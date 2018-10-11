@@ -32,7 +32,7 @@ class NotesApp: public App {
 public:
     NotesApp(FuncsPtr appFuncs);
 private:
-    bool keyboardMode = false;
+    int mode = 0; // 0 = image, 1 = text with keyboard, 2 = text without keyboard
 
     int drawPosX = 0, drawPosY = 0;
     std::string text;

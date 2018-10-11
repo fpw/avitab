@@ -41,6 +41,7 @@ XPlaneGUIDriver::XPlaneGUIDriver():
 void XPlaneGUIDriver::init(int width, int height) {
     logger::verbose("Initializing X-Plane GUI driver");
     GUIDriver::init(width, height);
+    setupKeyboard();
     XPLMGenerateTextureNumbers(&textureId, 1);
 
     XPLMBindTexture2d(textureId, 0);
@@ -113,7 +114,6 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
         return reinterpret_cast<XPlaneGUIDriver *>(ref)->onRightClick(x, y, status);
     };
     params.handleKeyFunc = [] (XPLMWindowID id, char key, XPLMKeyFlags flags, char vKey, void *ref, int losingFocus) {
-        reinterpret_cast<XPlaneGUIDriver *>(ref)->onKey(key, flags, vKey, losingFocus);
     };
     params.handleCursorFunc = [] (XPLMWindowID id, int x, int y, void *ref) -> XPLMCursorStatus {
         return reinterpret_cast<XPlaneGUIDriver *>(ref)->getCursor(x, y);
@@ -181,7 +181,6 @@ void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height) {
         return false;
     };
     params.handleKeyFunc = [] (XPLMWindowID id, char key, XPLMKeyFlags flags, char vKey, void *ref, int losingFocus) {
-        reinterpret_cast<XPlaneGUIDriver *>(ref)->onKey(key, flags, vKey, losingFocus);
     };
     params.handleCursorFunc = [] (XPLMWindowID id, int x, int y, void *ref) -> XPLMCursorStatus {
         return xplm_CursorDefault;
@@ -460,9 +459,6 @@ int XPlaneGUIDriver::getWheelDirection() {
     return val;
 }
 
-void XPlaneGUIDriver::onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus) {
-}
-
 XPLMCursorStatus XPlaneGUIDriver::getCursor(int x, int y) {
     return xplm_CursorDefault;
 }
@@ -529,6 +525,33 @@ bool XPlaneGUIDriver::onMouseWheelCapture(int x, int y, int wheel, int clicks) {
     return false;
 }
 
+void XPlaneGUIDriver::setupKeyboard() {
+    XPLMRegisterKeySniffer(onKeyPress, 0, this);
+}
+
+int XPlaneGUIDriver::onKeyPress(char c, XPLMKeyFlags flags, char vKey, void* ref) {
+    XPlaneGUIDriver *us = (XPlaneGUIDriver *) ref;
+
+    if ((flags & xplm_OptionAltFlag) || (flags & xplm_ControlFlag)) {
+        return 1;
+    }
+
+    if (!us->wantsKeyInput()) {
+        return 1;
+    }
+
+    if (flags & xplm_UpFlag) {
+        return 0;
+    }
+
+    if (c == '\r') {
+        c = '\n';
+    }
+
+    us->pushKeyInput(c);
+    return 0;
+}
+
 void XPlaneGUIDriver::setBrightness(float b) {
     *brightness = b;
 }
@@ -542,6 +565,7 @@ XPlaneGUIDriver::~XPlaneGUIDriver() {
     glDeleteTextures(1, &gluId);
 
     XPLMUnregisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
+    XPLMUnregisterKeySniffer(onKeyPress, 0, this);
 
     if (captureWindow) {
         XPLMDestroyWindow(captureWindow);

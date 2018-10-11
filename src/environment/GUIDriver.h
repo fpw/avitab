@@ -21,6 +21,8 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include <queue>
+#include <mutex>
 
 namespace avitab {
 
@@ -40,18 +42,25 @@ public:
     virtual void readPointerState(int &x, int &y, bool &pressed) = 0;
 
     virtual int getWheelDirection() = 0;
+    virtual void setWantKeyInput(bool wantKeys);
+    virtual int popKeyPress();
 
     virtual void setBrightness(float b) = 0;
     virtual float getBrightness() = 0;
 
     virtual ~GUIDriver();
 protected:
+    bool wantsKeyInput();
+    void pushKeyInput(int c);
     int width();
     int height();
     uint32_t *data();
 private:
+    std::mutex keyMutex;
+    bool enableKeyInput;
     int bufferWidth = 0, bufferHeight = 0;
     std::vector<uint32_t> buffer;
+    std::queue<int> keyInput;
 };
 
 }

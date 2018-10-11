@@ -76,7 +76,6 @@ private:
     void correctRatio(int left, int top, int &right, int &bottom);
     bool onClick(int x, int y, XPLMMouseStatus status);
     bool onRightClick(int x, int y, XPLMMouseStatus status);
-    void onKey(char key, XPLMKeyFlags flags, char virtualKey, bool losingFocus);
     XPLMCursorStatus getCursor(int x, int y);
     bool onMouseWheel(int x, int y, int wheel, int clicks);
     bool boxelToPixel(int bx, int by, int &px, int &py);
@@ -85,7 +84,10 @@ private:
     bool onClickCapture(int x, int y, XPLMMouseStatus status);
     bool onMouseWheelCapture(int x, int y, int wheel, int clicks);
 
+    void setupKeyboard();
+
     static int onDraw3D(XPLMDrawingPhase phase, int isBefore, void *ref);
+    static int onKeyPress(char c, XPLMKeyFlags flags, char vKey, void *ref);
 };
 
 } /* namespace avitab */

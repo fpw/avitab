@@ -102,6 +102,36 @@ uint32_t* GUIDriver::data() {
     return buffer.data();
 }
 
+void GUIDriver::setWantKeyInput(bool wantKeys) {
+    if (enableKeyInput != wantKeys) {
+        logger::verbose("Want key input: %d", wantKeys);
+    }
+    enableKeyInput = wantKeys;
+}
+
+bool GUIDriver::wantsKeyInput() {
+    return enableKeyInput && hasWindow();
+}
+
+void GUIDriver::pushKeyInput(int c) {
+    std::lock_guard<std::mutex> lock(keyMutex);
+    if (enableKeyInput) {
+        keyInput.push(c);
+    }
+}
+
+int GUIDriver::popKeyPress() {
+    int res = 0;
+    {
+        std::lock_guard<std::mutex> lock(keyMutex);
+        if (!keyInput.empty()) {
+            res = keyInput.front();
+            keyInput.pop();
+        }
+    }
+    return res;
+}
+
 GUIDriver::~GUIDriver() {
     logger::verbose("Destroying GUI driver");
 }

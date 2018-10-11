@@ -126,6 +126,7 @@ void LVGLToolkit::destroyNativeWindow() {
         guiThread->join();
         guiThread.reset();
         mainScreen.reset();
+        driver->setWantKeyInput(false);
         driver->hidePanel();
         driver->killWindow();
     }
@@ -177,13 +178,8 @@ void LVGLToolkit::guiLoop() {
                 task();
             }
 
-            int dir = driver->getWheelDirection();
-            if (dir != 0 && onMouseWheel) {
-                int x, y;
-                bool pressed;
-                driver->readPointerState(x, y, pressed);
-                onMouseWheel(dir, x, y);
-            }
+            handleMouseWheel();
+            handleKeyboard();
         } catch (const std::exception &e) {
             logger::error("Exception in GUI: %s", e.what());
         }
@@ -198,6 +194,82 @@ void LVGLToolkit::guiLoop() {
     }
 
     logger::verbose("LVGL thread destroyed");
+}
+
+void LVGLToolkit::handleMouseWheel() {
+    int dir = driver->getWheelDirection();
+    if (dir != 0 && onMouseWheel) {
+        int x, y;
+        bool pressed;
+        driver->readPointerState(x, y, pressed);
+        onMouseWheel(dir, x, y);
+    }
+}
+
+void LVGLToolkit::handleKeyboard() {
+    // check if we want keys
+    auto keyboard = searchActiveKeyboard(lv_scr_act());
+
+    // then process keys
+    int c = 0;
+    while ((c = driver->popKeyPress()) != 0) {
+        if (keyboard) {
+            auto action = lv_btnm_get_action(keyboard);
+            if (!action) {
+                continue;
+            }
+
+            if (std::isprint(c)) {
+                char str[] = {(char) (c & 0xFF), '\0'};
+                action(keyboard, str);
+            } else if (c == '\b') {
+                action(keyboard, "Del");
+            } else if (c == '\n') {
+                lv_kb_ext_t *kbExt = (lv_kb_ext_t *) keyboard->ext_attr;
+                auto okAction = kbExt->ok_action;
+                bool keyHandledByOkAction = false;
+                if (okAction) {
+                    if (okAction(keyboard) == LV_RES_OK) {
+                        keyHandledByOkAction = true;
+                    }
+                }
+                if (!keyHandledByOkAction) {
+                    action(keyboard, "Enter");
+                }
+            }
+        }
+    }
+
+    driver->setWantKeyInput(keyboard != nullptr);
+}
+
+lv_obj_t *LVGLToolkit::searchActiveKeyboard(lv_obj_t* obj) {
+    if (!obj || lv_obj_get_hidden(obj)) {
+        return nullptr;
+    }
+
+    lv_obj_t *screen = lv_scr_act();
+    if (screen) {
+        lv_area_t commonArea{};
+        if (!lv_area_union(&commonArea, &screen->coords, &obj->coords)) {
+            return nullptr;
+        }
+    }
+
+    lv_obj_t *curChild = nullptr;
+    while ((curChild = lv_obj_get_child(obj, curChild)) != nullptr) {
+        lv_obj_t *keyb = searchActiveKeyboard(curChild);
+        if (keyb) {
+            return keyb;
+        }
+
+        lv_obj_type_t type{};
+        lv_obj_get_type(curChild, &type);
+        if (strcmp(type.type[0], "lv_kb") == 0) {
+            return curChild;
+        }
+    }
+    return nullptr;
 }
 
 void LVGLToolkit::executeLater(GUITask func) {
