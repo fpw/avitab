@@ -129,7 +129,10 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
 
     tab.window->addSymbol(Widget::Symbol::REFRESH, [this, page, airport] {
         api().reloadMetar();
-        fillPage(page, airport);
+        TabPage &tab = findPage(page);
+        if (tab.charts.empty()) {
+            fillPage(page, airport);
+        }
     });
 
     if (api().getNavigraph()->hasChartsFor(airport->getID())) {
