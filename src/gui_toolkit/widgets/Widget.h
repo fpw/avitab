@@ -29,7 +29,7 @@ public:
     enum class Symbol {
         NONE,
         CLOSE, SETTINGS, LIST,
-        LEFT, RIGHT, UP, DOWN, ROTATE,
+        LEFT, RIGHT, UP, DOWN, ROTATE, REFRESH,
         PREV, NEXT, PAUSE,
         PLUS, MINUS,
         FILE, DIRECTORY,

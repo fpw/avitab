@@ -32,7 +32,7 @@ ImageSource::ImageSource(std::shared_ptr<img::Image> image):
 
 int ImageSource::getMinZoomLevel() {
     double maxDim = std::max(image->getWidth(), image->getHeight());
-    double minN = std::log2(maxDim / TILE_SIZE);
+    double minN = std::log(maxDim / TILE_SIZE) / std::log(M_SQRT2);
 
     return -minN;
 }
@@ -42,22 +42,20 @@ int ImageSource::getMaxZoomLevel() {
 }
 
 int ImageSource::getInitialZoomLevel() {
-    return -1;
+    auto min = getMinZoomLevel();
+    auto max = getMaxZoomLevel();
+    return min + (max - min) / 2;
 }
 
 img::Point<double> ImageSource::suggestInitialCenter() {
     int fullWidth = image->getWidth();
     int fullHeight = image->getHeight();
     auto scale = zoomToScale(getInitialZoomLevel());
-    return img::Point<double>{fullWidth / 2.0 / TILE_SIZE * scale, fullHeight / 6.0 / TILE_SIZE * scale};
+    return img::Point<double>{fullWidth / 2.0 / TILE_SIZE * scale, fullHeight / 4.0 / TILE_SIZE * scale};
 }
 
 float ImageSource::zoomToScale(int zoom) {
-    if (zoom < 0) {
-        return 1.0 / (1 << -zoom);
-    } else {
-        return 1.0 * (1 << zoom);
-    }
+    return std::pow(M_SQRT2, zoom);
 }
 
 bool ImageSource::supportsWorldCoords() {

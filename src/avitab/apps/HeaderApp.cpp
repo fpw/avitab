@@ -88,10 +88,6 @@ void HeaderApp::createSettingsContainer() {
     closeButton->setCallback([this] (const Button &) { toggleSettings(); api().close(); });
     closeButton->alignBelow(mediaLabel, VERT_PADDING);
 
-    metarReloadButton = std::make_shared<Button>(prefContainer, "Reload METAR");
-    metarReloadButton->setCallback([this] (const Button &) { api().reloadMetar(); });
-    metarReloadButton->alignRightOf(closeButton);
-
     prefContainer->setFit(false, false);
 }
 

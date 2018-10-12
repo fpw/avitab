@@ -532,6 +532,10 @@ void XPlaneGUIDriver::setupKeyboard() {
 int XPlaneGUIDriver::onKeyPress(char c, XPLMKeyFlags flags, char vKey, void* ref) {
     XPlaneGUIDriver *us = (XPlaneGUIDriver *) ref;
 
+    if (!us->hasWindow() && !us->captureWindow) {
+        return 1;
+    }
+
     if ((flags & xplm_OptionAltFlag) || (flags & xplm_ControlFlag)) {
         return 1;
     }

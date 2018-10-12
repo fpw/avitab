@@ -110,7 +110,7 @@ void GUIDriver::setWantKeyInput(bool wantKeys) {
 }
 
 bool GUIDriver::wantsKeyInput() {
-    return enableKeyInput && hasWindow();
+    return enableKeyInput;
 }
 
 void GUIDriver::pushKeyInput(int c) {

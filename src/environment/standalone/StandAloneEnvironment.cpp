@@ -133,6 +133,7 @@ std::shared_ptr<xdata::XData> StandAloneEnvironment::getNavData() {
 }
 
 void StandAloneEnvironment::reloadMetar() {
+    xplaneData->reloadMetar();
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

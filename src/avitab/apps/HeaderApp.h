@@ -43,7 +43,7 @@ private:
     std::shared_ptr<Checkbox> fpsCheckbox;
     std::shared_ptr<Button> pauseButton, nextButton, prevButton;
     std::shared_ptr<Label> brightLabel, mediaLabel;
-    std::shared_ptr<Button> closeButton, metarReloadButton;
+    std::shared_ptr<Button> closeButton;
 
     Timer tickTimer;
     std::string curTimeString;

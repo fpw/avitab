@@ -39,6 +39,7 @@ void AirportApp::resetLayout() {
     searchPage->setShowScrollbar(false);
     searchWindow = std::make_shared<Window>(searchPage, "Search");
     searchWindow->setDimensions(searchPage->getContentWidth(), searchPage->getHeight());
+    searchWindow->alignInTopLeft();
     searchWindow->setOnClose([this] { exit(); });
 
     searchField = std::make_shared<TextArea>(searchWindow, "");
@@ -113,7 +114,8 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
     tab.page = tabs->addTab(tabs, airport->getID());
     tab.page->setShowScrollbar(false);
     tab.window = std::make_shared<Window>(tab.page, airport->getID());
-    tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight() - 15);
+    tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
+    tab.window->alignInTopLeft();
 
     auto page = tab.page;
     tab.window->setOnClose([this, page] {
@@ -124,6 +126,11 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
 
     tab.label = std::make_shared<Label>(tab.window, "");
     tab.label->setLongMode(true);
+
+    tab.window->addSymbol(Widget::Symbol::REFRESH, [this, page, airport] {
+        api().reloadMetar();
+        fillPage(page, airport);
+    });
 
     if (api().getNavigraph()->hasChartsFor(airport->getID())) {
         tab.window->addSymbol(Widget::Symbol::LIST, [this, airport, page] {
@@ -290,7 +297,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
     tab.label->setVisible(false);
     tab.charts = charts;
     tab.chartSelect = std::make_shared<List>(tab.window);
-    tab.chartSelect->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
+    tab.chartSelect->setDimensions(tab.window->getContentWidth() - 5, tab.window->getHeight() - 75);
 
     if (tab.requestedList == "ROOT") {
         tab.chartSelect->add("Airport (" + std::to_string(countCharts(charts, "APT")) + ")", -1);
@@ -335,7 +342,8 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             auto newPage = newTab.page;
 
             newTab.window = std::make_shared<Window>(newTab.page, chart->getDescription());
-            newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() - 15);
+            newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight());
+            newTab.window->alignInTopLeft();
             newTab.window->setOnClose([this, newPage] {
                 api().executeLater([this, newPage] {
                     removeTab(newPage);
@@ -386,7 +394,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     tab.pixMap->draw(*tab.mapImage);
     tab.pixMap->setClickable(true);
     tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
-    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 40);
+    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 68);
     tab.pixMap->centerInParent();
 
     auto dayImage = chart->getDayImage();

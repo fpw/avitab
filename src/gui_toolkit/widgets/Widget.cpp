@@ -186,6 +186,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::UP:        return SYMBOL_UP;
     case Symbol::DOWN:      return SYMBOL_DOWN;
     case Symbol::ROTATE:    return SYMBOL_LOOP;
+    case Symbol::REFRESH:   return SYMBOL_REFRESH;
     case Symbol::PREV:      return SYMBOL_PREV;
     case Symbol::NEXT:      return SYMBOL_NEXT;
     case Symbol::PAUSE:     return SYMBOL_PAUSE;
