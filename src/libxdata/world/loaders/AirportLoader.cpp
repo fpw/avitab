@@ -93,7 +93,7 @@ void AirportLoader::onAirportLoaded(const AirportData& port) {
             auto &end2 = entry.ends[1];
             Location end1Loc(end1.latitude, end1.longitude);
             Location end2Loc(end2.latitude, end2.longitude);
-            length = end1Loc.distanceTo(end2Loc);
+            length = end1Loc.distanceTo(end2Loc) - end1.displace - end2.displace;
         }
 
         for (auto &end: entry.ends) {
