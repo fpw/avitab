@@ -49,6 +49,7 @@ public:
     void rotateRight();
 
     std::shared_ptr<Image> getPreRotatedImage();
+    std::shared_ptr<Image> getTargetImage();
     std::shared_ptr<TileSource> getTileSource();
 
 private:

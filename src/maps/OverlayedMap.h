@@ -22,6 +22,7 @@
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libxdata/world/World.h"
+#include "src/libimg/TTFStamper.h"
 
 namespace maps {
 
@@ -64,6 +65,7 @@ private:
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
     int calibrationStep = 0;
+    img::TTFStamper copyrightStamp;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;

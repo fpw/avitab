@@ -30,11 +30,13 @@ public:
     TTFStamper();
     void setSize(float size);
     void setText(const std::string &newText);
-    void applyStamp(Image &dst);
+    void setColor(uint32_t textColor);
+    void applyStamp(Image &dst, int angle);
 private:
     std::vector<uint8_t> fontData;
     stbtt_fontinfo font;
     float fontSize = 28;
+    uint32_t color = 0x808080;
     std::string text;
     Image stamp;
 

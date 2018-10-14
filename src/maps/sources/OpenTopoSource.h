@@ -47,6 +47,7 @@ public:
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
+    std::string getCopyrightInfo() override;
 private:
     bool cancelToken = false;
     Downloader downloader;

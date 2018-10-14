@@ -130,4 +130,8 @@ void OpenTopoSource::resumeLoading() {
     cancelToken = false;
 }
 
+std::string OpenTopoSource::getCopyrightInfo() {
+    return "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)";
+}
+
 } /* namespace maps */

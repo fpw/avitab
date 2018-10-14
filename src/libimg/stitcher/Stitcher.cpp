@@ -105,6 +105,10 @@ std::shared_ptr<Image> Stitcher::getPreRotatedImage() {
     return unrotatedImage;
 }
 
+std::shared_ptr<Image> img::Stitcher::getTargetImage() {
+    return dstImage;
+}
+
 std::shared_ptr<TileSource> Stitcher::getTileSource() {
     return tileSource;
 }

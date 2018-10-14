@@ -62,7 +62,8 @@ public:
     void drawImage(const Image &src, int dstX, int dstY);
     void copyTo(Image &dst, int srcX, int srcY);
     void blendImage(const Image &src, int dstX, int dstY, double angle);
-    void blendImage90(const Image &src, int dstX, int dstY);
+    void blendImage270(const Image &src, int dstX, int dstY);
+    void blendImage0(const Image &src, int dstX, int dstY);
     void alphaBlend(uint32_t color);
 
     // the source image must be square with edge len = max(srcWidth, srcHeight)

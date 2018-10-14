@@ -345,7 +345,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             auto newPage = newTab.page;
 
             newTab.window = std::make_shared<Window>(newTab.page, chart->getDescription());
-            newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight());
+            newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() + 30);
             newTab.window->alignInTopLeft();
             newTab.window->setOnClose([this, newPage] {
                 api().executeLater([this, newPage] {

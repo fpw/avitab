@@ -55,6 +55,8 @@ public:
     virtual void attachCalibration1(double x, double y, double lat, double lon, int zoom) {}
     virtual void attachCalibration2(double x, double y, double lat, double lon, int zoom) {}
 
+    virtual std::string getCopyrightInfo() { return ""; }
+
     virtual ~TileSource() = default;
 };
 

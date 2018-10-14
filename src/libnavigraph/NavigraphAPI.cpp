@@ -256,7 +256,7 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
     auto img = std::make_shared<img::Image>();
     img->loadEncodedData(pngData, false);
 
-    stamper.applyStamp(*img);
+    stamper.applyStamp(*img, 270);
 
     return img;
 }

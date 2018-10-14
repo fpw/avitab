@@ -61,6 +61,10 @@ void TTFStamper::setText(const std::string& newText) {
 
     text = newText;
     int width = getTextWidth(text, fontSize);
+    if (width == 0) {
+        stamp.resize(0, 0, 0);
+        return;
+    }
 
     stamp.resize(width, std::ceil(fontSize), COLOR_TRANSPARENT);
 
@@ -81,7 +85,7 @@ void TTFStamper::setText(const std::string& newText) {
         for (int y = 0; y < y1 - y0; y++) {
             for (int x = 0; x < x1 - x0; x++) {
                 if (glyph[y][x]) {
-                    stamp.drawPixel(xPos + x0 + x, baseline + y0 + y, glyph[y][x] << 24 | 0x808080);
+                    stamp.drawPixel(xPos + x0 + x, baseline + y0 + y, glyph[y][x] << 24 | color);
                 }
             }
         }
@@ -93,7 +97,15 @@ void TTFStamper::setText(const std::string& newText) {
     }
 }
 
+void TTFStamper::setColor(uint32_t textColor) {
+    color = textColor;
+}
+
 size_t TTFStamper::getTextWidth(const std::string& in, float size) {
+    if (in.empty()) {
+        return 0;
+    }
+
     float scale = stbtt_ScaleForPixelHeight(&font, size);
     int ascent;
     stbtt_GetFontVMetrics(&font, &ascent, 0, 0);
@@ -111,8 +123,12 @@ size_t TTFStamper::getTextWidth(const std::string& in, float size) {
     return std::ceil(xPos);
 }
 
-void TTFStamper::applyStamp(Image &dst) {
-    dst.blendImage90(stamp, dst.getWidth() - stamp.getHeight() - 5, dst.getHeight() / 2 - stamp.getWidth() / 2);
+void TTFStamper::applyStamp(Image &dst, int angle) {
+    if (angle == 270) {
+        dst.blendImage270(stamp, dst.getWidth() - stamp.getHeight() - 5, dst.getHeight() / 2 - stamp.getWidth() / 2);
+    } else if (angle == 0) {
+        dst.blendImage0(stamp, dst.getWidth() - stamp.getWidth() - 5, dst.getHeight() - 5 - stamp.getHeight());
+    }
 }
 
 // The following code is taken from ImgUi

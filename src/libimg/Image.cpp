@@ -163,7 +163,7 @@ void Image::scale(int newWidth, int newHeight) {
 
 void Image::drawPixel(int x, int y, uint32_t color) {
     if (x < 0 || x >= width || y < 0 || y >= height) {
-        throw std::runtime_error("drawPixel: out of bounds");
+        return;
     }
 
     uint32_t *data = getPixels();
@@ -306,9 +306,12 @@ void Image::blendImage(const Image& src, int dstX, int dstY, double angle) {
     }
 }
 
-void Image::blendImage90(const Image& src, int dstX, int dstY) {
+void Image::blendImage270(const Image& src, int dstX, int dstY) {
     int srcWidth = src.getWidth();
     int srcHeight = src.getHeight();
+    if (srcWidth == 0 || srcHeight == 0) {
+        return;
+    }
 
     uint32_t *dstPtr = getPixels();
     const uint32_t *srcPtr = src.getPixels();
@@ -317,6 +320,31 @@ void Image::blendImage90(const Image& src, int dstX, int dstY) {
         int srcX = srcWidth - 1 - (y - dstY);
         for (int x = dstX; x < dstX + srcHeight; x++) {
             int srcY = x - dstX;
+            if (srcX < 0 || srcX >= srcWidth|| srcY < 0 || srcY >= srcHeight) {
+                continue;
+            }
+            uint32_t srcColor = srcPtr[srcY * srcWidth + srcX];
+            if (srcColor & 0xFF000000) {
+                dstPtr[y * width + x] = 0xFF000000 | srcColor;
+            }
+        }
+    }
+}
+
+void Image::blendImage0(const Image& src, int dstX, int dstY) {
+    int srcWidth = src.getWidth();
+    int srcHeight = src.getHeight();
+    if (srcWidth == 0 || srcHeight == 0) {
+        return;
+    }
+
+    uint32_t *dstPtr = getPixels();
+    const uint32_t *srcPtr = src.getPixels();
+
+    for (int y = dstY; y < dstY + srcHeight; y++) {
+        for (int x = dstX; x < dstX + srcWidth; x++) {
+            int srcX = x - dstX;
+            int srcY = y - dstY;
             if (srcX < 0 || srcX >= srcWidth|| srcY < 0 || srcY >= srcHeight) {
                 continue;
             }

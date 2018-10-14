@@ -34,8 +34,13 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
      * call the client.
      */
 
+    copyrightStamp.setSize(16);
+    copyrightStamp.setColor(0x404040);
+    copyrightStamp.setText(tileSource->getCopyrightInfo());
+
     stitcher->setPreRotateCallback([this] () { drawOverlays(); });
     stitcher->setRedrawCallback([this] () {
+        copyrightStamp.applyStamp(*(stitcher->getTargetImage()), 0);
         if (onOverlaysDrawn) {
             onOverlaysDrawn();
         }
