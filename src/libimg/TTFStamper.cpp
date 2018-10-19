@@ -85,7 +85,9 @@ void TTFStamper::setText(const std::string& newText) {
         for (int y = 0; y < y1 - y0; y++) {
             for (int x = 0; x < x1 - x0; x++) {
                 if (glyph[y][x]) {
-                    stamp.drawPixel(xPos + x0 + x, baseline + y0 + y, glyph[y][x] << 24 | color);
+                    int px = xPos + x0 + x;
+                    int py = baseline + 1 + y0 + y;
+                    stamp.drawPixel(px, py, glyph[y][x] << 24 | color);
                 }
             }
         }
