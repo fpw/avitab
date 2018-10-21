@@ -2,7 +2,7 @@ Index: lib/mupdf/Makethird
 ===================================================================
 --- lib.orig/mupdf/Makethird
 +++ lib/mupdf/Makethird
-@@ -195,7 +195,21 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.
+@@ -195,7 +195,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.
  THIRD_SRC += thirdparty/libjpeg/jquant1.c
  THIRD_SRC += thirdparty/libjpeg/jquant2.c
  THIRD_SRC += thirdparty/libjpeg/jutils.c
