@@ -1,28 +1,6 @@
-add_subdirectory(sources)
+include(${CMAKE_CURRENT_LIST_DIR}/sources/CMakeLists.txt)
 
-add_library(maps
-    Downloader.cpp
-    OverlayedMap.cpp
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Downloader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/OverlayedMap.cpp
 )
-
-if(APPLE)
-    target_link_libraries(maps
-        map_sources
-        /usr/local/lib/libgeotiff.a
-        /usr/local/lib/libproj.a
-    )
-elseif(UNIX)
-    target_link_libraries(maps
-        map_sources
-        /home/folko/libgeotiff/.libs/libgeotiff.a
-        /home/folko/libgeotiff/libxtiff/.libs/libxtiff.a
-        /home/folko/proj-4.9.3/src/.libs/libproj.a
-    )
-elseif(WIN32)
-    target_link_libraries(maps
-        map_sources
-        geotiff
-        proj
-    )
-endif()
-

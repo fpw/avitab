@@ -1,5 +1,5 @@
-add_subdirectory(apps)
+include(${CMAKE_CURRENT_LIST_DIR}/apps/CMakeLists.txt)
 
-add_library(avitab_main
-    AviTab.cpp
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/AviTab.cpp
 )

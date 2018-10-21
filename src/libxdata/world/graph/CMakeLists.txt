@@ -1,3 +1,3 @@
-add_library(xdata_world_graph
-    NavNode.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/NavNode.cpp
 )

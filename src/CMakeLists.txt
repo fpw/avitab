@@ -1,75 +1,74 @@
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 
-find_package(CURL REQUIRED)
-include_directories(${LIBCURL_INCLUDE_DIR})
 add_definitions(-DCURL_STATICLIB)
 
-add_subdirectory(libimg)
-add_subdirectory(libxdata)
-add_subdirectory(libnavigraph)
-add_subdirectory(maps)
-add_subdirectory(environment)
-add_subdirectory(gui_toolkit)
-add_subdirectory(platform)
-add_subdirectory(avitab)
+add_library(avitab_common "${CMAKE_CURRENT_LIST_DIR}/Logger.cpp")
+add_library(avitab_xplane "")
+add_library(avitab_standalone "")
 
-set(CommonLibs 
-    avitab_main
-    avitab_apps
-    avitab_app_components
-    avitab_platform
-    navigraph
-    maps
-)
+include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/libnavigraph/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/maps/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/environment/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/gui_toolkit/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/platform/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/avitab/CMakeLists.txt)
 
-if(APPLE)
-    set(CommonLibs ${CommonLibs}
-        /usr/local/opt/curl/lib/libcurl.a
-        "-framework CoreFoundation"
-        "-framework Security"
-        ldap
-        z
+target_link_libraries(avitab_common
+    ${PROJECT_SOURCE_DIR}/lib/libgeotiff/build/lib/libgeotiff.a
+    ${PROJECT_SOURCE_DIR}/lib/proj/build/lib/libproj.a
+    ${PROJECT_SOURCE_DIR}/lib/libtiff/libtiff/.libs/libtiff.a
+    ${PROJECT_SOURCE_DIR}/lib/libgeotiff/build/lib/libxtiff.a
+    ${PROJECT_SOURCE_DIR}/lib/mupdf/build/release/libmupdf.a
+    ${PROJECT_SOURCE_DIR}/lib/mupdf/build/release/libmupdf-third.a
+    ${PROJECT_SOURCE_DIR}/lib/curl/lib/.libs/libcurl.a
+    ${PROJECT_SOURCE_DIR}/lib/mbedtls/build/lib/libmbedtls.a
+    ${PROJECT_SOURCE_DIR}/lib/mbedtls/build/lib/libmbedx509.a
+    ${PROJECT_SOURCE_DIR}/lib/mbedtls/build/lib/libmbedcrypto.a
+    ${PROJECT_SOURCE_DIR}/lib/detex/libdetex.a
+    xdata
+) 
+
+if(WIN32)
+    target_link_libraries(avitab_common
+        ws2_32
     )
-elseif(UNIX)
-    set(CommonLibs ${CommonLibs}
-        /home/folko/curl/lib/.libs/libcurl.a
-        /home/folko/mbedtls-2.12.0/build/library/libmbedtls.a
-        /home/folko/mbedtls-2.12.0/build/library/libmbedcrypto.a
-        /home/folko/mbedtls-2.12.0/build/library/libmbedx509.a
-    )
-elseif(WIN32)
-    set(CommonLibs ${CommonLibs} curl)
-endif()
+endif(WIN32)
 
 # X-Plane plugin
-add_library(avitab_plugin SHARED Plugin.cpp Logger.cpp)
+add_library(avitab_plugin SHARED
+    ${CMAKE_CURRENT_LIST_DIR}/Plugin.cpp
+)
+
 if(WIN32)
     target_link_libraries(avitab_plugin
         -static
         -static-libgcc
         -static-libstdc++
-        ${CommonLibs}
-        avitab_env_xplane
-        XPLM_64
-        ws2_32
-        crypt32
+        avitab_xplane
+        avitab_common
+        ${PROJECT_SOURCE_DIR}/lib/XSDK/Libraries/Win/XPLM_64.lib
+        opengl32
         xtiff
     )
 elseif(APPLE)
-target_link_libraries(avitab_plugin
-    ${CommonLibs}
-    avitab_env_xplane
-    "-F/opt/XSDK/Libraries/Mac -framework XPLM"
-)
+    target_link_libraries(avitab_plugin
+        avitab_xplane
+        avitab_common
+        "-F${PROJECT_SOURCE_DIR}/lib/XSDK/Libraries/Mac -framework XPLM"
+        "-framework OpenGL"
+    )
 elseif(UNIX)
-target_link_libraries(avitab_plugin
-    -static-libgcc
-    -static-libstdc++
-    -fPIC
-    ${CommonLibs}
-    avitab_env_xplane
-)
+    target_link_libraries(avitab_plugin
+        -static-libgcc
+        -static-libstdc++
+        -fPIC
+        avitab_xplane
+        avitab_common
+        GL
+    )
 endif()
 
 set_target_properties(avitab_plugin PROPERTIES PREFIX "")
@@ -83,10 +82,8 @@ install(TARGETS avitab_plugin
 endif(WIN32)
 
 # Standalone program
-add_executable(AviTab-standalone StandAlone.cpp Logger.cpp)
-target_link_libraries(AviTab-standalone
-    ${CommonLibs}
-    avitab_env_standalone
+add_executable(AviTab-standalone
+    ${CMAKE_CURRENT_LIST_DIR}/StandAlone.cpp
 )
 
 if(WIN32)
@@ -94,9 +91,25 @@ if(WIN32)
         -static
         -static-libgcc
         -static-libstdc++
-        ws2_32
-        crypt32
+        avitab_standalone
+        avitab_common
+        glfw3
+        opengl32
         -Wl,--subsystem,windows
     )
-endif(WIN32)
-
+elseif(APPLE)
+    target_link_libraries(AviTab-standalone
+        avitab_standalone
+        avitab_common
+        "-framework OpenGL"
+        glfw
+    )
+elseif(UNIX)
+    target_link_libraries(AviTab-standalone
+        avitab_standalone
+        avitab_common
+        GL
+        glfw
+        pthread
+    )
+endif()

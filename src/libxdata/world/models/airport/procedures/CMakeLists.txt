@@ -1,6 +1,6 @@
-add_library(xdata_models_airport_procedures
-    SID.cpp
-    STAR.cpp
-    Approach.cpp
-    Procedure.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/SID.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/STAR.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Approach.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Procedure.cpp
 )

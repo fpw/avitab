@@ -1,4 +1,4 @@
-add_library(xdata_router
-    RouteFinder.cpp
-    Route.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/RouteFinder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Route.cpp
 )

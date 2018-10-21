@@ -1,14 +1,14 @@
-add_subdirectory(components)
-add_library(avitab_apps
-    App.cpp
-    HeaderApp.cpp
-    AppLauncher.cpp
-    ChartsApp.cpp
-    NotesApp.cpp
-    About.cpp
-    PlaneManualApp.cpp
-    AirportApp.cpp
-    RouteApp.cpp
-    MapApp.cpp
-    NavigraphApp.cpp
+include(${CMAKE_CURRENT_LIST_DIR}/components/CMakeLists.txt)
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/App.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/HeaderApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/AppLauncher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ChartsApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NotesApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/About.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/PlaneManualApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/AirportApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/RouteApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/MapApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NavigraphApp.cpp
 )

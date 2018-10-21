@@ -1,10 +1,8 @@
-add_library(xdata_world_loaders
-    AirportLoader.cpp
-    FixLoader.cpp
-    NavaidLoader.cpp
-    AirwayLoader.cpp
-    CIFPLoader.cpp
-    MetarLoader.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/AirportLoader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/FixLoader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NavaidLoader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/AirwayLoader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/CIFPLoader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/MetarLoader.cpp
 )
-
-target_link_libraries(xdata_world_loaders xdata_parsers)

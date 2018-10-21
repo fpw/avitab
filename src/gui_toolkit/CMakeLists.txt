@@ -1,11 +1,10 @@
-add_subdirectory("widgets")
+include(${CMAKE_CURRENT_LIST_DIR}/widgets/CMakeLists.txt)
 
-add_library(avitab_gui_lvgl
-    LVGLToolkit.cpp
-    Timer.cpp
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/LVGLToolkit.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Timer.cpp
 )
 
-target_link_libraries(avitab_gui_lvgl
-    avitab_gui_lvgl_widgets
+target_link_libraries(avitab_common
     lvgl
 )

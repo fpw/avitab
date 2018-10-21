@@ -1,10 +1,7 @@
-add_subdirectory(procedures)
+include(${CMAKE_CURRENT_LIST_DIR}/procedures/CMakeLists.txt)
 
-add_library(xdata_models_airport
-    Airport.cpp
-    Runway.cpp
-    Heliport.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Airport.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Runway.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Heliport.cpp
 )
-
-target_link_libraries(xdata_models_airport xdata_models_airport_procedures)
-

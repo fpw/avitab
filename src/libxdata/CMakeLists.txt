@@ -1,12 +1,5 @@
-add_subdirectory(parsers)
-add_subdirectory(world)
-add_subdirectory(router)
+add_library(xdata STATIC "${CMAKE_CURRENT_LIST_DIR}/XData.cpp") 
 
-add_library(xdata_main
-    XData.cpp
-)
-
-target_link_libraries(xdata_main
-    xdata_world
-    xdata_router
-)
+include(${CMAKE_CURRENT_LIST_DIR}/parsers/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/world/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/router/CMakeLists.txt)
