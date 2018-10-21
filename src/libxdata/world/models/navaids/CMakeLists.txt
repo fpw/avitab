@@ -1,8 +1,8 @@
-add_library(xdata_models_navaids
-    Fix.cpp
-    RadioNavaid.cpp
-    ILSLocalizer.cpp
-    NDB.cpp
-    DME.cpp
-    VOR.cpp
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Fix.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/RadioNavaid.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ILSLocalizer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NDB.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/DME.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/VOR.cpp
 )

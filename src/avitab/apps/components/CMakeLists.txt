@@ -1,5 +1,5 @@
-add_library(avitab_app_components
-    FileSelect.cpp
-    FileChooser.cpp
-    PDFViewer.cpp
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/FileSelect.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/FileChooser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/PDFViewer.cpp
 )

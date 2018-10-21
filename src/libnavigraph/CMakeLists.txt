@@ -1,23 +1,8 @@
-add_library(navigraph
-    Crypto.cpp
-    OIDCClient.cpp
-    AuthServer.cpp
-    RESTClient.cpp
-    NavigraphAPI.cpp
-    Chart.cpp
+target_sources(avitab_common PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Crypto.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/OIDCClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/AuthServer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/RESTClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/NavigraphAPI.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Chart.cpp
 )
-
-if(APPLE)
-    target_link_libraries(navigraph
-        /usr/local/lib/libmbedcrypto.a
-    )
-elseif(UNIX)
-    target_link_libraries(navigraph
-        /home/folko/mbedtls-2.12.0/build/library/libmbedcrypto.a
-    )
-elseif(WIN32)
-    target_link_libraries(navigraph
-        mbedcrypto
-    )
-endif()
-

@@ -1,27 +1,6 @@
-add_library(avitab_env_xplane
-    XPlaneEnvironment.cpp
-    XPlaneGUIDriver.cpp
-    DataRef.cpp
-    DataCache.cpp
+target_sources(avitab_xplane PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/XPlaneEnvironment.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/XPlaneGUIDriver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/DataRef.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/DataCache.cpp
 )
-
-target_link_libraries(avitab_env_xplane
-    avitab_gui_lvgl
-    avitab_environment
-    avitab_platform
-    xdata_main
-)
-
-if(WIN32)
-    target_link_libraries(avitab_env_xplane
-        opengl32
-    )
-elseif(APPLE)
-    target_link_libraries(avitab_env_xplane
-        "-framework OpenGL"
-    )
-elseif(UNIX)
-    target_link_libraries(avitab_env_xplane
-        GL
-    )
-endif()

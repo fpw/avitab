@@ -1,14 +1,9 @@
-add_subdirectory(airport)
-add_subdirectory(navaids)
+include(${CMAKE_CURRENT_LIST_DIR}/airport/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/navaids/CMakeLists.txt)
 
-add_library(xdata_world_models
-    Region.cpp
-    Location.cpp
-    Frequency.cpp
-    Airway.cpp
-)
-
-target_link_libraries(xdata_world_models
-    xdata_models_airport
-    xdata_models_navaids
+target_sources(xdata PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Region.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Location.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Frequency.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Airway.cpp
 )

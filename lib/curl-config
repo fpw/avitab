@@ -1,1 +1,0 @@
-./configure --without-ssl --with-winssl --disable-ldap --without-zlib --without-brotli --without-winidn --without-libidn2 --disable-shared --disable-crypto-auth --disable-ftp --disable-telnet --disable-gopher --disable-dict --disable-imap --disable-pop3 --disable-rtsp --disable-smtp --disable-tftp --prefix=/usr/local
