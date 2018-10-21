@@ -33,7 +33,7 @@ echo "Building curl..."
 if [ ! -f curl/lib/.libs/libcurl.a ]; then
     cd curl
     ./buildconf
-    ./configure --without-ssl --with-mbedtls="`pwd`/../mbedtls/build" --with-zlib="`pwd`/../mupdf/thirdparty/zlib/" --without-libpsl --disable-ldap --without-brotli --without-winidn --without-libidn2 --disable-shared --disable-crypto-auth --disable-ftp --disable-telnet --disable-gopher --disable-dict --disable-imap --disable-pop3 --disable-rtsp --disable-smtp --disable-tftp
+    ./configure --without-ssl --without-nghttp2 --with-mbedtls="`pwd`/../mbedtls/build" --with-zlib="`pwd`/../mupdf/thirdparty/zlib/" --without-libpsl --disable-ldap --without-brotli --without-winidn --without-libidn2 --disable-shared --disable-crypto-auth --disable-ftp --disable-telnet --disable-gopher --disable-dict --disable-imap --disable-pop3 --disable-rtsp --disable-smtp --disable-tftp
     CFLAGS=-fPIC make -j10
     cd ..
 fi

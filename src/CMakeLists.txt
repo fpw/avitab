@@ -51,7 +51,6 @@ if(WIN32)
         avitab_common
         ${PROJECT_SOURCE_DIR}/lib/XSDK/Libraries/Win/XPLM_64.lib
         opengl32
-        xtiff
     )
 elseif(APPLE)
     target_link_libraries(avitab_plugin
