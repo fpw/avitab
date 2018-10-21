@@ -22,6 +22,7 @@ Index: lib/mupdf/Makethird
 +THIRD_SRC += thirdparty/libjpeg/jcmaster.c
 +THIRD_SRC += thirdparty/libjpeg/jcprepct.c
 +THIRD_SRC += thirdparty/libjpeg/jcsample.c
++THIRD_SRC += thirdparty/libjpeg/jmemansi.c
  THIRD_CFLAGS += -Iscripts/libjpeg -Ithirdparty/libjpeg
  
  $(OUT)/thirdparty/libjpeg/%.o: thirdparty/libjpeg/%.c
