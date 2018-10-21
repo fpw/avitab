@@ -21,6 +21,7 @@ include_directories("lib/mbedtls/build/include")
 include_directories("lib/curl/include")
 include_directories("lib/libtiff/libtiff")
 include_directories("lib/libgeotiff")
+include_directories("lib/libgeotiff/build")
 include_directories("lib/libgeotiff/libxtiff")
 include_directories("lib/proj/src")
 
