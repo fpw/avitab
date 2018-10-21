@@ -65,7 +65,7 @@ cd libgeotiff
     mkdir build
     cd build
     cmake -G "Unix Makefiles" -DCMAKE_C_FLAGS=-fPIC -DWITH_PROJ4=1 -DPROJ4_FOUND=1 -DPROJ4_INCLUDE_DIR="`pwd`/../../proj/build/lib"  ..
-    make -j10 geotiff_archive || make -j10 geotiff_library
+    make -j10 geotiff_library
     make -j10 xtiff
     cd ../..
 fi
