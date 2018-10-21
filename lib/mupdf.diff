@@ -122,9 +122,3 @@ index e5a19ed4..b165ed36 100644
  
  /* To skip the Base14 fonts, enable: */
  /* #define TOFU_BASE14 */
-diff --git a/thirdparty/libjpeg b/thirdparty/libjpeg
---- a/thirdparty/libjpeg
-+++ b/thirdparty/libjpeg
-@@ -1 +1 @@
--Subproject commit 9a532f2d544f218c8a237ebb56d09e24161c196c
-+Subproject commit 9a532f2d544f218c8a237ebb56d09e24161c196c-dirty

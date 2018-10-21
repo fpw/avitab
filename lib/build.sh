@@ -9,8 +9,8 @@ fi
 
 echo "Building mupdf..."
 if [ ! -f mupdf/build/release/libmupdf.a ] || [ ! -f mupdf/build/release/libmupdf-third.a ]; then
-    patch -p1 -s -N < mupdf.diff
     cd mupdf
+    patch -p1 -s -N < ../mupdf.diff
     XCFLAGS=-fPIC HAVE_X11=no HAVE_GLUT=no make -j10
     cd thirdparty/libjpeg
     ./configure
