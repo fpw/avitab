@@ -1,8 +1,8 @@
-Index: lib/mupdf/Makethird
-===================================================================
---- lib.orig/mupdf/Makethird
-+++ lib/mupdf/Makethird
-@@ -195,7 +195,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.
+diff --git a/Makethird b/Makethird
+index 9425ff3d..8b1c0b94 100644
+--- a/Makethird
++++ b/Makethird
+@@ -195,7 +195,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.c
  THIRD_SRC += thirdparty/libjpeg/jquant1.c
  THIRD_SRC += thirdparty/libjpeg/jquant2.c
  THIRD_SRC += thirdparty/libjpeg/jutils.c
@@ -26,10 +26,10 @@ Index: lib/mupdf/Makethird
  THIRD_CFLAGS += -Iscripts/libjpeg -Ithirdparty/libjpeg
  
  $(OUT)/thirdparty/libjpeg/%.o: thirdparty/libjpeg/%.c
-Index: lib/mupdf/include/mupdf/fitz/config.h
-===================================================================
---- lib.orig/mupdf/include/mupdf/fitz/config.h
-+++ lib/mupdf/include/mupdf/fitz/config.h
+diff --git a/include/mupdf/fitz/config.h b/include/mupdf/fitz/config.h
+index e5a19ed4..b165ed36 100644
+--- a/include/mupdf/fitz/config.h
++++ b/include/mupdf/fitz/config.h
 @@ -6,7 +6,7 @@
  	Enable the following for spot (and hence overprint/overprint
  	simulation) capable rendering. This forces FZ_PLOTTERS_N on.
@@ -122,3 +122,9 @@ Index: lib/mupdf/include/mupdf/fitz/config.h
  
  /* To skip the Base14 fonts, enable: */
  /* #define TOFU_BASE14 */
+diff --git a/thirdparty/libjpeg b/thirdparty/libjpeg
+--- a/thirdparty/libjpeg
++++ b/thirdparty/libjpeg
+@@ -1 +1 @@
+-Subproject commit 9a532f2d544f218c8a237ebb56d09e24161c196c
++Subproject commit 9a532f2d544f218c8a237ebb56d09e24161c196c-dirty
