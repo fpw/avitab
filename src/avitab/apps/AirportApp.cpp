@@ -468,13 +468,11 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 }
 
 bool AirportApp::onTimer() {
-    double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
-    double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
-    float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+    Location aircraftLoc = api().getAircraftLocation();
 
     for (auto &tab: pages) {
         if (tab.map) {
-            tab.map->setPlanePosition(planeLat, planeLon, planeHeading);
+            tab.map->setPlanePosition(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
             tab.map->doWork();
         }
     }

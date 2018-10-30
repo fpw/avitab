@@ -116,7 +116,7 @@ void HeaderApp::updateClock() {
 }
 
 void HeaderApp::updateFPS() {
-    float lastFramePeriod = api().getDataRef("sim/operation/misc/frame_rate_period").floatValue;
+    float lastFramePeriod = api().getLastFrameTime();
 
     if (lastFramePeriod > 0) {
         pushFPSValue(1 / lastFramePeriod);

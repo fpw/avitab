@@ -273,10 +273,6 @@ std::string AviTab::getAirplanePath() {
     return env->getAirplanePath();
 }
 
-EnvData AviTab::getDataRef(const std::string& dataRef) {
-    return env->getData(dataRef);
-}
-
 double AviTab::getMagneticVariation(double lat, double lon) {
     return env->getMagneticVariation(lat, lon);
 }
@@ -289,6 +285,14 @@ void AviTab::reloadMetar() {
 
 std::shared_ptr<navigraph::NavigraphAPI> AviTab::getNavigraph() {
     return navigraphAPI;
+}
+
+Location avitab::AviTab::getAircraftLocation() {
+    return env->getAircraftLocation();
+}
+
+float avitab::AviTab::getLastFrameTime() {
+    return env->getLastFrameTime();
 }
 
 void AviTab::onHomeButton() {

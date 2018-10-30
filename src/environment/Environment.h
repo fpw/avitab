@@ -32,6 +32,10 @@
 
 namespace avitab {
 
+struct Location {
+    double longitude{}, latitude{}, heading{};
+};
+
 /**
  * This interface defines methods to interact with the environment
  * of the application, e.g. X-Plane or the stand-alone variant.
@@ -61,13 +65,14 @@ public:
     virtual std::string getProgramPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
-    virtual EnvData getData(const std::string &dataRef) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     std::shared_ptr<xdata::World> getNavWorld();
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
     virtual void enableAndPowerPanel();
     virtual void setIsInMenu(bool menu);
+    virtual Location getAircraftLocation() = 0;
+    virtual float getLastFrameTime() = 0;
 
     virtual ~Environment() = default;
 protected:

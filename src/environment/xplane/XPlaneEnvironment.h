@@ -48,12 +48,13 @@ public:
     std::string getProgramPath() override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
-    EnvData getData(const std::string &dataRef) override;
     std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
     void enableAndPowerPanel() override;
     void setIsInMenu(bool menu) override;
+    Location getAircraftLocation() override;
+    float getLastFrameTime() override;
 
     ~XPlaneEnvironment();
 private:
@@ -67,6 +68,8 @@ private:
     DataCache dataCache;
     std::string pluginPath, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
+    std::atomic<Location> aircraftLocation{};
+    std::atomic<float> lastDrawTime{};
 
     // State
     std::vector<MenuCallback> menuCallbacks;
@@ -84,6 +87,7 @@ private:
     XPLMFlightLoopID createFlightLoop();
     float onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count);
     static int handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref);
+    EnvData getData(const std::string &dataRef);
 };
 
 } /* namespace avitab */

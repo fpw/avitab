@@ -19,6 +19,7 @@
 #include <XPLM/XPLMPlanes.h>
 #include <XPLM/XPLMScenery.h>
 #include <stdexcept>
+#include <chrono>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
@@ -247,8 +248,24 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 }
 
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
+    Location loc{};
+    loc.latitude = dataCache.getData("sim/flightmodel/position/latitude").doubleValue;
+    loc.longitude = dataCache.getData("sim/flightmodel/position/longitude").doubleValue;
+    loc.heading = dataCache.getData("sim/flightmodel/position/psi").floatValue;
+    aircraftLocation.store(loc);
+
+    lastDrawTime = dataCache.getData("sim/operation/misc/frame_rate_period").floatValue;
+
     runEnvironmentCallbacks();
     return -1;
+}
+
+Location XPlaneEnvironment::getAircraftLocation() {
+    return aircraftLocation.load();
+}
+
+float XPlaneEnvironment::getLastFrameTime() {
+    return lastDrawTime;
 }
 
 EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
@@ -271,12 +288,17 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
     std::promise<double> dataPromise;
     auto futureData = dataPromise.get_future();
 
+    auto startAt = std::chrono::high_resolution_clock::now();
     runInEnvironment([&dataPromise, &lat, &lon] () {
         double variation = XPLMGetMagneticVariation(lat, lon);
         dataPromise.set_value(variation);
     });
 
-    return futureData.get();
+    auto res = futureData.get();
+    auto duration = std::chrono::high_resolution_clock::now() - startAt;
+    logger::verbose("Time to get magnetic variation: %d millis",
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    return res;
 }
 
 std::shared_ptr<xdata::XData> XPlaneEnvironment::getNavData() {

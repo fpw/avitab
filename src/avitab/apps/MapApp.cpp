@@ -393,14 +393,12 @@ bool MapApp::onTimer() {
         return true;
     }
 
-    double planeLat = api().getDataRef("sim/flightmodel/position/latitude").doubleValue;
-    double planeLon = api().getDataRef("sim/flightmodel/position/longitude").doubleValue;
-    float planeHeading = api().getDataRef("sim/flightmodel/position/psi").floatValue;
+    Location aircraftLoc = api().getAircraftLocation();
 
     if (trackPlane) {
-        map->centerOnPlane(planeLat, planeLon, planeHeading);
+        map->centerOnPlane(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
     } else {
-        map->setPlanePosition(planeLat, planeLon, planeHeading);
+        map->setPlanePosition(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
     }
 
     map->doWork();

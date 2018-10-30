@@ -30,7 +30,6 @@ public:
     StandAloneEnvironment();
 
     void eventLoop();
-    void setData(const std::string &dataRef, EnvData value);
 
     // Must be called from the environment thread - do not call from GUI thread!
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
@@ -45,17 +44,18 @@ public:
     std::string getProgramPath() override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
-    EnvData getData(const std::string &dataRef) override;
     std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
+    Location getAircraftLocation() override;
+    float getLastFrameTime() override;
 
     virtual ~StandAloneEnvironment();
 private:
     std::string ourPath, xplaneRootPath;
     std::shared_ptr<GlfwGUIDriver> driver;
     std::shared_ptr<xdata::XData> xplaneData;
-    std::map<std::string, EnvData> simulatedData;
+    std::atomic<float> lastDrawTime{};
 
     std::string findXPlaneInstallationPath();
 };

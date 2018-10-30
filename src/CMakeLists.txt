@@ -29,6 +29,7 @@ target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/lib/mbedtls/build/lib/libmbedcrypto.a
     ${PROJECT_SOURCE_DIR}/lib/detex/libdetex.a
     xdata
+    atomic
 ) 
 
 if(WIN32)

@@ -28,17 +28,6 @@ StandAloneEnvironment::StandAloneEnvironment() {
 
     xplaneRootPath = findXPlaneInstallationPath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
-
-    EnvData data {};
-
-    data.doubleValue = 10.7017287;
-    setData("sim/flightmodel/position/longitude", data);
-
-    data.doubleValue = 53.8019434;
-    setData("sim/flightmodel/position/latitude", data);
-
-    data.floatValue = 70;
-    setData("sim/flightmodel/position/psi", data);
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {
@@ -76,16 +65,9 @@ std::string StandAloneEnvironment::getEarthTexturePath() {
 void StandAloneEnvironment::eventLoop() {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();
-
-        EnvData frameData {};
-        frameData.floatValue = driver->getLastDrawTime() / 1000.0;
-        setData("sim/operation/misc/frame_rate_period", frameData);
+        lastDrawTime = driver->getLastDrawTime() / 1000.0;
     }
     driver.reset();
-}
-
-void StandAloneEnvironment::setData(const std::string& dataRef, EnvData value) {
-    simulatedData[dataRef] = value;
 }
 
 std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
@@ -124,16 +106,24 @@ void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     registerEnvironmentCallback(cb);
 }
 
-EnvData StandAloneEnvironment::getData(const std::string& dataRef) {
-    return simulatedData[dataRef];
-}
-
 std::shared_ptr<xdata::XData> StandAloneEnvironment::getNavData() {
     return xplaneData;
 }
 
 void StandAloneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
+}
+
+Location StandAloneEnvironment::getAircraftLocation() {
+    Location res{};
+    res.latitude = 53.8019434;
+    res.longitude = 10.7017287;
+    res.heading = 70;
+    return res;
+}
+
+float StandAloneEnvironment::getLastFrameTime() {
+    return lastDrawTime;
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

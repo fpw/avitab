@@ -21,9 +21,9 @@
 #include <memory>
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
-#include "src/environment/EnvData.h"
 #include "src/libxdata/world/World.h"
 #include "src/libnavigraph/NavigraphAPI.h"
+#include "src/environment/Environment.h"
 
 namespace avitab {
 
@@ -46,7 +46,6 @@ public:
     virtual std::string getDataPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
     virtual std::string getAirplanePath() = 0;
-    virtual EnvData getDataRef(const std::string &dataRef) = 0;
     virtual std::shared_ptr<Container> createGUIContainer() = 0;
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
     virtual void onHomeButton() = 0;
@@ -56,6 +55,8 @@ public:
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;
     virtual std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() = 0;
+    virtual Location getAircraftLocation() = 0;
+    virtual float getLastFrameTime() = 0;
     virtual ~AppFunctions() = default;
 };
 

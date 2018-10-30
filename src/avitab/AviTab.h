@@ -47,7 +47,6 @@ public:
     std::string getDataPath() override;
     std::string getEarthTexturePath() override;
     std::string getAirplanePath() override;
-    EnvData getDataRef(const std::string &dataRef) override;
     std::shared_ptr<Container> createGUIContainer() override;
     void showGUIContainer(std::shared_ptr<Container> container) override;
     void onHomeButton() override;
@@ -57,6 +56,8 @@ public:
     void close() override;
     void setIsInMenu(bool inMenu) override;
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() override;
+    Location getAircraftLocation() override;
+    float getLastFrameTime() override;
 
     ~AviTab();
 
