@@ -58,6 +58,10 @@ bool Environment::isNavWorldReady() {
 
 void Environment::cancelNavWorldLoading() {
     getNavData()->cancelLoading();
+    if (navWorldFuture.valid()) {
+        // wait until the canceling is done to avoid race-conditions on destruction while loading
+        navWorldFuture.wait();
+    }
 }
 
 std::shared_ptr<xdata::World> Environment::getNavWorld() {

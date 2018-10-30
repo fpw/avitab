@@ -51,7 +51,7 @@ float Runway::getWidth() const {
 }
 
 void Runway::attachILSData(std::weak_ptr<Fix> ils) {
-    auto loc = ils.lock();
+    auto loc = std::shared_ptr<Fix>(ils);
     if (!loc->getILSLocalizer()) {
         throw std::runtime_error("Adding ILS fix without ILS data");
     }
@@ -64,7 +64,11 @@ bool Runway::isRunway() const {
 }
 
 std::shared_ptr<Fix> Runway::getILSData() const {
-    return ils.lock();
+    try {
+        return std::shared_ptr<Fix>(ils);
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 const Location &Runway::getLocation() const {
