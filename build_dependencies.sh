@@ -81,16 +81,17 @@ fi
 if [ ! -f $OUTDIR/lib/libtiff.a ]; then echo "Failed"; exit; fi
 
 echo "Building libproj..."
-if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then
+if [ ! -f $OUTDIR/lib/libproj.a ]; then
     cd proj
     mkdir -p build
     cd build
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPROJ_TESTS=OFF -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_INSTALL_PREFIX=$OUTDIR -DLIBDIR=$OUTDIR/lib -DINCLUDEDIR=$OUTDIR/include -DBINDIR=$OUTDIR/bin ..
     cd src
     make -j10 install
+    cp $OUTDIR/lib/libproj_5_2.a $OUTDIR/lib/libproj.a
     cd ../../..
 fi
-if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then echo "Failed"; exit; fi
+if [ ! -f $OUTDIR/lib/libproj.a ]; then echo "Failed"; exit; fi
 
 echo "Building libgeotiff..."
 if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then

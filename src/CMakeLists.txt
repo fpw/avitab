@@ -23,7 +23,7 @@ add_definitions(-DCURL_STATICLIB)
 
 target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libgeotiff.a
-    ${PROJECT_SOURCE_DIR}/build-third/lib/libproj_5_2.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/libproj.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libtiff.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libxtiff.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmupdf.a
