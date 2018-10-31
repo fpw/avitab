@@ -149,7 +149,7 @@ float LVGLToolkit::getBrightness() {
 }
 
 void LVGLToolkit::guiLoop() {
-    using clock = std::chrono::high_resolution_clock;
+    using clock = std::chrono::steady_clock;
     using namespace std::chrono_literals;
 
     logger::verbose("LVGL thread has id %d", std::this_thread::get_id());

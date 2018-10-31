@@ -11,19 +11,6 @@ configure_file(
 )
 
 add_definitions("-include ${PROJECT_BINARY_DIR}/config.h")
-include_directories("${PROJECT_SOURCE_DIR}")
-
-include_directories("lib")
-include_directories("lib/json/include")
-include_directories("lib/XSDK/CHeaders")
-include_directories("lib/mupdf/include")
-include_directories("lib/mbedtls/build/include")
-include_directories("lib/curl/include")
-include_directories("lib/libtiff/libtiff")
-include_directories("lib/libgeotiff")
-include_directories("lib/libgeotiff/build")
-include_directories("lib/libgeotiff/libxtiff")
-include_directories("lib/proj/src")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
