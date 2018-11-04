@@ -36,6 +36,12 @@ struct Location {
     double longitude{}, latitude{}, heading{};
 };
 
+enum class CommandState {
+    START,
+    CONTINUE,
+    END
+};
+
 /**
  * This interface defines methods to interact with the environment
  * of the application, e.g. X-Plane or the stand-alone variant.
@@ -43,7 +49,7 @@ struct Location {
 class Environment {
 public:
     using MenuCallback = std::function<void()>;
-    using CommandCallback = std::function<void()>;
+    using CommandCallback = std::function<void(CommandState)>;
     using EnvironmentCallback = std::function<void()>;
 
     // Must be called from the environment thread - do not call from GUI thread!
@@ -55,7 +61,7 @@ public:
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, MenuCallback cb) = 0;
     virtual void destroyMenu() = 0;
-    virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback) = 0;
+    virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) = 0;
     virtual void destroyCommands() = 0;
     virtual std::string getAirplanePath() = 0;
     void pauseEnvironmentJobs();

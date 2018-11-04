@@ -203,10 +203,6 @@ void XPlaneEnvironment::createCommand(const std::string& name, const std::string
 }
 
 int XPlaneEnvironment::handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void* ref) {
-    if (phase != xplm_CommandBegin) {
-        return 1;
-    }
-
     XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
     if (!us) {
         return 1;
@@ -214,7 +210,11 @@ int XPlaneEnvironment::handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase,
 
     CommandCallback f = us->commandHandlers[cmd].callback;
     if (f) {
-        f();
+        switch (phase) {
+        case xplm_CommandBegin:     f(CommandState::START); break;
+        case xplm_CommandContinue:  f(CommandState::CONTINUE); break;
+        case xplm_CommandEnd:       f(CommandState::END); break;
+        }
     }
 
     return 1;
@@ -288,14 +288,14 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
     std::promise<double> dataPromise;
     auto futureData = dataPromise.get_future();
 
-    auto startAt = std::chrono::high_resolution_clock::now();
+    auto startAt = std::chrono::steady_clock::now();
     runInEnvironment([&dataPromise, &lat, &lon] () {
         double variation = XPLMGetMagneticVariation(lat, lon);
         dataPromise.set_value(variation);
     });
 
     auto res = futureData.get();
-    auto duration = std::chrono::high_resolution_clock::now() - startAt;
+    auto duration = std::chrono::steady_clock::now() - startAt;
     logger::verbose("Time to get magnetic variation: %d millis",
             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
     return res;

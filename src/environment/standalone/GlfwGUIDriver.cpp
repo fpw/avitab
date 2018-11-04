@@ -154,7 +154,7 @@ void GlfwGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const u
 }
 
 void GlfwGUIDriver::render() {
-    auto startAt = std::chrono::high_resolution_clock::now();
+    auto startAt = std::chrono::steady_clock::now();
 
     int winWidth, winHeight;
     glfwGetFramebufferSize(window, &winWidth, &winHeight);
@@ -193,7 +193,7 @@ void GlfwGUIDriver::render() {
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    auto elapsed = std::chrono::high_resolution_clock::now() - startAt;
+    auto elapsed = std::chrono::steady_clock::now() - startAt;
     lastDrawTime = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
 
     glfwSwapBuffers(window);

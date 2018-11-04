@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <cstdarg>
+#include <chrono>
 
 namespace platform {
 
@@ -42,6 +43,14 @@ enum class Platform {
 };
 
 Platform getPlatform();
+
+#ifdef _WIN32
+int64_t measureTime();
+int getElapsedMillis(int64_t startAt);
+#else
+std::chrono::time_point<std::chrono::steady_clock> measureTime();
+int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt);
+#endif
 
 constexpr size_t getMaxPathLen();
 std::string nativeToUTF8(const std::string &native);

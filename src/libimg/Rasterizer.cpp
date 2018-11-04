@@ -154,7 +154,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
 
     fz_device *dev = nullptr;
     fz_try(ctx) {
-        auto startAt = std::chrono::high_resolution_clock::now();
+        auto startAt = std::chrono::steady_clock::now();
 
         dev = fz_new_draw_device_with_bbox(ctx, scaleMatrix, pix, &clipBox);
 
@@ -179,7 +179,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
         fz_drop_device(ctx, dev);
 
         if (logLoadTimes) {
-            auto endAt = std::chrono::high_resolution_clock::now();
+            auto endAt = std::chrono::steady_clock::now();
             auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(endAt - startAt).count();
             logger::info("Tile loaded in %d millis", dur);
         }

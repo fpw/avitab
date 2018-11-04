@@ -155,43 +155,45 @@ void XPlaneGUIDriver::setBrightnessPtr(std::shared_ptr<float> brightnessPtr) {
     brightness = brightnessPtr;
 }
 
-void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height) {
+void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height, bool captureClicks) {
     if (captureWindow) {
         XPLMDestroyWindow(captureWindow);
         captureWindow = {};
     }
 
-    int winLeft, winTop, winRight, winBot;
-    XPLMGetScreenBoundsGlobal(&winLeft, &winTop, &winRight, &winBot);
+    if (captureClicks) {
+        int winLeft, winTop, winRight, winBot;
+        XPLMGetScreenBoundsGlobal(&winLeft, &winTop, &winRight, &winBot);
 
-    XPLMCreateWindow_t params;
-    params.structSize = sizeof(params);
-    params.left = winLeft;
-    params.right = winRight;
-    params.top = winTop;
-    params.bottom = winBot;
-    params.visible = 1;
-    params.refcon = this;
-    params.drawWindowFunc = [] (XPLMWindowID id, void *ref) {
-    };
-    params.handleMouseClickFunc = [] (XPLMWindowID id, int x, int y, XPLMMouseStatus status, void *ref) -> int {
-        return reinterpret_cast<XPlaneGUIDriver *>(ref)->onClickCapture(x, y, status);
-    };
-    params.handleRightClickFunc = [] (XPLMWindowID id, int x, int y, XPLMMouseStatus status, void *ref) -> int {
-        return false;
-    };
-    params.handleKeyFunc = [] (XPLMWindowID id, char key, XPLMKeyFlags flags, char vKey, void *ref, int losingFocus) {
-    };
-    params.handleCursorFunc = [] (XPLMWindowID id, int x, int y, void *ref) -> XPLMCursorStatus {
-        return xplm_CursorDefault;
-    };
-    params.handleMouseWheelFunc =  [] (XPLMWindowID id, int x, int y, int wheel, int clicks, void *ref) -> int {
-        return reinterpret_cast<XPlaneGUIDriver *>(ref)->onMouseWheelCapture(x, y, wheel, clicks);
-    };
-    params.layer = xplm_WindowLayerFlightOverlay;
-    params.decorateAsFloatingWindow = xplm_WindowDecorationNone;
-    captureWindow = XPLMCreateWindowEx(&params);
-    XPLMSetWindowPositioningMode(captureWindow, xplm_WindowFullScreenOnAllMonitors, -1);
+        XPLMCreateWindow_t params;
+        params.structSize = sizeof(params);
+        params.left = winLeft;
+        params.right = winRight;
+        params.top = winTop;
+        params.bottom = winBot;
+        params.visible = 1;
+        params.refcon = this;
+        params.drawWindowFunc = [] (XPLMWindowID id, void *ref) {
+        };
+        params.handleMouseClickFunc = [] (XPLMWindowID id, int x, int y, XPLMMouseStatus status, void *ref) -> int {
+            return reinterpret_cast<XPlaneGUIDriver *>(ref)->onClickCapture(x, y, status);
+        };
+        params.handleRightClickFunc = [] (XPLMWindowID id, int x, int y, XPLMMouseStatus status, void *ref) -> int {
+            return false;
+        };
+        params.handleKeyFunc = [] (XPLMWindowID id, char key, XPLMKeyFlags flags, char vKey, void *ref, int losingFocus) {
+        };
+        params.handleCursorFunc = [] (XPLMWindowID id, int x, int y, void *ref) -> XPLMCursorStatus {
+            return xplm_CursorDefault;
+        };
+        params.handleMouseWheelFunc =  [] (XPLMWindowID id, int x, int y, int wheel, int clicks, void *ref) -> int {
+            return reinterpret_cast<XPlaneGUIDriver *>(ref)->onMouseWheelCapture(x, y, wheel, clicks);
+        };
+        params.layer = xplm_WindowLayerFlightOverlay;
+        params.decorateAsFloatingWindow = xplm_WindowDecorationNone;
+        captureWindow = XPLMCreateWindowEx(&params);
+        XPLMSetWindowPositioningMode(captureWindow, xplm_WindowFullScreenOnAllMonitors, -1);
+    }
 
     panelLeft = left;
     panelBottom = bottom;
@@ -212,6 +214,7 @@ void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height) {
 
     setupVRCapture();
     XPLMRegisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
+    hasPanel = true;
 }
 
 void XPlaneGUIDriver::hidePanel() {
@@ -220,6 +223,7 @@ void XPlaneGUIDriver::hidePanel() {
         captureWindow = {};
     }
     XPLMUnregisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
+    hasPanel = false;
 }
 
 int XPlaneGUIDriver::onDraw3D(XPLMDrawingPhase phase, int isBefore, void *ref) {
@@ -501,6 +505,10 @@ bool XPlaneGUIDriver::onClickCapture(int x, int y, XPLMMouseStatus status) {
     return false;
 }
 
+void XPlaneGUIDriver::passLeftClick(bool down) {
+    onClickCapture(0, 0, down ? xplm_MouseDown : xplm_MouseUp);
+}
+
 bool XPlaneGUIDriver::onMouseWheelCapture(int x, int y, int wheel, int clicks) {
     if (*panelEnabled == 0) {
         return false;
@@ -532,7 +540,7 @@ void XPlaneGUIDriver::setupKeyboard() {
 int XPlaneGUIDriver::onKeyPress(char c, XPLMKeyFlags flags, char vKey, void* ref) {
     XPlaneGUIDriver *us = (XPlaneGUIDriver *) ref;
 
-    if (!us->hasWindow() && !us->captureWindow) {
+    if (!us->hasWindow() && !us->hasPanel) {
         return 1;
     }
 

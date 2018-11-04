@@ -42,20 +42,24 @@ void AviTab::startApp() {
     logger::verbose("Starting AviTab %s", AVITAB_VERSION_STR);
 
     env->createMenu("AviTab");
-    env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
-    env->createCommand("AviTab/zoom_in", "Zoom In", std::bind(&AviTab::zoomIn, this));
-    env->createCommand("AviTab/zoom_out", "Zoom Out", std::bind(&AviTab::zoomOut, this));
-    env->createCommand("AviTab/Home", "Home Button", std::bind(&AviTab::onHomeButton, this));
+    env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", [this] (CommandState s) { if (s == CommandState::START) toggleTablet(); });
+    env->createCommand("AviTab/zoom_in", "Zoom In", [this] (CommandState s) { if (s == CommandState::START) zoomIn(); });
+    env->createCommand("AviTab/zoom_out", "Zoom Out", [this] (CommandState s) { if (s == CommandState::START) zoomOut(); });
+    env->createCommand("AviTab/Home", "Home Button",[this] (CommandState s) { if (s == CommandState::START) onHomeButton(); });
 
     // App commands
-    env->createCommand("AviTab/app_charts", "Charts App", std::bind(&AviTab::showApp, this, AppId::CHARTS));
-    env->createCommand("AviTab/app_airports", "Airports App", std::bind(&AviTab::showApp, this, AppId::AIRPORTS));
-    env->createCommand("AviTab/app_routes", "Routes App", std::bind(&AviTab::showApp, this, AppId::ROUTES));
-    env->createCommand("AviTab/app_maps", "Maps App", std::bind(&AviTab::showApp, this, AppId::MAPS));
-    env->createCommand("AviTab/app_plane_manual", "Plane Manual App", std::bind(&AviTab::showApp, this, AppId::PLANE_MANUAL));
-    env->createCommand("AviTab/app_notes", "Notes App", std::bind(&AviTab::showApp, this, AppId::NOTES));
-    env->createCommand("AviTab/app_navigraph", "Navigraph App", std::bind(&AviTab::showApp, this, AppId::NAVIGRAPH));
-    env->createCommand("AviTab/app_about", "About App", std::bind(&AviTab::showApp, this, AppId::ABOUT));
+    env->createCommand("AviTab/app_charts", "Charts App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::CHARTS); });
+    env->createCommand("AviTab/app_airports", "Airports App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::AIRPORTS); });
+    env->createCommand("AviTab/app_routes", "Routes App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::ROUTES); });
+    env->createCommand("AviTab/app_maps", "Maps App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::MAPS); });
+    env->createCommand("AviTab/app_plane_manual", "Plane Manual App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::PLANE_MANUAL); });
+    env->createCommand("AviTab/app_notes", "Notes App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::NOTES); });
+    env->createCommand("AviTab/app_navigraph", "Navigraph App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::NAVIGRAPH); });
+    env->createCommand("AviTab/app_about", "About App", [this] (CommandState s) { if (s == CommandState::START) showApp(AppId::ABOUT); });
+
+    env->createCommand("AviTab/click_left", "Left click", [this] (CommandState s) { handleLeftClick(s != CommandState::END); });
+    env->createCommand("AviTab/wheel_up", "Wheel up", [this] (CommandState s) { if (s == CommandState::START) handleWheel(true); });
+    env->createCommand("AviTab/wheel_down", "Wheel down", [this] (CommandState s) { if (s == CommandState::START) handleWheel(false); });
 
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
 
@@ -139,6 +143,7 @@ void AviTab::createPanel() {
         int width = cfg.getInt("/panel/width");
         int height = cfg.getInt("/panel/height");
         bool enable = false;
+        bool disableCaptureWindow = false;
         hideHeader = false;
         try {
             enable = cfg.getBool("/panel/enabled");
@@ -148,8 +153,12 @@ void AviTab::createPanel() {
             hideHeader = cfg.getBool("/panel/hide_header");
         } catch (...) {
         }
+        try {
+            disableCaptureWindow = cfg.getBool("/panel/disable_capture_window");
+        } catch (...) {
+        }
 
-        guiLib->createPanel(left, bottom, width, height);
+        guiLib->createPanel(left, bottom, width, height, !disableCaptureWindow);
         if (enable) {
             env->enableAndPowerPanel();
         }
@@ -347,6 +356,18 @@ void AviTab::cleanupLayout() {
     centerContainer.reset();
     headerApp.reset();
     appLauncher.reset();
+}
+
+void AviTab::handleLeftClick(bool down) {
+    guiLib->sendLeftClick(down);
+}
+
+void AviTab::handleWheel(bool up) {
+    guiLib->executeLater([this, up] () {
+        if (appLauncher) {
+            appLauncher->onMouseWheel(up ? 1 : -1, 0, 0);
+        }
+    });
 }
 
 AviTab::~AviTab() {

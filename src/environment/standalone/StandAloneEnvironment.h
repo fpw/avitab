@@ -36,7 +36,7 @@ public:
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, std::function<void()> cb) override;
     void destroyMenu() override;
-    void createCommand(const std::string &name, const std::string &desc, std::function<void()> cb) override;
+    void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
     void destroyCommands() override;
     std::string getAirplanePath() override;
 

@@ -30,7 +30,7 @@ void GUIDriver::init(int width, int height) {
     buffer.resize(width * height);
 }
 
-void GUIDriver::createPanel(int left, int bottom, int width, int height) {
+void GUIDriver::createPanel(int left, int bottom, int width, int height, bool captureClicks) {
 }
 
 void GUIDriver::hidePanel() {
@@ -130,6 +130,9 @@ int GUIDriver::popKeyPress() {
         }
     }
     return res;
+}
+
+void GUIDriver::passLeftClick(bool down) {
 }
 
 GUIDriver::~GUIDriver() {

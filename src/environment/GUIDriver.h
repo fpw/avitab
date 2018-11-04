@@ -33,7 +33,7 @@ public:
     virtual bool hasWindow() = 0;
     virtual void killWindow() = 0;
 
-    virtual void createPanel(int left, int bottom, int width, int height);
+    virtual void createPanel(int left, int bottom, int width, int height, bool captureClicks);
     virtual void hidePanel();
 
     virtual void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
@@ -47,6 +47,8 @@ public:
 
     virtual void setBrightness(float b) = 0;
     virtual float getBrightness() = 0;
+
+    virtual void passLeftClick(bool down);
 
     virtual ~GUIDriver();
 protected:

@@ -41,7 +41,7 @@ public:
     void setPanelEnabledPtr(std::shared_ptr<int> panelEnabledPtr);
     void setPanelPoweredPtr(std::shared_ptr<int> panelPoweredPtr);
     void setBrightnessPtr(std::shared_ptr<float> brightnessPtr);
-    void createPanel(int left, int bottom, int width, int height) override;
+    void createPanel(int left, int bottom, int width, int height, bool captureClicks) override;
     void hidePanel() override;
 
     void readPointerState(int &x, int &y, bool &pressed) override;
@@ -50,6 +50,8 @@ public:
     int getWheelDirection() override;
     void setBrightness(float b) override;
     float getBrightness() override;
+
+    void passLeftClick(bool down) override;
 
     ~XPlaneGUIDriver();
 private:
@@ -68,6 +70,7 @@ private:
     float panelLeft = 0, panelBottom = 0, panelWidth = 0, panelHeight = 0;
     std::vector<int> vrTriggerIndices;
     bool mouseDownFromTrigger = false;
+    bool hasPanel = false;
 
     void onDraw();
     void onDrawPanel();

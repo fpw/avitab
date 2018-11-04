@@ -38,7 +38,7 @@ public:
 
     void setMouseWheelCallback(MouseWheelCallback cb);
     void createNativeWindow(const std::string &title);
-    void createPanel(int left, int bottom, int width, int height);
+    void createPanel(int left, int bottom, int width, int height, bool captureClicks);
     void hidePanel();
     void pauseNativeWindow();
     bool hasNativeWindow();
@@ -46,6 +46,7 @@ public:
     void destroyNativeWindow();
     void setBrightness(float b);
     float getBrightness();
+    void sendLeftClick(bool down);
 
     std::shared_ptr<Screen> &screen();
 

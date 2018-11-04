@@ -68,6 +68,37 @@ platform::Platform getPlatform() {
 #endif
 }
 
+#ifdef _WIN32
+int64_t measureTime() {
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return counter.QuadPart;
+}
+
+int getElapsedMillis(int64_t startAt)  {
+    LARGE_INTEGER endAt, frq;
+    QueryPerformanceCounter(&endAt);
+    QueryPerformanceFrequency(&frq);
+
+    int64_t elapsed = endAt.QuadPart - startAt;
+
+    elapsed *= 1000;
+    elapsed /= frq.QuadPart;
+
+    return elapsed;
+}
+
+#else
+std::chrono::time_point<std::chrono::steady_clock> measureTime() {
+    return std::chrono::steady_clock::now();
+}
+
+int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt) {
+    auto endAt = measureTime();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(endAt - startAt).count();
+}
+#endif
+
 constexpr size_t getMaxPathLen() {
     return AVITAB_PATH_LEN_MAX;
 }

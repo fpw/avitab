@@ -80,6 +80,9 @@ private:
     void showAppLauncher();
     void showApp(AppId id);
     void cleanupLayout();
+
+    void handleLeftClick(bool down);
+    void handleWheel(bool up);
 };
 
 } /* namespace avitab */

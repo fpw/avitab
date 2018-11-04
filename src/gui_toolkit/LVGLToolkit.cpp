@@ -19,6 +19,7 @@
 #include <functional>
 #include <lvgl/lvgl.h>
 #include "LVGLToolkit.h"
+#include "src/platform/Platform.h"
 #include "src/Logger.h"
 
 namespace avitab {
@@ -108,8 +109,8 @@ void LVGLToolkit::pauseNativeWindow() {
     driver->killWindow();
 }
 
-void LVGLToolkit::createPanel(int left, int bottom, int width, int height) {
-    driver->createPanel(left, bottom, width, height);
+void LVGLToolkit::createPanel(int left, int bottom, int width, int height, bool captureClicks) {
+    driver->createPanel(left, bottom, width, height, captureClicks);
 }
 
 void LVGLToolkit::hidePanel() {
@@ -149,13 +150,13 @@ float LVGLToolkit::getBrightness() {
 }
 
 void LVGLToolkit::guiLoop() {
-    using clock = std::chrono::steady_clock;
     using namespace std::chrono_literals;
 
     logger::verbose("LVGL thread has id %d", std::this_thread::get_id());
 
     while (guiActive) {
-        auto startAt = clock::now();
+        // chrono clocks run at 64Hz precision in mingw, use something custom
+        auto startAt = platform::measureTime();
 
         try {
             // first run the actual GUI tasks, i.e. let LVGL do its animations etc.
@@ -184,16 +185,17 @@ void LVGLToolkit::guiLoop() {
             logger::error("Exception in GUI: %s", e.what());
         }
 
-        auto endAt = clock::now();
-        auto incMs = std::chrono::duration_cast<std::chrono::milliseconds>(endAt - startAt).count();
-
         std::this_thread::sleep_for(1ms);
-        incMs++;
+        auto elapsedMillis = platform::getElapsedMillis(startAt);
 
-        lv_tick_inc(incMs);
+        lv_tick_inc(std::max(elapsedMillis, 1));
     }
 
     logger::verbose("LVGL thread destroyed");
+}
+
+void LVGLToolkit::sendLeftClick(bool down) {
+    driver->passLeftClick(down);
 }
 
 void LVGLToolkit::handleMouseWheel() {
