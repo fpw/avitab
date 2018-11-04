@@ -252,7 +252,11 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
     loc.latitude = dataCache.getData("sim/flightmodel/position/latitude").doubleValue;
     loc.longitude = dataCache.getData("sim/flightmodel/position/longitude").doubleValue;
     loc.heading = dataCache.getData("sim/flightmodel/position/psi").floatValue;
-    aircraftLocation.store(loc);
+
+    {
+        std::lock_guard<std::mutex> lock(stateMutex);
+        aircraftLocation = loc;
+    }
 
     lastDrawTime = dataCache.getData("sim/operation/misc/frame_rate_period").floatValue;
 
@@ -261,7 +265,8 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
 }
 
 Location XPlaneEnvironment::getAircraftLocation() {
-    return aircraftLocation.load();
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return aircraftLocation;
 }
 
 float XPlaneEnvironment::getLastFrameTime() {

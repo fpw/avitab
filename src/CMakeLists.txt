@@ -38,7 +38,6 @@ target_link_libraries(avitab_common
 
 if(WIN32)
     target_link_libraries(avitab_common
-        atomic
         ws2_32
     )
 endif(WIN32)

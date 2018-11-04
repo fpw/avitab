@@ -25,6 +25,7 @@
 #include <vector>
 #include <atomic>
 #include <map>
+#include <thread>
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "src/environment/Environment.h"
 #include "DataCache.h"
@@ -68,10 +69,11 @@ private:
     DataCache dataCache;
     std::string pluginPath, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
-    std::atomic<Location> aircraftLocation{};
+    Location aircraftLocation{};
     std::atomic<float> lastDrawTime{};
 
     // State
+    std::mutex stateMutex;
     std::vector<MenuCallback> menuCallbacks;
     std::atomic<XPLMFlightLoopID> flightLoopId { nullptr };
     std::map<XPLMCommandRef, RegisteredCommand> commandHandlers;
