@@ -105,15 +105,22 @@ std::shared_ptr<Runway> Airport::getRunwayAndFixName(const std::string& name) {
 
     int wantHeading = std::stoi(name.substr(0, 2)) * 10;
 
+    if (name.empty()) {
+        return nullptr;
+    }
+
     // the nav data is often newer than apt.dat, so we must sometimes rename runways
     for (auto it = runways.begin(); it != runways.end(); ++it) {
+        if (it->first.empty()) {
+            continue;
+        }
+
         if (std::isalpha(name.back()) || std::isalpha(it->first.back())) {
             if (name.back() != it->first.back()) {
                 // make sure we don't rename 16L to 17C etc.
                 continue;
             }
         }
-
 
         int curHeading = std::stoi(it->first.substr(0, 2)) * 10;
         int diff = wantHeading - curHeading;
@@ -129,7 +136,7 @@ std::shared_ptr<Runway> Airport::getRunwayAndFixName(const std::string& name) {
             runways.erase(it);
             rwy->rename(name);
             runways.insert(std::make_pair(rwy->getID(), rwy));
-            return it->second;
+            return rwy;
         }
     }
     return nullptr;
