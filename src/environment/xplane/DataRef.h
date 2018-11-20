@@ -31,7 +31,7 @@ public:
 
     operator T();
 private:
-    T overrideValue;
+    T overrideValue{};
     XPLMDataRef handle = nullptr;
 };
 

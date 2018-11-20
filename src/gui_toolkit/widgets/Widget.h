@@ -83,7 +83,7 @@ private:
     bool managed = false;
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;
-    lv_style_t styleMod;
+    lv_style_t styleMod{};
     ClickHandler onClick;
     lv_signal_func_t origSigFunc = nullptr;
 };

@@ -23,24 +23,27 @@
 #include "src/Logger.h"
 
 int main() {
-    // Using the heap so we can debug destructors with log messages
-    auto env = std::make_shared<avitab::StandAloneEnvironment>();
-    env->loadConfig();
-    logger::setStdOut(env->getConfig()->getBool("/AviTab/logToStdOut"));
-    logger::init(env->getProgramPath());
-    logger::verbose("Main thread has id %d", std::this_thread::get_id());
+    try {
+        // Using the heap so we can debug destructors with log messages
+        auto env = std::make_shared<avitab::StandAloneEnvironment>();
+        env->loadConfig();
+        logger::setStdOut(env->getConfig()->getBool("/AviTab/logToStdOut"));
+        logger::init(env->getProgramPath());
+        logger::verbose("Main thread has id %d", std::this_thread::get_id());
 
-    auto aviTab = std::make_unique<avitab::AviTab>(env);
-    aviTab->startApp();
-    aviTab->toggleTablet();
+        auto aviTab = std::make_unique<avitab::AviTab>(env);
+        aviTab->startApp();
+        aviTab->toggleTablet();
 
-    // pauses until window closed
-    env->eventLoop();
+        // pauses until window closed
+        env->eventLoop();
 
-    aviTab->stopApp();
-
-    aviTab.reset();
-    env.reset();
+        aviTab->stopApp();
+        aviTab.reset();
+        env.reset();
+    } catch (const std::exception &e) {
+        logger::error("Exception: %s", e.what());
+    }
 
     logger::verbose("Quitting main");
 

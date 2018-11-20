@@ -59,7 +59,7 @@ protected:
     uint32_t *data();
 private:
     std::mutex keyMutex;
-    bool enableKeyInput;
+    bool enableKeyInput = false;
     int bufferWidth = 0, bufferHeight = 0;
     std::vector<uint32_t> buffer;
     std::queue<int> keyInput;

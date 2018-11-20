@@ -58,7 +58,7 @@ int AuthServer::start() {
     }
 
     int val = 1;
-    setsockopt(srvSock, SOL_SOCKET, SO_REUSEADDR, (char *) &val, sizeof(val));
+    (void) setsockopt(srvSock, SOL_SOCKET, SO_REUSEADDR, (char *) &val, sizeof(val));
 
     sockaddr_in serverAddr {};
     serverAddr.sin_family = AF_INET;
@@ -75,12 +75,15 @@ int AuthServer::start() {
         throw std::runtime_error("Couldn't listen on server socket");
     }
 
-    keepAlive = true;
-    serverThread = std::make_unique<std::thread>(&AuthServer::loop, this);
-
     sockaddr_in chosenAddr;
     socklen_t size = sizeof(chosenAddr);
-    getsockname(srvSock, (sockaddr *) &chosenAddr, &size);
+    if (getsockname(srvSock, (sockaddr *) &chosenAddr, &size) != 0) {
+        close(srvSock);
+        throw std::runtime_error("Couldn't get server socket port");
+    }
+
+    keepAlive = true;
+    serverThread = std::make_unique<std::thread>(&AuthServer::loop, this);
 
     return ntohs(chosenAddr.sin_port);
 }
@@ -166,7 +169,8 @@ void AuthServer::handleClient(int client) {
     } else {
         reply = "HTTP/1.1 404 NOT FOUND\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\nAviTab: 404 Not Found";
     }
-    send(client, reply.c_str(), reply.length(), 0);
+
+    (void) send(client, reply.c_str(), reply.length(), 0);
 }
 
 bool AuthServer::handleData(const std::string& data) {

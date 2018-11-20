@@ -62,14 +62,16 @@ void TabGroup::setActiveTab(size_t i) {
 void TabGroup::removeTab(size_t i) {
     lv_tabview_ext_t *ext = reinterpret_cast<lv_tabview_ext_t *>(lv_obj_get_ext_attr(obj()));
 
-    lv_mem_free(ext->tab_name_ptr[i]);
-    if (ext->tab_cnt > 0) {
-        for (uint16_t j = i; j < ext->tab_cnt; j++) {
-            ext->tab_name_ptr[j] = ext->tab_name_ptr[j + 1];
-        }
-        ext->tab_name_ptr = (const char **) lv_mem_realloc(ext->tab_name_ptr, sizeof(char *) * (ext->tab_cnt));
-        ext->tab_cnt--;
+    if (ext->tab_cnt <= 1) {
+        throw std::runtime_error("Cannot remove last tab");
     }
+
+    lv_mem_free(ext->tab_name_ptr[i]);
+    for (uint16_t j = i; j < ext->tab_cnt; j++) {
+        ext->tab_name_ptr[j] = ext->tab_name_ptr[j + 1];
+    }
+    ext->tab_name_ptr = (const char **) lv_mem_realloc(ext->tab_name_ptr, sizeof(char *) * (ext->tab_cnt));
+    ext->tab_cnt--;
     lv_btnm_set_map(ext->btns, ext->tab_name_ptr);
 
     lv_obj_t *page = lv_tabview_get_tab(obj(), i);

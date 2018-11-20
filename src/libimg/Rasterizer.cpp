@@ -140,7 +140,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
     clipBox.y0 = outStartY;
     clipBox.y1 = outStartY + outHeight;
 
-    fz_pixmap *pix;
+    fz_pixmap *pix = nullptr;
     fz_try(ctx) {
         uint8_t *outBuf = (uint8_t *) image->getPixels();
         pix = fz_new_pixmap_with_data(ctx, fz_device_bgr(ctx), outWidth, outHeight, nullptr, 1, outWidth * 4, outBuf);
@@ -191,7 +191,9 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
         throw std::runtime_error("Couldn't render page: " + std::string(fz_caught_message(ctx)));
     }
 
-    fz_drop_pixmap(ctx, pix);
+    if (pix) {
+        fz_drop_pixmap(ctx, pix);
+    }
 
     return image;
 }

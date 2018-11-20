@@ -45,7 +45,7 @@ void List::add(const std::string& entry, Symbol smb, int data) {
         return LV_RES_OK;
     });
     lv_obj_set_free_ptr(btn, this);
-    lv_obj_set_free_num(btn, data);
+    lv_obj_set_free_num(btn, (LV_OBJ_FREE_NUM_TYPE) data);
 }
 
 void List::scrollUp() {
