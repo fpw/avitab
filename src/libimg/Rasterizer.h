@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <atomic>
 #include <mupdf/fitz.h>
 #include "Image.h"
 
@@ -31,19 +32,20 @@ public:
 
     int getTileSize();
     void loadDocument(const std::string &file);
-    void loadPage(int pageNum);
+    void setPage(int pageNum);
     int getPageWidth(int zoom) const;
     int getPageHeight(int zoom) const;
     std::unique_ptr<Image> loadTile(int x, int y, int zoom);
 
     int getPageCount() const;
-    int getCurrentPageNum() const;
+    int getPageNum() const;
 
     ~Rasterizer();
 private:
     bool logLoadTimes = false;
     int tileSize = 1024;
     int totalPages = 0;
+    std::atomic_int requestedPageNum {0};
     int currentPageNum = 0;
     int currentPageWidth = -1;
     int currentPageHeight = -1;
@@ -53,6 +55,7 @@ private:
 
     float zoomToScale(int zoom) const;
     void initFitz();
+    void loadPage();
     void freeCurrentDocument();
     void freeCurrentPage();
 };

@@ -17,6 +17,7 @@
  */
 #include <stdexcept>
 #include <chrono>
+#include <thread>
 #include "Rasterizer.h"
 #include "src/Logger.h"
 
@@ -27,6 +28,7 @@ Rasterizer::Rasterizer() {
 }
 
 void Rasterizer::initFitz() {
+    logger::verbose("Init fitz in thread %d", std::this_thread::get_id());
     ctx = fz_new_context(nullptr, nullptr, FZ_STORE_UNLIMITED);
     if (!ctx) {
         throw std::runtime_error("Couldn't initialize fitz");
@@ -47,7 +49,7 @@ int Rasterizer::getTileSize() {
 void Rasterizer::loadDocument(const std::string& utf8Path) {
     freeCurrentDocument();
 
-    logger::info("Loading '%s'", utf8Path.c_str());
+    logger::info("Loading '%s in thread %d'", utf8Path.c_str(), std::this_thread::get_id());
 
     fz_try(ctx) {
         doc = fz_open_document(ctx, utf8Path.c_str());
@@ -77,18 +79,23 @@ void Rasterizer::loadDocument(const std::string& utf8Path) {
     logger::info("Document loaded, %dx%d", currentPageWidth, currentPageHeight);
 }
 
-void Rasterizer::loadPage(int pageNum) {
-    if (pageNum == currentPageNum && currentPageList != nullptr) {
+void Rasterizer::setPage(int pageNum) {
+    requestedPageNum = pageNum;
+}
+
+void Rasterizer::loadPage() {
+    logger::verbose("Load page in thread %d", std::this_thread::get_id());
+    if (requestedPageNum == currentPageNum && currentPageList != nullptr) {
         return;
     }
 
     freeCurrentPage();
 
-    logger::verbose("Loading page %d", pageNum);
+    logger::verbose("Loading page %d", (int) requestedPageNum);
 
     fz_try(ctx) {
-        currentPageList = fz_new_display_list_from_page_number(ctx, doc, pageNum);
-        currentPageNum = pageNum;
+        currentPageList = fz_new_display_list_from_page_number(ctx, doc, requestedPageNum);
+        currentPageNum = requestedPageNum;
     } fz_catch(ctx) {
         throw std::runtime_error("Cannot parse page: " + std::string(fz_caught_message(ctx)));
     }
@@ -97,7 +104,7 @@ void Rasterizer::loadPage(int pageNum) {
     currentPageWidth = rect.x1 - rect.x0;
     currentPageHeight = rect.y1 - rect.y0;
 
-    logger::verbose("Page %d loaded, %dx%d pixels", pageNum, currentPageWidth, currentPageHeight);
+    logger::verbose("Page %d rasterized to %dx%d pixels", currentPageNum, currentPageWidth, currentPageHeight);
 }
 
 int Rasterizer::getPageWidth(int zoom) const {
@@ -112,12 +119,12 @@ int Rasterizer::getPageCount() const {
     return totalPages;
 }
 
-int Rasterizer::getCurrentPageNum() const {
-    return currentPageNum;
+int Rasterizer::getPageNum() const {
+    return requestedPageNum;
 }
 
 std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
-    loadPage(currentPageNum);
+    loadPage();
 
     if (logLoadTimes) {
         logger::info("Loading tile %d, %d, %d", x, y, zoom);

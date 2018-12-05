@@ -97,7 +97,7 @@ std::string PDFSource::getUniqueTileName(int x, int y, int zoom) {
 
     std::ostringstream nameStream;
     nameStream << zoom << "/" << x << "/" << y << "/";
-    nameStream << rasterizer.getCurrentPageNum();
+    nameStream << rasterizer.getPageNum();
     return nameStream.str();
 }
 
@@ -112,16 +112,16 @@ void PDFSource::resumeLoading() {
 }
 
 void PDFSource::nextPage() {
-    int curPage = rasterizer.getCurrentPageNum();
+    int curPage = rasterizer.getPageNum();
     if (curPage + 1 < rasterizer.getPageCount()) {
-        rasterizer.loadPage(curPage + 1);
+        rasterizer.setPage(curPage + 1);
     }
 }
 
 void PDFSource::prevPage() {
-    int curPage = rasterizer.getCurrentPageNum();
+    int curPage = rasterizer.getPageNum();
     if (curPage - 1 >= 0) {
-        rasterizer.loadPage(curPage - 1);
+        rasterizer.setPage(curPage - 1);
     }
 }
 
