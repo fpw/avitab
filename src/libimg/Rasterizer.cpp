@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+#include <cmath>
 #include "Rasterizer.h"
 #include "src/Logger.h"
 
@@ -84,14 +85,13 @@ void Rasterizer::setPage(int pageNum) {
 }
 
 void Rasterizer::loadPage() {
-    logger::verbose("Load page in thread %d", std::this_thread::get_id());
     if (requestedPageNum == currentPageNum && currentPageList != nullptr) {
         return;
     }
 
     freeCurrentPage();
 
-    logger::verbose("Loading page %d", (int) requestedPageNum);
+    logger::verbose("Loading page %d in thread %d", (int) requestedPageNum, std::this_thread::get_id());
 
     fz_try(ctx) {
         currentPageList = fz_new_display_list_from_page_number(ctx, doc, requestedPageNum);
@@ -206,11 +206,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
 }
 
 float Rasterizer::zoomToScale(int zoom) const {
-    if (zoom >= 0) {
-        return 1 << zoom;
-    } else {
-        return 1.0 / (1 << -zoom);
-    }
+    return std::pow(M_SQRT2, zoom);
 }
 
 void Rasterizer::freeCurrentDocument() {

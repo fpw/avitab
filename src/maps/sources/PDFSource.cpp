@@ -36,11 +36,11 @@ PDFSource::PDFSource(const std::string& file):
 }
 
 int PDFSource::getMinZoomLevel() {
-    return -5;
+    return -10;
 }
 
 int PDFSource::getMaxZoomLevel() {
-    return 5;
+    return 10;
 }
 
 int PDFSource::getInitialZoomLevel() {
