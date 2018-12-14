@@ -89,9 +89,14 @@ void FileChooser::sortEntries() {
 }
 
 void FileChooser::showCurrentEntries() {
-    // TODO: there seems to be no way to clear a list, so create a new one
-    list = std::make_shared<List>(window);
-    initList();
+    if (!list) {
+        list = std::make_shared<List>(window);
+        list->setDimensions(window->getContentWidth(), window->getContentHeight());
+        list->centerInParent();
+        list->setCallback([this] (int data) { onListSelect(data); });
+    } else {
+        list->clear();
+    }
 
     if (!selectDirOnly) {
         list->add("Up one directory", Window::Symbol::LEFT, -1);
@@ -101,12 +106,6 @@ void FileChooser::showCurrentEntries() {
         Widget::Symbol smb = entry.isDirectory ? Window::Symbol::DIRECTORY : Window::Symbol::FILE;
         list->add(entry.utf8Name, smb, i);
     }
-}
-
-void FileChooser::initList() {
-    list->setDimensions(window->getContentWidth(), window->getContentHeight());
-    list->centerInParent();
-    list->setCallback([this] (int data) { onListSelect(data); });
 }
 
 void FileChooser::onListSelect(int data) {

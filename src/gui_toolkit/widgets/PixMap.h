@@ -34,7 +34,7 @@ public:
     void panDown();
 private:
     float PAN_FACTOR = 0.1f;
-    lv_img_t image;
+    lv_img_dsc_t image;
 };
 
 } /* namespace avitab */

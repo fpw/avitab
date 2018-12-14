@@ -54,7 +54,6 @@ private:
     std::regex filterRegex;
 
     void showDirectory(const std::string &path);
-    void initList();
     void filterEntries();
     void sortEntries();
     void showCurrentEntries();

@@ -125,14 +125,17 @@ void Widget::setBackgroundWhite() {
     lv_img_set_style(obj(), &styleMod);
 }
 
-lv_img_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
-    lv_img_t res;
-    res.header.format = LV_IMG_FORMAT_INTERNAL_RAW;
+lv_img_dsc_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
+    lv_img_dsc_t res;
+
+    res.header.always_zero = 0;
+    res.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
     res.header.w = width;
     res.header.h = height;
-    res.header.chroma_keyed = 0;
-    res.header.alpha_byte = 1;
-    res.pixel_map = reinterpret_cast<const uint8_t *>(pix);
+
+    res.data_size = width * height * sizeof(uint32_t);
+    res.data = reinterpret_cast<const uint8_t *>(pix);
+
     return res;
 }
 

@@ -48,6 +48,10 @@ void List::add(const std::string& entry, Symbol smb, int data) {
     lv_obj_set_free_num(btn, (LV_OBJ_FREE_NUM_TYPE) data);
 }
 
+void List::clear() {
+    lv_list_clean(obj());
+}
+
 void List::scrollUp() {
     lv_list_down(obj());
 }

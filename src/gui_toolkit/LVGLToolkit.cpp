@@ -252,8 +252,7 @@ lv_obj_t *LVGLToolkit::searchActiveKeyboard(lv_obj_t* obj) {
 
     lv_obj_t *screen = lv_scr_act();
     if (screen) {
-        lv_area_t commonArea{};
-        if (!lv_area_union(&commonArea, &screen->coords, &obj->coords)) {
+        if (!lv_area_is_on(&screen->coords, &obj->coords)) {
             return nullptr;
         }
     }

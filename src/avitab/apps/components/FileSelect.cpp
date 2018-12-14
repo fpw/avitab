@@ -30,17 +30,13 @@ FileSelect::FileSelect(FuncsPtr appFuncs):
     window->addSymbol(Widget::Symbol::DOWN, [this] () { onDown(); });
     window->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
 
-    initListWidget();
+    list->setDimensions(window->getContentWidth(), window->getContentHeight());
+    list->centerInParent();
+    list->setCallback([this] (int data) { onSelect(data); });
 }
 
 void FileSelect::setSelectCallback(SelectCallback cb) {
     selectCallback = cb;
-}
-
-void FileSelect::initListWidget() {
-    list->setDimensions(window->getContentWidth(), window->getContentHeight());
-    list->centerInParent();
-    list->setCallback([this] (int data) { onSelect(data); });
 }
 
 void FileSelect::setFilterRegex(const std::string ext) {
@@ -83,10 +79,7 @@ void FileSelect::sortEntries() {
 }
 
 void FileSelect::showCurrentEntries() {
-    // TODO: there seems to be no way to clear a list, so create a new one
-    list = std::make_shared<List>(window);
-    initListWidget();
-
+    list->clear();
     list->add("Up one directory", Window::Symbol::LEFT, -1);
     for (size_t i = 0; i < currentEntries.size(); i++) {
         auto &entry = currentEntries[i];

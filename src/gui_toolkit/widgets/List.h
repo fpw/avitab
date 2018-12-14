@@ -33,6 +33,8 @@ public:
     void add(const std::string &entry, int data);
     void add(const std::string &entry, Symbol smb, int data);
 
+    void clear();
+
     void scrollUp();
     void scrollDown();
 private:

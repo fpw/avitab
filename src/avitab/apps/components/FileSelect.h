@@ -48,7 +48,6 @@ private:
 
     void filterEntries();
     void sortEntries();
-    void initListWidget();
     void showCurrentEntries();
     void onDown();
     void onUp();

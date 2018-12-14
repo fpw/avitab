@@ -76,7 +76,7 @@ public:
 
 protected:
     void setObj(lv_obj_t *obj);
-    lv_img_t toLVImage(const uint32_t *pix, int width, int height);
+    lv_img_dsc_t toLVImage(const uint32_t *pix, int width, int height);
     const void *symbolToLVSymbol(Symbol symbol);
 
 private:
