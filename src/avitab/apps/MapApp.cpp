@@ -142,7 +142,7 @@ void MapApp::setMapSource(MapSource style) {
 }
 
 void MapApp::selectGeoTIFF() {
-    fileChooser = std::make_unique<FileChooser>();
+    fileChooser = std::make_unique<FileChooser>(&api());
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/GeoTIFFs/");
     fileChooser->setFilterRegex("\\.(tif|tiff)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
@@ -168,7 +168,7 @@ void MapApp::selectGeoTIFF() {
 }
 
 void MapApp::selectMercator() {
-    fileChooser = std::make_unique<FileChooser>();
+    fileChooser = std::make_unique<FileChooser>(&api());
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/Mercator/");
     fileChooser->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
@@ -194,7 +194,7 @@ void MapApp::selectMercator() {
 }
 
 void MapApp::selectEPSG() {
-    fileChooser = std::make_unique<FileChooser>();
+    fileChooser = std::make_unique<FileChooser>(&api());
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/EPSG-3857/");
     fileChooser->setDirectorySelect(true);
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {

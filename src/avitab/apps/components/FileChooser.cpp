@@ -19,10 +19,14 @@
 
 namespace avitab {
 
+FileChooser::FileChooser(App::FuncsPtr appFunctions):
+    api(appFunctions)
+{
+}
+
 void FileChooser::setCancelCallback(CancelCallback cb) {
     onCancel = cb;
 }
-
 
 void FileChooser::setSelectCallback(SelectCallback cb) {
     onSelect = cb;
@@ -46,6 +50,14 @@ void FileChooser::show(std::shared_ptr<Container> parent, const std::string &cap
         if (onCancel) {
             onCancel();
         }
+    });
+    list = std::make_shared<List>(window);
+    list->setDimensions(window->getContentWidth(), window->getContentHeight());
+    list->centerInParent();
+    list->setCallback([this] (int data) {
+        api->executeLater([this, data] {
+            onListSelect(data);
+        });
     });
     showDirectory(basePath);
 }
@@ -89,14 +101,7 @@ void FileChooser::sortEntries() {
 }
 
 void FileChooser::showCurrentEntries() {
-    if (!list) {
-        list = std::make_shared<List>(window);
-        list->setDimensions(window->getContentWidth(), window->getContentHeight());
-        list->centerInParent();
-        list->setCallback([this] (int data) { onListSelect(data); });
-    } else {
-        list->clear();
-    }
+    list->clear();
 
     if (!selectDirOnly) {
         list->add("Up one directory", Window::Symbol::LEFT, -1);

@@ -32,7 +32,11 @@ FileSelect::FileSelect(FuncsPtr appFuncs):
 
     list->setDimensions(window->getContentWidth(), window->getContentHeight());
     list->centerInParent();
-    list->setCallback([this] (int data) { onSelect(data); });
+    list->setCallback([this] (int data) {
+        api().executeLater([this, data] {
+            onSelect(data);
+        });
+    });
 }
 
 void FileSelect::setSelectCallback(SelectCallback cb) {

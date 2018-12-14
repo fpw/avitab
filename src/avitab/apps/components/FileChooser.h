@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/platform/Platform.h"
@@ -35,6 +36,8 @@ public:
     using CancelCallback = std::function<void(void)>;
     using SelectCallback = std::function<void(const std::string &)>;
 
+    FileChooser(App::FuncsPtr appFunctions);
+
     void setCancelCallback(CancelCallback cb);
     void setSelectCallback(SelectCallback cb);
     void setFilterRegex(const std::string &regex);
@@ -42,6 +45,7 @@ public:
     void setDirectorySelect(bool dirSel);
     void show(std::shared_ptr<Container> parent, const std::string &caption);
 private:
+    App::FuncsPtr api{};
     bool selectDirOnly = false;
     std::shared_ptr<Window> window;
     std::shared_ptr<List> list;
