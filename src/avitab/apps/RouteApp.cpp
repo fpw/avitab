@@ -192,8 +192,16 @@ std::string RouteApp::toShortRouteDescription() {
             }
         }
 
-        if (to && to != departureAirport && to != arrivalAirport) {
+        if (to) {
+            if (to == departureAirport || to == arrivalAirport) {
+                desc << " #99CC00";
+            }
+
             desc << " " << to->getID();
+
+            if (to == departureAirport || to == arrivalAirport) {
+                desc << "#";
+            }
         }
     });
 
