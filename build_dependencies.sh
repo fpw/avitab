@@ -88,6 +88,7 @@ if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPROJ_TESTS=OFF -DBUILD_LIBPROJ_SHARED=OFF -DCMAKE_C_FLAGS=-fPIC -DCMAKE_INSTALL_PREFIX=$OUTDIR -DLIBDIR=$OUTDIR/lib -DINCLUDEDIR=$OUTDIR/include -DBINDIR=$OUTDIR/bin ..
     cd src
     make -j10 install
+    cp $OUTDIR/lib/libproj.a $OUTDIR/lib/libproj_5_2.a
     cd ../../..
 fi
 if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then echo "Failed"; exit; fi
