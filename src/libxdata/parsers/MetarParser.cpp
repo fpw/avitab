@@ -34,10 +34,18 @@ void MetarParser::loadMetar() {
 }
 
 void MetarParser::parseLine() {
-    if (curData.timestamp.empty()) {
-        curData.timestamp = parser.restOfLine();
+    auto firstWord = parser.parseWord();
+
+    if (firstWord.empty()) {
+        return;
+    }
+
+    char firstChar = firstWord.front();
+
+    if (std::isdigit(firstChar)) {
+        curData.timestamp = firstWord;
     } else {
-        curData.icaoCode = parser.parseWord();
+        curData.icaoCode = firstWord;
         curData.metar = parser.restOfLine();
         acceptor(curData);
         curData = {};

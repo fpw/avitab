@@ -246,13 +246,16 @@ std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
     const auto &timestamp = airport->getMetarTimestamp();
     const auto &metar = airport->getMetarString();
 
-    if (timestamp.empty() || metar.empty()) {
+    if (metar.empty()) {
         return "No weather information available";
     }
 
     std::stringstream str;
-    str << "Weather, updated " << timestamp << "\n";
-    str << metar << "\n";
+    str << "Weather";
+    if (!timestamp.empty()) {
+        str << ", updated " << timestamp;
+    }
+    str << ":\n" << metar << "\n";
     return str.str();
 
 }
