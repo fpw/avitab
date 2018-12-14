@@ -41,15 +41,14 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
 
     lv_kb_set_ok_action(keys, [] (lv_obj_t *ref) -> lv_res_t {
         Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_free_ptr(ref));
-        bool handled = false;
         if (us) {
             if (us->onOk) {
                 us->onOk();
-                handled = true;
+                // to prevent LVGL from adding the Ok symbol to our TA
+                lv_kb_set_ta(ref, nullptr);
             }
-            lv_kb_set_ta(ref, us->targetText->obj());
         }
-        return handled ? LV_RES_OK : LV_RES_INV;
+        return LV_RES_OK;
     });
 
     setObj(keys);

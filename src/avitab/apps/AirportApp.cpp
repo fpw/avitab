@@ -52,7 +52,12 @@ void AirportApp::resetLayout() {
     keys = std::make_shared<Keyboard>(searchWindow, searchField);
     keys->hideEnterKey();
     keys->setOnCancel([this] { searchField->setText(""); });
-    keys->setOnOk([this] { onSearchEntered(searchField->getText()); });
+    keys->setOnOk([this] {
+        api().executeLater([this] {
+            keys->setTarget(searchField);
+            onSearchEntered(searchField->getText());
+        });
+    });
     keys->setDimensions(searchWindow->getContentWidth(), keys->getHeight());
     keys->setPosition(0, 120);
 }
