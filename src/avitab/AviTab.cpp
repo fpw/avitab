@@ -177,7 +177,6 @@ void AviTab::createLayout() {
         if (!loadLabel) {
             loadLabel = std::make_shared<Label>(screen, "Loading nav data...");
             loadLabel->centerInParent();
-            screen->activate();
         }
 
         // try again later
@@ -199,8 +198,6 @@ void AviTab::createLayout() {
     if (!appLauncher) {
         showAppLauncher();
     }
-
-    screen->activate();
 }
 
 void AviTab::showAppLauncher() {

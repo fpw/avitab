@@ -22,12 +22,9 @@ namespace avitab {
 Screen::Screen():
     Widget(nullptr)
 {
-    lv_obj_t *screen = lv_obj_create(nullptr, nullptr);
+    lv_obj_t *screen = lv_scr_act();
     setObj(screen);
-}
-
-void Screen::activate() {
-    lv_scr_load(obj());
+    setManaged();
 }
 
 } /* namespace avitab */
