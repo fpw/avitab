@@ -26,6 +26,7 @@ namespace maps {
 OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
     mapImage(stitchedMap->getPreRotatedImage()),
     tileSource(stitchedMap->getTileSource()),
+    copyrightStamp("Inconsolata.ttf"),
     stitcher(stitchedMap)
 {
     /*

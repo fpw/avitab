@@ -68,6 +68,7 @@ public:
     void resumeEnvironmentJobs();
 
     // Can be called from any thread
+    virtual std::string getFontDirectory() = 0;
     virtual std::string getProgramPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;

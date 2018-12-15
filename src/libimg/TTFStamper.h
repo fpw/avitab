@@ -20,28 +20,33 @@
 
 #include <string>
 #include <vector>
-#include <stb/stb_truetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include "Image.h"
 
 namespace img {
 
 class TTFStamper {
 public:
-    TTFStamper();
+    TTFStamper(const std::string &fontName);
     void setSize(float size);
     void setText(const std::string &newText);
     void setColor(uint32_t textColor);
     void applyStamp(Image &dst, int angle);
+    static void setFontDirectory(const std::string &dir);
+    ~TTFStamper();
 private:
+    int fontSize = 28;
+    FT_Library ft{};
+    FT_Face fontFace{};
+
     std::vector<uint8_t> fontData;
-    stbtt_fontinfo font;
-    float fontSize = 28;
     uint32_t color = 0x808080;
     std::string text;
     Image stamp;
 
-    void loadFont();
-    size_t getTextWidth(const std::string &in, float size);
+    void loadInternalFont();
+    size_t getTextWidth(const std::string &in);
 };
 
 const char* GetDefaultCompressedFontDataTTFBase85();

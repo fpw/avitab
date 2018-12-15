@@ -170,6 +170,36 @@ void Image::drawPixel(int x, int y, uint32_t color) {
     data[y * width + x] = color;
 }
 
+void Image::blendPixel(int x, int y, uint32_t foreCol) {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return;
+    }
+
+    // background
+    uint32_t *data = getPixels();
+    uint32_t color = data[y * width + x];
+    float ba = (int) ((color >> 24) & 0xFF) / 255.0;
+    float br = (int) ((color >> 16) & 0xFF) / 255.0;
+    float bg = (int) ((color >>  8) & 0xFF) / 255.0;
+    float bb = (int) ((color >>  0) & 0xFF) / 255.0;
+
+    // foreground
+    float fa = (int) ((foreCol >> 24) & 0xFF) / 255.0;
+    float fr = (int) ((foreCol >> 16) & 0xFF) / 255.0;
+    float fg = (int) ((foreCol >>  8) & 0xFF) / 255.0;
+    float fb = (int) ((foreCol >>  0) & 0xFF) / 255.0;
+
+    float a = fa + ba * (1 - fa);
+    float r = (fr * fa + br * ba * (1 - fa)) / a;
+    float g = (fg * fa + bg * ba * (1 - fa)) / a;
+    float b = (fb * fa + bb * ba * (1 - fa)) / a;
+
+    data[y * width + x] =  (uint8_t(a * 255) << 24)
+            | (uint8_t(r * 255) << 16)
+            | (uint8_t(g * 255) << 8)
+            | (uint8_t(b * 255) << 0);
+}
+
 void Image::drawLine(int x1, int y1, int x2, int y2, uint32_t color) {
     int dx = std::abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
     int dy = -std::abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
@@ -295,12 +325,9 @@ void Image::blendImage(const Image& src, int dstX, int dstY, double angle) {
                 continue;
             }
 
-            // TODO: interpolate from neighbors
-
             const uint32_t *s = src.getPixels() + y2 * srcWidth + x2;
-            uint32_t *d = getPixels() + y * width + x;
             if (*s & 0xFF000000) {
-                *d = *s;
+                blendPixel(x, y, *s);
             }
         }
     }
@@ -313,7 +340,6 @@ void Image::blendImage270(const Image& src, int dstX, int dstY) {
         return;
     }
 
-    uint32_t *dstPtr = getPixels();
     const uint32_t *srcPtr = src.getPixels();
 
     for (int y = dstY; y < dstY + srcWidth; y++) {
@@ -325,7 +351,7 @@ void Image::blendImage270(const Image& src, int dstX, int dstY) {
             }
             uint32_t srcColor = srcPtr[srcY * srcWidth + srcX];
             if (srcColor & 0xFF000000) {
-                dstPtr[y * width + x] = 0xFF000000 | srcColor;
+                blendPixel(x, y, srcColor);
             }
         }
     }
@@ -338,7 +364,7 @@ void Image::blendImage0(const Image& src, int dstX, int dstY) {
         return;
     }
 
-    uint32_t *dstPtr = getPixels();
+    //uint32_t *dstPtr = getPixels();
     const uint32_t *srcPtr = src.getPixels();
 
     for (int y = dstY; y < dstY + srcHeight; y++) {
@@ -350,7 +376,7 @@ void Image::blendImage0(const Image& src, int dstX, int dstY) {
             }
             uint32_t srcColor = srcPtr[srcY * srcWidth + srcX];
             if (srcColor & 0xFF000000) {
-                dstPtr[y * width + x] = 0xFF000000 | srcColor;
+                blendPixel(x, y, srcColor);
             }
         }
     }

@@ -62,6 +62,10 @@ std::string StandAloneEnvironment::getEarthTexturePath() {
     return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
 
+std::string StandAloneEnvironment::getFontDirectory() {
+    return xplaneRootPath + "/Resources/fonts/";
+}
+
 void StandAloneEnvironment::eventLoop() {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();

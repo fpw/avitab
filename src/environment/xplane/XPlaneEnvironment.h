@@ -46,6 +46,7 @@ public:
     std::string getAirplanePath() override;
 
     // Can be called from any thread
+    std::string getFontDirectory() override;
     std::string getProgramPath() override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;

@@ -27,7 +27,8 @@ namespace navigraph {
 
 NavigraphAPI::NavigraphAPI(const std::string &cacheDirectory):
     cacheDirectory(cacheDirectory),
-    oidc(std::make_shared<OIDCClient>("charts-avitab", NAVIGRAPH_CLIENT_SECRET))
+    oidc(std::make_shared<OIDCClient>("charts-avitab", NAVIGRAPH_CLIENT_SECRET)),
+    stamper("DejaVuSans.ttf")
 {
     if (!platform::fileExists(cacheDirectory)) {
         platform::mkdir(cacheDirectory);
@@ -108,6 +109,7 @@ std::shared_ptr<APICall<bool>> NavigraphAPI::init() {
             demoMode = false;
         }
         loadAirports();
+        stamper.setSize(20);
         stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
         return demoMode;
     });

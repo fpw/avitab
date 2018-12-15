@@ -17,7 +17,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/avitab/CMakeLists.txt)
 include_directories(
     "${PROJECT_SOURCE_DIR}"
     "${PROJECT_SOURCE_DIR}/build-third/include"
-    "${PROJECT_SOURCE_DIR}/lib/")
+    "${PROJECT_SOURCE_DIR}/lib/"
+    "${PROJECT_SOURCE_DIR}/lib/mupdf/thirdparty/freetype/include")
 
 add_definitions(-DCURL_STATICLIB)
 

@@ -243,6 +243,10 @@ std::string XPlaneEnvironment::getEarthTexturePath() {
     return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
 
+std::string XPlaneEnvironment::getFontDirectory() {
+    return xplaneRootPath + "/Resources/fonts/";
+}
+
 void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     registerEnvironmentCallback(cb);
 }

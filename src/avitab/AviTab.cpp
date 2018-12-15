@@ -18,6 +18,7 @@
 #include <climits>
 #include <future>
 #include "AviTab.h"
+#include "src/libimg/TTFStamper.h"
 #include "src/Logger.h"
 #include "src/environment/Config.h"
 #include "src/avitab/apps/HeaderApp.h"
@@ -29,6 +30,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
+    img::TTFStamper::setFontDirectory(env->getFontDirectory());
     // runs in environment thread, called by PluginStart
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();

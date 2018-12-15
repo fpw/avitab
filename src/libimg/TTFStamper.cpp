@@ -19,20 +19,33 @@
 #include <cmath>
 #include "TTFStamper.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb/stb_truetype.h>
-#pragma GCC diagnostic pop
+namespace {
+std::string fontDir;
+}
 
 namespace img {
 
-TTFStamper::TTFStamper() {
-    loadFont();
+TTFStamper::TTFStamper(const std::string &fontName) {
+    auto error = FT_Init_FreeType(&ft);
+    if (error) {
+        throw std::runtime_error("Couldn't init freetype");
+    }
+
+    error = FT_New_Face(ft, platform::UTF8ToNative(fontDir + fontName).c_str(), 0, &fontFace);
+    if (error) {
+        logger::verbose("Couldn't load desired font, using fallback font");
+        loadInternalFont();
+    }
+    setSize(fontSize);
 }
 
-void TTFStamper::loadFont() {
+void TTFStamper::setFontDirectory(const std::string& dir) {
+    fontDir = dir;
+}
+
+void TTFStamper::loadInternalFont() {
     const char *encodedFont = GetDefaultCompressedFontDataTTFBase85();
 
     // decode
@@ -45,57 +58,53 @@ void TTFStamper::loadFont() {
     fontData.resize(uncompressedSize);
     stb_decompress(fontData.data(), compressedData.data(), compressedData.size());
 
-    if (stbtt_InitFont(&font, fontData.data(), 0) == 0) {
+    auto error = FT_New_Memory_Face(ft, fontData.data(), fontData.size(), 0, &fontFace);
+    if (error) {
         throw std::runtime_error("Couldn't load font");
     }
 }
 
 void TTFStamper::setSize(float size) {
     fontSize = size;
+    FT_Set_Pixel_Sizes(fontFace, 0, size);
 }
 
 void TTFStamper::setText(const std::string& newText) {
     if (newText == text) {
         return;
     }
-
     text = newText;
-    int width = getTextWidth(text, fontSize);
+    int width = getTextWidth(text);
     if (width == 0) {
         stamp.resize(0, 0, 0);
         return;
     }
+    stamp.resize(width, fontSize, COLOR_TRANSPARENT);
 
-    stamp.resize(width, std::ceil(fontSize), COLOR_TRANSPARENT);
+    auto slot = fontFace->glyph;
+    double baseline = fontFace->ascender * fontSize / fontFace->units_per_EM;
 
-    float scale = stbtt_ScaleForPixelHeight(&font, fontSize);
-    int ascent;
-    stbtt_GetFontVMetrics(&font, &ascent, 0, 0);
-    int baseline = ascent * scale;
+    size_t penX = 0;
+    for (size_t i = 0; i < newText.size(); i++) {
+        auto error = FT_Load_Char(fontFace, newText[i], FT_LOAD_RENDER);
+        if (error) {
+            continue;
+        }
 
-    float xPos = 2;
-    for (size_t i = 0; i < text.size(); i++) {
-        int advance, leftSideBearing, x0, x1, y0, y1;
-        float xShift = xPos - std::floor(xPos);
-        stbtt_GetCodepointHMetrics(&font, text[i], &advance, &leftSideBearing);
-        stbtt_GetCodepointBitmapBoxSubpixel(&font, text[i], scale, scale, xShift, 0, &x0, &y0, &x1, &y1);
+        size_t charWidth = slot->bitmap.width;
+        size_t charHeight = slot->bitmap.rows;
 
-        uint8_t glyph[y1 - y0][x1 - x0];
-        stbtt_MakeCodepointBitmapSubpixel(&font, &glyph[0][0], x1 - x0, y1 - y0, x1 - x0, scale, scale, xShift, 0, text[i]);
-        for (int y = 0; y < y1 - y0; y++) {
-            for (int x = 0; x < x1 - x0; x++) {
-                if (glyph[y][x]) {
-                    int px = xPos + x0 + x;
-                    int py = baseline + 1 + y0 + y;
-                    stamp.drawPixel(px, py, glyph[y][x] << 24 | color);
+        for (size_t y = 0; y < charHeight; y++) {
+            for (size_t x = 0; x < charWidth; x++) {
+                auto val = slot->bitmap.buffer[y * charWidth + x];
+                if (val) {
+                    int px = penX + slot->bitmap_left + x;
+                    int py = baseline - slot->bitmap_top + y;
+                    stamp.drawPixel(px, py, val << 24 | color);
                 }
             }
         }
-
-        xPos += advance * scale;
-        if (i + 1 < text.size()) {
-            xPos += scale * stbtt_GetCodepointKernAdvance(&font, text[i], text[i + 1]);
-        }
+        penX += slot->advance.x / 64;
     }
 }
 
@@ -103,26 +112,24 @@ void TTFStamper::setColor(uint32_t textColor) {
     color = textColor;
 }
 
-size_t TTFStamper::getTextWidth(const std::string& in, float size) {
+size_t TTFStamper::getTextWidth(const std::string& in) {
     if (in.empty()) {
         return 0;
     }
 
-    float scale = stbtt_ScaleForPixelHeight(&font, size);
-    int ascent;
-    stbtt_GetFontVMetrics(&font, &ascent, 0, 0);
+    size_t xPos = 0;
+    auto slot = fontFace->glyph;
 
-    float xPos = 2;
     for (size_t i = 0; i < in.size(); i++) {
-        int advance, leftSideBearing;
-        stbtt_GetCodepointHMetrics(&font, in[i], &advance, &leftSideBearing);
-        xPos += advance * scale;
-        if (i + 1 < in.size()) {
-            xPos += scale * stbtt_GetCodepointKernAdvance(&font, in[i], in[i + 1]);
+        FT_UInt glyphIndex = FT_Get_Char_Index(fontFace, in[i]);
+        auto error = FT_Load_Glyph(fontFace, glyphIndex, FT_LOAD_BITMAP_METRICS_ONLY);
+        if (error) {
+            continue;
         }
-    }
 
-    return std::ceil(xPos);
+        xPos += slot->advance.x / 64;
+    }
+    return xPos;
 }
 
 void TTFStamper::applyStamp(Image &dst, int angle) {
@@ -131,6 +138,11 @@ void TTFStamper::applyStamp(Image &dst, int angle) {
     } else if (angle == 0) {
         dst.blendImage0(stamp, dst.getWidth() - stamp.getWidth() - 5, dst.getHeight() - 5 - stamp.getHeight());
     }
+}
+
+TTFStamper::~TTFStamper() {
+    FT_Done_Face(fontFace);
+    FT_Done_FreeType(ft);
 }
 
 // The following code is taken from ImgUi

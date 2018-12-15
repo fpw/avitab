@@ -65,6 +65,7 @@ public:
     void blendImage270(const Image &src, int dstX, int dstY);
     void blendImage0(const Image &src, int dstX, int dstY);
     void alphaBlend(uint32_t color);
+    void blendPixel(int x, int y, uint32_t color);
 
     // the source image must be square with edge len = max(srcWidth, srcHeight)
     void rotate0(Image &dst);
