@@ -54,7 +54,6 @@ void AirportApp::resetLayout() {
     keys->setOnCancel([this] { searchField->setText(""); });
     keys->setOnOk([this] {
         api().executeLater([this] {
-            keys->setTarget(searchField);
             onSearchEntered(searchField->getText());
         });
     });

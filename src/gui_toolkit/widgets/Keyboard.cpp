@@ -44,8 +44,6 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
         if (us) {
             if (us->onOk) {
                 us->onOk();
-                // to prevent LVGL from adding the Ok symbol to our TA
-                lv_kb_set_ta(ref, nullptr);
             }
         }
         return LV_RES_OK;

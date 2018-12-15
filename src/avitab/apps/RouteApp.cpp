@@ -56,7 +56,6 @@ void RouteApp::showDeparturePage() {
     });
 
     keys->setOnOk([this] () { api().executeLater([this] () {
-        keys->setTarget(departureField);
         if (checkBox->isChecked()) {
             airwayLevel = xdata::AirwayLevel::UPPER;
         } else {
@@ -106,7 +105,6 @@ void RouteApp::showArrivalPage() {
     });
 
     keys->setOnOk([this] () { api().executeLater([this] () {
-        keys->setTarget(arrivalField);
         onArrivalEntered(arrivalField->getText());
     });});
 
