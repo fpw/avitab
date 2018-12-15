@@ -25,7 +25,6 @@ namespace avitab {
 class Screen: public Widget {
 public:
     Screen();
-    void activate();
 };
 
 } /* namespace avitab */

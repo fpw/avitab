@@ -23,6 +23,11 @@ Screen::Screen():
     Widget(nullptr)
 {
     lv_obj_t *screen = lv_scr_act();
+
+    lv_theme_t * th = lv_theme_get_current();
+    if(th) {
+        lv_obj_set_style(screen, th->bg);
+    }
     setObj(screen);
     setManaged();
 }
