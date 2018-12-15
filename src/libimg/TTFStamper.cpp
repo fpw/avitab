@@ -82,7 +82,7 @@ void TTFStamper::setText(const std::string& newText) {
     stamp.resize(width, fontSize, COLOR_TRANSPARENT);
 
     auto slot = fontFace->glyph;
-    double baseline = fontFace->ascender * fontSize / fontFace->units_per_EM;
+    double baseline = std::abs(fontFace->descender) * fontSize / fontFace->units_per_EM;
 
     size_t penX = 0;
     for (size_t i = 0; i < newText.size(); i++) {
@@ -97,11 +97,9 @@ void TTFStamper::setText(const std::string& newText) {
         for (size_t y = 0; y < charHeight; y++) {
             for (size_t x = 0; x < charWidth; x++) {
                 auto val = slot->bitmap.buffer[y * charWidth + x];
-                if (val) {
-                    int px = penX + slot->bitmap_left + x;
-                    int py = baseline - slot->bitmap_top + y;
-                    stamp.drawPixel(px, py, val << 24 | color);
-                }
+                int px = penX + slot->bitmap_left + x;
+                int py = fontSize - slot->bitmap_top - baseline + y;
+                stamp.drawPixel(px, py, val << 24 | color);
             }
         }
         penX += slot->advance.x / 64;
