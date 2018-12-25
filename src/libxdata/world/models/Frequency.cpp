@@ -15,6 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sstream>
+#include <iomanip>
 #include "Frequency.h"
 
 namespace xdata {
@@ -32,9 +34,11 @@ const std::string& Frequency::getDescription() const {
 
 std::string Frequency::getFrequencyString() const {
     if (unit == Unit::MHZ) {
+        std::ostringstream str;
         int beforeDot = frequency / 100;
         int afterDot = frequency % 100;
-        return std::to_string(beforeDot) + "." + std::to_string(afterDot) + " MHz";
+        str << beforeDot << "." << std::setw(2) << std::setfill('0') << afterDot << " MHz";
+        return str.str();
     } else if (unit == Unit::KHZ) {
         return std::to_string(frequency) + " kHz";
     } else {
