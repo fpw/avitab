@@ -36,7 +36,7 @@ private:
     std::shared_ptr<App> childApp;
 
     void showFileSelect();
-    void onSelect(const std::vector<platform::DirEntry> &entries, size_t i);
+    void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
 };
 
 } /* namespace avitab */

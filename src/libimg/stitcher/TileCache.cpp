@@ -113,6 +113,7 @@ bool TileCache::hasWork() {
 }
 
 void TileCache::loadLoop() {
+    logger::verbose("TileCache spawned thread %d", std::this_thread::get_id());
     while (keepAlive) {
         TileCoords coords;
         bool coordsValid = false;
@@ -147,6 +148,7 @@ void TileCache::loadLoop() {
 
         flushCache();
     }
+    logger::verbose("TileCache ending thread %d", std::this_thread::get_id());
 }
 
 void TileCache::loadAndCacheTile(int x, int y, int zoom) {

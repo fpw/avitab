@@ -30,6 +30,7 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/PDFSource.h"
+#include "src/platform/Platform.h"
 
 namespace avitab {
 
@@ -37,7 +38,7 @@ class PDFViewer: public App {
 public:
     PDFViewer(FuncsPtr appFuncs);
     void showFile(const std::string &nameUtf8);
-    void showDirectory(const std::vector<std::string> &fileNamesUtf8, size_t startIndex);
+    void showDirectory(const std::string &dirPath, const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
     void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<Window> window;

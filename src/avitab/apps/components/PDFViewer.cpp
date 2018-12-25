@@ -49,14 +49,26 @@ void PDFViewer::showFile(const std::string& nameUtf8) {
     loadCurrentFile();
 }
 
-void PDFViewer::showDirectory(const std::vector<std::string>& fileNamesUtf8, size_t startIndex) {
-    fileNames = fileNamesUtf8;
-    fileIndex = startIndex;
+void PDFViewer::showDirectory(const std::string &dirPath, const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
+    fileNames.clear();
+
+    for (size_t i = 0; i < entries.size(); i++) {
+        if (i == chosenIndex) {
+            fileIndex = fileNames.size();
+        }
+        if (!entries[i].isDirectory) {
+            fileNames.push_back(dirPath + entries[i].utf8Name);
+        }
+    }
 
     loadCurrentFile();
 }
 
 void PDFViewer::loadCurrentFile() {
+    if (fileIndex >= fileNames.size()) {
+        throw std::runtime_error("File index out of range");
+    }
+
     map.reset();
     stitcher.reset();
     source.reset();

@@ -74,16 +74,11 @@ void PlaneManualApp::showFileSelect() {
     childApp = std::move(fileSelect);
 }
 
-void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t i) {
+void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
     currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
 
-    std::vector<std::string> files;
-    for (auto &entry: entries) {
-        files.push_back(currentPath + entry.utf8Name);
-    }
-
     auto pdfApp = startSubApp<PDFViewer>();
-    pdfApp->showDirectory(files, i);
+    pdfApp->showDirectory(currentPath, entries, chosenIndex);
     pdfApp->setOnExit([this] () {
         showFileSelect();
         childApp->show();
