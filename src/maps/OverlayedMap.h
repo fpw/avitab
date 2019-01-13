@@ -26,6 +26,13 @@
 
 namespace maps {
 
+struct OverlayConfig {
+    bool drawAircraft = true;
+    bool drawAirports = false;
+    bool drawVORs = false;
+    bool drawNDBs = false;
+};
+
 class OverlayedMap {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
@@ -51,6 +58,9 @@ public:
     void setCalibrationPoint2(double lat, double lon);
     int getCalibrationStep() const;
 
+    void setOverlayConfig(const OverlayConfig &conf);
+    OverlayConfig getOverlayConfig() const;
+
     // Call periodically to refresh tiles that were pending
     void doWork();
 
@@ -61,6 +71,7 @@ private:
     OverlaysDrawnCallback onOverlaysDrawn;
 
     // Overlays
+    OverlayConfig overlayConfig{};
     std::shared_ptr<xdata::World> navWorld;
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
@@ -71,7 +82,9 @@ private:
     std::shared_ptr<img::Stitcher> stitcher;
 
     void drawOverlays();
+    void drawAircraftOverlay();
     void drawDataOverlays();
+    void drawCalibrationOverlay();
     void drawAirport(const xdata::Airport &airport, double scale);
     void drawFix(const xdata::Fix &fix, double scale);
 

@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <sstream>
 #include <fstream>
 #include <iomanip>
 #include <chrono>
@@ -109,6 +110,7 @@ std::shared_ptr<APICall<bool>> NavigraphAPI::init() {
             demoMode = false;
         }
         loadAirports();
+        loadCycle();
         stamper.setSize(20);
         stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
         return demoMode;
@@ -208,6 +210,12 @@ void NavigraphAPI::loadAirports() {
     jsonStream >> *airportJson;
 }
 
+void NavigraphAPI::loadCycle() {
+    auto cycleData = oidc->get("https://charts.api.navigraph.com/1/cycles/current");
+    nlohmann::json cycleJson = nlohmann::json::parse(cycleData);
+    cycleId = cycleJson.at("id");
+}
+
 bool NavigraphAPI::hasChartsSubscription() {
     std::string reply;
     try {
@@ -250,6 +258,10 @@ bool NavigraphAPI::canAccess(const std::string& icao) {
     } else {
         return true;
     }
+}
+
+std::string NavigraphAPI::getEnrouteKey() {
+    return cycleId;
 }
 
 std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {

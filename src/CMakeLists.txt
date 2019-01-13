@@ -5,6 +5,8 @@ add_library(avitab_common "${CMAKE_CURRENT_LIST_DIR}/Logger.cpp")
 add_library(avitab_xplane "")
 add_library(avitab_standalone "")
 
+add_definitions(-DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
+
 include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libnavigraph/CMakeLists.txt)
@@ -49,6 +51,7 @@ add_library(avitab_plugin SHARED
 )
 
 if(WIN32)
+    add_definitions(-DIBM=1)
     target_link_libraries(avitab_plugin
         -static
         -static-libgcc
@@ -60,6 +63,7 @@ if(WIN32)
         opengl32
     )
 elseif(APPLE)
+    add_definitions(-DAPL=1)
     target_link_libraries(avitab_plugin
         avitab_xplane
         avitab_common
@@ -67,6 +71,7 @@ elseif(APPLE)
         "-framework OpenGL"
     )
 elseif(UNIX)
+    add_definitions(-DLIN=1)
     target_link_libraries(avitab_plugin
         -static-libgcc
         -static-libstdc++

@@ -81,7 +81,7 @@ fi
 if [ ! -f $OUTDIR/lib/libtiff.a ]; then echo "Failed"; exit; fi
 
 echo "Building libproj..."
-if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then
+if [ ! -f $OUTDIR/lib/libproj_5_2.a ] || [ ! -f $OUTDIR/lib/libproj.a ]; then
     cd proj
     mkdir -p build
     cd build
@@ -89,6 +89,7 @@ if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then
     cd src
     make -j10 install
     cp $OUTDIR/lib/libproj.a $OUTDIR/lib/libproj_5_2.a
+    cp $OUTDIR/lib/libproj_5_2.a $OUTDIR/lib/libproj.a
     cd ../../..
 fi
 if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then echo "Failed"; exit; fi

@@ -21,16 +21,3 @@
 #define AVITAB_VERSION_PATCH @AviTab_VERSION_PATCH@
 #define AVITAB_VERSION_STR "@AviTab_VERSION_MAJOR@.@AviTab_VERSION_MINOR@.@AviTab_VERSION_PATCH@"
 #define NAVIGRAPH_CLIENT_SECRET "@NAVIGRAPH_SECRET@"
-
-#if defined _WIN32
-#   define IBM 1
-#elif defined __linux
-#   define LIN 1
-#elif defined __APPLE__
-#   define APL 1
-#endif
-
-#define XPLM301
-#define XPLM300
-#define XPLM210
-#define XPLM200

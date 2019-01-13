@@ -55,6 +55,7 @@ public:
     void cancelAuth();
     bool isInDemoMode() const;
     bool hasChartsFor(const std::string &icao);
+    std::string getEnrouteKey();
     void logout();
 
     void stop();
@@ -65,6 +66,7 @@ private:
     std::string cacheDirectory;
     std::shared_ptr<OIDCClient> oidc;
     std::shared_ptr<nlohmann::json> airportJson;
+    std::string cycleId;
     img::TTFStamper stamper;
     bool demoMode = true;
 
@@ -80,6 +82,7 @@ private:
     void workLoop();
 
     void loadAirports();
+    void loadCycle();
     bool hasChartsSubscription();
     bool canAccess(const std::string &icao);
     std::shared_ptr<img::Image> getChartImageFromURL(const std::string &url);

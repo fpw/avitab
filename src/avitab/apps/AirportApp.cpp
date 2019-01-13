@@ -398,6 +398,13 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
         TabPage &tab = findPage(page);
         tab.mapStitcher->rotateRight();
     });
+    tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
+        TabPage &tab = findPage(page);
+        auto conf = tab.map->getOverlayConfig();
+        conf.drawAircraft = !conf.drawAircraft;
+        tab.map->setOverlayConfig(conf);
+        tab.aircraftButton->setToggleState(conf.drawAircraft);
+    });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
     tab.pixMap = std::make_shared<PixMap>(tab.window);
@@ -414,6 +421,8 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
     tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
     tab.map->setNavWorld(api().getNavWorld());
+
+    tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawAircraft);
 
     auto geoRef = chart->getGeoReference();
     if (geoRef.valid) {

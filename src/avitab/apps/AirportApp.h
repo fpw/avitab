@@ -47,6 +47,7 @@ private:
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
+        std::shared_ptr<Button> aircraftButton;
         std::shared_ptr<xdata::Airport> airport;
 
         std::string requestedList = "ROOT";

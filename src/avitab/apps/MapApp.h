@@ -25,6 +25,7 @@
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Checkbox.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/MessageBox.h"
@@ -51,6 +52,8 @@ private:
         MERCATOR,
         GEOTIFF,
         EPSG3857,
+        NAVIGRAPH_HIGH,
+        NAVIGRAPH_LOW,
     };
 
     std::unique_ptr<FileChooser> fileChooser;
@@ -62,8 +65,10 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;
-    std::shared_ptr<Container> settingsContainer, chooserContainer;
-    std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton;
+    std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
+    std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton;
+    std::shared_ptr<Label> overlayLabel;
+    std::shared_ptr<Checkbox> aircraftCheckbox, airportCheckbox, vorCheckbox, ndbCheckbox;
 
     std::unique_ptr<MessageBox> messageBox;
     std::shared_ptr<TextArea> coordsField;
@@ -76,15 +81,18 @@ private:
     int panPosX = 0, panPosY = 0;
 
     void createSettingsLayout();
+    void showOverlaySettings();
     void setMapSource(MapSource style);
     void setTileSource(std::shared_ptr<img::TileSource> source);
     void selectGeoTIFF();
     void selectMercator();
     void selectEPSG();
+    void selectNavigraph(bool highEnroute);
 
     bool onTimer();
     void onRedrawNeeded();
     void onSettingsButton();
+    void onOverlaysButton();
     void onMapPan(int x, int y, bool start, bool end);
     void onPlusButton();
     void onMinusButton();

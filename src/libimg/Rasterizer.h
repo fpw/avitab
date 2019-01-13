@@ -33,8 +33,8 @@ public:
     int getTileSize();
     void loadDocument(const std::string &file);
     void setPage(int pageNum);
-    int getPageWidth(int zoom) const;
-    int getPageHeight(int zoom) const;
+    int getPageWidth(int zoom);
+    int getPageHeight(int zoom);
     std::unique_ptr<Image> loadTile(int x, int y, int zoom);
 
     int getPageCount() const;

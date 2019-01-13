@@ -133,21 +133,38 @@ void OverlayedMap::doWork() {
     stitcher->doWork();
 }
 
+void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
+    overlayConfig = conf;
+    updateImage();
+}
+
+OverlayConfig OverlayedMap::getOverlayConfig() const {
+    return overlayConfig;
+}
+
 void OverlayedMap::drawOverlays() {
     if (tileSource->supportsWorldCoords()) {
-        int px = 0, py = 0;
-        positionToPixel(planeLat, planeLong, px, py);
+        drawAircraftOverlay();
+        drawDataOverlays();
+    }
+    drawCalibrationOverlay();
+}
 
-        px -= planeIcon.getWidth() / 2;
-        py -= planeIcon.getHeight() / 2;
-
-        mapImage->blendImage(planeIcon, px, py, planeHeading);
-
-        if (navWorld) {
-            // drawDataOverlays();
-        }
+void OverlayedMap::drawAircraftOverlay() {
+    if (!overlayConfig.drawAircraft) {
+        return;
     }
 
+    int px = 0, py = 0;
+    positionToPixel(planeLat, planeLong, px, py);
+
+    px -= planeIcon.getWidth() / 2;
+    py -= planeIcon.getHeight() / 2;
+
+    mapImage->blendImage(planeIcon, px, py, planeHeading);
+}
+
+void OverlayedMap::drawCalibrationOverlay() {
     if (calibrationStep != 0) {
         uint32_t color = img::COLOR_WHITE;
         if (calibrationStep == 1) {
@@ -170,6 +187,14 @@ void OverlayedMap::drawOverlays() {
 }
 
 void OverlayedMap::drawDataOverlays() {
+    if (!navWorld) {
+        return;
+    }
+
+    if (!overlayConfig.drawAirports && !overlayConfig.drawVORs && !overlayConfig.drawNDBs) {
+        return;
+    }
+
     double leftLon, rightLon;
     double upLat, bottomLat;
     pixelToPosition(0, 0, upLat, leftLon);
@@ -195,6 +220,10 @@ void OverlayedMap::drawDataOverlays() {
 }
 
 void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
+    if (!overlayConfig.drawAirports) {
+        return;
+    }
+
     auto &loc = airport.getLocation();
     int px, py;
     positionToPixel(loc.latitude, loc.longitude, px, py);
@@ -221,10 +250,12 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
 
     double r = scale * 0.05;
 
-    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+    bool crossDrawn = false;
 
-    if (vor) {
+    if (vor && overlayConfig.drawVORs) {
+        mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+        crossDrawn = true;
         mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_BLUE);
         mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_BLUE);
         mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_BLUE);
@@ -233,14 +264,22 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
         mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_BLUE);
     }
 
-    if (dme) {
+    if (dme && overlayConfig.drawVORs) {
+        if (!crossDrawn) {
+            mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+            mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+        }
         mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_BLUE);
         mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_BLUE);
         mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_BLUE);
         mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_BLUE);
     }
 
-    if (ndb) {
+    if (ndb && overlayConfig.drawNDBs) {
+        if (!crossDrawn) {
+            mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+            mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+        }
         mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_RED);
         mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_RED);
         mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_RED);

@@ -107,11 +107,13 @@ void Rasterizer::loadPage() {
     logger::verbose("Page %d rasterized to %dx%d pixels", currentPageNum, currentPageWidth, currentPageHeight);
 }
 
-int Rasterizer::getPageWidth(int zoom) const {
+int Rasterizer::getPageWidth(int zoom) {
+    loadPage();
     return currentPageWidth * zoomToScale(zoom);
 }
 
-int Rasterizer::getPageHeight(int zoom) const {
+int Rasterizer::getPageHeight(int zoom) {
+    loadPage();
     return currentPageHeight * zoomToScale(zoom);
 }
 

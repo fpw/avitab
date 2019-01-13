@@ -24,9 +24,7 @@
 #include "src/maps/sources/PDFSource.h"
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
-
-// Some library includes <windows.h> :-(
-#undef MessageBox
+#include "src/maps/sources/NavigraphSource.h"
 
 namespace avitab {
 
@@ -37,6 +35,7 @@ MapApp::MapApp(FuncsPtr funcs):
 {
     window->setOnClose([this] () { exit(); });
     window->addSymbol(Widget::Symbol::LIST, std::bind(&MapApp::onSettingsButton, this));
+    window->addSymbol(Widget::Symbol::SETTINGS, std::bind(&MapApp::onOverlaysButton, this));
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&MapApp::onMinusButton, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&MapApp::onPlusButton, this));
     trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
@@ -113,6 +112,26 @@ void MapApp::createSettingsLayout() {
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
+
+    if (api().getNavigraph()->isSupported() && false) {
+        naviLowButton = std::make_shared<Button>(settingsContainer, "Navigraph L");
+        naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
+        naviLowButton->setFit(false, true);
+        naviLowButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviLowButton->alignBelow(mercatorButton, 10);
+        auto naviLowLabel = std::make_shared<Label>(settingsContainer, "Navigraph low enroute charts");
+        naviLowLabel->alignRightOf(naviLowButton, 10);
+        naviLowLabel->setManaged();
+
+        naviHighButton = std::make_shared<Button>(settingsContainer, "Navigraph H");
+        naviHighButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_HIGH); });
+        naviHighButton->setFit(false, true);
+        naviHighButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviHighButton->alignBelow(naviLowButton, 10);
+        auto naviHighLabel = std::make_shared<Label>(settingsContainer, "Navigraph high enroute charts");
+        naviHighLabel->alignRightOf(naviHighButton, 10);
+        naviHighLabel->setManaged();
+    }
 }
 
 void MapApp::setMapSource(MapSource style) {
@@ -135,6 +154,12 @@ void MapApp::setMapSource(MapSource style) {
         break;
     case MapSource::EPSG3857:
         selectEPSG();
+        break;
+    case MapSource::NAVIGRAPH_HIGH:
+        selectNavigraph(true);
+        break;
+    case MapSource::NAVIGRAPH_LOW:
+        selectNavigraph(false);
         break;
     }
 
@@ -219,6 +244,11 @@ void MapApp::selectEPSG() {
     chooserContainer->setVisible(true);
 }
 
+void MapApp::selectNavigraph(bool highEnroute) {
+    auto source = std::make_shared<maps::NavigraphSource>(api().getNavigraph()->getEnrouteKey(), true, highEnroute);
+    setTileSource(source);
+}
+
 void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     mapImage->clear(img::COLOR_TRANSPARENT);
     map.reset();
@@ -239,6 +269,15 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
 }
 
 void MapApp::suspend() {
+    settingsContainer->setVisible(false);
+    if (overlaysContainer) {
+        overlayLabel.reset();
+        ndbCheckbox.reset();
+        vorCheckbox.reset();
+        airportCheckbox.reset();
+        aircraftCheckbox.reset();
+        overlaysContainer.reset();
+    }
     suspended = true;
 }
 
@@ -248,6 +287,81 @@ void MapApp::resume() {
 
 void MapApp::onSettingsButton() {
     settingsContainer->setVisible(!settingsContainer->isVisible());
+}
+
+void MapApp::onOverlaysButton() {
+    if (overlaysContainer) {
+        overlayLabel.reset();
+        ndbCheckbox.reset();
+        vorCheckbox.reset();
+        airportCheckbox.reset();
+        aircraftCheckbox.reset();
+        overlaysContainer.reset();
+    } else {
+        if (map) {
+            showOverlaySettings();
+        }
+    }
+}
+
+void MapApp::showOverlaySettings() {
+    auto ui = getUIContainer();
+
+    overlaysContainer = std::make_shared<Container>();
+    overlaysContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
+    overlaysContainer->alignLeftInParent(10);
+    overlaysContainer->setFit(true, true);
+    overlaysContainer->setVisible(true);
+
+    auto overlays = map->getOverlayConfig();
+
+    overlayLabel = std::make_shared<Label>(overlaysContainer, "Overlays:");
+    overlayLabel->alignInTopLeft();
+
+    aircraftCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Aircraft");
+    aircraftCheckbox->setChecked(overlays.drawAircraft);
+    aircraftCheckbox->alignBelow(overlayLabel);
+    aircraftCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawAircraft = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+/*
+    airportCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Airports");
+    airportCheckbox->setChecked(overlays.drawAirports);
+    airportCheckbox->alignBelow(aircraftCheckbox);
+    airportCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawAirports = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VORs & DMEs");
+    vorCheckbox->setChecked(overlays.drawVORs);
+    vorCheckbox->alignBelow(airportCheckbox);
+    vorCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawVORs = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDBs");
+    ndbCheckbox->setChecked(overlays.drawNDBs);
+    ndbCheckbox->alignBelow(vorCheckbox);
+    ndbCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawNDBs = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+*/
 }
 
 void MapApp::onRedrawNeeded() {
