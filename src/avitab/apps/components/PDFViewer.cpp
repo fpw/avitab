@@ -81,6 +81,8 @@ void PDFViewer::loadCurrentFile() {
     map->setOverlayDirectory(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { pixMap->invalidate(); });
     map->updateImage();
+
+    setTitle();
 }
 
 void PDFViewer::onPan(int x, int y, bool start, bool end) {
@@ -130,16 +132,16 @@ void PDFViewer::onPrevFile() {
 
 void PDFViewer::onNextPage() {
     if (source) {
-        source->nextPage();
-        stitcher->updateImage();
+        stitcher->nextPage();
     }
+    setTitle();
 }
 
 void PDFViewer::onPrevPage() {
     if (source) {
-        source->prevPage();
-        stitcher->updateImage();
+        stitcher->prevPage();
     }
+    setTitle();
 }
 
 void PDFViewer::onPlus() {
@@ -171,6 +173,12 @@ void PDFViewer::onMouseWheel(int dir, int x, int y) {
 bool PDFViewer::onTimer() {
     map->doWork();
     return true;
+}
+
+void PDFViewer::setTitle() {
+    int page = stitcher->getCurrentPage() + 1;
+    int pageCount = stitcher->getPageCount();
+    window->setCaption(std::string("Page ") + std::to_string(page) + " / " + std::to_string(pageCount));
 }
 
 } /* namespace avitab */

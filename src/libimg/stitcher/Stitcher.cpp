@@ -27,7 +27,7 @@ Stitcher::Stitcher(std::shared_ptr<Image> dstImage, std::shared_ptr<TileSource> 
     tileCache(source)
 {
     zoomLevel = source->getInitialZoomLevel();
-    auto center = source->suggestInitialCenter();
+    auto center = source->suggestInitialCenter(page);
     centerX = center.x;
     centerY = center.y;
 
@@ -59,6 +59,30 @@ img::Point<double> Stitcher::getCenter() const {
     return img::Point<double>{centerX, centerY};
 }
 
+void Stitcher::nextPage() {
+    if (page + 1 < tileSource->getPageCount()) {
+        page++;
+        tileCache.cancelPendingRequests();
+        updateImage();
+    }
+}
+
+void Stitcher::prevPage() {
+    if (page > 0) {
+        page--;
+        tileCache.cancelPendingRequests();
+        updateImage();
+    }
+}
+
+int Stitcher::getPageCount() const {
+    return tileSource->getPageCount();
+}
+
+int Stitcher::getCurrentPage() const {
+    return page;
+}
+
 void Stitcher::pan(int dx, int dy) {
     auto dim = tileSource->getTileDimensions(zoomLevel);
     switch (rotAngle) {
@@ -87,7 +111,7 @@ void Stitcher::setZoomLevel(int level) {
         return;
     }
 
-    auto newCenterXY = tileSource->transformZoomedPoint(centerX, centerY, zoomLevel, level);
+    auto newCenterXY = tileSource->transformZoomedPoint(page, centerX, centerY, zoomLevel, level);
     centerX = newCenterXY.x;
     centerY = newCenterXY.y;
     zoomLevel = level;
@@ -147,14 +171,14 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
             int tileX = ((int) centerX) + x;
             int tileY = ((int) centerY) + y;
 
-            if (!tileSource->checkAndCorrectTileCoordinates(tileX, tileY, zoomLevel)) {
+            if (!tileSource->checkAndCorrectTileCoordinates(page, tileX, tileY, zoomLevel)) {
                 f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, emptyTile);
                 continue;
             }
 
             std::shared_ptr<img::Image> tile;
             try {
-                tile = tileCache.getTile(tileX, tileY, zoomLevel);
+                tile = tileCache.getTile(page, tileX, tileY, zoomLevel);
             } catch (const std::exception &e) {
                 f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, errorTile);
                 continue;

@@ -74,7 +74,8 @@ void OverlayedMap::centerOnWorldPos(double latitude, double longitude) {
     auto centerXY = tileSource->worldToXY(longitude, latitude, zoomLevel);
     int checkX = centerXY.x;
     int checkY = centerXY.y;
-    if (tileSource->checkAndCorrectTileCoordinates(checkX, checkY, zoomLevel)) {
+    int page = stitcher->getCurrentPage();
+    if (tileSource->checkAndCorrectTileCoordinates(page, checkX, checkY, zoomLevel)) {
         stitcher->setCenter(centerXY.x, centerXY.y);
     }
 }

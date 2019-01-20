@@ -53,7 +53,7 @@ int GeoTIFFSource::getInitialZoomLevel() {
     return 0;
 }
 
-img::Point<double> GeoTIFFSource::suggestInitialCenter() {
+img::Point<double> GeoTIFFSource::suggestInitialCenter(int page) {
     int fullWidth = tiff.getFullWidth();
     int fullHeight = tiff.getFullHeight();
     return img::Point<double>{fullWidth / 2.0 / tileSize, fullHeight / 2.0 / tileSize};
@@ -71,7 +71,7 @@ img::Point<int> GeoTIFFSource::getTileDimensions(int zoom) {
     return img::Point<int>{tileSize, tileSize};
 }
 
-img::Point<double> GeoTIFFSource::transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> GeoTIFFSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     int fullWidth = tiff.getFullWidth();
     int fullHeight = tiff.getFullHeight();
 
@@ -86,10 +86,19 @@ img::Point<double> GeoTIFFSource::transformZoomedPoint(double oldX, double oldY,
     return img::Point<double>{x, y};
 }
 
-bool GeoTIFFSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
+int GeoTIFFSource::getPageCount() {
+    return 1;
+}
+
+bool GeoTIFFSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+    if (page != 0) {
+        return false;
+    }
+
     int fullWidth = tiff.getFullWidth();
     int fullHeight = tiff.getFullHeight();
     auto scale = zoomToScale(zoom);
+
     if (x < 0 || x * tileSize >= fullWidth * scale || y < 0 || y * tileSize >= fullHeight * scale) {
         return false;
     }
@@ -97,8 +106,8 @@ bool GeoTIFFSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string GeoTIFFSource::getUniqueTileName(int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::string GeoTIFFSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -107,7 +116,11 @@ std::string GeoTIFFSource::getUniqueTileName(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> GeoTIFFSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> GeoTIFFSource::loadTileImage(int page, int x, int y, int zoom) {
+    if (page != 0) {
+        throw std::runtime_error("Invalid page for GeoTIFFSource");
+    }
+
     auto scale = zoomToScale(zoom);
 
     tiff.loadFullImage();

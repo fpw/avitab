@@ -37,13 +37,13 @@ class TileCache {
 public:
     TileCache(std::shared_ptr<TileSource> source);
     void setCacheDirectory(const std::string &utf8Path);
-    std::shared_ptr<Image> getTile(int x, int y, int zoom);
+    std::shared_ptr<Image> getTile(int page, int x, int y, int zoom);
     void cancelPendingRequests();
     ~TileCache();
 private:
     static constexpr const int CACHE_SECONDS = 30;
     using TimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
-    using TileCoords = std::tuple<int, int, int>;
+    using TileCoords = std::tuple<int, int, int, int>;
     using MemCacheEntry = std::tuple<std::shared_ptr<Image>, TimeStamp>;
 
     std::shared_ptr<TileSource> tileSource;
@@ -60,15 +60,15 @@ private:
 
     std::atomic_bool keepAlive { true };
 
-    std::shared_ptr<Image> getFromMemory(int x, int y, int zoom);
-    std::shared_ptr<Image> getFromDisk(int x, int y, int zoom);
-    void enqueue(int x, int y, int zoom);
+    std::shared_ptr<Image> getFromMemory(int page, int x, int y, int zoom);
+    std::shared_ptr<Image> getFromDisk(int page, int x, int y, int zoom);
+    void enqueue(int page, int x, int y, int zoom);
 
     void loadLoop();
     bool hasWork();
     void flushCache();
-    void loadAndCacheTile(int x, int y, int zoom);
-    void enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> img);
+    void loadAndCacheTile(int page, int x, int y, int zoom);
+    void enterMemoryCache(int page, int x, int y, int zoom, std::shared_ptr<Image> img);
 };
 
 } /* namespace img */

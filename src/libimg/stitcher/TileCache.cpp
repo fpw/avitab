@@ -36,8 +36,8 @@ void TileCache::setCacheDirectory(const std::string& utf8Path) {
     }
 }
 
-std::shared_ptr<Image> TileCache::getTile(int x, int y, int zoom) {
-    if (!tileSource->checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::shared_ptr<Image> TileCache::getTile(int page, int x, int y, int zoom) {
+    if (!tileSource->checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         // coords out of bounds: treat as transparent
         throw std::runtime_error(std::string("Invalid coordinates in ") + __FUNCTION__);
     }
@@ -47,31 +47,31 @@ std::shared_ptr<Image> TileCache::getTile(int x, int y, int zoom) {
     std::lock_guard<std::mutex> lock(cacheMutex);
 
     // First check if this coords had a load error
-    auto errorIt = errorSet.find(TileCoords(x, y, zoom));
+    auto errorIt = errorSet.find(TileCoords(page, x, y, zoom));
     if (errorIt != errorSet.end()) {
         throw std::runtime_error("Corrupt tile");
     }
 
     // Cache strategy: Check memory cache first
-    image = getFromMemory(x, y, zoom);
+    image = getFromMemory(page, x, y, zoom);
     if (image) {
         return image;
     }
 
     // Then check file cache
-    image = getFromDisk(x, y, zoom);
+    image = getFromDisk(page, x, y, zoom);
     if (image) {
         return image;
     }
 
     // Finally got a cache miss -> enqueue and return miss for now
-    enqueue(x, y, zoom);
+    enqueue(page, x, y, zoom);
     return nullptr;
 }
 
-std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
+std::shared_ptr<Image> TileCache::getFromMemory(int page, int x, int y, int zoom) {
     // gets called with locked mutex
-    auto it = memoryCache.find(tileSource->getUniqueTileName(x, y, zoom));
+    auto it = memoryCache.find(tileSource->getUniqueTileName(page, x, y, zoom));
     if (it == memoryCache.end()) {
         return nullptr;
     }
@@ -81,9 +81,9 @@ std::shared_ptr<Image> TileCache::getFromMemory(int x, int y, int zoom) {
     return std::get<0>(entry);
 }
 
-std::shared_ptr<Image> TileCache::getFromDisk(int x, int y, int zoom) {
+std::shared_ptr<Image> TileCache::getFromDisk(int page, int x, int y, int zoom) {
     // gets called with locked mutex
-    std::string fileName = cacheDir + "/" + tileSource->getUniqueTileName(x, y, zoom);
+    std::string fileName = cacheDir + "/" + tileSource->getUniqueTileName(page, x, y, zoom);
     if (!platform::fileExists(fileName)) {
         return nullptr;
     }
@@ -91,14 +91,14 @@ std::shared_ptr<Image> TileCache::getFromDisk(int x, int y, int zoom) {
     // upon loading: insert into memory cache for next access
     auto img = std::make_shared<Image>();
     img->loadImageFile(fileName);
-    enterMemoryCache(x, y, zoom, img);
+    enterMemoryCache(page, x, y, zoom, img);
 
     return img;
 }
 
-void img::TileCache::enqueue(int x, int y, int zoom) {
+void img::TileCache::enqueue(int page, int x, int y, int zoom) {
     // gets called with locked mutex
-    TileCoords coords(x, y, zoom);
+    TileCoords coords(page, x, y, zoom);
     loadSet.insert(coords);
     cacheCondition.notify_one();
 }
@@ -136,13 +136,14 @@ void TileCache::loadLoop() {
         }
 
         if (coordsValid) {
-            int x = std::get<0>(coords);
-            int y = std::get<1>(coords);
-            int zoom = std::get<2>(coords);
-            if (!getFromMemory(x, y, zoom)) {
+            int page = std::get<0>(coords);
+            int x = std::get<1>(coords);
+            int y = std::get<2>(coords);
+            int zoom = std::get<3>(coords);
+            if (!getFromMemory(page, x, y, zoom)) {
                 // some sources load multiple x/y/zoom tiles at once, so it could already
                 // be loaded from another pair
-                loadAndCacheTile(x, y, zoom);
+                loadAndCacheTile(page, x, y, zoom);
             }
         }
 
@@ -151,33 +152,33 @@ void TileCache::loadLoop() {
     logger::verbose("TileCache ending thread %d", std::this_thread::get_id());
 }
 
-void TileCache::loadAndCacheTile(int x, int y, int zoom) {
+void TileCache::loadAndCacheTile(int page, int x, int y, int zoom) {
     // gets called unlocked
     std::shared_ptr<Image> image;
     try {
-        image = tileSource->loadTileImage(x, y, zoom);
+        image = tileSource->loadTileImage(page, x, y, zoom);
     } catch (const std::out_of_range &e) {
         // cancelled
         return;
     } catch (const std::exception &e) {
         // some error
         logger::verbose("Marking tile %d/%d/%d as error: %s", zoom, x, y, e.what());
-        errorSet.insert(TileCoords(x, y, zoom));
+        errorSet.insert(TileCoords(page, x, y, zoom));
         return;
     }
 
-    std::string fileName = tileSource->getUniqueTileName(x, y, zoom);
+    std::string fileName = tileSource->getUniqueTileName(page, x, y, zoom);
 
     std::lock_guard<std::mutex> lock(cacheMutex);
-    enterMemoryCache(x, y, zoom, image);
+    enterMemoryCache(page, x, y, zoom, image);
     image->storeAndClearEncodedData(cacheDir + "/" + fileName);
 }
 
-void TileCache::enterMemoryCache(int x, int y, int zoom, std::shared_ptr<Image> img) {
+void TileCache::enterMemoryCache(int page, int x, int y, int zoom, std::shared_ptr<Image> img) {
     // gets called with locked mutex
     auto timeStamp = std::chrono::steady_clock::now();
     MemCacheEntry entry(img, timeStamp);
-    memoryCache.insert(std::make_pair(tileSource->getUniqueTileName(x, y, zoom), entry));
+    memoryCache.insert(std::make_pair(tileSource->getUniqueTileName(page, x, y, zoom), entry));
 }
 
 void TileCache::cancelPendingRequests() {

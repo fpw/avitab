@@ -44,7 +44,7 @@ int XPlaneSource::getInitialZoomLevel() {
     return MAX_MIPMAP_LVL;
 }
 
-img::Point<double> XPlaneSource::suggestInitialCenter() {
+img::Point<double> XPlaneSource::suggestInitialCenter(int page) {
     return img::Point<double>{0, 0};
 }
 
@@ -62,11 +62,19 @@ img::Point<int> XPlaneSource::getTileDimensions(int zoom) {
     return img::Point<int>{dim, dim};
 }
 
-img::Point<double> XPlaneSource::transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> XPlaneSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     return img::Point<double>{oldX, oldY};
 }
 
-bool XPlaneSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
+int XPlaneSource::getPageCount() {
+    return 1;
+}
+
+bool XPlaneSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+    if (page != 0) {
+        return false;
+    }
+
     if (y < 0 || y >= 180 / 10) {
         return false;
     }
@@ -79,8 +87,8 @@ bool XPlaneSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string XPlaneSource::getUniqueTileName(int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::string XPlaneSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -89,7 +97,11 @@ std::string XPlaneSource::getUniqueTileName(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+        throw std::runtime_error("Invalid coordinates");
+    }
+
     char name[32];
     std::sprintf(name, "%+03d%+04d.dds", -y * 10 + 80, x * 10 - 180);
     std::string path = baseDir + name;

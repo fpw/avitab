@@ -38,7 +38,7 @@ bool OpenTopoSource::supportsWorldCoords() {
     return true;
 }
 
-img::Point<double> OpenTopoSource::suggestInitialCenter() {
+img::Point<double> OpenTopoSource::suggestInitialCenter(int page) {
     return img::Point<double>{0, 0};
 }
 
@@ -46,7 +46,7 @@ img::Point<int> OpenTopoSource::getTileDimensions(int zoom) {
     return img::Point<int>{256, 256};
 }
 
-img::Point<double> OpenTopoSource::transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> OpenTopoSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     if (oldZoom == newZoom) {
         return img::Point<double>{oldX, oldY};
     }
@@ -86,7 +86,15 @@ img::Point<double> OpenTopoSource::xyToWorld(double x, double y, int zoom) {
     return img::Point<double>{lon, lat};
 }
 
-bool OpenTopoSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
+int OpenTopoSource::getPageCount() {
+    return 1;
+}
+
+bool OpenTopoSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+    if (page != 0) {
+        return false;
+    }
+
     uint32_t endXY = 1 << zoom;
 
     if (y < 0 || (uint32_t) y >= endXY) {
@@ -102,8 +110,8 @@ bool OpenTopoSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string OpenTopoSource::getUniqueTileName(int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -113,9 +121,9 @@ std::string OpenTopoSource::getUniqueTileName(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
-    std::string path = getUniqueTileName(x, y, zoom);
+    std::string path = getUniqueTileName(page, x, y, zoom);
     auto data = downloader.download("https://" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data, true);

@@ -35,13 +35,14 @@ public:
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;
-    img::Point<double> suggestInitialCenter() override;
+    img::Point<double> suggestInitialCenter(int page) override;
     img::Point<int> getTileDimensions(int zoom) override;
-    img::Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) override;
+    img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) override;
 
-    bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) override;
-    std::string getUniqueTileName(int x, int y, int zoom) override;
-    std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) override;
+    int getPageCount() override;
+    bool checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) override;
+    std::string getUniqueTileName(int page, int x, int y, int zoom) override;
+    std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) override;
     void cancelPendingLoads() override;
     void resumeLoading() override;
 

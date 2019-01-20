@@ -28,35 +28,30 @@ namespace img {
 
 class Rasterizer {
 public:
-    Rasterizer();
+    Rasterizer(const std::string &utf8Path);
 
     int getTileSize();
-    void loadDocument(const std::string &file);
-    void setPage(int pageNum);
-    int getPageWidth(int zoom);
-    int getPageHeight(int zoom);
-    std::unique_ptr<Image> loadTile(int x, int y, int zoom);
+    int getPageWidth(int page, int zoom);
+    int getPageHeight(int page, int zoom);
+    std::unique_ptr<Image> loadTile(int page, int x, int y, int zoom);
 
     int getPageCount() const;
-    int getPageNum() const;
 
     ~Rasterizer();
 private:
+    std::vector<fz_rect> pageRects;
     bool logLoadTimes = false;
     int tileSize = 1024;
     int totalPages = 0;
-    std::atomic_int requestedPageNum {0};
     int currentPageNum = 0;
-    int currentPageWidth = -1;
-    int currentPageHeight = -1;
     fz_context *ctx {};
     fz_document *doc {};
     fz_display_list *currentPageList {};
 
-    float zoomToScale(int zoom) const;
     void initFitz();
-    void loadPage();
-    void freeCurrentDocument();
+    void loadDocument(const std::string &file);
+    void loadPage(int page);
+    float zoomToScale(int zoom) const;
     void freeCurrentPage();
 };
 

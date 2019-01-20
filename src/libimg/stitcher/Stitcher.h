@@ -39,6 +39,11 @@ public:
     void setCenter(double x, double y);
     img::Point<double> getCenter() const;
 
+    int getCurrentPage() const;
+    int getPageCount() const;
+    void nextPage();
+    void prevPage();
+
     void pan(int dx, int dy);
     void setZoomLevel(int level);
     int getZoomLevel();
@@ -53,6 +58,7 @@ public:
     std::shared_ptr<TileSource> getTileSource();
 
 private:
+    int page = 0;
     Image emptyTile, errorTile, loadingTile;
     std::shared_ptr<Image> unrotatedImage;
     std::shared_ptr<Image> dstImage;

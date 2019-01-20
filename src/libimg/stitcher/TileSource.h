@@ -35,19 +35,20 @@ public:
     virtual int getMinZoomLevel() = 0;
     virtual int getMaxZoomLevel() = 0;
     virtual int getInitialZoomLevel() = 0;
-    virtual Point<double> suggestInitialCenter() = 0;
+    virtual Point<double> suggestInitialCenter(int page) = 0;
     virtual Point<int> getTileDimensions(int zoom) = 0;
     virtual bool supportsWorldCoords() = 0;
-    virtual Point<double> transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) = 0;
+    virtual img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) = 0;
 
     // Control the underlying loader
     virtual void cancelPendingLoads() = 0;
     virtual void resumeLoading() = 0;
 
     // Query and load tile information
-    virtual bool checkAndCorrectTileCoordinates(int &x, int &y, int zoom) = 0;
-    virtual std::string getUniqueTileName(int x, int y, int zoom) = 0;
-    virtual std::unique_ptr<img::Image> loadTileImage(int x, int y, int zoom) = 0;
+    virtual int getPageCount() = 0;
+    virtual bool checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) = 0;
+    virtual std::string getUniqueTileName(int page, int x, int y, int zoom) = 0;
+    virtual std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) = 0;
 
     // World position support
     virtual Point<double> worldToXY(double lon, double lat, int zoom) = 0;

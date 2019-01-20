@@ -47,7 +47,7 @@ int ImageSource::getInitialZoomLevel() {
     return min + (max - min) / 2;
 }
 
-img::Point<double> ImageSource::suggestInitialCenter() {
+img::Point<double> ImageSource::suggestInitialCenter(int page) {
     int fullWidth = image->getWidth();
     int fullHeight = image->getHeight();
     auto scale = zoomToScale(getInitialZoomLevel());
@@ -80,7 +80,7 @@ img::Point<int> ImageSource::getTileDimensions(int zoom) {
     return img::Point<int>{TILE_SIZE, TILE_SIZE};
 }
 
-img::Point<double> ImageSource::transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> ImageSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     int fullWidth = image->getWidth();
     int fullHeight = image->getHeight();
 
@@ -95,10 +95,19 @@ img::Point<double> ImageSource::transformZoomedPoint(double oldX, double oldY, i
     return img::Point<double>{x, y};
 }
 
-bool ImageSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
+int ImageSource::getPageCount() {
+    return 1;
+}
+
+bool ImageSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+    if (page != 0) {
+        return false;
+    }
+
     int fullWidth = image->getWidth();
     int fullHeight = image->getHeight();
     auto scale = zoomToScale(zoom);
+
     if (x < 0 || x * TILE_SIZE >= fullWidth * scale || y < 0 || y * TILE_SIZE >= fullHeight * scale) {
         return false;
     }
@@ -106,8 +115,8 @@ bool ImageSource::checkAndCorrectTileCoordinates(int& x, int& y, int zoom) {
     return true;
 }
 
-std::string ImageSource::getUniqueTileName(int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::string ImageSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -116,7 +125,11 @@ std::string ImageSource::getUniqueTileName(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> ImageSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> ImageSource::loadTileImage(int page, int x, int y, int zoom) {
+    if (page != 0) {
+        throw std::runtime_error("Invalid page for image");
+    }
+
     auto scale = zoomToScale(zoom);
     auto tile = std::make_unique<img::Image>(TILE_SIZE / scale, TILE_SIZE / scale, 0);
     image->copyTo(*tile, x * TILE_SIZE / scale, y * TILE_SIZE / scale);

@@ -68,6 +68,7 @@ private:
     void onPan(int x, int y, bool start, bool end);
 
     void loadCurrentFile();
+    void setTitle();
 };
 
 } /* namespace avitab */

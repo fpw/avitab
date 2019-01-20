@@ -45,7 +45,7 @@ bool NavigraphSource::supportsWorldCoords() {
     return true;
 }
 
-img::Point<double> NavigraphSource::suggestInitialCenter() {
+img::Point<double> NavigraphSource::suggestInitialCenter(int page) {
     return img::Point<double>{0, 0};
 }
 
@@ -53,7 +53,7 @@ img::Point<int> NavigraphSource::getTileDimensions(int zoom) {
     return img::Point<int>{256, 256};
 }
 
-img::Point<double> NavigraphSource::transformZoomedPoint(double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> NavigraphSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     if (oldZoom == newZoom) {
         return img::Point<double>{oldX, oldY};
     }
@@ -93,7 +93,15 @@ img::Point<double> NavigraphSource::xyToWorld(double x, double y, int zoom) {
     return img::Point<double>{lon, lat};
 }
 
-bool NavigraphSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
+int NavigraphSource::getPageCount() {
+    return 1;
+}
+
+bool NavigraphSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+    if (page != 0) {
+        return false;
+    }
+
     uint32_t endXY = 1 << zoom;
 
     if (y < 0 || (uint32_t) y >= endXY) {
@@ -109,8 +117,8 @@ bool NavigraphSource::checkAndCorrectTileCoordinates(int &x, int &y, int zoom) {
     return true;
 }
 
-std::string NavigraphSource::getUniqueTileName(int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(x, y, zoom)) {
+std::string NavigraphSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -131,9 +139,9 @@ std::string NavigraphSource::getUniqueTileName(int x, int y, int zoom) {
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> NavigraphSource::loadTileImage(int x, int y, int zoom) {
+std::unique_ptr<img::Image> NavigraphSource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
-    std::string path = getUniqueTileName(x, y, zoom);
+    std::string path = getUniqueTileName(page, x, y, zoom);
     auto data = downloader.download("https://enroute.charts.api.navigraph.com/" + key + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data, false);

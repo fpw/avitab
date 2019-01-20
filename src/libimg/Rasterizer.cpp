@@ -24,8 +24,9 @@
 
 namespace img {
 
-Rasterizer::Rasterizer() {
+Rasterizer::Rasterizer(const std::string &utf8Path) {
     initFitz();
+    loadDocument(utf8Path);
 }
 
 void Rasterizer::initFitz() {
@@ -43,13 +44,7 @@ void Rasterizer::initFitz() {
     }
 }
 
-int Rasterizer::getTileSize() {
-    return tileSize;
-}
-
 void Rasterizer::loadDocument(const std::string& utf8Path) {
-    freeCurrentDocument();
-
     logger::info("Loading '%s in thread %d'", utf8Path.c_str(), std::this_thread::get_id());
 
     fz_try(ctx) {
@@ -66,70 +61,45 @@ void Rasterizer::loadDocument(const std::string& utf8Path) {
         throw std::runtime_error("Cannot count pages: " + std::string(fz_caught_message(ctx)));
     }
 
-    // get initial page size
-    fz_try(ctx) {
-        fz_page *page = fz_load_page(ctx, doc, 0);
-        fz_rect rect = fz_bound_page(ctx, page);
-        currentPageWidth = rect.x1 - rect.x0;
-        currentPageHeight = rect.y1 - rect.y0;
+    for (int i = 0; i < totalPages; i++) {
+        auto page = fz_load_page(ctx, doc, i);
+        if (!page) {
+            fz_drop_document(ctx, doc);
+            throw std::runtime_error("Couldn't load page");
+        }
+        auto rect = fz_bound_page(ctx, page);
+        pageRects.push_back(rect);
         fz_drop_page(ctx, page);
-    } fz_catch(ctx) {
-        fz_drop_document(ctx, doc);
-        throw std::runtime_error("Cannot get first page size: " + std::string(fz_caught_message(ctx)));
-    }
-    logger::info("Document loaded, %dx%d", currentPageWidth, currentPageHeight);
-}
-
-void Rasterizer::setPage(int pageNum) {
-    requestedPageNum = pageNum;
-}
-
-void Rasterizer::loadPage() {
-    if (requestedPageNum == currentPageNum && currentPageList != nullptr) {
-        return;
     }
 
-    freeCurrentPage();
-
-    logger::verbose("Loading page %d in thread %d", (int) requestedPageNum, std::this_thread::get_id());
-
-    fz_try(ctx) {
-        currentPageList = fz_new_display_list_from_page_number(ctx, doc, requestedPageNum);
-        currentPageNum = requestedPageNum;
-    } fz_catch(ctx) {
-        throw std::runtime_error("Cannot parse page: " + std::string(fz_caught_message(ctx)));
-    }
-
-    fz_rect rect = fz_bound_display_list(ctx, currentPageList);
-    currentPageWidth = rect.x1 - rect.x0;
-    currentPageHeight = rect.y1 - rect.y0;
-
-    logger::verbose("Page %d rasterized to %dx%d pixels", currentPageNum, currentPageWidth, currentPageHeight);
+    logger::info("Document loaded");
 }
 
-int Rasterizer::getPageWidth(int zoom) {
-    loadPage();
-    return currentPageWidth * zoomToScale(zoom);
+int Rasterizer::getTileSize() {
+    return tileSize;
 }
 
-int Rasterizer::getPageHeight(int zoom) {
-    loadPage();
-    return currentPageHeight * zoomToScale(zoom);
+int Rasterizer::getPageWidth(int page, int zoom) {
+    auto &rect = pageRects.at(page);
+    int width = rect.x1 - rect.x0;
+    return width * zoomToScale(zoom);
+}
+
+int Rasterizer::getPageHeight(int page, int zoom) {
+    auto &rect = pageRects.at(page);
+    int height = rect.y1 - rect.y0;
+    return height * zoomToScale(zoom);
 }
 
 int Rasterizer::getPageCount() const {
     return totalPages;
 }
 
-int Rasterizer::getPageNum() const {
-    return requestedPageNum;
-}
-
-std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
-    loadPage();
+std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom) {
+    loadPage(page);
 
     if (logLoadTimes) {
-        logger::info("Loading tile %d, %d, %d", x, y, zoom);
+        logger::info("Loading tile %d, %d, %d, %d in thread %d", page, x, y, zoom, std::this_thread::get_id());
     }
 
     auto image = std::make_unique<Image>(tileSize, tileSize, 0);
@@ -163,6 +133,10 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
 
     fz_device *dev = nullptr;
     fz_try(ctx) {
+        auto &rect = pageRects.at(currentPageNum);
+        int currentPageWidth = rect.x1 - rect.x0;
+        int currentPageHeight = rect.y1 - rect.y0;
+
         auto startAt = std::chrono::steady_clock::now();
 
         dev = fz_new_draw_device_with_bbox(ctx, scaleMatrix, pix, &clipBox);
@@ -207,16 +181,27 @@ std::unique_ptr<Image> Rasterizer::loadTile(int x, int y, int zoom) {
     return image;
 }
 
-float Rasterizer::zoomToScale(int zoom) const {
-    return std::pow(M_SQRT2, zoom);
+void Rasterizer::loadPage(int page) {
+    if (page == currentPageNum && currentPageList != nullptr) {
+        return;
+    }
+
+    freeCurrentPage();
+
+    logger::verbose("Loading page %d in thread %d", (int) page, std::this_thread::get_id());
+
+    fz_try(ctx) {
+        currentPageList = fz_new_display_list_from_page_number(ctx, doc, page);
+        currentPageNum = page;
+    } fz_catch(ctx) {
+        throw std::runtime_error("Cannot parse page: " + std::string(fz_caught_message(ctx)));
+    }
+
+    logger::verbose("Page %d rasterized", currentPageNum);
 }
 
-void Rasterizer::freeCurrentDocument() {
-    freeCurrentPage();
-    if (doc) {
-        fz_drop_document(ctx, doc);
-        doc = nullptr;
-    }
+float Rasterizer::zoomToScale(int zoom) const {
+    return std::pow(M_SQRT2, zoom);
 }
 
 void Rasterizer::freeCurrentPage() {
@@ -227,10 +212,9 @@ void Rasterizer::freeCurrentPage() {
 }
 
 Rasterizer::~Rasterizer() {
-    if (ctx) {
-        freeCurrentDocument();
-        fz_drop_context(ctx);
-    }
+    freeCurrentPage();
+    fz_drop_document(ctx, doc);
+    fz_drop_context(ctx);
 }
 
 } /* namespace img */
