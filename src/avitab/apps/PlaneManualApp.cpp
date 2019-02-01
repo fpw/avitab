@@ -27,7 +27,7 @@ PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
     App(appFuncs)
 {
     std::string planePath = api().getAirplanePath();
-    std::string manualPath = planePath + "manual/";
+    std::string manualPath = planePath + "manuals/";
     bool showError = false;
 
     if (platform::fileExists(manualPath)) {

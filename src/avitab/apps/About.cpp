@@ -27,7 +27,7 @@ About::About(FuncsPtr appFuncs):
     window->setOnClose([this] () { exit(); });
 
     std::string aboutText =
-            "AviTab " AVITAB_VERSION_STR ", copyright 2018 by Folke Will <folko@solhost.org>\n"
+            "AviTab " AVITAB_VERSION_STR ", copyright 2019 by Folke Will <folko@solhost.org>\n"
             "Licensed under the AGPL license, see LICENSE for details\n"
             "\n"
             "Uses the mupdf library, copyright 2006-2017 by Artifex Software, Inc.\n"
