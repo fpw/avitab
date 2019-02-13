@@ -34,11 +34,10 @@
 	path = lib/proj
 	url = https://github.com/OSGeo/proj.4
 	ignore = dirty
-[submodule "lib/libgeotiff"]
-	path = lib/libgeotiff
-	url = https://github.com/fpw/libgeotiff
-	ignore = dirty
 [submodule "lib/XSDK"]
 	path = lib/XSDK
 	url = https://github.com/fpw/XSDK
 	ignore = dirty
+[submodule "lib/libgeotiff"]
+	path = lib/libgeotiff
+	url = https://github.com/OSGeo/libgeotiff

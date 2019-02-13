@@ -45,7 +45,7 @@ if [ ! -f $OUTDIR/lib/libmupdf-third.a ]; then
     XCFLAGS=-fPIC HAVE_X11=no HAVE_GLUT=no make prefix=$OUTDIR -j10 install
     cd thirdparty/libjpeg
     ./configure
-    cd ../../../ 
+    cd ../../../
 fi
 if [ ! -f $OUTDIR/lib/libmupdf-third.a ]; then echo "Failed"; exit; fi
 
@@ -96,13 +96,13 @@ if [ ! -f $OUTDIR/lib/libproj_5_2.a ]; then echo "Failed"; exit; fi
 
 echo "Building libgeotiff..."
 if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then
-    cd libgeotiff
+    cd libgeotiff/libgeotiff
     mkdir -p build
     cd build
-    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$OUTDIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS=-fPIC -DCMAKE_PREFIX_PATH="`pwd`/../../" ..
+    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$OUTDIR -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS=-fPIC -DCMAKE_PREFIX_PATH="`pwd`/../../../" ..
     make -j10 install
     cp lib/libxtiff.a $OUTDIR/lib
-    cd ../..
+    cd ../../..
 fi
 if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then echo "Failed"; exit; fi
 

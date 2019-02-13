@@ -18,6 +18,7 @@
 #include <chrono>
 #include <functional>
 #include <lvgl/lvgl.h>
+#include <lvgl/lv_draw/lv_draw_vbasic.h>
 #include "LVGLToolkit.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
@@ -38,6 +39,7 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         lv_init();
         initDisplayDriver();
         initInputDriver();
+
         lv_theme_t *theme = lv_theme_night_init(210, LV_FONT_DEFAULT);
         lv_theme_set_current(theme);
         lvglIsInitialized = true;
@@ -225,7 +227,7 @@ void LVGLToolkit::handleKeyboard() {
                 char str[] = {(char) (c & 0xFF), '\0'};
                 action(keyboard, str);
             } else if (c == '\b') {
-                action(keyboard, "Del");
+                action(keyboard, "Bksp");
             } else if (c == '\n') {
                 lv_kb_ext_t *kbExt = (lv_kb_ext_t *) keyboard->ext_attr;
                 auto okAction = kbExt->ok_action;

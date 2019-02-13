@@ -66,7 +66,7 @@ void Keyboard::setOnOk(Callback cb) {
 
 void Keyboard::hideEnterKey() {
     static const char* defaultMapWithoutEnter[] = {
-    "\2051#", "\204q", "\204w", "\204e", "\204r", "\204t", "\204y", "\204u", "\204i", "\204o", "\204p", "\207Del", "\n",
+    "\2051#", "\204q", "\204w", "\204e", "\204r", "\204t", "\204y", "\204u", "\204i", "\204o", "\204p", "\207Bksp", "\n",
     "\226ABC", "\203a", "\203s", "\203d", "\203f", "\203g", "\203h", "\203j", "\203k", "\203l", "\n",
     "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
     "\202" SYMBOL_CLOSE, "\202" SYMBOL_LEFT, "\206 ", "\202" SYMBOL_RIGHT, "\202" SYMBOL_OK, ""

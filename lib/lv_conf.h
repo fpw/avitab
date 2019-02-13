@@ -36,27 +36,59 @@
 /* Horizontal and vertical resolution of the library.*/
 #define LV_HOR_RES          (800)
 #define LV_VER_RES          (480)
+
+/* Dot Per Inch: used to initialize default sizes. E.g. a button with width = LV_DPI / 2 -> half inch wide
+ * (Not so important, you can adjust it to modify default sizes and spaces)*/
 #define LV_DPI              60
-
-/* Size of VDB (Virtual Display Buffer: the internal graphics buffer).
- * Required for buffered drawing, opacity and anti-aliasing
- * VDB makes the double buffering, you don't need to deal with it!
- * Typical size: ~1/10 screen */
-#define LV_VDB_SIZE         (LV_VER_RES * LV_HOR_RES)  /*Size of VDB in pixel count (1/10 screen size is good for first)*/
-#define LV_VDB_PX_BPP       LV_COLOR_SIZE      /*Bit-per-pixel of VDB. Useful for monochrome or non-standard color format displays. (Special formats are handled with `disp_drv->vdb_wr`)*/
-#define LV_VDB_ADR          0                  /*Place VDB to a specific address (e.g. in external RAM) (0: allocate automatically into RAM)*/
-
-/* Use two Virtual Display buffers (VDB) parallelize rendering and flushing (optional)
- * The flushing should use DMA to write the frame buffer in the background*/
-#define LV_VDB_DOUBLE       0       /*1: Enable the use of 2 VDBs*/
-#define LV_VDB2_ADR         0       /*Place VDB2 to a specific address (e.g. in external RAM) (0: allocate automatically into RAM)*/
 
 /* Enable anti-aliasing (lines, and radiuses will be smoothed) */
 #define LV_ANTIALIAS        1       /*1: Enable anti-aliasing*/
 
 /*Screen refresh settings*/
 #define LV_REFR_PERIOD       1    /*Screen refresh period in milliseconds*/
-#define LV_INV_FIFO_SIZE    32    /*The average count of objects on a screen */
+
+/*-----------------
+ *  VDB settings
+ *----------------*/
+
+/* VDB (Virtual Display Buffer) is an internal graphics buffer.
+ * The GUI will be drawn into this buffer first and then
+ * the buffer will be passed to your `disp_drv.disp_flush` function to
+ * copy it to your frame buffer.
+ * VDB is required for: buffered drawing, opacity, anti-aliasing and shadows
+ * Learn more: https://docs.littlevgl.com/#Drawing*/
+
+/* Size of the VDB in pixels. Typical size: ~1/10 screen. Must be >= LV_HOR_RES
+ * Setting it to 0 will disable VDB and `disp_drv.disp_fill` and `disp_drv.disp_map` functions
+ * will be called to draw to the frame buffer directly*/
+#define LV_VDB_SIZE         (LV_VER_RES * LV_HOR_RES)
+
+/* Bit-per-pixel of VDB. Useful for monochrome or non-standard color format displays.
+  * Special formats are handled with `disp_drv.vdb_wr`)*/
+#define LV_VDB_PX_BPP       LV_COLOR_SIZE       /*LV_COLOR_SIZE comes from LV_COLOR_DEPTH below to set 8, 16 or 32 bit pixel size automatically */
+
+ /* Place VDB to a specific address (e.g. in external RAM)
+  * 0: allocate automatically into RAM
+  * LV_VDB_ADR_INV: to replace it later with `lv_vdb_set_adr()`*/
+#define LV_VDB_ADR          0
+
+/* Use two Virtual Display buffers (VDB) to parallelize rendering and flushing
+ * The flushing should use DMA to write the frame buffer in the background */
+#define LV_VDB_DOUBLE       0
+
+/* Place VDB2 to a specific address (e.g. in external RAM)
+ * 0: allocate automatically into RAM
+ * LV_VDB_ADR_INV: to replace it later with `lv_vdb_set_adr()`*/
+#define LV_VDB2_ADR         0
+
+/* Using true double buffering in `disp_drv.disp_flush` you will always get the image of the whole screen.
+ * Your only task is to set the rendered image (`color_p` parameter) as frame buffer address or send it to your display.
+ * The best if you do in the blank period of you display to avoid tearing effect.
+ * Requires:
+ * - LV_VDB_SIZE = LV_HOR_RES * LV_VER_RES
+ * - LV_VDB_DOUBLE = 1
+ */
+#define LV_VDB_TRUE_DOUBLE_BUFFERED 0
 
 /*=================
    Misc. setting
@@ -79,6 +111,9 @@
 /*Text settings*/
 #define LV_TXT_UTF8             1                /*Enable UTF-8 coded Unicode character usage */
 #define LV_TXT_BREAK_CHARS     " ,.;:-_"         /*Can break texts on these chars*/
+#define LV_TXT_LINE_BREAK_LONG_LEN 12 /* If a character is at least this long, will break wherever "prettiest" */
+#define LV_TXT_LINE_BREAK_LONG_PRE_MIN_LEN 3 /* Minimum number of characters of a word to put on a line before a break */
+#define LV_TXT_LINE_BREAK_LONG_POST_MIN_LEN 1 /* Minimum number of characters of a word to put on a line after a break */
 
 /*Graphics feature usage*/
 #define USE_LV_ANIMATION        1               /*1: Enable all animations*/
@@ -87,6 +122,7 @@
 #define USE_LV_GPU              1               /*1: Enable GPU interface*/
 #define USE_LV_REAL_DRAW        1               /*1: Enable function which draw directly to the frame buffer instead of VDB (required if LV_VDB_SIZE = 0)*/
 #define USE_LV_FILESYSTEM       1               /*1: Enable file system (required by images*/
+#define USE_LV_MULTI_LANG       0               /* Number of languages for labels to store (0: to disable this feature)*/
 
 /*Compiler attributes*/
 #define LV_ATTRIBUTE_TICK_INC                 /* Define a custom attribute to tick increment function */
@@ -174,9 +210,10 @@
  *==================*/
 #define LV_OBJ_FREE_NUM_TYPE    size_t      /*Type of free number attribute (comment out disable free number)*/
 #define LV_OBJ_FREE_PTR         1           /*Enable the free pointer attribute*/
+#define LV_OBJ_REALIGN          1           /*Enable `lv_obj_realaign()` based on `lv_obj_align()` parameters*/
 
 /*==================
- *  LV OBJ X USAGE 
+ *  LV OBJ X USAGE
  *================*/
 /*
  * Documentation of the object types: https://littlevgl.com/object-types
@@ -189,14 +226,14 @@
 /*Label (dependencies: -*/
 #define USE_LV_LABEL    1
 #if USE_LV_LABEL != 0
-#define LV_LABEL_SCROLL_SPEED       25     /*Hor, or ver. scroll speed [px/sec] in 'LV_LABEL_LONG_SCROLL/ROLL' mode*/
+#  define LV_LABEL_SCROLL_SPEED       25     /*Hor, or ver. scroll speed [px/sec] in 'LV_LABEL_LONG_SCROLL/ROLL' mode*/
 #endif
 
 /*Image (dependencies: lv_label*/
 #define USE_LV_IMG      1
 #if USE_LV_IMG != 0
-#define LV_IMG_CF_INDEXED   1       /*Enable indexed (palette) images*/
-#define LV_IMG_CF_ALPHA     1       /*Enable alpha indexed images*/
+#  define LV_IMG_CF_INDEXED   1       /*Enable indexed (palette) images*/
+#  define LV_IMG_CF_ALPHA     1       /*Enable alpha indexed images*/
 #endif
 
 /*Line (dependencies: -*/
@@ -220,8 +257,14 @@
 
 /*Tab (dependencies: lv_page, lv_btnm)*/
 #define USE_LV_TABVIEW      1
-#if USE_LV_TABVIEW != 0
-#define LV_TABVIEW_ANIM_TIME    300     /*Time of slide animation [ms] (0: no animation)*/
+#  if USE_LV_TABVIEW != 0
+#  define LV_TABVIEW_ANIM_TIME    300     /*Time of slide animation [ms] (0: no animation)*/
+#endif
+
+/*Tileview (dependencies: lv_page) */
+#define USE_LV_TILEVIEW     1
+#if USE_LV_TILEVIEW
+#  define LV_TILEVIEW_ANIM_TIME   300     /*Time of slide animation [ms] (0: no animation)*/
 #endif
 
 /*************************
@@ -234,11 +277,17 @@
 /*Line meter (dependencies: *;)*/
 #define USE_LV_LMETER   1
 
-/*Gauge (dependencies:bar, lmeter)*/
+/*Gauge (dependencies:lv_bar, lv_lmeter)*/
 #define USE_LV_GAUGE    1
 
 /*Chart (dependencies: -)*/
 #define USE_LV_CHART    1
+
+/*Table (dependencies: lv_label)*/
+#define USE_LV_TABLE    1
+#if USE_LV_TABLE
+#  define LV_TABLE_COL_MAX    12
+#endif
 
 /*LED (dependencies: -)*/
 #define USE_LV_LED      1
@@ -249,20 +298,26 @@
 /*Text area (dependencies: lv_label, lv_page)*/
 #define USE_LV_TA       1
 #if USE_LV_TA != 0
-#define LV_TA_CURSOR_BLINK_TIME 400     /*ms*/
-#define LV_TA_PWD_SHOW_TIME     1500    /*ms*/
+#  define LV_TA_CURSOR_BLINK_TIME 400     /*ms*/
+#  define LV_TA_PWD_SHOW_TIME     1500    /*ms*/
 #endif
+
+/*Spinbox (dependencies: lv_ta)*/
+#define USE_LV_SPINBOX       1
 
 /*Calendar (dependencies: -)*/
 #define USE_LV_CALENDAR 1
 
-/*Preload (dependencies: arc)*/
+/*Preload (dependencies: lv_arc)*/
 #define USE_LV_PRELOAD      1
 #if USE_LV_PRELOAD != 0
-#define LV_PRELOAD_DEF_ARC_LENGTH   60      /*[deg]*/
-#define LV_PRELOAD_DEF_SPIN_TIME    1000    /*[ms]*/
+#  define LV_PRELOAD_DEF_ARC_LENGTH   60      /*[deg]*/
+#  define LV_PRELOAD_DEF_SPIN_TIME    1000    /*[ms]*/
+#  define LV_PRELOAD_DEF_ANIM         LV_PRELOAD_TYPE_SPINNING_ARC
 #endif
 
+/*Canvas (dependencies: lv_img)*/
+#define USE_LV_CANVAS       1
 /*************************
  * User input objects
  *************************/
@@ -270,11 +325,14 @@
 /*Button (dependencies: lv_cont*/
 #define USE_LV_BTN      1
 #if USE_LV_BTN != 0
-#define LV_BTN_INK_EFFECT   1       /*Enable button-state animations - draw a circle on click (dependencies: USE_LV_ANIMATION)*/
+#  define LV_BTN_INK_EFFECT   1       /*Enable button-state animations - draw a circle on click (dependencies: USE_LV_ANIMATION)*/
 #endif
 
 /*Image Button (dependencies: lv_btn*/
 #define USE_LV_IMGBTN   1
+#if USE_LV_IMGBTN
+#  define LV_IMGBTN_TILED 0           /*1: The imgbtn requires left, mid and right parts and the width can be set freely*/
+#endif
 
 /*Button matrix (dependencies: -)*/
 #define USE_LV_BTNM     1
@@ -288,19 +346,19 @@
 /*List (dependencies: lv_page, lv_btn, lv_label, (lv_img optionally for icons ))*/
 #define USE_LV_LIST     1
 #if USE_LV_LIST != 0
-#define LV_LIST_FOCUS_TIME  0 /*Default animation time of focusing to a list element [ms] (0: no animation)  */
+#  define LV_LIST_FOCUS_TIME  100 /*Default animation time of focusing to a list element [ms] (0: no animation)  */
 #endif
 
-/*Drop down list (dependencies: lv_page, lv_label)*/
+/*Drop down list (dependencies: lv_page, lv_label, lv_symbol_def.h)*/
 #define USE_LV_DDLIST    1
 #if USE_LV_DDLIST != 0
-#define LV_DDLIST_ANIM_TIME     200     /*Open and close default animation time [ms] (0: no animation)*/
+#  define LV_DDLIST_ANIM_TIME     200     /*Open and close default animation time [ms] (0: no animation)*/
 #endif
 
 /*Roller (dependencies: lv_ddlist)*/
 #define USE_LV_ROLLER    1
 #if USE_LV_ROLLER != 0
-#define LV_ROLLER_ANIM_TIME     200     /*Focus animation time [ms] (0: no animation)*/
+#  define LV_ROLLER_ANIM_TIME     200     /*Focus animation time [ms] (0: no animation)*/
 #endif
 
 /*Slider (dependencies: lv_bar)*/
@@ -312,9 +370,14 @@
 /*************************
  * Non-user section
  *************************/
-#ifdef _MSC_VER                               /* Disable warnings for Visual Studio*/
-#define _CRT_SECURE_NO_WARNINGS
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)    /* Disable warnings for Visual Studio*/
+#  define _CRT_SECURE_NO_WARNINGS
 #endif
+
+/*--END OF LV_CONF_H--*/
+
+/*Be sure every define has a default value*/
+#include "lvgl/lv_conf_checker.h"
 
 #endif /*LV_CONF_H*/
 

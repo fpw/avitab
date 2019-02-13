@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <lib/lvgl/lv_core/lv_style.h>
 #include "Button.h"
 #include "src/Logger.h"
 
@@ -73,8 +74,10 @@ Button::Button(WidgetPtr parent, Symbol smb):
     lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));
     styleWhenReleased.body.empty = true;
     styleWhenReleased.body.border.part = LV_BORDER_NONE;
+    styleWhenReleased.image.color = lv_color_hex3(0xFFF);
     styleWhenPressed.body.empty = true;
     styleWhenPressed.body.border.part = (lv_border_part_t) (LV_BORDER_LEFT | LV_BORDER_RIGHT);
+    styleWhenPressed.image.color = lv_color_hex3(0xFFF);
     lv_btn_set_style(button, LV_BTN_STYLE_PR, &styleWhenPressed);
     lv_btn_set_style(button, LV_BTN_STYLE_REL, &styleWhenReleased);
 

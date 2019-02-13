@@ -1,6 +1,7 @@
 list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_group.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_indev.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_lang.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_obj.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_refr.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_core/lv_style.c
@@ -54,6 +55,7 @@ list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_color.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_font.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_fs.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_gc.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_ll.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_log.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_misc/lv_math.c
@@ -70,6 +72,7 @@ list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_btn.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_btnm.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_calendar.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_canvas.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_cb.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_chart.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_cont.c
@@ -89,8 +92,11 @@ list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_preload.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_roller.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_slider.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_spinbox.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_tileview.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_sw.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_ta.c
+    ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_table.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_tabview.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/lv_objx/lv_win.c
 )
