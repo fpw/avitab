@@ -315,7 +315,6 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
         tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, "DEP")) + ")", -3);
         tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, "APP")) + ")", -4);
         tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, "REF")) + ")", -5);
-
     } else {
         tab.chartSelect->add("Back", Widget::Symbol::LEFT, -6);
         for (size_t i = 0; i < charts.size(); i++) {
@@ -365,11 +364,12 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             tabs->showTab(newTab.page);
 
             auto navigraph = api().getNavigraph();
-            auto call = navigraph->loadChartImage(chart);
+            auto call = navigraph->loadChartImage(chart, nightMode);
             call->andThen([this, newPage] (std::future<std::shared_ptr<navigraph::Chart>> res) {
                 try {
-                    auto chart = res.get();
-                    api().executeLater([this, chart, newPage] { onChartLoaded(newPage, chart); });
+                    TabPage &tab = findPage(newPage);
+                    tab.chart = res.get();
+                    api().executeLater([this, newPage] { onChartLoaded(newPage); });
                 } catch (const std::exception &e) {
                     TabPage &tab = findPage(newPage);
                     tab.label->setTextFormatted("Error: %s", e.what());
@@ -381,7 +381,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
     });
 }
 
-void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart) {
+void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     TabPage &tab = findPage(page);
 
     tab.label->setVisible(false);
@@ -398,6 +398,14 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
         TabPage &tab = findPage(page);
         tab.mapStitcher->rotateRight();
     });
+    tab.nightModeButton = tab.window->addSymbol(Widget::Symbol::IMAGE, [this, page] () {
+        TabPage &tab = findPage(page);
+        nightMode = !nightMode;
+        tab.nightModeButton->setToggleState(nightMode);
+        tab.mapSource->changeImage(getChartImage(tab.chart));
+        tab.mapStitcher->invalidateCache();
+    });
+    tab.nightModeButton->setToggleState(nightMode);
     tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
         TabPage &tab = findPage(page);
         auto conf = tab.map->getOverlayConfig();
@@ -414,8 +422,8 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
     tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 68);
     tab.pixMap->centerInParent();
 
-    auto dayImage = chart->getDayImage();
-    tab.mapSource = std::make_shared<maps::ImageSource>(dayImage);
+    auto chartImage = getChartImage(tab.chart);
+    tab.mapSource = std::make_shared<maps::ImageSource>(chartImage);
     tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
     tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher);
     tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
@@ -424,11 +432,11 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navig
 
     tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawAircraft);
 
-    auto geoRef = chart->getGeoReference();
+    auto geoRef = tab.chart->getGeoReference();
     if (geoRef.valid) {
         try {
-            int w = dayImage->getWidth();
-            int h = dayImage->getHeight();
+            int w = chartImage->getWidth();
+            int h = chartImage->getHeight();
             tab.mapSource->attachCalibration1(geoRef.x1 * w, geoRef.y1 * h, geoRef.lat1, geoRef.lon1, 0);
             tab.mapSource->attachCalibration2(geoRef.x2 * w, geoRef.y2 * h, geoRef.lat2, geoRef.lon2, 0);
         } catch (const std::exception &e) {
@@ -493,6 +501,14 @@ bool AirportApp::onTimer() {
         }
     }
     return true;
+}
+
+std::shared_ptr<img::Image> AirportApp::getChartImage(std::shared_ptr<navigraph::Chart> chart) {
+    if (nightMode) {
+        return chart->getNightImage();
+    } else {
+        return chart->getDayImage();
+    }
 }
 
 size_t AirportApp::countCharts(const navigraph::NavigraphAPI::ChartsList& list, const std::string& type) {

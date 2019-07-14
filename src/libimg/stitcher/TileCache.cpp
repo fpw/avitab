@@ -202,6 +202,15 @@ void TileCache::flushCache() {
     }
 }
 
+void TileCache::invalidate() {
+    // gets called unlocked
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    tileSource->cancelPendingLoads();
+    memoryCache.clear();
+    errorSet.clear();
+    loadSet.clear();
+}
+
 TileCache::~TileCache() {
     {
         std::lock_guard<std::mutex> lock(cacheMutex);

@@ -30,6 +30,12 @@ ImageSource::ImageSource(std::shared_ptr<img::Image> image):
 {
 }
 
+void ImageSource::changeImage(std::shared_ptr<img::Image> newImage) {
+    if (image->getWidth() == newImage->getWidth() && image->getHeight() == newImage->getHeight()) {
+        image = newImage;
+    }
+}
+
 int ImageSource::getMinZoomLevel() {
     double maxDim = std::max(image->getWidth(), image->getHeight());
     double minN = std::log(maxDim / TILE_SIZE) / std::log(M_SQRT2);

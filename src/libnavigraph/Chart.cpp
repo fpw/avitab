@@ -83,7 +83,7 @@ std::string Chart::getFileNight() const {
 }
 
 bool Chart::isLoaded() const {
-    return imgDay != nullptr;
+    return imgDay != nullptr && imgNight != nullptr;
 }
 
 void Chart::attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night) {

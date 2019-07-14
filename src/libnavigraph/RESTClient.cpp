@@ -83,9 +83,11 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     if (code != CURLE_OK) {
         if (code == CURLE_ABORTED_BY_CALLBACK) {
             curl_easy_cleanup(curl);
+            logger::verbose("HTTP request: Cancelled");
             throw std::out_of_range("Cancelled");
         } else {
             curl_easy_cleanup(curl);
+            logger::verbose("HTTP request: Error %s", curl_easy_strerror(code));
             throw std::runtime_error(std::string("GET_BIN error: ") + curl_easy_strerror(code));
         }
     }
@@ -94,10 +96,12 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
     if (httpStatus != 200) {
         curl_easy_cleanup(curl);
+        logger::verbose("HTTP request: Status %d", httpStatus);
         throw HTTPException(httpStatus);
     }
 
     curl_easy_cleanup(curl);
+    logger::verbose("HTTP request: Done, %d bytes", downloadBuf.size());
 
     return downloadBuf;
 }

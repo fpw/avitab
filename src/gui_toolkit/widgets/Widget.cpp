@@ -202,6 +202,7 @@ const void* Widget::symbolToLVSymbol(Symbol symbol) {
     case Symbol::GPS:       return SYMBOL_GPS;
     case Symbol::EDIT:      return SYMBOL_EDIT;
     case Symbol::KEYBOARD:  return SYMBOL_KEYBOARD;
+    case Symbol::IMAGE:     return SYMBOL_IMAGE;
     default:                return nullptr;
     }
 }

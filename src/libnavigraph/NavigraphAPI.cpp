@@ -151,8 +151,8 @@ std::shared_ptr<APICall<NavigraphAPI::ChartsList>> NavigraphAPI::getChartsFor(co
     return call;
 }
 
-std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(std::shared_ptr<Chart> chart) {
-    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart] {
+std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(std::shared_ptr<Chart> chart, bool nightMode) {
+    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart, nightMode] {
         if (chart->isLoaded()) {
             return chart;
         }
@@ -165,8 +165,8 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(st
         std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
 
         auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
-        //auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
-        chart->attachImages(imgDay, nullptr);
+        auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
+        chart->attachImages(imgDay, imgNight);
 
         return chart;
     });
@@ -268,7 +268,12 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
     std::string signedUrl = oidc->get(url);
     std::vector<uint8_t> pngData = oidc->getBinary(signedUrl);
     auto img = std::make_shared<img::Image>();
+    logger::verbose("Decoding PNG image");
     img->loadEncodedData(pngData, false);
+    logger::verbose("PNG decoded, %dx%d px", img->getWidth(), img->getHeight());
+    if (img->getWidth()  == 0 || img->getHeight() == 0) {
+        throw std::runtime_error("Invalid chart image");
+    }
 
     stamper.applyStamp(*img, 270);
 

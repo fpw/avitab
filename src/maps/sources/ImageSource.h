@@ -30,6 +30,7 @@ class ImageSource: public img::TileSource {
 public:
     ImageSource(std::shared_ptr<img::Image> image);
 
+    void changeImage(std::shared_ptr<img::Image> newImage);
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
     int getInitialZoomLevel() override;

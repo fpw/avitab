@@ -223,4 +223,9 @@ void Stitcher::doWork() {
     }
 }
 
+void Stitcher::invalidateCache() {
+    tileCache.invalidate();
+    updateImage();
+}
+
 } /* namespace img */

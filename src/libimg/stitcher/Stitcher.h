@@ -48,6 +48,7 @@ public:
     void setZoomLevel(int level);
     int getZoomLevel();
 
+    void invalidateCache();
     void updateImage();
     void doWork();
 

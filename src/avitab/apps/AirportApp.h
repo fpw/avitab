@@ -47,13 +47,14 @@ private:
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
-        std::shared_ptr<Button> aircraftButton;
+        std::shared_ptr<Button> aircraftButton, nightModeButton;
         std::shared_ptr<xdata::Airport> airport;
 
         std::string requestedList = "ROOT";
         navigraph::NavigraphAPI::ChartsList charts;
         std::shared_ptr<List> chartSelect;
 
+        std::shared_ptr<navigraph::Chart> chart;
         std::shared_ptr<maps::ImageSource> mapSource;
         std::shared_ptr<img::Image> mapImage;
         std::shared_ptr<img::Stitcher> mapStitcher;
@@ -63,6 +64,7 @@ private:
         int panPosX = 0, panPosY = 0;
     };
     std::vector<TabPage> pages;
+    bool nightMode = false;
 
     Timer updateTimer;
     std::shared_ptr<Page> searchPage;
@@ -90,11 +92,12 @@ private:
     void toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts);
-    void onChartLoaded(std::shared_ptr<Page> page, std::shared_ptr<navigraph::Chart> chart);
+    void onChartLoaded(std::shared_ptr<Page> page);
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
     void redrawPage(std::shared_ptr<Page> page);
     bool onTimer();
 
+    std::shared_ptr<img::Image> getChartImage(std::shared_ptr<navigraph::Chart> chart);
     size_t countCharts(const navigraph::NavigraphAPI::ChartsList &list, const std::string &type);
 };
 
