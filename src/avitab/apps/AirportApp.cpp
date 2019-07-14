@@ -364,7 +364,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             tabs->showTab(newTab.page);
 
             auto navigraph = api().getNavigraph();
-            auto call = navigraph->loadChartImage(chart, nightMode);
+            auto call = navigraph->loadChartImages(chart);
             call->andThen([this, newPage] (std::future<std::shared_ptr<navigraph::Chart>> res) {
                 try {
                     TabPage &tab = findPage(newPage);

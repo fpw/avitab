@@ -45,7 +45,7 @@ public:
     // asynchronous calls
     std::shared_ptr<APICall<bool>> init();
     std::shared_ptr<APICall<ChartsList>> getChartsFor(const std::string &icao);
-    std::shared_ptr<APICall<std::shared_ptr<Chart>>> loadChartImage(std::shared_ptr<Chart> chart, bool nightMode);
+    std::shared_ptr<APICall<std::shared_ptr<Chart>>> loadChartImages(std::shared_ptr<Chart> chart);
     void submitCall(std::shared_ptr<BaseCall> call);
 
     // synchronous calls

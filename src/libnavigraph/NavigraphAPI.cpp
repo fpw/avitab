@@ -151,8 +151,8 @@ std::shared_ptr<APICall<NavigraphAPI::ChartsList>> NavigraphAPI::getChartsFor(co
     return call;
 }
 
-std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImage(std::shared_ptr<Chart> chart, bool nightMode) {
-    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart, nightMode] {
+std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImages(std::shared_ptr<Chart> chart) {
+    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart] {
         if (chart->isLoaded()) {
             return chart;
         }
