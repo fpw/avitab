@@ -63,8 +63,16 @@ void AirportLoader::onAirportLoaded(const AirportData& port) {
     }
 
     for (auto &entry: port.frequencies) {
-        Frequency frq(entry.frq, Frequency::Unit::MHZ, entry.desc);
-        switch (entry.code) {
+        int places = 2;
+        int code = entry.code;
+        // to support 8 kHz channel spacing
+        if (code > 1000) {
+            places = 3;
+            code -= 1000;
+        }
+
+        Frequency frq(entry.frq, places, Frequency::Unit::MHZ, entry.desc);
+        switch (code) {
         case 50: airport->addATCFrequency(Airport::ATCFrequency::RECORDED, frq); break;
         case 51: airport->addATCFrequency(Airport::ATCFrequency::UNICOM, frq); break;
         case 52: airport->addATCFrequency(Airport::ATCFrequency::CLD, frq); break;

@@ -21,8 +21,9 @@
 
 namespace xdata {
 
-Frequency::Frequency(int frq, Unit unit, const std::string& desc):
+Frequency::Frequency(int frq, int places, Unit unit, const std::string& desc):
     frequency(frq),
+    places(places),
     unit(unit),
     description(desc)
 {
@@ -35,8 +36,12 @@ const std::string& Frequency::getDescription() const {
 std::string Frequency::getFrequencyString() const {
     if (unit == Unit::MHZ) {
         std::ostringstream str;
-        int beforeDot = frequency / 100;
-        int afterDot = frequency % 100;
+        int factor = 1;
+        for (int i = 0; i < places; i++) {
+            factor *= 10;
+        }
+        int beforeDot = frequency / factor;
+        int afterDot = frequency % factor;
         str << beforeDot << "." << std::setw(2) << std::setfill('0') << afterDot << " MHz";
         return str.str();
     } else if (unit == Unit::KHZ) {

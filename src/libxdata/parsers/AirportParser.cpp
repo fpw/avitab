@@ -70,6 +70,13 @@ void AirportParser::parseLine() {
     case 54:
     case 55:
     case 56:
+    case 1050:
+    case 1051:
+    case 1052:
+    case 1053:
+    case 1054:
+    case 1055:
+    case 1056:
         parseFrequency(rowCode);
         break;
     case 99:
