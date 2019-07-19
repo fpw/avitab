@@ -52,8 +52,9 @@ void ChartsApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t 
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showDirectory(currentPath, entries, chosenIndex);
     pdfApp->setOnExit([this] () {
-        showFileSelect();
-        childApp->show();
+        api().executeLater([this] {
+            onSelectionClosed();
+        });
     });
 
     childApp = std::move(pdfApp);
@@ -64,6 +65,11 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
     if (childApp) {
         childApp->onMouseWheel(dir, x, y);
     }
+}
+
+void ChartsApp::onSelectionClosed() {
+    showFileSelect();
+    childApp->show();
 }
 
 } /* namespace avitab */
