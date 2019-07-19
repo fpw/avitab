@@ -80,8 +80,9 @@ void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, si
     auto pdfApp = startSubApp<PDFViewer>();
     pdfApp->showDirectory(currentPath, entries, chosenIndex);
     pdfApp->setOnExit([this] () {
-        showFileSelect();
-        childApp->show();
+        api().executeLater([this] {
+            onSelectionClosed();
+        });
     });
 
     childApp = std::move(pdfApp);
@@ -92,6 +93,11 @@ void PlaneManualApp::onMouseWheel(int dir, int x, int y) {
     if (childApp) {
         childApp->onMouseWheel(dir, x, y);
     }
+}
+
+void PlaneManualApp::onSelectionClosed() {
+    showFileSelect();
+    childApp->show();
 }
 
 } /* namespace avitab */

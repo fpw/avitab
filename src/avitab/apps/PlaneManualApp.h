@@ -37,6 +37,7 @@ private:
 
     void showFileSelect();
     void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
+    void onSelectionClosed();
 };
 
 } /* namespace avitab */
