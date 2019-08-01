@@ -28,11 +28,11 @@ namespace xdata {
 class AirportLoader {
 public:
     AirportLoader(std::shared_ptr<World> worldPtr);
-    void load(const std::string &file);
+    void load(const std::string &file) const;
 private:
     std::shared_ptr<World> world;
 
-    void onAirportLoaded(const AirportData &port);
+    void onAirportLoaded(const AirportData &port) const;
 };
 
 } /* namespace xdata */

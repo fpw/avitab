@@ -24,6 +24,7 @@
 #include "src/libxdata/world/loaders/AirwayLoader.h"
 #include "src/libxdata/world/loaders/CIFPLoader.h"
 #include "src/libxdata/world/loaders/MetarLoader.h"
+#include "src/libxdata/parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -66,7 +67,21 @@ void XData::cancelLoading() {
 }
 
 void XData::loadAirports() {
-    AirportLoader loader(world);
+    const AirportLoader loader(world);
+
+    //Custom scenery
+    CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
+    parser.setAcceptor([this,loader] (const std::string &data) {
+        auto customScenaryDir = xplaneRoot + data + "/Earth nav data/apt.dat";
+        if(!platform::fileExists(customScenaryDir))
+            return;
+
+        logger::info("Loading custom scenary airport for %s", data.c_str());
+        loader.load(customScenaryDir);
+    });
+    parser.loadCustomScenery();
+
+    //Default scenery
     loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
 }
 
