@@ -21,6 +21,7 @@
 #include <string>
 #include <memory>
 #include "src/libxdata/world/World.h"
+#include "src/libxdata/world/loaders/AirportLoader.h"
 
 namespace xdata {
 
@@ -44,6 +45,7 @@ private:
     void loadAirways();
     void loadProcedures();
     void loadMetar();
+    void loadCustomScenery(const AirportLoader& loader);
 };
 
 } /* namespace xdata */

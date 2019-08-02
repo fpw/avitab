@@ -51,7 +51,7 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     }
 
     auto airport = world->findAirportByID(port.id);
-    if(airport != nullptr) {
+    if (airport != nullptr) {
         //Airport already exists so lets skip it.
         return;
     }
