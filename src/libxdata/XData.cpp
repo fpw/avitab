@@ -71,7 +71,7 @@ void XData::loadAirports() {
     try {
         loadCustomScenery(loader);
     } catch (const std::exception &e) {
-        logger::warn("Unable to parse custom scenery. Check your scenery_packs.ini file.", e.what());
+        logger::warn("Unable to parse custom scenery: %s", e.what());
     }
 
     loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
