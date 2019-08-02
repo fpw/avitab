@@ -27,7 +27,7 @@ AirportLoader::AirportLoader(std::shared_ptr<World> worldPtr):
 {
 }
 
-void AirportLoader::load(const std::string& file) {
+void AirportLoader::load(const std::string& file) const {
     AirportParser parser(file);
     parser.setAcceptor([this] (const AirportData &data) {
         try {
@@ -42,7 +42,7 @@ void AirportLoader::load(const std::string& file) {
     parser.loadAirports();
 }
 
-void AirportLoader::onAirportLoaded(const AirportData& port) {
+void AirportLoader::onAirportLoaded(const AirportData& port) const {
     if (std::isnan(port.latitude) || std::isnan(port.longitude)) {
         if (port.runways.empty() && port.heliports.empty()) {
             logger::warn("Airport %s has no location or landing points, discarding", port.id.c_str());
@@ -50,7 +50,13 @@ void AirportLoader::onAirportLoaded(const AirportData& port) {
         }
     }
 
-    auto airport = world->findOrCreateAirport(port.id);
+    auto airport = world->findAirportByID(port.id);
+    if (airport != nullptr) {
+        //Airport already exists so lets skip it.
+        return;
+    }
+
+    airport = world->findOrCreateAirport(port.id);
     airport->setName(port.name);
     airport->setElevation(port.elevation);
 

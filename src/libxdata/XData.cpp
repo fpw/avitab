@@ -18,12 +18,12 @@
 #include <chrono>
 #include "XData.h"
 #include "src/platform/Platform.h"
-#include "src/libxdata/world/loaders/AirportLoader.h"
 #include "src/libxdata/world/loaders/FixLoader.h"
 #include "src/libxdata/world/loaders/NavaidLoader.h"
 #include "src/libxdata/world/loaders/AirwayLoader.h"
 #include "src/libxdata/world/loaders/CIFPLoader.h"
 #include "src/libxdata/world/loaders/MetarLoader.h"
+#include "src/libxdata/parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -66,8 +66,29 @@ void XData::cancelLoading() {
 }
 
 void XData::loadAirports() {
-    AirportLoader loader(world);
+    const AirportLoader loader(world);
+
+    try {
+        loadCustomScenery(loader);
+    } catch (const std::exception &e) {
+        logger::warn("Unable to parse custom scenery: %s", e.what());
+    }
+
     loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
+}
+
+void XData::loadCustomScenery(const AirportLoader& loader) {
+    CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
+    parser.setAcceptor([this,loader] (const std::string &data) {
+        auto customSceneryDir = xplaneRoot + data + "/Earth nav data/apt.dat";
+        
+        if (!platform::fileExists(customSceneryDir))
+            return;
+
+        logger::info("Loading custom scenery airport for %s", data.c_str());
+        loader.load(customSceneryDir);
+    });
+    parser.loadCustomScenery();
 }
 
 void XData::loadFixes() {
