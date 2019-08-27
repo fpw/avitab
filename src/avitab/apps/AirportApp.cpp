@@ -371,9 +371,15 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
                     tab.chart = res.get();
                     api().executeLater([this, newPage] { onChartLoaded(newPage); });
                 } catch (const std::exception &e) {
-                    TabPage &tab = findPage(newPage);
-                    tab.label->setTextFormatted("Error: %s", e.what());
-                    tab.label->setVisible(true);
+                    // if the page was closed, findPage will throw an exception again
+                    try {
+                        TabPage &tab = findPage(newPage);
+                        tab.label->setTextFormatted("Error: %s", e.what());
+                        tab.label->setVisible(true);
+                    } catch (...) {
+                        // but we can silently discard it since the user closed the page and thus lost interest
+                        logger::info("Ignoring exception since the page was closed: %s", e.what());
+                    }
                 }
             });
             navigraph->submitCall(call);

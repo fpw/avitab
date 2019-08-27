@@ -77,7 +77,11 @@ void NavigraphAPI::workLoop() {
         lock.unlock();
 
         for (auto call: callsCopy) {
-            call->exec();
+            try {
+                call->exec();
+            } catch (const std::exception &e) {
+                logger::warn("Oof! Uncaught exception in Navigraph API: %s", e.what());
+            }
         }
     }
 }
