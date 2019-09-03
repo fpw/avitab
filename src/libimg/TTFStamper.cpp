@@ -138,6 +138,11 @@ void TTFStamper::applyStamp(Image &dst, int angle) {
     }
 }
 
+void TTFStamper::applyStamp(Image &dst, int x, int y)
+{
+    dst.blendImage0(stamp, x, y);
+}
+
 TTFStamper::~TTFStamper() {
     FT_Done_Face(fontFace);
     FT_Done_FreeType(ft);

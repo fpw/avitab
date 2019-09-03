@@ -33,7 +33,9 @@ public:
     void setText(const std::string &newText);
     void setColor(uint32_t textColor);
     void applyStamp(Image &dst, int angle);
+    void applyStamp(Image &dst, int x, int y);
     static void setFontDirectory(const std::string &dir);
+    size_t getTextWidth(const std::string &in);
     ~TTFStamper();
 private:
     int fontSize = 28;
@@ -46,7 +48,6 @@ private:
     Image stamp;
 
     void loadInternalFont();
-    size_t getTextWidth(const std::string &in);
 };
 
 const char* GetDefaultCompressedFontDataTTFBase85();

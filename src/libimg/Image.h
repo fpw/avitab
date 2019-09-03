@@ -22,6 +22,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <map>
 
 namespace img {
 
@@ -32,6 +33,11 @@ constexpr const uint32_t COLOR_RED          = 0xFF800000;
 constexpr const uint32_t COLOR_LIGHT_RED    = 0xFFFF0000;
 constexpr const uint32_t COLOR_BLUE         = 0xFF0000FF;
 constexpr const uint32_t COLOR_YELLOW       = 0xFF808000;
+constexpr const uint32_t COLOR_DARK_GREY    = 0xFF303030;
+constexpr const uint32_t COLOR_DARK_GREEN   = 0xFF006000;
+constexpr const uint32_t COLOR_ICAO_BLUE    = 0xFF307090;
+constexpr const uint32_t COLOR_ICAO_MAGENTA = 0xFF906080;
+
 
 class Image {
 public:
@@ -59,6 +65,7 @@ public:
     void scale(int newWidth, int newHeight);
     void drawPixel(int x, int y, uint32_t color);
     void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
+    void drawLineAA(float x0, float y0, float x1, float y1, uint32_t color);
     void drawImage(const Image &src, int dstX, int dstY);
     void copyTo(Image &dst, int srcX, int srcY);
     void blendImage(const Image &src, int dstX, int dstY, double angle);
@@ -66,6 +73,10 @@ public:
     void blendImage0(const Image &src, int dstX, int dstY);
     void alphaBlend(uint32_t color);
     void blendPixel(int x, int y, uint32_t color);
+    void fillCircle(int x, int y, int radius, uint32_t color);
+    void fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+    void fillRectangle(int x0, int y0, int x1, int y1, uint32_t color);
+    void drawText(const std::string text, int size, int x, int y, uint32_t color);
 
     // the source image must be square with edge len = max(srcWidth, srcHeight)
     void rotate0(Image &dst);
@@ -78,8 +89,14 @@ public:
 private:
     int width = 0;
     int height = 0;
+    uint32_t drawLineAAColor = 0;
     std::unique_ptr<std::vector<uint8_t>> encodedData;
     std::unique_ptr<std::vector<uint32_t>> pixels;
+
+    std::map<uint64_t, std::shared_ptr<img::Image>> circleCache;
+
+    void fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_t color);
+    void plot(int x, int y, float brightness);
 };
 
 } /* namespace img */
