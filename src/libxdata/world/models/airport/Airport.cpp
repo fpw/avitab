@@ -42,6 +42,8 @@ int Airport::getElevation() {
 
 void Airport::setLocation(const Location& loc) {
     this->location = loc;
+    this->locationUpLeft = loc;
+    this->locationDownRight = loc;
 }
 
 void Airport::setRegion(std::shared_ptr<Region> region) {
@@ -54,6 +56,25 @@ void Airport::addATCFrequency(ATCFrequency which, const Frequency &frq) {
 
 void Airport::addRunway(std::shared_ptr<Runway> rwy) {
     runways.insert(std::make_pair(rwy->getID(), rwy));
+    auto &loc = rwy->getLocation();
+
+    if (!locationUpLeft.isValid()) {
+        locationUpLeft = rwy->getLocation();
+    } else {
+        locationUpLeft.longitude = std::min(locationUpLeft.longitude, loc.longitude);
+        locationUpLeft.latitude  = std::max(locationUpLeft.latitude,  loc.latitude);
+    }
+    
+    if (!locationDownRight.isValid()) {
+        locationDownRight = rwy->getLocation();
+    } else {
+        locationDownRight.longitude = std::max(locationDownRight.longitude, loc.longitude);
+        locationDownRight.latitude  = std::min(locationDownRight.latitude,  loc.latitude);
+    }
+}
+
+void Airport::addRunwayEnds(std::shared_ptr<Runway> rwy1, std::shared_ptr<Runway> rwy2) {
+    runwayPairs.insert(std::make_pair(rwy1, rwy2));
 }
 
 void Airport::addHeliport(std::shared_ptr<Heliport> port) {
@@ -150,14 +171,51 @@ const std::shared_ptr<Runway> Airport::getRunwayByName(const std::string& rw) co
     return rwy->second;
 }
 
-void Airport::forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) {
+void Airport::forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) const {
     for (auto &rwy: runways) {
         f(rwy.second);
     }
 }
 
+void Airport::forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>, const std::shared_ptr<Runway>)> f) const {
+    for (auto &rwys: runwayPairs) {
+        f(rwys.first, rwys.second);
+    }
+}
+
 bool Airport::hasOnlyHeliports() const {
-    return runways.empty();
+    return runways.empty() && !heliports.empty();
+}
+
+bool Airport::hasWaterRunway() const {
+    for (const auto &rwy: runways) {
+        if (rwy.second->getSurfaceType() == xdata::Runway::SurfaceType::WATER_RUNWAY)
+            return true;
+    }
+    return false;
+}
+
+bool Airport::hasTowerFrequency() const {
+    int numberOfTowerFrequencies = 0;
+    try {
+        const auto towerFrequencies = atcFrequencies.at(ATCFrequency::TWR);
+        numberOfTowerFrequencies = towerFrequencies.size();
+    }
+        catch (const std::out_of_range& oor) {
+    }
+    return (numberOfTowerFrequencies >= 1);
+}
+
+bool Airport::hasMultipleATCFrequencies() const {
+    return (atcFrequencies.size() > 1);
+}
+
+bool Airport::hasHardRunway() const {
+    for (const auto &rwy: runways) {
+        if (rwy.second->hasHardSurface())
+            return true;
+    }
+    return false;
 }
 
 void Airport::addSID(std::shared_ptr<SID> sid) {
@@ -219,6 +277,14 @@ const Location& Airport::getLocation() const {
     }
 
     return location;
+}
+
+const Location& Airport::getLocationUpLeft() const {
+    return (locationUpLeft.isValid()) ? locationUpLeft :getLocation();
+}
+
+const Location& Airport::getLocationDownRight() const {
+    return (locationUpLeft.isValid()) ? locationDownRight : getLocation();
 }
 
 } /* namespace xdata */

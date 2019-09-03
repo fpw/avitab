@@ -42,6 +42,10 @@ void Runway::setLocation(const Location &loc) {
     this->location = loc;
 }
 
+void Runway::setSurfaceType(int surfaceTypeCode) {
+    surfaceType = (SurfaceType)surfaceTypeCode ;
+}
+
 const std::string& Runway::getID() const {
     return name;
 }
@@ -77,6 +81,15 @@ const Location &Runway::getLocation() const {
 
 float xdata::Runway::getLength() const {
     return length;
+}
+
+xdata::Runway::SurfaceType xdata::Runway::getSurfaceType() const{
+    return surfaceType;
+}
+
+bool xdata::Runway::hasHardSurface() const{
+    return ((surfaceType == xdata::Runway::SurfaceType::ASPHALT) ||
+            (surfaceType == xdata::Runway::SurfaceType::CONCRETE));
 }
 
 } /* namespace xdata */

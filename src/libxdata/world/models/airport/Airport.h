@@ -57,6 +57,8 @@ public:
 
     const std::string& getID() const override;
     const Location &getLocation() const override;
+    const Location &getLocationUpLeft() const;
+    const Location &getLocationDownRight() const;
 
     // Optional
     void setLocation(const Location &loc);
@@ -70,12 +72,19 @@ public:
     const std::string &getMetarString() const;
 
     void addRunway(std::shared_ptr<Runway> rwy);
-    void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f);
+    void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) const;
+    void addRunwayEnds(std::shared_ptr<Runway> rwy1, std::shared_ptr<Runway> rwy2);
+    void forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>, const std::shared_ptr<Runway>)> f) const;
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
     void addHeliport(std::shared_ptr<Heliport> port);
 
     bool hasOnlyHeliports() const;
 
+    bool hasWaterRunway() const;
+    bool hasTowerFrequency() const;
+    bool hasMultipleATCFrequencies() const;
+    bool hasHardRunway() const;
+    
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
@@ -94,6 +103,8 @@ private:
     std::string id; // either ICAO code or X + fictional id
     std::string name;
     Location location;
+    Location locationUpLeft;
+    Location locationDownRight;
     int elevation = 0; // feet AMSL
 
     // Optional
@@ -101,6 +112,7 @@ private:
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
 
     std::map<std::string, std::shared_ptr<Runway>> runways;
+    std::map<std::shared_ptr<Runway>, std::shared_ptr<Runway>> runwayPairs;
     std::map<std::string, std::shared_ptr<Heliport>> heliports;
 
     std::map<std::string, std::shared_ptr<Fix>> terminalFixes;

@@ -108,16 +108,28 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             Location end1Loc(end1.latitude, end1.longitude);
             Location end2Loc(end2.latitude, end2.longitude);
             length = end1Loc.distanceTo(end2Loc) - end1.displace - end2.displace;
+        } else {
+            LOG_WARN("%s has runway with %d ends!", port.id.c_str(), entry.ends.size());
         }
 
-        for (auto &end: entry.ends) {
-            auto rwy = std::make_shared<Runway>(end.name);
-            rwy->setLocation(Location(end.latitude, end.longitude));
+        std::shared_ptr<Runway> end0 = NULL;
+        for (auto end = entry.ends.begin(); end != entry.ends.end(); ++end) {
+            auto rwy = std::make_shared<Runway>(end->name);
+            rwy->setLocation(Location(end->latitude, end->longitude));
             rwy->setWidth(entry.width);
+            rwy->setSurfaceType(entry.surfaceType);
             if (!std::isnan(length)) {
                 rwy->setLength(length);
             }
             airport->addRunway(rwy);
+            if (entry.ends.size() == 2) {
+                if (end == entry.ends.begin()) {
+                    end0 = rwy;
+                } else {
+                    airport->addRunwayEnds(end0, rwy);
+                    LOG_VERBOSE(0,"%s runway pair %s & %s", port.id.c_str(), end0->getID().c_str(), rwy->getID().c_str());
+                }
+            }
         }
     }
 }
