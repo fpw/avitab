@@ -275,6 +275,8 @@ void MapApp::suspend() {
         ndbCheckbox.reset();
         vorCheckbox.reset();
         airportCheckbox.reset();
+        airstripCheckbox.reset();
+        heliseaportCheckbox.reset();
         aircraftCheckbox.reset();
         overlaysContainer.reset();
     }
@@ -295,6 +297,8 @@ void MapApp::onOverlaysButton() {
         ndbCheckbox.reset();
         vorCheckbox.reset();
         airportCheckbox.reset();
+        airstripCheckbox.reset();
+        heliseaportCheckbox.reset();
         aircraftCheckbox.reset();
         overlaysContainer.reset();
     } else {
@@ -328,7 +332,7 @@ void MapApp::showOverlaySettings() {
             map->setOverlayConfig(conf);
         }
     });
-/*
+
     airportCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Airports");
     airportCheckbox->setChecked(overlays.drawAirports);
     airportCheckbox->alignBelow(aircraftCheckbox);
@@ -340,6 +344,29 @@ void MapApp::showOverlaySettings() {
         }
     });
 
+    airstripCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Airstrips");
+    airstripCheckbox->setChecked(overlays.drawAirstrips);
+    airstripCheckbox->alignRightOf(airportCheckbox);
+    airstripCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawAirstrips = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    heliseaportCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Heli/Seaports");
+    heliseaportCheckbox->setChecked(overlays.drawHeliportsSeaports);
+    heliseaportCheckbox->alignRightOf(airstripCheckbox);
+    heliseaportCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawHeliportsSeaports = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+/*
     vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VORs & DMEs");
     vorCheckbox->setChecked(overlays.drawVORs);
     vorCheckbox->alignBelow(airportCheckbox);
