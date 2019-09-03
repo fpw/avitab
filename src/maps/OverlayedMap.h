@@ -36,7 +36,8 @@ struct OverlayConfig {
 class OverlayedMap {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
-    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
+
+    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
     void setOverlayDirectory(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
