@@ -42,8 +42,8 @@ void Runway::setLocation(const Location &loc) {
     this->location = loc;
 }
 
-void Runway::setSurfaceType(int surfaceTypeCode) {
-    surfaceType = (SurfaceType)surfaceTypeCode ;
+void Runway::setSurfaceType(SurfaceType surfaceType) {
+    this->surfaceType = surfaceType ;
 }
 
 const std::string& Runway::getID() const {

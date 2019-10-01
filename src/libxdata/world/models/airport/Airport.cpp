@@ -64,7 +64,7 @@ void Airport::addRunway(std::shared_ptr<Runway> rwy) {
         locationUpLeft.longitude = std::min(locationUpLeft.longitude, loc.longitude);
         locationUpLeft.latitude  = std::max(locationUpLeft.latitude,  loc.latitude);
     }
-    
+
     if (!locationDownRight.isValid()) {
         locationDownRight = rwy->getLocation();
     } else {
@@ -189,21 +189,15 @@ bool Airport::hasOnlyHeliports() const {
 
 bool Airport::hasWaterRunway() const {
     for (const auto &rwy: runways) {
-        if (rwy.second->getSurfaceType() == xdata::Runway::SurfaceType::WATER_RUNWAY)
+        if (rwy.second->getSurfaceType() == xdata::Runway::SurfaceType::WATER_RUNWAY) {
             return true;
+        }
     }
     return false;
 }
 
 bool Airport::hasTowerFrequency() const {
-    int numberOfTowerFrequencies = 0;
-    try {
-        const auto towerFrequencies = atcFrequencies.at(ATCFrequency::TWR);
-        numberOfTowerFrequencies = towerFrequencies.size();
-    }
-        catch (const std::out_of_range& oor) {
-    }
-    return (numberOfTowerFrequencies >= 1);
+    return (atcFrequencies.count(ATCFrequency::TWR) >= 1);
 }
 
 bool Airport::hasMultipleATCFrequencies() const {
@@ -212,8 +206,9 @@ bool Airport::hasMultipleATCFrequencies() const {
 
 bool Airport::hasHardRunway() const {
     for (const auto &rwy: runways) {
-        if (rwy.second->hasHardSurface())
+        if (rwy.second->hasHardSurface()) {
             return true;
+        }
     }
     return false;
 }

@@ -193,7 +193,7 @@ void OverlayedMap::drawDataOverlays() {
     if (!navWorld) {
         return;
     }
-    if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports && 
+    if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports &&
         !overlayConfig.drawVORs && !overlayConfig.drawNDBs) {
         return;
     }
@@ -238,8 +238,9 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
     bool hasHardRunway = airport.hasHardRunway();
 
     if (stitcher->getZoomLevel() <= 8) {
-        if (hasHardRunway)
+        if (hasHardRunway) {
             drawAirportBlob(px, py, color);
+        }
         return;
     }
 
@@ -247,19 +248,21 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
     bool isHeliport = airport.hasOnlyHeliports();
     bool isAirport  = !isSeaplaneport && !isHeliport &&  hasHardRunway;
     bool isAirstrip = !isSeaplaneport && !isHeliport && !hasHardRunway;
-    
-    if (isSeaplaneport)
+
+    if (isSeaplaneport) {
         LOG_INFO(dbg, "%s %s -> Seaplane port", airport.getID().c_str(), airport.getName().c_str());
-    else if (isHeliport)
+    } else if (isHeliport) {
         LOG_INFO(dbg, "%s %s -> Heliport", airport.getID().c_str(), airport.getName().c_str());
-    else
+    } else {
         LOG_INFO(dbg, "%s %s -> %s %s", airport.getID().c_str(), airport.getName().c_str(), hasHardRunway ? "Airport":"Airstrip", hasControlTower ? "control tower" : "");
+    }
 
     if ( (isAirport &&  !overlayConfig.drawAirports) ||
          (isAirstrip && !overlayConfig.drawAirstrips) ||
-         ((isHeliport || isSeaplaneport) && !overlayConfig.drawHeliportsSeaports))
+         ((isHeliport || isSeaplaneport) && !overlayConfig.drawHeliportsSeaports)) {
         return;
- 
+    }
+
     if (stitcher->getZoomLevel() >= 12) {
         if (isHeliport || isSeaplaneport) {
             drawAirportICAORing(airport, px, py, color);
@@ -278,7 +281,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
             if (maxDistance > ICAO_RADIUS) {
                 drawAirportICAOGeographicRunways(airport);
             } else {
-                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_RADIUS, color);        
+                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_RADIUS, color);
             }
         }
     }
@@ -287,7 +290,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
 }
 
 void OverlayedMap::drawAirportBlob(int x, int y, uint32_t color) {
-    auto radius = (stitcher->getZoomLevel()*2) - 7;
+    int radius = (stitcher->getZoomLevel() * 2) - 7;
     mapImage->fillCircle(x, y, radius, color);
 }
 
@@ -308,18 +311,18 @@ void OverlayedMap::drawAirportGeographicRunways(const xdata::Airport& airport) {
         if (std::isnan(rwyWidth) || (rwyWidth == 0)) {
             return;
         }
-        auto aspectRatio = rwyLength/(rwyWidth*1.2);
+        float aspectRatio = rwyLength / (rwyWidth * 1.2);
         uint32_t color = (rwy1->hasHardSurface()) ? img::COLOR_DARK_GREY : img::COLOR_DARK_GREEN;
-        int xo = (px1-px2)/aspectRatio;
-        int yo = (py1-py2)/aspectRatio;
-        mapImage->fillRectangle(px1+yo, py1-xo, px1-yo, py1+xo, px2-yo, py2+xo, px2+yo, py2-xo, color);
+        int xo = (px1 - px2) / aspectRatio;
+        int yo = (py1 - py2) / aspectRatio;
+        mapImage->fillRectangle(px1 + yo, py1 - xo, px1 - yo, py1 + xo, px2 - yo, py2 + xo, px2 + yo, py2 - xo, color);
    });
 }
 
 void OverlayedMap::drawAirportICAOGeographicRunways(const xdata::Airport& airport) {
     LOG_INFO(dbg, "%s", airport.getID().c_str());
     drawRunwayRectangles(airport, 10, img::COLOR_BLUE);
-    drawRunwayRectangles(airport, 3, img::COLOR_WHITE);
+    drawRunwayRectangles(airport,  3, img::COLOR_WHITE);
 }
 
 void OverlayedMap::drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color) {
@@ -330,14 +333,14 @@ void OverlayedMap::drawRunwayRectangles(const xdata::Airport& airport, float siz
         int x1, y1, x2, y2;
         positionToPixel(loc1.latitude, loc1.longitude, x1, y1);
         positionToPixel(loc2.latitude, loc2.longitude, x2, y2);
-        float angleDegrees = atan2((float)(y2-y1), (float)(x2-x1)) * 180.0/M_PI;
+        float angleDegrees = atan2((float)(y2 - y1), (float)(x2 - x1)) * 180.0 / M_PI;
         float angleClockwiseCorner =      angleDegrees + 45;
         float angleAnticlockwiseCorner  = angleDegrees - 45;
-        int xc = size * cos(angleClockwiseCorner*M_PI/180.0);
-        int yc = size * sin(angleClockwiseCorner*M_PI/180.0);
-        int xa = size * cos(angleAnticlockwiseCorner*M_PI/180.0);
-        int ya = size * sin(angleAnticlockwiseCorner*M_PI/180.0);
-        mapImage->fillRectangle(x2+xc, y2+yc, x2+xa, y2+ya, x1-xc, y1-yc, x1-xa, y1-ya, color);
+        int xc = size * cos(angleClockwiseCorner * M_PI / 180.0);
+        int yc = size * sin(angleClockwiseCorner * M_PI / 180.0);
+        int xa = size * cos(angleAnticlockwiseCorner * M_PI / 180.0);
+        int ya = size * sin(angleAnticlockwiseCorner * M_PI / 180.0);
+        mapImage->fillRectangle(x2 + xc, y2 + yc, x2 + xa, y2 + ya, x1 - xc, y1 - yc, x1 - xa, y1 - ya, color);
     });
 }
 
@@ -349,7 +352,7 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
     int yCentre = 0;
     getRunwaysCentre(airport, 18, xCentre, yCentre);
     int maxDistance = getMaxRunwayDistanceFromCentre(airport, 18, xCentre, yCentre);
-    float scale = (float)maxDistance/(float)(radius-4);
+    float scale = (float)maxDistance / (float)(radius - 4);
     xCentre /= scale;
     yCentre /= scale;
 
@@ -363,42 +366,44 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
         px2 /= scale;
         py1 /= scale;
         py2 /= scale;
-        mapImage->drawLineAA(px1-xCentre+x, py1-yCentre+y, px2-xCentre+x, py2-yCentre+y, img::COLOR_WHITE);
+        mapImage->drawLineAA(px1 - xCentre + x, py1 - yCentre + y, px2 - xCentre + x, py2 - yCentre + y, img::COLOR_WHITE);
     });
 }
 
 void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color) {
     LOG_INFO(dbg, "%s", airport.getID().c_str());
     const int r = 12;
-    mapImage->fillCircle(x, y, r,   color);
-    mapImage->fillCircle(x, y, r-3, img::COLOR_WHITE);
+    mapImage->fillCircle(x, y, r,     color);
+    mapImage->fillCircle(x, y, r - 3, img::COLOR_WHITE);
     if (airport.hasOnlyHeliports()) {
         // Draw 'H'
-        mapImage->drawLine(x-3, y-5, x-3, y+5, color); // Left vertical
-        mapImage->drawLine(x+3, y-5, x+3, y+5, color); // Right vertical  
-        mapImage->drawLine(x-3, y  , x+3, y  , color); // Horizonatal
+        mapImage->drawLine(x - 3, y - 5, x - 3, y + 5, color); // Left vertical
+        mapImage->drawLine(x + 3, y - 5, x + 3, y + 5, color); // Right vertical
+        mapImage->drawLine(x - 3, y    , x + 3, y    , color); // Horizonatal
     } else if (airport.hasWaterRunway()) {
         // Draw anchor
-        mapImage->drawLine(  x-3, y-4, x+3, y-4, color); // Top
-        mapImage->drawLine(  x  , y-4, x  , y+4, color); // Vertical
-        mapImage->drawLineAA(x  , y+4, x+4, y+1, color); // Right bottom
-        mapImage->drawLineAA(x  , y+4, x-4, y+1, color); // Left bottom
+        mapImage->drawLine(  x - 3, y - 4, x + 3, y - 4, color); // Top
+        mapImage->drawLine(  x    , y - 4, x    , y + 4, color); // Vertical
+        mapImage->drawLineAA(x    , y + 4, x + 4, y + 1, color); // Right bottom
+        mapImage->drawLineAA(x    , y + 4, x - 4, y + 1, color); // Left bottom
     }
 }
 
 void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, uint32_t color) {
-    auto zoomLevel = stitcher->getZoomLevel();
-    auto idSize = zoomLevel * 2;
-    mapImage->drawText(airport.getID(), idSize, x, y+20, color);
-    if (zoomLevel >= 11)
-        mapImage->drawText(airport.getName(), idSize * 0.7, x, y+20+idSize, color);
+    int zoomLevel = stitcher->getZoomLevel();
+    int idSize = zoomLevel * 2;
+    mapImage->drawText(airport.getID(), idSize, x, y + 20, color);
+    if (zoomLevel >= 11) {
+        mapImage->drawText(airport.getName(), idSize * 0.7, x, y + 20 + idSize, color);
+    }
 }
 
 bool OverlayedMap::isAirportVisible(const xdata::Airport& airport) {
     auto &locUpLeft = airport.getLocationUpLeft();
     auto &locDownRight = airport.getLocationDownRight();
-    if (!locUpLeft.isValid() || !locDownRight.isValid())
+    if (!locUpLeft.isValid() || !locDownRight.isValid()) {
         return true; // Not sure, let later stages figure it out
+    }
     int xmin, ymin, xmax, ymax;
     positionToPixel(locUpLeft.latitude, locUpLeft.longitude, xmin, ymin);
     positionToPixel(locDownRight.latitude, locDownRight.longitude, xmax, ymax);
@@ -408,8 +413,8 @@ bool OverlayedMap::isAirportVisible(const xdata::Airport& airport) {
 void OverlayedMap::getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int& xCentre, int &yCentre) {
     auto &locUpLeft    = airport.getLocationUpLeft();
     auto &locDownRight = airport.getLocationDownRight();
-    auto latitudeCentre  = (locUpLeft.latitude +  locDownRight.latitude)/2;
-    auto longitudeCentre = (locUpLeft.longitude + locDownRight.longitude)/2;
+    double latitudeCentre  = (locUpLeft.latitude +  locDownRight.latitude) / 2;
+    double longitudeCentre = (locUpLeft.longitude + locDownRight.longitude) / 2;
     positionToPixel(latitudeCentre, longitudeCentre, xCentre, yCentre, zoomLevel);
 }
 
@@ -419,7 +424,7 @@ int OverlayedMap::getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, 
         auto loc = rwy->getLocation();
         int x, y;
         positionToPixel(loc.latitude, loc.longitude, x, y, zoomLevel);
-        maxDistance = std::max(maxDistance, (x-xCentre)*(x-xCentre) + (y-yCentre)*(y-yCentre));
+        maxDistance = std::max(maxDistance, (x - xCentre) * (x - xCentre) + (y - yCentre) * (y - yCentre));
     });
     return std::sqrt(maxDistance);
 }

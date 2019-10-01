@@ -48,7 +48,7 @@ public:
     void setWidth(float w);
     void setLength(float l);
     void setLocation(const Location &loc);
-    void setSurfaceType(int surfaceTypeCode);
+    void setSurfaceType(SurfaceType surfaceType);
     float getLength() const; // can be NaN
 
     const std::string &getID() const override;

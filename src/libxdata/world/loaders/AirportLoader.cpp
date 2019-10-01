@@ -112,12 +112,12 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             LOG_WARN("%s has runway with %d ends!", port.id.c_str(), entry.ends.size());
         }
 
-        std::shared_ptr<Runway> end0 = NULL;
+        std::shared_ptr<Runway> end0;
         for (auto end = entry.ends.begin(); end != entry.ends.end(); ++end) {
             auto rwy = std::make_shared<Runway>(end->name);
             rwy->setLocation(Location(end->latitude, end->longitude));
             rwy->setWidth(entry.width);
-            rwy->setSurfaceType(entry.surfaceType);
+            rwy->setSurfaceType((Runway::SurfaceType)entry.surfaceType);
             if (!std::isnan(length)) {
                 rwy->setLength(length);
             }

@@ -95,9 +95,9 @@ void logger::log_info(bool enable, const char *file, const char *function, const
         char fileNonConst[256];
         char message[256];
         va_list ap;
-        strcpy(fileNonConst, file);
+        strncpy(fileNonConst, file, sizeof(fileNonConst));
         va_start(ap, format);
-        vsprintf(message, format, ap);
+        vsnprintf(message, sizeof(message), format, ap);
         logger::info("%s::%s():%d %s", basename(fileNonConst), function, line, message);
         va_end(ap);
     }
@@ -108,9 +108,9 @@ void logger::log_verbose(bool enable, const char *file, const char *function, co
         char fileNonConst[256];
         char message[256];
         va_list ap;
-        strcpy(fileNonConst, file);
+        strncpy(fileNonConst, file, sizeof(fileNonConst));
         va_start(ap, format);
-        vsprintf(message, format, ap);
+        vsnprintf(message, sizeof(message), format, ap);
         logger::verbose("%s::%s():%d %s", basename(fileNonConst), function, line, message);
         va_end(ap);
     }
@@ -120,9 +120,9 @@ void logger::log_warn(const char *file, const char *function, const int line, co
     char fileNonConst[256];
     char message[256];
     va_list ap;
-    strcpy(fileNonConst, file);
+    strncpy(fileNonConst, file, sizeof(fileNonConst));
     va_start(ap, format);
-    vsprintf(message, format, ap);
+    vsnprintf(message, sizeof(message), format, ap);
     logger::warn("%s::%s():%d %s", basename(fileNonConst), function, line, message);
     va_end(ap);
 }
@@ -131,9 +131,9 @@ void logger::log_error(const char *file, const char *function, const int line, c
     char fileNonConst[256];
     char message[256];
     va_list ap;
-    strcpy(fileNonConst, file);
+    strncpy(fileNonConst, file, sizeof(fileNonConst));
     va_start(ap, format);
-    vsprintf(message, format, ap);
+    vsnprintf(message, sizeof(message), format, ap);
     logger::error("%s::%s():%d %s", basename(fileNonConst), function, line, message);
     va_end(ap);
 }
