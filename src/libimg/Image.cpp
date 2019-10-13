@@ -24,9 +24,11 @@
 #include <cstdlib>
 #include <cmath>
 #include <fstream>
+#include <algorithm>
 #include "Image.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
+#include "TTFStamper.h"
 
 namespace img {
 
@@ -275,6 +277,237 @@ void Image::drawImage(const Image& src, int dstX, int dstY) {
     }
 }
 
+void Image::plot(int x, int y, float brightness) {
+    int alpha = (int)(brightness * 255);
+    int color = (alpha << 24) | (drawLineAAColor & 0x00FFFFFF);
+    blendPixel(x, y, color);
+}
+
+// From https://rosettacode.org/wiki/Xiaolin_Wu%27s_line_algorithm#C.2B.2B
+void Image::drawLineAA(float x0, float y0, float x1, float y1, uint32_t color) {
+    drawLineAAColor = color;
+
+    auto ipart = [](float x) -> int {return int(std::floor(x));};
+    auto round = [](float x) -> float {return std::round(x);};
+    auto fpart = [](float x) -> float {return x - std::floor(x);};
+    auto rfpart = [=](float x) -> float {return 1 - fpart(x);};
+
+    const bool steep = abs(y1 - y0) > abs(x1 - x0);
+    if (steep) {
+        std::swap(x0,y0);
+        std::swap(x1,y1);
+    }
+    if (x0 > x1) {
+        std::swap(x0,x1);
+        std::swap(y0,y1);
+    }
+
+    const float dx = x1 - x0;
+    const float dy = y1 - y0;
+    const float gradient = (dx == 0) ? 1 : dy/dx;
+
+    int xpx11;
+    float intery;
+    {
+        const float xend = round(x0);
+        const float yend = y0 + gradient * (xend - x0);
+        const float xgap = rfpart(x0 + 0.5);
+        xpx11 = int(xend);
+        const int ypx11 = ipart(yend);
+        if (steep) {
+            plot(ypx11,     xpx11, rfpart(yend) * xgap);
+            plot(ypx11 + 1, xpx11,  fpart(yend) * xgap);
+        } else {
+            plot(xpx11, ypx11,    rfpart(yend) * xgap);
+            plot(xpx11, ypx11 + 1, fpart(yend) * xgap);
+        }
+        intery = yend + gradient;
+    }
+
+    int xpx12;
+    {
+        const float xend = round(x1);
+        const float yend = y1 + gradient * (xend - x1);
+        const float xgap = rfpart(x1 + 0.5);
+        xpx12 = int(xend);
+        const int ypx12 = ipart(yend);
+        if (steep) {
+            plot(ypx12,     xpx12, rfpart(yend) * xgap);
+            plot(ypx12 + 1, xpx12,  fpart(yend) * xgap);
+        } else {
+            plot(xpx12, ypx12,    rfpart(yend) * xgap);
+            plot(xpx12, ypx12 + 1, fpart(yend) * xgap);
+        }
+    }
+
+    if (steep) {
+        for (int x = xpx11 + 1; x < xpx12; x++) {
+            plot(ipart(intery),     x, rfpart(intery));
+            plot(ipart(intery) + 1, x,  fpart(intery));
+            intery += gradient;
+        }
+    } else {
+        for (int x = xpx11 + 1; x < xpx12; x++) {
+            plot(x, ipart(intery),     rfpart(intery));
+            plot(x, ipart(intery) + 1,  fpart(intery));
+            intery += gradient;
+        }
+    }
+}
+
+void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_t color) {
+    float d;
+    int alpha;
+    for (int y = y_centre - radius; y < y_centre + radius; y++) {
+        for (int x = x_centre - radius; x < x_centre + radius; x++) {
+            d = sqrt(pow((x - x_centre), 2) + pow((y - y_centre), 2));
+            if (d > (radius + 0.5)) {
+                alpha = 0; // Definitely outside
+            } else if (d < (radius - 0.5)) {
+                alpha = 255; // Definitely inside
+            } else {
+                alpha = ((radius + 0.5) - d) * 255; // Border, so alpha blend for anti-aliasing
+            }
+            int colorAA = (alpha << 24) | (color & 0x00FFFFFF);
+            blendPixel(x, y, colorAA);
+        }
+    }
+}
+
+void Image::fillCircle(int x_centre, int y_centre, int radius, uint32_t color) {
+    // Due to compute complexity, all filled circles are rendered and cached with a
+    // key consisting of the radius and color. So typically just a small image blend.
+    uint64_t key = (uint64_t)(radius) << 32 | color;
+    std::shared_ptr<img::Image> pImage;
+    auto it = circleCache.find(key);
+    if (it != circleCache.end()) {
+        pImage = it->second;
+    } else {
+        pImage = std::make_shared<img::Image>(radius * 2 + 1, radius * 2 + 1, 0x00FFFFFF);
+        pImage->fillCircleCacheImage(radius, radius, radius, color);
+        circleCache.insert(std::make_pair(key, pImage));
+    }
+    blendImage0(*pImage, x_centre - radius, y_centre - radius);
+}
+
+// This class is a representation of a classic line equation ax + by + c
+// It is used in rectangle fills to determine whether a point is inside or outside
+// a rectangle bounding line. And how far away from the line it is so as to determine
+// appropriate alpha blend for anti-aliasing
+class LineEquation {
+public:
+    LineEquation(int x1, int y1, int x2, int y2, int ref_x, int ref_y) {
+        if ((x1 == x2) && (y1 == y2)) {
+            LOG_WARN("Attempt to construct line with 2 identical points");
+            x1++;
+        }
+        a = y1 - y2;
+        b = x2 - x1;
+        c = x1 * y2 - x2 * y1;
+        normalAdjust = 10 / sqrt(a * a + b * b);
+        refOffsetSign = (computeDistance(ref_x, ref_y) >= 0);
+    }
+    int getIntensity(int x, int y) {
+        // Return a value between 0 and 4, which is the multiplicative
+        // contribution to alphas blend from this line instance.
+        int intensity;
+        int distance = (int)(computeDistance(x, y) * normalAdjust);
+        bool sameSign = ((distance >= 0) == refOffsetSign);
+        bool throughPixel = abs(distance) < 7;
+        if (throughPixel) {
+            int offset = abs(distance);
+            if (sameSign) {
+                intensity = 2 + (offset * 2) / 7;
+            } else {
+                intensity = 2 - (offset * 2) / 7;
+            }
+            return intensity;
+        } else {
+            if (sameSign) {
+                return 4;
+            } else {
+                return 0;
+            }
+        }
+    }
+private:
+    int a;
+    int b;
+    int c;
+    int refOffsetSign;
+    float normalAdjust;
+
+    int computeDistance(int x, int y) {
+        return a * x + b * y + c;
+    }
+};
+
+// Fill rotated rectangle, given 4 points
+// Points must be in an order where successive points create each one of the bounding lines
+void Image::fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color) {
+    int xCentre = (x0 + x1 + x2 + x3) / 4;
+    int yCentre = (y0 + y1 + y2 + y3) / 4;
+
+    int xMin = std::min({x0, x1, x2, x3});
+    xMin = std::max(0, xMin);
+    int xMax = std::max({x0, x1, x2, x3});
+    xMax = std::min(width, xMax);
+    int yMin = std::min({y0, y1, y2, y3});
+    yMin = std::max(0, yMin);
+    int yMax = std::max({y0, y1, y2, y3});
+    yMax = std::min(width, yMax);
+
+    std::array<LineEquation, 4> lines = {
+        LineEquation(x0, y0, x1, y1, xCentre, yCentre),
+        LineEquation(x1, y1, x2, y2, xCentre, yCentre),
+        LineEquation(x2, y2, x3, y3, xCentre, yCentre),
+        LineEquation(x3, y3, x0, y0, xCentre, yCentre)
+    };
+
+    // Loop through all possible pixels and ask each of the 4 LineEquations for a
+    // inside/outside/border multiplicative contribution (0-4) to the alpha blend.
+    bool beenInside;
+    for(int y = yMin - 1; y <= yMax + 1; y++) {
+        beenInside = false;
+        for(int x = xMin - 1; x <= xMax + 1; x++) {
+            int alpha = 1;
+            for (auto line: lines) {
+                alpha *= line.getIntensity(x,y);
+            }
+
+            if (alpha == 0) {
+                if (beenInside) {
+                    break; // Short circuit if done this row
+                }
+            } else {
+                if (alpha == 256) {
+                    alpha = 255;
+                }
+                blendPixel(x, y, (color & 0x00FFFFFF) | (alpha << 24));
+                beenInside = true;
+            }
+        }
+    }
+}
+
+// Fill aligned rectangle, just given 2 points
+void Image::fillRectangle(int x0, int y0, int x1, int y1, uint32_t color) {
+    int xMin = std::min(x0, x1);
+    xMin = std::max(0, xMin);
+    int xMax = std::max(x0, x1);
+    xMax = std::min(width, xMax);
+    int yMin = std::min(y0, y1);
+    yMin = std::max(0, yMin);
+    int yMax = std::max(y0, y1);
+    yMax = std::min(width, yMax);
+
+    for(int y=yMin; y<=yMax; y++) {
+        for(int x=xMin; x<=xMax; x++) {
+            blendPixel(x, y, color);
+        }
+    }
+}
+
 void Image::copyTo(Image& dst, int srcX, int srcY) {
     int copyWidth = dst.getWidth();
     int copyHeight = dst.getHeight();
@@ -502,6 +735,17 @@ void Image::rotate(Image& dst, int angle) {
     case 180:   rotate180(dst); break;
     case 270:   rotate270(dst); break;
     }
+}
+
+void Image::drawText(const std::string text, int size, int x, int y, uint32_t color) {
+    // Centered around x,y
+    static TTFStamper textBox("Inconsolata.ttf");
+    textBox.setSize(size);
+    textBox.setColor(color & 0x00FFFFFF);
+    textBox.setText(text.c_str());
+    int width = textBox.getTextWidth(text);
+    fillRectangle(x - width / 2, y, x + width / 2, y + size, img::COLOR_WHITE & 0xA0FFFFFF);
+    textBox.applyStamp(*this, x - width / 2, y);
 }
 
 } /* namespace img */

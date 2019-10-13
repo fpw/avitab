@@ -20,6 +20,11 @@
 
 #include <string>
 
+#define LOG_VERBOSE(enable_expression, ...) logger::log_verbose(enable_expression, __FILE__,__FUNCTION__,__LINE__,__VA_ARGS__)
+#define LOG_INFO(enable_expression, ...) logger::log_info(enable_expression, __FILE__,__FUNCTION__,__LINE__,__VA_ARGS__)
+#define LOG_WARN(...) logger::log_warn(__FILE__,__FUNCTION__,__LINE__,__VA_ARGS__)
+#define LOG_ERROR(...) logger::log_error(__FILE__,__FUNCTION__,__LINE__,__VA_ARGS__)
+
 namespace logger {
     void init(const std::string &path);
     void setStdOut(bool logToStdOut);
@@ -28,6 +33,11 @@ namespace logger {
     void info(const std::string format, ...);
     void warn(const std::string format, ...);
     void error(const std::string format, ...);
+
+    void log_info(bool enable, const char *file, const char *function, const int line, const char *format, ... );
+    void log_verbose(bool enable, const char *file, const char *function, const int line, const char *format, ... );
+    void log_warn(const char *file, const char *function, const int line, const char *format, ... );
+    void log_error(const char *file, const char *function, const int line, const char *format, ... );
 }
 
 #endif /* SRC_LOGGER_H_ */

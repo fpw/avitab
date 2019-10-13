@@ -29,6 +29,8 @@ namespace maps {
 struct OverlayConfig {
     bool drawAircraft = true;
     bool drawAirports = false;
+    bool drawAirstrips = false;
+    bool drawHeliportsSeaports = false;
     bool drawVORs = false;
     bool drawNDBs = false;
 };
@@ -36,7 +38,8 @@ struct OverlayConfig {
 class OverlayedMap {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
-    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
+
+    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
     void setOverlayDirectory(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
@@ -77,6 +80,7 @@ private:
     img::Image planeIcon;
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
+    bool dbg;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;
@@ -85,10 +89,23 @@ private:
     void drawAircraftOverlay();
     void drawDataOverlays();
     void drawCalibrationOverlay();
+
     void drawAirport(const xdata::Airport &airport, double scale);
+    bool isAirportVisible(const xdata::Airport& airport);
+    void drawAirportBlob(int x, int y, uint32_t color);
+    void drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color);        
+    void drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color);
+    void drawAirportICAOGeographicRunways(const xdata::Airport& airport);
+    void drawAirportGeographicRunways(const xdata::Airport& airport);
+    void drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color);
+    void drawAirportText(const xdata::Airport& airport, int x, int y, uint32_t color);
+    void getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int & xCentre, int & yCentre);
+    int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
+
     void drawFix(const xdata::Fix &fix, double scale);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
+    void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
 };
 

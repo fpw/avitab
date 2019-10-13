@@ -17,6 +17,7 @@
  */
 #include "AirportParser.h"
 #include "src/libxdata/parsers/objects/AirportData.h"
+#include "src/libxdata/world/models/airport/Runway.h"
 #include <iostream>
 
 namespace xdata {
@@ -133,6 +134,7 @@ bool AirportParser::parseRunwayEnd(AirportData::RunwayEnd &end) {
 void AirportParser::parseWaterway() {
     AirportData::RunwayData rwy;
     rwy.width = parser.parseDouble();
+    rwy.surfaceType = (int)Runway::SurfaceType::WATER_RUNWAY;
     parser.parseInt(); // buoys
 
     AirportData::RunwayEnd end;

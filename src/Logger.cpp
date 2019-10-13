@@ -20,6 +20,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <cstring>
+#include <libgen.h>
+
 #include "Logger.h"
 #include "src/platform/Platform.h"
 
@@ -86,3 +89,52 @@ void logger::error(const std::string format, ...) {
         std::flush(logFile);
     }
 }
+
+void logger::log_info(bool enable, const char *file, const char *function, const int line, const char *format, ... ) {
+    if (enable) {
+        char fileNonConst[256];
+        char message[256];
+        va_list ap;
+        strncpy(fileNonConst, file, sizeof(fileNonConst));
+        va_start(ap, format);
+        vsnprintf(message, sizeof(message), format, ap);
+        logger::info("%s::%s():%d %s", basename(fileNonConst), function, line, message);
+        va_end(ap);
+    }
+}
+
+void logger::log_verbose(bool enable, const char *file, const char *function, const int line, const char *format, ... ) {
+    if (enable) {
+        char fileNonConst[256];
+        char message[256];
+        va_list ap;
+        strncpy(fileNonConst, file, sizeof(fileNonConst));
+        va_start(ap, format);
+        vsnprintf(message, sizeof(message), format, ap);
+        logger::verbose("%s::%s():%d %s", basename(fileNonConst), function, line, message);
+        va_end(ap);
+    }
+}
+
+void logger::log_warn(const char *file, const char *function, const int line, const char *format, ... ) {
+    char fileNonConst[256];
+    char message[256];
+    va_list ap;
+    strncpy(fileNonConst, file, sizeof(fileNonConst));
+    va_start(ap, format);
+    vsnprintf(message, sizeof(message), format, ap);
+    logger::warn("%s::%s():%d %s", basename(fileNonConst), function, line, message);
+    va_end(ap);
+}
+
+void logger::log_error(const char *file, const char *function, const int line, const char *format, ... ) {
+    char fileNonConst[256];
+    char message[256];
+    va_list ap;
+    strncpy(fileNonConst, file, sizeof(fileNonConst));
+    va_start(ap, format);
+    vsnprintf(message, sizeof(message), format, ap);
+    logger::error("%s::%s():%d %s", basename(fileNonConst), function, line, message);
+    va_end(ap);
+}
+

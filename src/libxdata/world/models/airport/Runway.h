@@ -30,17 +30,33 @@ class Fix;
 
 class Runway: public NavNode {
 public:
+
+    enum class SurfaceType {
+        ASPHALT = 1,
+        CONCRETE = 2,
+        TURF_GRASS = 3,
+        DIRT_BROWN = 4,
+        GRAVEL_GREY = 5,
+        DRY_LAKEBED = 12,
+        WATER_RUNWAY = 13,
+        SNOW_OR_ICE = 14,
+        TRANSPARENT_SURFACE = 15
+    };
+
     Runway(const std::string &name);
     void rename(const std::string &newName);
     void setWidth(float w);
     void setLength(float l);
     void setLocation(const Location &loc);
+    void setSurfaceType(SurfaceType surfaceType);
     float getLength() const; // can be NaN
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
     bool isRunway() const override;
     float getWidth() const;
+    bool hasHardSurface() const;
+    SurfaceType getSurfaceType() const;
     void attachILSData(std::weak_ptr<Fix> ils);
 
     // Optional, can return nullptr
@@ -50,6 +66,7 @@ private:
     Location location;
     float width = std::numeric_limits<float>::quiet_NaN(); // meters
     float length = std::numeric_limits<float>::quiet_NaN(); // meters
+    SurfaceType surfaceType;
 
     // optional
     std::weak_ptr<Fix> ils;
