@@ -315,7 +315,11 @@ void OverlayedMap::drawAirportGeographicRunways(const xdata::Airport& airport) {
         uint32_t color = (rwy1->hasHardSurface()) ? img::COLOR_DARK_GREY : img::COLOR_DARK_GREEN;
         int xo = (px1 - px2) / aspectRatio;
         int yo = (py1 - py2) / aspectRatio;
-        mapImage->fillRectangle(px1 + yo, py1 - xo, px1 - yo, py1 + xo, px2 - yo, py2 + xo, px2 + yo, py2 - xo, color);
+        if ((xo == 0) && (yo == 0)) {
+            mapImage->drawLineAA(px1, py1, px2, py2, color);
+        } else {
+            mapImage->fillRectangle(px1 + yo, py1 - xo, px1 - yo, py1 + xo, px2 - yo, py2 + xo, px2 + yo, py2 - xo, color);
+        }
    });
 }
 

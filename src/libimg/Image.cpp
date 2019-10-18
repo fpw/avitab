@@ -129,9 +129,17 @@ void Image::storeAndClearEncodedData(const std::string& utf8Path) {
 
 
 void Image::resize(int width, int height, uint32_t color) {
+    int oldSize = this->width * this->height;
     this->width = width;
     this->height = height;
-    pixels->resize(width * height, color);
+    int newSize = this->width * this->height;
+    if (newSize >= oldSize) {
+        std::fill(pixels->begin(), pixels->end(), color);
+        pixels->resize(newSize, color);
+    } else {
+        pixels->resize(newSize);
+        std::fill(pixels->begin(), pixels->end(), color);
+    }
 }
 
 int Image::getWidth() const {
@@ -445,6 +453,11 @@ private:
 // Fill rotated rectangle, given 4 points
 // Points must be in an order where successive points create each one of the bounding lines
 void Image::fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color) {
+    if (((x0 == x1) && (y0 == y1)) || ((x0 == x2) && (y0 == y2)) || ((x0 == x3) && (y0 == y3)) ||
+        ((x1 == x2) && (y1 == y2)) || ((x1 == x3) && (y1 == y3)) || ((x2 == x3) && (y2 == y3))) {
+        LOG_WARN("Requested with some identical points, skipping, fix calling code");
+        return;
+    }
     int xCentre = (x0 + x1 + x2 + x3) / 4;
     int yCentre = (y0 + y1 + y2 + y3) / 4;
 
