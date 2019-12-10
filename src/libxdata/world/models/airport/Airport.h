@@ -90,12 +90,10 @@ public:
     void addHeliport(std::shared_ptr<Heliport> port);
 
     bool hasOnlyHeliports() const;
-
     bool hasWaterRunway() const;
-    bool hasTowerFrequency() const;
-    bool hasMultipleATCFrequencies() const;
     bool hasHardRunway() const;
-    
+    bool hasControlTower() const;
+
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);

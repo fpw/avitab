@@ -250,8 +250,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM)
     int px, py;
     positionToPixel(loc.latitude, loc.longitude, px, py);
 
-    bool hasControlTower = airport.hasTowerFrequency(); // ?
-    // bool hasControlTower = airport.hasMultipleATCFrequencies(); // Better than airport.hasTowerFrequency() ?
+    bool hasControlTower = airport.hasControlTower();
     uint32_t color = hasControlTower ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
     bool hasHardRunway = airport.hasHardRunway();
 
@@ -297,14 +296,14 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM)
             getRunwaysCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
             int maxDistance = getMaxRunwayDistanceFromCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
             if (maxDistance > ICAO_RADIUS) {
-                drawAirportICAOGeographicRunways(airport);
+                drawAirportICAOGeographicRunways(airport, color);
             } else {
                 drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_RADIUS, color);
             }
         }
     }
 
-    drawAirportText(airport, px, py, mapWidthNM, color);
+    drawAirportText(airport, px, py, mapWidthNM, color - 0x00101010);
 }
 
 void OverlayedMap::drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color) {
@@ -329,7 +328,7 @@ void OverlayedMap::drawAirportGeographicRunways(const xdata::Airport& airport) {
         if (std::isnan(rwyWidth) || (rwyWidth == 0)) {
             return;
         }
-        float aspectRatio = rwyLength / (rwyWidth * 1.2);
+        float aspectRatio = rwyLength / (rwyWidth * 1.1);
         uint32_t color = (rwy1->hasHardSurface()) ? img::COLOR_DARK_GREY : img::COLOR_DARK_GREEN;
         int xo = (px1 - px2) / aspectRatio;
         int yo = (py1 - py2) / aspectRatio;
@@ -341,9 +340,9 @@ void OverlayedMap::drawAirportGeographicRunways(const xdata::Airport& airport) {
    });
 }
 
-void OverlayedMap::drawAirportICAOGeographicRunways(const xdata::Airport& airport) {
+void OverlayedMap::drawAirportICAOGeographicRunways(const xdata::Airport& airport, uint32_t color) {
     LOG_INFO(dbg, "%s", airport.getID().c_str());
-    drawRunwayRectangles(airport, 10, img::COLOR_BLUE);
+    drawRunwayRectangles(airport, 10, color);
     drawRunwayRectangles(airport,  3, img::COLOR_WHITE);
 }
 

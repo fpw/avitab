@@ -96,7 +96,7 @@ private:
     void drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color);
     void drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color);
     void drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color);
-    void drawAirportICAOGeographicRunways(const xdata::Airport& airport);
+    void drawAirportICAOGeographicRunways(const xdata::Airport& airport, uint32_t color);
     void drawAirportGeographicRunways(const xdata::Airport& airport);
     void drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color);
     void drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color);

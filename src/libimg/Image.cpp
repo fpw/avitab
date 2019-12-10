@@ -366,8 +366,8 @@ void Image::drawLineAA(float x0, float y0, float x1, float y1, uint32_t color) {
 void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_t color) {
     float d;
     int alpha;
-    for (int y = y_centre - radius; y < y_centre + radius; y++) {
-        for (int x = x_centre - radius; x < x_centre + radius; x++) {
+    for (int y = y_centre - radius; y <= y_centre + radius; y++) {
+        for (int x = x_centre - radius; x <= x_centre + radius; x++) {
             d = sqrt(pow((x - x_centre), 2) + pow((y - y_centre), 2));
             if (d > (radius + 0.5)) {
                 alpha = 0; // Definitely outside
@@ -385,6 +385,9 @@ void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_
 void Image::fillCircle(int x_centre, int y_centre, int radius, uint32_t color) {
     // Due to compute complexity, all filled circles are rendered and cached with a
     // key consisting of the radius and color. So typically just a small image blend.
+    if (radius <= 0) {
+        return;
+    }
     uint64_t key = (uint64_t)(radius) << 32 | color;
     std::shared_ptr<img::Image> pImage;
     auto it = circleCache.find(key);

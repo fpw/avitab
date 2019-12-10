@@ -205,12 +205,8 @@ bool Airport::hasWaterRunway() const {
     return false;
 }
 
-bool Airport::hasTowerFrequency() const {
+bool Airport::hasControlTower() const {
     return (atcFrequencies.count(ATCFrequency::TWR) >= 1);
-}
-
-bool Airport::hasMultipleATCFrequencies() const {
-    return (atcFrequencies.size() > 1);
 }
 
 bool Airport::hasHardRunway() const {
