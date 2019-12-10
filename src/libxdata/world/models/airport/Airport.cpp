@@ -17,6 +17,7 @@
  */
 #include <algorithm>
 #include <cstdlib>
+#include <math.h>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/Logger.h"
@@ -36,7 +37,7 @@ void Airport::setElevation(int elevation) {
     this->elevation = elevation;
 }
 
-int Airport::getElevation() {
+int Airport::getElevation() const {
     return elevation;
 }
 
@@ -183,6 +184,14 @@ void Airport::forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>
     }
 }
 
+float Airport::getLongestRunwayLength() const {
+    float longestRunwayLength = 0;
+    for (auto &rwy: runways) {
+        longestRunwayLength = std::fmax(rwy.second->getLength(), longestRunwayLength); // Ignore NaN
+    }
+    return longestRunwayLength;
+}
+
 bool Airport::hasOnlyHeliports() const {
     return runways.empty() && !heliports.empty();
 }
@@ -280,6 +289,28 @@ const Location& Airport::getLocationUpLeft() const {
 
 const Location& Airport::getLocationDownRight() const {
     return (locationUpLeft.isValid()) ? locationDownRight : getLocation();
+}
+
+std::string Airport::getInitialATCContactInfo() const {
+    std::string initialATCContact = "";
+    for (auto atcType: prioritisedATCType) {
+        if (atcFrequencies.count(atcType) > 0) {
+            std::string desc;
+            switch(atcType) {
+                case(xdata::Airport::ATCFrequency::RECORDED): desc = "ATIS"; break;
+                case(xdata::Airport::ATCFrequency::TWR):      desc = "TWR";  break;
+                case(xdata::Airport::ATCFrequency::UNICOM):   desc = "UCOM"; break;
+                case(xdata::Airport::ATCFrequency::APP):      desc = "APP";  break;
+                case(xdata::Airport::ATCFrequency::DEP):      desc = "DEP";  break;
+                case(xdata::Airport::ATCFrequency::CLD):      desc = "CLD";  break;
+                case(xdata::Airport::ATCFrequency::GND):      desc = "GND";  break;
+                default: desc = ""; break;
+            }
+            initialATCContact = desc + "-" + atcFrequencies.at(atcType)[0].getFrequencyString(false);
+            break;
+        }
+    }
+    return initialATCContact;
 }
 
 } /* namespace xdata */

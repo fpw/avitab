@@ -412,10 +412,25 @@ void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int
 }
 
 void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color) {
-    int idSize = 16;
-    mapImage->drawText(airport.getID(), idSize, x, y + 20, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
-    if (mapWidthNM <= 40) {
-        mapImage->drawText(airport.getName(), idSize * 0.7, x, y + 20 + idSize, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
+    // Place text below southern airport boundary and below symbol
+    int yOffset = y + 15;
+    auto &locDownRight = airport.getLocationDownRight();
+    if (locDownRight.isValid()) {
+        int xIgnored;
+        positionToPixel(locDownRight.latitude, locDownRight.longitude, xIgnored, yOffset);
+        yOffset += 15;
+    }
+    if (mapWidthNM > 40) {
+        mapImage->drawText(airport.getID(), 16, x, yOffset, color, img::COLOR_WHITE & 0xA0FFFFFF, img::Align::CENTRE);
+    } else {
+        std::string nameAndID = airport.getName() + " (" + airport.getID() + ")";
+        std::string elevationFeet = std::to_string(airport.getElevation());
+        int rwyLengthHundredsFeet = (int)((airport.getLongestRunwayLength() * 3.28) / 100.0);
+        std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
+        std::string atcInfo = airport.getInitialATCContactInfo();
+        std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";
+        mapImage->drawText(nameAndID,   14, x, yOffset,      color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
+        mapImage->drawText(airportInfo, 12, x, yOffset + 14, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
     }
 }
 
