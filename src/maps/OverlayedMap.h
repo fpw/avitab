@@ -89,20 +89,21 @@ private:
     void drawAircraftOverlay();
     void drawDataOverlays();
     void drawCalibrationOverlay();
+    void drawScale(double nmPerPixel);
 
-    void drawAirport(const xdata::Airport &airport, double scale);
+    void drawAirport(const xdata::Airport &airport, double mapWidthNM);
     bool isAirportVisible(const xdata::Airport& airport);
-    void drawAirportBlob(int x, int y, uint32_t color);
-    void drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color);        
+    void drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color);
+    void drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color);
     void drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color);
     void drawAirportICAOGeographicRunways(const xdata::Airport& airport);
     void drawAirportGeographicRunways(const xdata::Airport& airport);
     void drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color);
-    void drawAirportText(const xdata::Airport& airport, int x, int y, uint32_t color);
+    void drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color);
     void getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int & xCentre, int & yCentre);
     int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
 
-    void drawFix(const xdata::Fix &fix, double scale);
+    void drawFix(const xdata::Fix &fix, double mapWidthNM);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;

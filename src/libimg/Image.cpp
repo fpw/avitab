@@ -750,15 +750,20 @@ void Image::rotate(Image& dst, int angle) {
     }
 }
 
-void Image::drawText(const std::string text, int size, int x, int y, uint32_t color) {
-    // Centered around x,y
+void Image::drawText(const std::string text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al) {
     static TTFStamper textBox("Inconsolata.ttf");
     textBox.setSize(size);
-    textBox.setColor(color & 0x00FFFFFF);
+    textBox.setColor(fgColor & 0x00FFFFFF);
     textBox.setText(text.c_str());
     int width = textBox.getTextWidth(text);
-    fillRectangle(x - width / 2, y, x + width / 2, y + size, img::COLOR_WHITE & 0xA0FFFFFF);
-    textBox.applyStamp(*this, x - width / 2, y);
+    int xOffset = 0;
+    if (al == Align::CENTRE) {
+        xOffset = -width / 2;
+    } else if (al == Align::RIGHT) {
+        xOffset = -width;
+    }
+    fillRectangle(x + xOffset, y, x + xOffset + width, y + size, bgColor);
+    textBox.applyStamp(*this, x + xOffset, y);
 }
 
 } /* namespace img */

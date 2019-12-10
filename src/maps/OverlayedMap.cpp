@@ -207,22 +207,40 @@ void OverlayedMap::drawDataOverlays() {
     xdata::Location downRight { bottomLat, rightLon };
 
     double deltaLon = rightLon - leftLon;
-    double scale = mapImage->getWidth() / deltaLon;
 
-    navWorld->visitNodes(upLeft, downRight, [this, &scale] (const xdata::NavNode &node) {
-        auto airport = dynamic_cast<const xdata::Airport *>(&node);
-        if (airport && isAirportVisible(*airport)) {
-            drawAirport(*airport, scale);
-        }
+    // Don't overlay anything if zoomed out to world view. Too much to draw.
+    // And haversine formula used by distanceTo misbehaves in world views.
+    if ((deltaLon > 180) || (deltaLon < 0)) {
+        return;
+    }
 
+    // Calculate scaling from a hybrid of horizontal and vertical axes
+    double diagonalPixels = sqrt(pow(mapImage->getWidth(), 2) + pow(mapImage->getHeight(), 2));
+    double metresPerPixel = upLeft.distanceTo(downRight) / diagonalPixels;
+    double nmPerPixel = metresPerPixel / 1852;
+    double mapWidthNM = nmPerPixel * mapImage->getWidth();
+
+    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
         auto fix = dynamic_cast<const xdata::Fix *>(&node);
         if (fix) {
-            drawFix(*fix, scale);
+            drawFix(*fix, mapWidthNM);
         }
     });
+
+    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
+        auto airport = dynamic_cast<const xdata::Airport *>(&node);
+        if (airport && isAirportVisible(*airport)) {
+            drawAirport(*airport, mapWidthNM);
+        }
+    });
+
+    LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
+        stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);
+
+    drawScale(nmPerPixel);
 }
 
-void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
+void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM) {
 
     if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports ) {
         return;
@@ -237,9 +255,9 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
     uint32_t color = hasControlTower ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
     bool hasHardRunway = airport.hasHardRunway();
 
-    if (stitcher->getZoomLevel() <= 8) {
+    if (mapWidthNM > 200) {
         if (hasHardRunway) {
-            drawAirportBlob(px, py, color);
+            drawAirportBlob(px, py, mapWidthNM, color);
         }
         return;
     }
@@ -263,7 +281,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
         return;
     }
 
-    if (stitcher->getZoomLevel() >= 12) {
+    if (mapWidthNM < 5) {
         if (isHeliport || isSeaplaneport) {
             drawAirportICAORing(airport, px, py, color);
         } else {
@@ -286,11 +304,11 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double scale) {
         }
     }
 
-    drawAirportText(airport, px, py, color);
+    drawAirportText(airport, px, py, mapWidthNM, color);
 }
 
-void OverlayedMap::drawAirportBlob(int x, int y, uint32_t color) {
-    int radius = (stitcher->getZoomLevel() * 2) - 7;
+void OverlayedMap::drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color) {
+    int radius = 2500 / mapWidthNM;
     mapImage->fillCircle(x, y, radius, color);
 }
 
@@ -354,8 +372,8 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
     // Scale up to fill circle - calculate pixels at higher resolution zoom level and scale down.
     int xCentre = 0;
     int yCentre = 0;
-    getRunwaysCentre(airport, 18, xCentre, yCentre);
-    int maxDistance = getMaxRunwayDistanceFromCentre(airport, 18, xCentre, yCentre);
+    getRunwaysCentre(airport, tileSource->getMaxZoomLevel(), xCentre, yCentre);
+    int maxDistance = getMaxRunwayDistanceFromCentre(airport, tileSource->getMaxZoomLevel(), xCentre, yCentre);
     float scale = (float)maxDistance / (float)(radius - 4);
     xCentre /= scale;
     yCentre /= scale;
@@ -364,8 +382,8 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
         auto loc1 = rwy1->getLocation();
         auto loc2 = rwy2->getLocation();
         int px1, py1, px2, py2;
-        positionToPixel(loc1.latitude, loc1.longitude, px1, py1, 18);
-        positionToPixel(loc2.latitude, loc2.longitude, px2, py2, 18);
+        positionToPixel(loc1.latitude, loc1.longitude, px1, py1, tileSource->getMaxZoomLevel());
+        positionToPixel(loc2.latitude, loc2.longitude, px2, py2, tileSource->getMaxZoomLevel());
         px1 /= scale;
         px2 /= scale;
         py1 /= scale;
@@ -393,12 +411,11 @@ void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int
     }
 }
 
-void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, uint32_t color) {
-    int zoomLevel = stitcher->getZoomLevel();
-    int idSize = zoomLevel * 2;
-    mapImage->drawText(airport.getID(), idSize, x, y + 20, color);
-    if (zoomLevel >= 11) {
-        mapImage->drawText(airport.getName(), idSize * 0.7, x, y + 20 + idSize, color);
+void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color) {
+    int idSize = 16;
+    mapImage->drawText(airport.getID(), idSize, x, y + 20, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
+    if (mapWidthNM <= 40) {
+        mapImage->drawText(airport.getName(), idSize * 0.7, x, y + 20 + idSize, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
     }
 }
 
@@ -433,7 +450,7 @@ int OverlayedMap::getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, 
     return std::sqrt(maxDistance);
 }
 
-void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
+void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
     auto &loc = fix.getLocation();
     int px, py;
     positionToPixel(loc.latitude, loc.longitude, px, py);
@@ -442,7 +459,7 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
     auto vor = fix.getVOR();
     auto dme = fix.getDME();
 
-    double r = scale * 0.05;
+    double r = 1400.0 / mapWidthNM;
 
     bool crossDrawn = false;
 
@@ -479,6 +496,33 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double scale) {
         mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_RED);
         mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_RED);
     }
+}
+
+void OverlayedMap::drawScale(double nmPerPixel) {
+    bool useFeet = (nmPerPixel < 0.005);
+    std::string units = useFeet ? "ft" : "nm";
+    double perPixel = useFeet ? (nmPerPixel * 6076) : nmPerPixel;
+    double maxRange = 300 * perPixel;
+    double step = std::pow(10, ((int)std::log10(maxRange)));
+    double rangeToShow = step;
+    if ((rangeToShow * 5) < maxRange) {
+        rangeToShow *= 5;
+    } else if ((rangeToShow * 2) < maxRange) {
+        rangeToShow *= 2;
+    }
+    LOG_INFO(dbg, "zoom = %d, %f%s/pixel, maxRange = %f%s, step = %f%s, show = %f%s",
+        stitcher->getZoomLevel(),  perPixel, units.c_str(),  maxRange, units.c_str(),
+        step, units.c_str(),  rangeToShow, units.c_str());
+    int x = 5;
+    int y = 195;
+    int lineLength = rangeToShow / perPixel;
+    mapImage->drawLine(x, y,  x + lineLength, y,  img::COLOR_BLACK);
+    for (int tick = 0; tick <= rangeToShow; tick += step) {
+        mapImage->drawLine(x + (tick / perPixel), y,  x + (tick / perPixel), y + 10,  img::COLOR_BLACK);
+    }
+    std::string text = std::to_string(int(rangeToShow)) + units;
+    int xtext = x + lineLength + 2;
+    mapImage->drawText(text, 12, xtext, y, img::COLOR_BLACK, img::COLOR_WHITE & 0x80FFFFFF, img::Align::LEFT);
 }
 
 void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py) const {
