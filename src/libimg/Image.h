@@ -38,6 +38,8 @@ constexpr const uint32_t COLOR_DARK_GREEN   = 0xFF006000;
 constexpr const uint32_t COLOR_ICAO_BLUE    = 0xFF107090;
 constexpr const uint32_t COLOR_ICAO_MAGENTA = 0xFF803070;
 
+constexpr const uint32_t DARKER = -0x00101010;
+
 enum class Align {
     LEFT,
     CENTRE,

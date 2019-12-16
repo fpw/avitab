@@ -17,7 +17,7 @@
  */
 #include <algorithm>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/Logger.h"
@@ -288,6 +288,15 @@ const Location& Airport::getLocationDownRight() const {
 }
 
 std::string Airport::getInitialATCContactInfo() const {
+    static const ATCFrequency prioritisedATCType[] {
+        ATCFrequency::RECORDED,
+        ATCFrequency::TWR,
+        ATCFrequency::UNICOM,
+        ATCFrequency::APP,
+        ATCFrequency::DEP,
+        ATCFrequency::CLD,
+        ATCFrequency::GND
+    };
     std::string initialATCContact = "";
     for (auto atcType: prioritisedATCType) {
         if (atcFrequencies.count(atcType) > 0) {

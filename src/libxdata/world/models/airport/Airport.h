@@ -50,16 +50,6 @@ public:
         DEP
     };
 
-    ATCFrequency prioritisedATCType[7] {
-        ATCFrequency::RECORDED,
-        ATCFrequency::TWR,
-        ATCFrequency::UNICOM,
-        ATCFrequency::APP,
-        ATCFrequency::DEP,
-        ATCFrequency::CLD,
-        ATCFrequency::GND
-    };
-
     Airport(const std::string &airportId);
     void setName(const std::string &name);
     void setElevation(int elevation);

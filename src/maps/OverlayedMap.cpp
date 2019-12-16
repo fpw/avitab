@@ -254,7 +254,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM)
     uint32_t color = hasControlTower ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
     bool hasHardRunway = airport.hasHardRunway();
 
-    if (mapWidthNM > 200) {
+    if (mapWidthNM > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) {
         if (hasHardRunway) {
             drawAirportBlob(px, py, mapWidthNM, color);
         }
@@ -280,7 +280,7 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM)
         return;
     }
 
-    if (mapWidthNM < 5) {
+    if (mapWidthNM < DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM) {
         if (isHeliport || isSeaplaneport) {
             drawAirportICAORing(airport, px, py, color);
         } else {
@@ -290,24 +290,23 @@ void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM)
         if (isHeliport || isSeaplaneport || isAirstrip) {
             drawAirportICAORing(airport, px, py, color);
         } else {
-            int ICAO_RADIUS = 15;
             int xCentre = 0;
             int yCentre = 0;
             getRunwaysCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
             int maxDistance = getMaxRunwayDistanceFromCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
-            if (maxDistance > ICAO_RADIUS) {
+            if (maxDistance > ICAO_CIRCLE_RADIUS) {
                 drawAirportICAOGeographicRunways(airport, color);
             } else {
-                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_RADIUS, color);
+                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_CIRCLE_RADIUS, color);
             }
         }
     }
 
-    drawAirportText(airport, px, py, mapWidthNM, color - 0x00101010);
+    drawAirportText(airport, px, py, mapWidthNM, color + img::DARKER);
 }
 
 void OverlayedMap::drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color) {
-    int radius = 2500 / mapWidthNM;
+    int radius = BLOB_SIZE_DIVIDEND / mapWidthNM;
     mapImage->fillCircle(x, y, radius, color);
 }
 
@@ -393,9 +392,8 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
 
 void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color) {
     LOG_INFO(dbg, "%s", airport.getID().c_str());
-    const int r = 12;
-    mapImage->fillCircle(x, y, r,     color);
-    mapImage->fillCircle(x, y, r - 3, img::COLOR_WHITE);
+    mapImage->fillCircle(x, y, ICAO_RING_RADIUS, color);
+    mapImage->fillCircle(x, y, ICAO_RING_RADIUS - 3, img::COLOR_WHITE);
     if (airport.hasOnlyHeliports()) {
         // Draw 'H'
         mapImage->drawLine(x - 3, y - 5, x - 3, y + 5, color); // Left vertical
@@ -412,19 +410,19 @@ void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int
 
 void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color) {
     // Place text below southern airport boundary and below symbol
-    int yOffset = y + 15;
+    int yOffset = y + ICAO_CIRCLE_RADIUS;
     auto &locDownRight = airport.getLocationDownRight();
     if (locDownRight.isValid()) {
         int xIgnored;
         positionToPixel(locDownRight.latitude, locDownRight.longitude, xIgnored, yOffset);
-        yOffset += 15;
+        yOffset += ICAO_CIRCLE_RADIUS;
     }
-    if (mapWidthNM > 40) {
+    if (mapWidthNM > SHOW_DETAILED_AIRPORT_INFO_AT_MAPWIDTHNM) {
         mapImage->drawText(airport.getID(), 16, x, yOffset, color, img::COLOR_WHITE & 0xA0FFFFFF, img::Align::CENTRE);
     } else {
         std::string nameAndID = airport.getName() + " (" + airport.getID() + ")";
         std::string elevationFeet = std::to_string(airport.getElevation());
-        int rwyLengthHundredsFeet = (int)((airport.getLongestRunwayLength() * 3.28) / 100.0);
+        int rwyLengthHundredsFeet = (airport.getLongestRunwayLength() * 3.28) / 100.0;
         std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
         std::string atcInfo = airport.getInitialATCContactInfo();
         std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";
@@ -517,7 +515,7 @@ void OverlayedMap::drawScale(double nmPerPixel) {
     std::string units = useFeet ? "ft" : "nm";
     double perPixel = useFeet ? (nmPerPixel * 6076) : nmPerPixel;
     double maxRange = 300 * perPixel;
-    double step = std::pow(10, ((int)std::log10(maxRange)));
+    double step = std::pow(10, (std::floor(std::log10(maxRange))));
     double rangeToShow = step;
     if ((rangeToShow * 5) < maxRange) {
         rangeToShow *= 5;
