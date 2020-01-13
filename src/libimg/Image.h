@@ -35,9 +35,16 @@ constexpr const uint32_t COLOR_BLUE         = 0xFF0000FF;
 constexpr const uint32_t COLOR_YELLOW       = 0xFF808000;
 constexpr const uint32_t COLOR_DARK_GREY    = 0xFF303030;
 constexpr const uint32_t COLOR_DARK_GREEN   = 0xFF006000;
-constexpr const uint32_t COLOR_ICAO_BLUE    = 0xFF307090;
-constexpr const uint32_t COLOR_ICAO_MAGENTA = 0xFF906080;
+constexpr const uint32_t COLOR_ICAO_BLUE    = 0xFF107090;
+constexpr const uint32_t COLOR_ICAO_MAGENTA = 0xFF803070;
 
+constexpr const uint32_t DARKER = -0x00101010;
+
+enum class Align {
+    LEFT,
+    CENTRE,
+    RIGHT
+};
 
 class Image {
 public:
@@ -76,7 +83,7 @@ public:
     void fillCircle(int x, int y, int radius, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, uint32_t color);
-    void drawText(const std::string text, int size, int x, int y, uint32_t color);
+    void drawText(const std::string text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al);
 
     // the source image must be square with edge len = max(srcWidth, srcHeight)
     void rotate0(Image &dst);

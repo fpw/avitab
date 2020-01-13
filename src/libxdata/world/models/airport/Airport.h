@@ -53,7 +53,7 @@ public:
     Airport(const std::string &airportId);
     void setName(const std::string &name);
     void setElevation(int elevation);
-    int getElevation();
+    int getElevation() const;
 
     const std::string& getID() const override;
     const Location &getLocation() const override;
@@ -73,18 +73,17 @@ public:
 
     void addRunway(std::shared_ptr<Runway> rwy);
     void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) const;
+    float getLongestRunwayLength() const;
     void addRunwayEnds(std::shared_ptr<Runway> rwy1, std::shared_ptr<Runway> rwy2);
     void forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>, const std::shared_ptr<Runway>)> f) const;
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
     void addHeliport(std::shared_ptr<Heliport> port);
 
     bool hasOnlyHeliports() const;
-
     bool hasWaterRunway() const;
-    bool hasTowerFrequency() const;
-    bool hasMultipleATCFrequencies() const;
     bool hasHardRunway() const;
-    
+    bool hasControlTower() const;
+
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);
     void attachILSData(const std::string &rwy, std::weak_ptr<Fix> ils);
@@ -95,6 +94,7 @@ public:
     std::vector<std::shared_ptr<SID>> getSIDs() const;
     std::vector<std::shared_ptr<STAR>> getSTARs() const;
     std::vector<std::shared_ptr<Approach>> getApproaches() const;
+    std::string getInitialATCContactInfo() const;
 
     Airport(const Airport &other) = delete;
     void operator=(const Airport &other) = delete;

@@ -32,7 +32,7 @@ public:
 
     Frequency() = default;
     Frequency(int frq, int places, Unit unit, const std::string &desc);
-    std::string getFrequencyString() const;
+    std::string getFrequencyString(bool appendUnits = true) const;
     const std::string &getDescription() const;
 
     operator bool() const;

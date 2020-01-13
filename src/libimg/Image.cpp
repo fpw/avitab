@@ -366,8 +366,8 @@ void Image::drawLineAA(float x0, float y0, float x1, float y1, uint32_t color) {
 void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_t color) {
     float d;
     int alpha;
-    for (int y = y_centre - radius; y < y_centre + radius; y++) {
-        for (int x = x_centre - radius; x < x_centre + radius; x++) {
+    for (int y = y_centre - radius; y <= y_centre + radius; y++) {
+        for (int x = x_centre - radius; x <= x_centre + radius; x++) {
             d = sqrt(pow((x - x_centre), 2) + pow((y - y_centre), 2));
             if (d > (radius + 0.5)) {
                 alpha = 0; // Definitely outside
@@ -385,6 +385,9 @@ void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_
 void Image::fillCircle(int x_centre, int y_centre, int radius, uint32_t color) {
     // Due to compute complexity, all filled circles are rendered and cached with a
     // key consisting of the radius and color. So typically just a small image blend.
+    if (radius <= 0) {
+        return;
+    }
     uint64_t key = (uint64_t)(radius) << 32 | color;
     std::shared_ptr<img::Image> pImage;
     auto it = circleCache.find(key);
@@ -750,15 +753,20 @@ void Image::rotate(Image& dst, int angle) {
     }
 }
 
-void Image::drawText(const std::string text, int size, int x, int y, uint32_t color) {
-    // Centered around x,y
+void Image::drawText(const std::string text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al) {
     static TTFStamper textBox("Inconsolata.ttf");
     textBox.setSize(size);
-    textBox.setColor(color & 0x00FFFFFF);
+    textBox.setColor(fgColor & 0x00FFFFFF);
     textBox.setText(text.c_str());
     int width = textBox.getTextWidth(text);
-    fillRectangle(x - width / 2, y, x + width / 2, y + size, img::COLOR_WHITE & 0xA0FFFFFF);
-    textBox.applyStamp(*this, x - width / 2, y);
+    int xOffset = 0;
+    if (al == Align::CENTRE) {
+        xOffset = -width / 2;
+    } else if (al == Align::RIGHT) {
+        xOffset = -width;
+    }
+    fillRectangle(x + xOffset, y, x + xOffset + width, y + size, bgColor);
+    textBox.applyStamp(*this, x + xOffset, y);
 }
 
 } /* namespace img */

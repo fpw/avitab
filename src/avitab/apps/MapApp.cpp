@@ -77,7 +77,7 @@ void MapApp::createSettingsLayout() {
     openTopoLabel->alignRightOf(openTopoButton, 10);
     openTopoLabel->setManaged();
 
-    epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3875");
+    epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3857");
     epsgButton->setCallback([this] (const Button &) { setMapSource(MapSource::EPSG3857); });
     epsgButton->setFit(false, true);
     epsgButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());

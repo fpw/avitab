@@ -33,7 +33,7 @@ const std::string& Frequency::getDescription() const {
     return description;
 }
 
-std::string Frequency::getFrequencyString() const {
+std::string Frequency::getFrequencyString(bool appendUnits) const {
     if (unit == Unit::MHZ) {
         std::ostringstream str;
         int factor = 1;
@@ -42,10 +42,10 @@ std::string Frequency::getFrequencyString() const {
         }
         int beforeDot = frequency / factor;
         int afterDot = frequency % factor;
-        str << beforeDot << "." << std::setw(2) << std::setfill('0') << afterDot << " MHz";
+        str << beforeDot << "." << std::setw(2) << std::setfill('0') << afterDot << (appendUnits ? " MHz" : "");
         return str.str();
     } else if (unit == Unit::KHZ) {
-        return std::to_string(frequency) + " kHz";
+        return std::to_string(frequency) + (appendUnits ? " kHz" : "");
     } else {
         return "<unit error>";
     }
