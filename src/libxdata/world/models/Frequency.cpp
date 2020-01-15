@@ -42,7 +42,7 @@ std::string Frequency::getFrequencyString(bool appendUnits) const {
         }
         int beforeDot = frequency / factor;
         int afterDot = frequency % factor;
-        str << beforeDot << "." << std::setw(2) << std::setfill('0') << afterDot << (appendUnits ? " MHz" : "");
+        str << beforeDot << "." << std::setw(places) << std::setfill('0') << afterDot << (appendUnits ? " MHz" : "");
         return str.str();
     } else if (unit == Unit::KHZ) {
         return std::to_string(frequency) + (appendUnits ? " kHz" : "");
