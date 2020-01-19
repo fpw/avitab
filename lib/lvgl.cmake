@@ -104,3 +104,7 @@ list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_themes/lv_theme_templ.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_themes/lv_theme_zen.c
 )
+
+list(APPEND lvgl_sources
+    ${CMAKE_CURRENT_LIST_DIR}/lv_font_roboto_20.c
+)

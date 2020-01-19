@@ -34,12 +34,13 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 
 void AirportApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
+    tabs->centerInParent();
 
     searchPage = tabs->addTab(tabs, "Search");
     searchPage->setShowScrollbar(false);
     searchWindow = std::make_shared<Window>(searchPage, "Search");
     searchWindow->setDimensions(searchPage->getContentWidth(), searchPage->getHeight());
-    searchWindow->alignInTopLeft();
+    searchWindow->centerInParent();
     searchWindow->setOnClose([this] { exit(); });
 
     searchField = std::make_shared<TextArea>(searchWindow, "");
@@ -58,7 +59,7 @@ void AirportApp::resetLayout() {
         });
     });
     keys->setDimensions(searchWindow->getContentWidth(), keys->getHeight());
-    keys->setPosition(0, 120);
+    keys->setPosition(0, searchWindow->getContentHeight() - keys->getHeight());
 }
 
 void AirportApp::onSearchEntered(const std::string& code) {

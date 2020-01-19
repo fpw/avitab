@@ -93,7 +93,7 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
     glfwSetCharCallback(window, [] (GLFWwindow *wnd, unsigned int c) {
         GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
         if (us->wantsKeyInput()) {
-            us->pushKeyInput(c & 0xFF);
+            us->pushKeyInput(c);
         }
     });
 

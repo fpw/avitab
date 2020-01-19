@@ -42,7 +42,7 @@ public:
 
     virtual int getWheelDirection() = 0;
     virtual void setWantKeyInput(bool wantKeys);
-    virtual int popKeyPress();
+    virtual uint32_t popKeyPress();
 
     virtual void setBrightness(float b) = 0;
     virtual float getBrightness() = 0;
@@ -53,7 +53,7 @@ public:
 protected:
     uint32_t *data();
     bool wantsKeyInput();
-    void pushKeyInput(int c);
+    void pushKeyInput(uint32_t c);
     int width();
     int height();
 private:
@@ -61,7 +61,7 @@ private:
     bool enableKeyInput = false;
     int bufferWidth = 0, bufferHeight = 0;
     std::vector<uint32_t> buffer;
-    std::queue<int> keyInput;
+    std::queue<uint32_t> keyInput;
 };
 
 }

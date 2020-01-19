@@ -64,7 +64,7 @@ void RouteApp::showDeparturePage() {
         onDepartureEntered(departureField->getText());
      });});
 
-    keys->setPosition(-5, window->getContentHeight() - keys->getHeight());
+    keys->setPosition(0, window->getContentHeight() - keys->getHeight());
 }
 
 void RouteApp::onDepartureEntered(const std::string& departure) {

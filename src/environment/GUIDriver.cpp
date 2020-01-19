@@ -75,14 +75,14 @@ bool GUIDriver::wantsKeyInput() {
     return enableKeyInput;
 }
 
-void GUIDriver::pushKeyInput(int c) {
+void GUIDriver::pushKeyInput(uint32_t c) {
     std::lock_guard<std::mutex> lock(keyMutex);
     if (enableKeyInput) {
         keyInput.push(c);
     }
 }
 
-int GUIDriver::popKeyPress() {
+uint32_t GUIDriver::popKeyPress() {
     int res = 0;
     {
         std::lock_guard<std::mutex> lock(keyMutex);

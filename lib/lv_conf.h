@@ -14,8 +14,8 @@
  *====================*/
 
 /* Maximal horizontal and vertical resolution to support by the library.*/
-#define LV_HOR_RES_MAX          (800)
-#define LV_VER_RES_MAX          (480)
+#define LV_HOR_RES_MAX          (4096)
+#define LV_VER_RES_MAX          (4096)
 
 /* Color depth:
  * - 1:  1 byte per pixel
@@ -50,7 +50,7 @@
 /* Dot Per Inch: used to initialize default sizes.
  * E.g. a button with width = LV_DPI / 2 -> half inch wide
  * (Not so important, you can adjust it to modify default sizes and spaces)*/
-#define LV_DPI              60     /*[px]*/
+#define LV_DPI              72     /*[px]*/
 
 /* Type of coordinates. Should be `int16_t` (or `int32_t` for extreme cases) */
 typedef int16_t lv_coord_t;
@@ -139,10 +139,10 @@ typedef void * lv_group_user_data_t;
 #endif  /*LV_USE_GROUP*/
 
 /* 1: Enable GPU interface*/
-#define LV_USE_GPU              1
+#define LV_USE_GPU              0
 
 /* 1: Enable file system (might be required for images */
-#define LV_USE_FILESYSTEM       1
+#define LV_USE_FILESYSTEM       0
 #if LV_USE_FILESYSTEM
 /*Declare the type of the user data of file system drivers (can be e.g. `void *`, `int`, `struct`)*/
 typedef void * lv_fs_drv_user_data_t;
@@ -315,15 +315,15 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  * #define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(my_font_1) \
  *                                LV_FONT_DECLARE(my_font_2)
  */
-#define LV_FONT_CUSTOM_DECLARE
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(lv_font_roboto_20)
 
 /*Always set a default font from the built-in fonts*/
-#define LV_FONT_DEFAULT        &lv_font_roboto_22
+#define LV_FONT_DEFAULT        &lv_font_roboto_20
 
 /* Enable it if you have fonts with a lot of characters.
  * The limit depends on the font size, font face and bpp
  * but with > 10,000 characters if you see issues probably you need to enable it.*/
-#define LV_FONT_FMT_TXT_LARGE   0
+#define LV_FONT_FMT_TXT_LARGE   1
 
 /* Set the pixel order of the display.
  * Important only if "subpx fonts" are used.

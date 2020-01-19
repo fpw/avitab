@@ -30,7 +30,9 @@ Window::Window(WidgetPtr parent, const std::string& title):
 
     lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT));
     scrlStyle.body.padding.left = 0;
+    scrlStyle.body.padding.right = 0;
     scrlStyle.body.padding.top = 0;
+    scrlStyle.body.padding.bottom = 0;
     scrlStyle.body.padding.inner = 0;
     lv_win_set_style(win, LV_WIN_STYLE_CONTENT, &scrlStyle);
 
@@ -46,12 +48,12 @@ void Window::hideScrollbars() {
 }
 
 int Window::getContentWidth() {
-    return lv_win_get_width(obj());
+    return lv_win_get_width(obj()) - 5;
 }
 
 int Window::getContentHeight() {
     lv_win_ext_t *ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
-    return lv_obj_get_height(ext->page) - 10;
+    return lv_obj_get_height(ext->page) - 6;
 }
 
 void Window::setOnClose(WindowCallback cb) {

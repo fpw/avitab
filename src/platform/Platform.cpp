@@ -269,15 +269,23 @@ std::string getClipboardContent() {
         return "No clipboard access";
     }
 
-    char *text = reinterpret_cast<char *>(GetClipboardData(CF_TEXT));
+    std::string res;
+    HANDLE data = GetClipboardData(CF_UNICODETEXT);
+    if (data) {
+        WCHAR *text = (WCHAR *) GlobalLock(data);
+        if (text) {
+            size_t utf16len = wcslen(text);
+            size_t utf8len = WideCharToMultiByte(CP_UTF8, 0, text, utf16len, nullptr, 0, nullptr, nullptr);
+            res.reserve(utf8len + 1);
+            WideCharToMultiByte(CP_UTF8, 0, text, utf16len, &res[0], utf8len, nullptr, nullptr);
+            res[utf8len] = '\0';
+            GlobalUnlock(data);
+        }
+    }
 
     CloseClipboard();
 
-    if (!text) {
-        return "";
-    }
-
-    return text;
+    return res;
 }
 #else
 std::string getClipboardContent() {

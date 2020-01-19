@@ -49,11 +49,11 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
 }
 
 int LVGLToolkit::getFrameWidth() {
-    return LV_HOR_RES_MAX;
+    return 800;
 }
 
 int LVGLToolkit::getFrameHeight() {
-    return LV_VER_RES_MAX;
+    return 480;
 }
 
 void LVGLToolkit::initDisplayDriver() {
@@ -66,6 +66,8 @@ void LVGLToolkit::initDisplayDriver() {
     lv_disp_drv_init(&lvDriver);
 
     lvDriver.user_data = this;
+    lvDriver.hor_res = getFrameWidth();
+    lvDriver.ver_res = getFrameHeight();
     lvDriver.buffer = &lvDispBuf;
 
     lvDriver.flush_cb = [] (lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *data) {
@@ -225,7 +227,7 @@ void LVGLToolkit::handleKeyboard() {
     auto keyboard = searchActiveKeyboard(lv_scr_act());
 
     // then process keys
-    int c = 0;
+    uint32_t c = 0;
     while ((c = driver->popKeyPress()) != 0) {
         if (keyboard) {
             auto ta = lv_kb_get_ta(keyboard);
@@ -234,16 +236,16 @@ void LVGLToolkit::handleKeyboard() {
                 continue;
             }
 
-            if (std::isprint(c)) {
-                lv_ta_add_char(ta, c);
-            } else if (c == '\b') {
+            if (c == '\b') {
                 lv_ta_del_char(ta);
             } else if (c == '\n') {
                 if (keyb && keyb->hasOkAction()) {
                     lv_obj_get_event_cb(keyboard)(keyboard, LV_EVENT_APPLY);
                 } else {
-                lv_ta_add_char(ta, '\n');
+                    lv_ta_add_char(ta, '\n');
                 }
+            } else {
+                lv_ta_add_char(ta, lv_txt_encoded_conv_wc(c));
             }
         }
     }
