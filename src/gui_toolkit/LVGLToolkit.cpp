@@ -16,23 +16,19 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <chrono>
-#include <functional>
 #include <lvgl/lvgl.h>
-#include <lvgl/lv_draw/lv_draw_vbasic.h>
 #include "LVGLToolkit.h"
+#include "widgets/Keyboard.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
 
 namespace avitab {
 
 bool LVGLToolkit::lvglIsInitialized = false;
-LVGLToolkit *LVGLToolkit::instance = nullptr;
 
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     driver(drv)
 {
-    instance = this;
-
     driver->init(getFrameWidth(), getFrameHeight());
     if (!lvglIsInitialized) {
         // LVGL does not support de-initialization so we can only do this once
@@ -53,30 +49,38 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
 }
 
 int LVGLToolkit::getFrameWidth() {
-    return LV_HOR_RES;
+    return LV_HOR_RES_MAX;
 }
 
 int LVGLToolkit::getFrameHeight() {
-    return LV_VER_RES;
+    return LV_VER_RES_MAX;
 }
 
 void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
 
+    tmpBuffer.resize(getFrameWidth() * getFrameHeight());
+    lv_disp_buf_init(&lvDispBuf, tmpBuffer.data(), nullptr, tmpBuffer.size());
+
     lv_disp_drv_t lvDriver;
     lv_disp_drv_init(&lvDriver);
 
-    lvDriver.disp_flush = [] (int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t *data) {
-        instance->driver->blit(x1, y1, x2, y2, reinterpret_cast<const uint32_t *>(data));
-        lv_flush_ready();
-    };
+    lvDriver.user_data = this;
+    lvDriver.buffer = &lvDispBuf;
 
-    lvDriver.disp_fill = [] (int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color) {
-        instance->driver->fill(x1, y1, x2, y2, color.full);
-    };
+    lvDriver.flush_cb = [] (lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *data) {
+        LVGLToolkit *us = (LVGLToolkit *) drv->user_data;
+        if (!us) {
+            return;
+        }
 
-    lvDriver.disp_map = [] (int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t *data) {
-        instance->driver->copy(x1, y1, x2, y2, reinterpret_cast<const uint32_t *>(data));
+        int x1 = area->x1;
+        int y1 = area->y1;
+        int x2 = area->x2;
+        int y2 = area->y2;
+
+        us->driver->blit(x1, y1, x2, y2, reinterpret_cast<const uint32_t *>(data));
+        lv_disp_flush_ready(drv);
     };
 
     lv_disp_drv_register(&lvDriver);
@@ -87,10 +91,16 @@ void LVGLToolkit::initInputDriver() {
     lv_indev_drv_init(&inputDriver);
 
     inputDriver.type = LV_INDEV_TYPE_POINTER;
-    inputDriver.read = [] (lv_indev_data_t *data) -> bool {
+    inputDriver.user_data = this;
+    inputDriver.read_cb = [] (lv_indev_drv_t  *drv, lv_indev_data_t *data) -> bool {
+        LVGLToolkit *us = (LVGLToolkit *) drv->user_data;
+        if (!us) {
+            return false;
+        }
+
         int x, y;
         bool pressed;
-        instance->driver->readPointerState(x, y, pressed);
+        us->driver->readPointerState(x, y, pressed);
         data->state = pressed ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
         data->point.x = x;
         data->point.y = y;
@@ -218,27 +228,21 @@ void LVGLToolkit::handleKeyboard() {
     int c = 0;
     while ((c = driver->popKeyPress()) != 0) {
         if (keyboard) {
-            auto action = lv_btnm_get_action(keyboard);
-            if (!action) {
+            auto ta = lv_kb_get_ta(keyboard);
+            auto keyb = (Keyboard *) lv_obj_get_user_data(keyboard);
+            if (!ta) {
                 continue;
             }
 
             if (std::isprint(c)) {
-                char str[] = {(char) (c & 0xFF), '\0'};
-                action(keyboard, str);
+                lv_ta_add_char(ta, c);
             } else if (c == '\b') {
-                action(keyboard, "Bksp");
+                lv_ta_del_char(ta);
             } else if (c == '\n') {
-                lv_kb_ext_t *kbExt = (lv_kb_ext_t *) keyboard->ext_attr;
-                auto okAction = kbExt->ok_action;
-                bool keyHandledByOkAction = false;
-                if (okAction) {
-                    if (okAction(keyboard) == LV_RES_OK) {
-                        keyHandledByOkAction = true;
-                    }
-                }
-                if (!keyHandledByOkAction) {
-                    action(keyboard, "Enter");
+                if (keyb && keyb->hasOkAction()) {
+                    lv_obj_get_event_cb(keyboard)(keyboard, LV_EVENT_APPLY);
+                } else {
+                lv_ta_add_char(ta, '\n');
                 }
             }
         }

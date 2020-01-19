@@ -34,6 +34,8 @@ public:
     void setOnOk(Callback cb);
     void hideEnterKey();
     void setNumericLayout();
+
+    bool hasOkAction() const;
 private:
     std::shared_ptr<TextArea> targetText;
     Callback onCancel;

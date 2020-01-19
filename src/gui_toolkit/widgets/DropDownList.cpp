@@ -35,7 +35,7 @@ DropDownList::DropDownList(WidgetPtr parent, const std::vector<std::string>& cho
     }
 
     lv_ddlist_set_options(obj, choiceStr.c_str());
-    lv_obj_set_free_ptr(obj, this);
+    lv_obj_set_user_data(obj, this);
 
     setObj(obj);
 }
@@ -47,10 +47,11 @@ int DropDownList::getSelectedIndex() {
 void DropDownList::setSelectAction(SelectCallback cb) {
     onSelect = cb;
 
-    lv_ddlist_set_action(obj(), [] (lv_obj_t *dd) -> lv_res_t {
-        DropDownList *us = reinterpret_cast<DropDownList *>(lv_obj_get_free_ptr(dd));
-        us->onSelect();
-        return LV_RES_OK;
+    lv_obj_set_event_cb(obj(), [] (lv_obj_t *dd, lv_event_t ev) {
+        if (ev == LV_EVENT_VALUE_CHANGED) {
+            DropDownList *us = reinterpret_cast<DropDownList *>(lv_obj_get_user_data(dd));
+            us->onSelect();
+        }
     });
 }
 

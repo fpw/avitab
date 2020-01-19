@@ -25,14 +25,14 @@ Window::Window(WidgetPtr parent, const std::string& title):
 {
     lv_obj_t *win = lv_win_create(parentObj(), nullptr);
     lv_win_set_title(win, title.c_str());
-    lv_obj_set_free_ptr(win, this);
+    lv_obj_set_user_data(win, this);
     setObj(win);
 
-    lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT_SCRL));
-    scrlStyle.body.padding.hor = 0;
-    scrlStyle.body.padding.ver = 0;
+    lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT));
+    scrlStyle.body.padding.left = 0;
+    scrlStyle.body.padding.top = 0;
     scrlStyle.body.padding.inner = 0;
-    lv_win_set_style(win, LV_WIN_STYLE_CONTENT_SCRL, &scrlStyle);
+    lv_win_set_style(win, LV_WIN_STYLE_CONTENT, &scrlStyle);
 
     setDimensions(parent->getWidth(), parent->getHeight());
 }
@@ -66,18 +66,19 @@ std::shared_ptr<Button> Window::addSymbol(Symbol smb, WindowCallback cb) {
         throw std::runtime_error("Invalid symbol passed to window");
     }
 
-    lv_obj_t *btn = lv_win_add_btn(obj(), lvSymbol, [] (lv_obj_t *btn) -> lv_res_t {
-        lv_obj_t *winObj = lv_win_get_from_btn(btn);
-        Window *winCls = reinterpret_cast<Window *>(lv_obj_get_free_ptr(winObj));
-        int smbInt = lv_obj_get_free_num(btn);
+    lv_obj_t *btn = lv_win_add_btn(obj(), lvSymbol);
+    lv_obj_set_event_cb(btn, [] (lv_obj_t *btn, lv_event_t ev) {
+        if (ev == LV_EVENT_CLICKED) {
+            lv_obj_t *winObj = lv_win_get_from_btn(btn);
+            Window *winCls = reinterpret_cast<Window *>(lv_obj_get_user_data(winObj));
+            int smbInt = reinterpret_cast<intptr_t>(lv_obj_get_user_data(btn));
 
-        if (winCls) {
-            winCls->callbacks[static_cast<Symbol>(smbInt)]();
+            if (winCls) {
+                winCls->callbacks[static_cast<Symbol>(smbInt)]();
+            }
         }
-
-        return LV_RES_OK;
     });
-    lv_obj_set_free_num(btn, static_cast<size_t>(smb));
+    lv_obj_set_user_data(btn, reinterpret_cast<void *>(smb));
 
     return std::make_shared<Button>(nullptr, btn);
 }

@@ -49,7 +49,7 @@ int Page::getContentHeight() {
 }
 
 void Page::setFit(bool horz, bool vert) {
-    lv_page_set_scrl_fit(obj(), horz, vert);
+    lv_page_set_scrl_fit2(obj(), horz, vert);
 }
 
 void Page::setLayoutCenterColumns() {

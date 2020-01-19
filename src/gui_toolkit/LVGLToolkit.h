@@ -55,7 +55,6 @@ public:
     ~LVGLToolkit();
 private:
     static bool lvglIsInitialized;
-    static LVGLToolkit *instance;
     MouseWheelCallback onMouseWheel;
     std::recursive_mutex guiMutex;
     std::vector<GUITask> pendingTasks;
@@ -72,6 +71,9 @@ private:
     void guiLoop();
     void handleMouseWheel();
     void handleKeyboard();
+
+    std::vector<uint32_t> tmpBuffer;
+    lv_disp_buf_t lvDispBuf;
 
     lv_obj_t *searchActiveKeyboard(lv_obj_t *obj);
 };

@@ -128,10 +128,10 @@ void Image::storeAndClearEncodedData(const std::string& utf8Path) {
 }
 
 
-void Image::resize(int width, int height, uint32_t color) {
+void Image::resize(int newWidth, int newHeight, uint32_t color) {
     int oldSize = this->width * this->height;
-    this->width = width;
-    this->height = height;
+    this->width = newWidth;
+    this->height = newHeight;
     int newSize = this->width * this->height;
     if (newSize >= oldSize) {
         std::fill(pixels->begin(), pixels->end(), color);

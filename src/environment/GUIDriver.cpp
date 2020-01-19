@@ -52,44 +52,6 @@ void GUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint3
     }
 }
 
-void GUIDriver::fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color) {
-    if(x2 < 0 || y2 < 0 || x1 > bufferWidth - 1 || y1 > bufferHeight - 1) {
-        return;
-    }
-
-    int32_t act_x1 = x1 < 0 ? 0 : x1;
-    int32_t act_y1 = y1 < 0 ? 0 : y1;
-    int32_t act_x2 = x2 > bufferWidth - 1 ? bufferWidth - 1 : x2;
-    int32_t act_y2 = y2 > bufferHeight - 1 ? bufferHeight - 1 : y2;
-
-    uint32_t *fb = reinterpret_cast<uint32_t *>(buffer.data());
-    for (int32_t x = act_x1; x <= act_x2; x++) {
-        for (int32_t y = act_y1; y <= act_y2; y++) {
-            fb[y * bufferWidth + x] = color;
-        }
-    }
-}
-
-void GUIDriver::copy(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
-    if(x2 < 0 || y2 < 0 || x1 > bufferWidth - 1 || y1 > bufferHeight - 1) {
-        return;
-    }
-
-    int32_t act_x1 = x1 < 0 ? 0 : x1;
-    int32_t act_y1 = y1 < 0 ? 0 : y1;
-    int32_t act_x2 = x2 > bufferWidth - 1 ? bufferWidth - 1 : x2;
-    int32_t act_y2 = y2 > bufferHeight - 1 ? bufferHeight - 1 : y2;
-
-    uint32_t *fb = reinterpret_cast<uint32_t *>(buffer.data());
-    for (int32_t y = act_y1; y <= act_y2; y++) {
-        for (int32_t x = act_x1; x <= act_x2; x++) {
-            fb[y * bufferWidth + x] = *data;
-            data++;
-        }
-        data += x2 - act_x2;
-    }
-}
-
 int GUIDriver::width() {
     return bufferWidth;
 }

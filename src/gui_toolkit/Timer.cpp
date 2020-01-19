@@ -25,8 +25,8 @@ Timer::Timer(TimerFunc callback, int periodMs):
     func(callback)
 {
     logger::verbose("Creating timer in thread %d", std::this_thread::get_id());
-    task = lv_task_create([] (void *ref) {
-        Timer *tmr = (Timer *)(ref);
+    task = lv_task_create([] (lv_task_t *tsk) {
+        Timer *tmr = (Timer *)(tsk->user_data);
         bool wantContinue = tmr->func();
         if (!wantContinue) {
             tmr->stop();

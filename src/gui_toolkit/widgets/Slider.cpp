@@ -31,18 +31,19 @@ Slider::Slider(WidgetPtr parent, int min, int max):
 void Slider::setCallback(Callback cb) {
     onChange = cb;
 
-    lv_obj_set_free_ptr(obj(), this);
-    lv_slider_set_action(obj(), [] (lv_obj_t *slider) -> lv_res_t {
-        Slider *us = reinterpret_cast<Slider *>(lv_obj_get_free_ptr(slider));
-        if (us) {
-            us->onChange(lv_slider_get_value(slider));
+    lv_obj_set_user_data(obj(), this);
+    lv_obj_set_event_cb(obj(), [] (lv_obj_t *slider, lv_event_t ev) {
+        if (ev == LV_EVENT_VALUE_CHANGED) {
+            Slider *us = reinterpret_cast<Slider *>(lv_obj_get_user_data(slider));
+            if (us) {
+                us->onChange(lv_slider_get_value(slider));
+            }
         }
-        return LV_RES_OK;
     });
 }
 
 void Slider::setValue(int v) {
-    lv_slider_set_value(obj(), v);
+    lv_slider_set_value(obj(), v, false);
 }
 
 int Slider::getValue() {

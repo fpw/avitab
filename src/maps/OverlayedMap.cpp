@@ -376,7 +376,7 @@ void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airp
     xCentre /= scale;
     yCentre /= scale;
 
-    airport.forEachRunwayPair([this, color, xCentre, yCentre, x, y, scale](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
+    airport.forEachRunwayPair([this, xCentre, yCentre, x, y, scale](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
         auto loc1 = rwy1->getLocation();
         auto loc2 = rwy2->getLocation();
         int px1, py1, px2, py2;

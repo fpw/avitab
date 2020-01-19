@@ -122,7 +122,7 @@ void Widget::setBackgroundWhite() {
     lv_style_copy(&styleMod, lv_obj_get_style(obj()));
     styleMod.body.main_color = LV_COLOR_WHITE;
     styleMod.body.grad_color = LV_COLOR_WHITE;
-    lv_img_set_style(obj(), &styleMod);
+    lv_img_set_style(obj(), LV_IMG_STYLE_MAIN, &styleMod);
 }
 
 lv_img_dsc_t Widget::toLVImage(const uint32_t* pix, int width, int height) {
@@ -157,11 +157,11 @@ void Widget::enablePanning() {
 
 void Widget::setClickHandler(ClickHandler handler) {
     onClick = handler;
-    origSigFunc = lv_obj_get_signal_func(obj());
-    lv_obj_set_free_ptr(obj(), this);
+    origSigFunc = lv_obj_get_signal_cb(obj());
+    lv_obj_set_user_data(obj(), this);
 
-    lv_obj_set_signal_func(obj(), [] (_lv_obj_t *o, lv_signal_t sign, void *param) -> lv_res_t {
-        Widget *us = reinterpret_cast<Widget *>(lv_obj_get_free_ptr(o));
+    lv_obj_set_signal_cb(obj(), [] (_lv_obj_t *o, lv_signal_t sign, void *param) -> lv_res_t {
+        Widget *us = reinterpret_cast<Widget *>(lv_obj_get_user_data(o));
         if (sign == LV_SIGNAL_PRESSED || sign == LV_SIGNAL_PRESSING || sign == LV_SIGNAL_RELEASED || sign == LV_SIGNAL_PRESS_LOST) {
             lv_point_t point;
             lv_indev_t *dev = reinterpret_cast<lv_indev_t *>(param);
@@ -181,28 +181,28 @@ void Widget::setClickHandler(ClickHandler handler) {
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
     switch (symbol) {
     case Symbol::NONE:      return nullptr;
-    case Symbol::CLOSE:     return SYMBOL_CLOSE;
-    case Symbol::SETTINGS:  return SYMBOL_SETTINGS;
-    case Symbol::LIST:      return SYMBOL_LIST;
-    case Symbol::LEFT:      return SYMBOL_LEFT;
-    case Symbol::RIGHT:     return SYMBOL_RIGHT;
-    case Symbol::UP:        return SYMBOL_UP;
-    case Symbol::DOWN:      return SYMBOL_DOWN;
-    case Symbol::ROTATE:    return SYMBOL_LOOP;
-    case Symbol::REFRESH:   return SYMBOL_REFRESH;
-    case Symbol::PREV:      return SYMBOL_PREV;
-    case Symbol::NEXT:      return SYMBOL_NEXT;
-    case Symbol::PAUSE:     return SYMBOL_PAUSE;
-    case Symbol::PLUS:      return SYMBOL_PLUS;
-    case Symbol::MINUS:     return SYMBOL_MINUS;
-    case Symbol::FILE:      return SYMBOL_FILE;
-    case Symbol::DIRECTORY: return SYMBOL_DIRECTORY;
-    case Symbol::HOME:      return SYMBOL_HOME;
-    case Symbol::COPY:      return SYMBOL_COPY;
-    case Symbol::GPS:       return SYMBOL_GPS;
-    case Symbol::EDIT:      return SYMBOL_EDIT;
-    case Symbol::KEYBOARD:  return SYMBOL_KEYBOARD;
-    case Symbol::IMAGE:     return SYMBOL_IMAGE;
+    case Symbol::CLOSE:     return LV_SYMBOL_CLOSE;
+    case Symbol::SETTINGS:  return LV_SYMBOL_SETTINGS;
+    case Symbol::LIST:      return LV_SYMBOL_LIST;
+    case Symbol::LEFT:      return LV_SYMBOL_LEFT;
+    case Symbol::RIGHT:     return LV_SYMBOL_RIGHT;
+    case Symbol::UP:        return LV_SYMBOL_UP;
+    case Symbol::DOWN:      return LV_SYMBOL_DOWN;
+    case Symbol::ROTATE:    return LV_SYMBOL_LOOP;
+    case Symbol::REFRESH:   return LV_SYMBOL_REFRESH;
+    case Symbol::PREV:      return LV_SYMBOL_PREV;
+    case Symbol::NEXT:      return LV_SYMBOL_NEXT;
+    case Symbol::PAUSE:     return LV_SYMBOL_PAUSE;
+    case Symbol::PLUS:      return LV_SYMBOL_PLUS;
+    case Symbol::MINUS:     return LV_SYMBOL_MINUS;
+    case Symbol::FILE:      return LV_SYMBOL_FILE;
+    case Symbol::DIRECTORY: return LV_SYMBOL_DIRECTORY;
+    case Symbol::HOME:      return LV_SYMBOL_HOME;
+    case Symbol::COPY:      return LV_SYMBOL_COPY;
+    case Symbol::GPS:       return LV_SYMBOL_GPS;
+    case Symbol::EDIT:      return LV_SYMBOL_EDIT;
+    case Symbol::KEYBOARD:  return LV_SYMBOL_KEYBOARD;
+    case Symbol::IMAGE:     return LV_SYMBOL_IMAGE;
     default:                return nullptr;
     }
 }

@@ -26,7 +26,7 @@ Screen::Screen():
 
     lv_theme_t * th = lv_theme_get_current();
     if(th) {
-        lv_obj_set_style(screen, th->bg);
+        lv_obj_set_style(screen, th->style.bg);
     }
     setObj(screen);
     setManaged();

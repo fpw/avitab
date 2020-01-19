@@ -85,7 +85,7 @@ private:
     WidgetPtr parent;
     lv_style_t styleMod{};
     ClickHandler onClick;
-    lv_signal_func_t origSigFunc = nullptr;
+    lv_signal_cb_t origSigFunc = nullptr;
 };
 }
 

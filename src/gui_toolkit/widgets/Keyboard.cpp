@@ -26,27 +26,26 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
     lv_obj_t *keys = lv_kb_create(parentObj(), nullptr);
     lv_kb_set_cursor_manage(keys, true);
     lv_kb_set_ta(keys, target->obj());
-    lv_obj_set_free_ptr(keys, this);
+    lv_obj_set_user_data(keys, this);
 
-    lv_kb_set_hide_action(keys, [] (lv_obj_t *ref) -> lv_res_t {
-        Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_free_ptr(ref));
-        if (us) {
-            if (us->onCancel) {
-                us->onCancel();
+    lv_obj_set_event_cb(keys, [] (lv_obj_t *ref, lv_event_t ev) {
+        Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_user_data(ref));
+        if (ev == LV_EVENT_APPLY) {
+            if (us) {
+                if (us->onOk) {
+                    us->onOk();
+                }
             }
-            lv_kb_set_ta(ref, us->targetText->obj());
-        }
-        return LV_RES_OK;
-    });
-
-    lv_kb_set_ok_action(keys, [] (lv_obj_t *ref) -> lv_res_t {
-        Keyboard *us = reinterpret_cast<Keyboard *>(lv_obj_get_free_ptr(ref));
-        if (us) {
-            if (us->onOk) {
-                us->onOk();
+        } else if (ev == LV_EVENT_CANCEL) {
+            if (us) {
+                if (us->onCancel) {
+                    us->onCancel();
+                }
+                lv_kb_set_ta(ref, us->targetText->obj());
             }
+        } else if (ev == LV_EVENT_VALUE_CHANGED) {
+            lv_kb_def_event_cb(ref, ev);
         }
-        return LV_RES_OK;
     });
 
     setObj(keys);
@@ -66,22 +65,29 @@ void Keyboard::setOnOk(Callback cb) {
 
 void Keyboard::hideEnterKey() {
     static const char* defaultMapWithoutEnter[] = {
-    "\2051#", "\204q", "\204w", "\204e", "\204r", "\204t", "\204y", "\204u", "\204i", "\204o", "\204p", "\207Bksp", "\n",
-    "\226ABC", "\203a", "\203s", "\203d", "\203f", "\203g", "\203h", "\203j", "\203k", "\203l", "\n",
-    "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
-    "\202" SYMBOL_CLOSE, "\202" SYMBOL_LEFT, "\206 ", "\202" SYMBOL_RIGHT, "\202" SYMBOL_OK, ""
+        "1#", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", LV_SYMBOL_BACKSPACE, "\n",
+        "ABC", "a", "s", "d", "f", "g", "h", "j", "k", "l", "\n",
+        "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
+        LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
     };
-
     lv_kb_set_map(obj(), defaultMapWithoutEnter);
 }
 
 void Keyboard::setNumericLayout() {
     static const char * kb_map_num[] = {
             "+", "-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n",
-            ",", "\202Del", SYMBOL_LEFT, SYMBOL_RIGHT, ""
+            ",", LV_SYMBOL_BACKSPACE, LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, ""
     };
 
     lv_kb_set_map(obj(), kb_map_num);
+}
+
+bool Keyboard::hasOkAction() const {
+    if (onOk) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 } /* namespace avitab */

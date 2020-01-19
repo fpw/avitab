@@ -29,6 +29,7 @@ namespace avitab {
 class GUIDriver {
 public:
     virtual void init(int width, int height);
+
     virtual void createWindow(const std::string &title) = 0;
     virtual bool hasWindow() = 0;
     virtual void killWindow() = 0;
@@ -37,8 +38,6 @@ public:
     virtual void hidePanel();
 
     virtual void blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
-    virtual void fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color);
-    virtual void copy(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t *data);
     virtual void readPointerState(int &x, int &y, bool &pressed) = 0;
 
     virtual int getWheelDirection() = 0;
@@ -52,11 +51,11 @@ public:
 
     virtual ~GUIDriver();
 protected:
+    uint32_t *data();
     bool wantsKeyInput();
     void pushKeyInput(int c);
     int width();
     int height();
-    uint32_t *data();
 private:
     std::mutex keyMutex;
     bool enableKeyInput = false;

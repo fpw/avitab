@@ -55,7 +55,7 @@ public:
     Image& operator=(Image &&other);
 
     // Reset content
-    void resize(int width, int height, uint32_t color);
+    void resize(int newWidth, int newHeight, uint32_t color);
     void loadImageFile(const std::string &utf8Path);
     void loadEncodedData(const std::vector<uint8_t> &encodedImage, bool keepData);
     void setPixels(uint8_t *data, int srcWidth, int srcHeight);

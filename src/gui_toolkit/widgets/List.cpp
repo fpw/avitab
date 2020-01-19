@@ -23,6 +23,7 @@ List::List(WidgetPtr parent):
     Widget(parent)
 {
     lv_obj_t *lst = lv_list_create(parentObj(), nullptr);
+    lv_obj_set_user_data(lst, this);
     setObj(lst);
 }
 
@@ -35,17 +36,20 @@ void List::add(const std::string& entry, int data) {
 }
 
 void List::add(const std::string& entry, Symbol smb, int data) {
-    lv_obj_t *btn = lv_list_add(obj(), symbolToLVSymbol(smb), entry.c_str(), [] (lv_obj_t *btn) -> lv_res_t {
-        void *list = lv_obj_get_free_ptr(btn);
-        int usrData = lv_obj_get_free_num(btn);
-        if (list) {
-            reinterpret_cast<List *>(list)->onSelect(usrData);
-        }
+    lv_obj_t *btn = lv_list_add_btn(obj(), symbolToLVSymbol(smb), entry.c_str());
 
-        return LV_RES_OK;
+    lv_obj_set_user_data(btn, reinterpret_cast<void *>(data));
+
+    lv_obj_set_event_cb(btn, [] (lv_obj_t *obj, lv_event_t ev) {
+        if (ev == LV_EVENT_CLICKED) {
+            lv_obj_t *listObj = lv_obj_get_parent(lv_obj_get_parent(obj));
+            void *list = lv_obj_get_user_data(listObj);
+            if (list) {
+                int usrData = reinterpret_cast<intptr_t>(lv_obj_get_user_data(obj));
+                reinterpret_cast<List *>(list)->onSelect(usrData);
+            }
+        }
     });
-    lv_obj_set_free_ptr(btn, this);
-    lv_obj_set_free_num(btn, (LV_OBJ_FREE_NUM_TYPE) data);
 }
 
 void List::clear() {

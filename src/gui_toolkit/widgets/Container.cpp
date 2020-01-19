@@ -54,7 +54,7 @@ void Container::setLayoutGrid() {
 }
 
 void Container::setFit(bool horiz, bool vert) {
-    lv_cont_set_fit(obj(), horiz, vert);
+    lv_cont_set_fit2(obj(), horiz, vert);
 }
 
 } /* namespace avitab */
