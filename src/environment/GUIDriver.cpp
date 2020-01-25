@@ -30,6 +30,19 @@ void GUIDriver::init(int width, int height) {
     buffer.resize(width * height);
 }
 
+void GUIDriver::setResizeCallback(ResizeCallback cb) {
+    onResize = cb;
+}
+
+void GUIDriver::resize(int newWidth, int newHeight) {
+    bufferWidth = newWidth;
+    bufferHeight = newHeight;
+    buffer.resize(bufferWidth * bufferHeight);
+    if (onResize) {
+        onResize(newWidth, newHeight);
+    }
+}
+
 void GUIDriver::createPanel(int left, int bottom, int width, int height, bool captureClicks) {
 }
 

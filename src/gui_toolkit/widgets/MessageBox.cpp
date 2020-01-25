@@ -46,6 +46,10 @@ void MessageBox::addButton(const std::string& caption, Callback cb) {
     lv_obj_set_event_cb(obj(), [] (lv_obj_t *obj, lv_event_t ev) {
         if (ev == LV_EVENT_CLICKED) {
             const char *txt = lv_mbox_get_active_btn_text(obj);
+            if (!txt) {
+                return;
+            }
+
             MessageBox *us = reinterpret_cast<MessageBox *>(lv_obj_get_user_data(obj));
             if (us) {
                 for (size_t i = 0; i < us->buttons.size(); i++) {

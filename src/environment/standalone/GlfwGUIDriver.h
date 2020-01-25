@@ -43,6 +43,8 @@ public:
     int getWheelDirection() override;
     ~GlfwGUIDriver();
 private:
+    static constexpr const float ZOOM = 1.5f;
+
     std::mutex driverMutex;
     GLFWwindow *window {};
     GLuint textureId{};

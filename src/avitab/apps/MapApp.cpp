@@ -67,7 +67,7 @@ void MapApp::createSettingsLayout() {
     settingsContainer = std::make_shared<Container>();
     settingsContainer->setDimensions(ui->getWidth() / 2, ui->getHeight() / 2);
     settingsContainer->centerInParent();
-    settingsContainer->setFit(true, true);
+    settingsContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     settingsContainer->setVisible(false);
 
     openTopoButton = std::make_shared<Button>(settingsContainer, "OpenTopo");
@@ -314,7 +314,7 @@ void MapApp::showOverlaySettings() {
     overlaysContainer = std::make_shared<Container>();
     overlaysContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
     overlaysContainer->alignLeftInParent(10);
-    overlaysContainer->setFit(true, true);
+    overlaysContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     overlaysContainer->setVisible(true);
 
     auto overlays = map->getOverlayConfig();

@@ -37,11 +37,13 @@ public:
     };
 
     AppLauncher(FuncsPtr appFuncs);
+    void onScreenResize(int width, int height) override;
     void onMouseWheel(int dir, int x, int y) override;
     void show() override;
     void showApp(AppId id);
 private:
     std::vector<Entry> entries;
+
     std::shared_ptr<App> activeApp;
 
     template<typename T>

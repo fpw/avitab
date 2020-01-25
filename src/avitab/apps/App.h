@@ -32,6 +32,7 @@ public:
     using ContPtr = std::shared_ptr<Container>;
 
     App(FuncsPtr appFuncs);
+    virtual void onScreenResize(int width, int height);
     virtual void resume();
     virtual void suspend();
     void setOnExit(ExitFunct onExitFunct);

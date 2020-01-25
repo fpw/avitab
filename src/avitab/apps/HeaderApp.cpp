@@ -48,13 +48,16 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     onTick();
 }
 
+void HeaderApp::onScreenResize(int width, int height) {
+}
+
 void HeaderApp::createSettingsContainer() {
     auto ui = getUIContainer();
 
     prefContainer = std::make_shared<Container>();
     prefContainer->setDimensions(ui->getWidth() / 2, ui->getHeight() / 2);
     prefContainer->centerInParent();
-    prefContainer->setFit(true, true);
+    prefContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     prefContainer->setVisible(false);
 
     brightLabel = std::make_shared<Label>(prefContainer, "Brightness");
@@ -87,8 +90,6 @@ void HeaderApp::createSettingsContainer() {
     closeButton = std::make_shared<Button>(prefContainer, "Close AviTab");
     closeButton->setCallback([this] (const Button &) { toggleSettings(); api().close(); });
     closeButton->alignBelow(mediaLabel, VERT_PADDING);
-
-    prefContainer->setFit(false, false);
 }
 
 void HeaderApp::toggleSettings() {
@@ -108,7 +109,7 @@ bool HeaderApp::onTick() {
 void HeaderApp::updateClock() {
     std::string time = platform::getLocalTime("%H:%M");
     if (curTimeString != time) {
-        // to prevent rendering calls each second
+        // to prevent rendering calls each tick
         curTimeString = time;
         clockLabel->setText(time);
         clockLabel->alignRightInParent(HOR_PADDING);

@@ -53,8 +53,18 @@ void Container::setLayoutGrid() {
     lv_cont_set_layout(obj(), LV_LAYOUT_GRID);
 }
 
-void Container::setFit(bool horiz, bool vert) {
-    lv_cont_set_fit2(obj(), horiz, vert);
+void Container::setFit(Fit horiz, Fit vert) {
+    lv_cont_set_fit2(obj(), toLvFit(horiz), toLvFit(vert));
+}
+
+lv_fit_t Container::toLvFit(Container::Fit fit) {
+    switch (fit) {
+        case Fit::OFF:      return LV_FIT_NONE;
+        case Fit::TIGHT:    return LV_FIT_TIGHT;
+        case Fit::FLOOD:    return LV_FIT_FLOOD;
+        case Fit::FILL:     return LV_FIT_FILL;
+        default: return LV_FIT_NONE;
+    }
 }
 
 } /* namespace avitab */

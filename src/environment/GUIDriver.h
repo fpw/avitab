@@ -23,12 +23,17 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <functional>
 
 namespace avitab {
 
 class GUIDriver {
 public:
+    using ResizeCallback = std::function<void(int, int)>;
+
     virtual void init(int width, int height);
+
+    void setResizeCallback(ResizeCallback cb);
 
     virtual void createWindow(const std::string &title) = 0;
     virtual bool hasWindow() = 0;
@@ -56,7 +61,9 @@ protected:
     void pushKeyInput(uint32_t c);
     int width();
     int height();
+    void resize(int newWidth, int newHeight);
 private:
+    ResizeCallback onResize;
     std::mutex keyMutex;
     bool enableKeyInput = false;
     int bufferWidth = 0, bufferHeight = 0;

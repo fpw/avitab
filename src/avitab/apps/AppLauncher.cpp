@@ -50,6 +50,12 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     addEntry<About>("About", root + "if_Help_1493288.png", AppId::ABOUT);
 }
 
+void AppLauncher::onScreenResize(int width, int height) {
+    for (auto &entry: entries) {
+        entry.app->onScreenResize(width, height);
+    }
+}
+
 void AppLauncher::show() {
     if (activeApp) {
         activeApp->suspend();

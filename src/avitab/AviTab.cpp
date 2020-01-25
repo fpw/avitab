@@ -30,8 +30,8 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     env(environment),
     guiLib(environment->createGUIToolkit())
 {
-    img::TTFStamper::setFontDirectory(env->getFontDirectory());
     // runs in environment thread, called by PluginStart
+    img::TTFStamper::setFontDirectory(env->getFontDirectory());
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
@@ -109,6 +109,7 @@ void AviTab::onPlaneLoad() {
                 headContainer = headerApp->getUIContainer();
                 headContainer->setParent(screen);
                 headContainer->setVisible(true);
+                headContainer->setFit(Container::Fit::FILL, Container::Fit::OFF);
                 if (centerContainer) {
                     centerContainer->setPosition(0, 30);
                     centerContainer->setDimensions(screen->getWidth(), screen->getHeight() - 30);
@@ -174,6 +175,7 @@ void AviTab::createPanel() {
 void AviTab::createLayout() {
     // runs in GUI thread
     auto screen = guiLib->screen();
+    screen->setOnResize([this] { this->onScreenResize(); });
 
     if (!env->isNavWorldReady()) {
         if (!loadLabel) {
@@ -199,6 +201,24 @@ void AviTab::createLayout() {
 
     if (!appLauncher) {
         showAppLauncher();
+    }
+}
+
+void AviTab::onScreenResize() {
+    auto screen = guiLib->screen();
+    int width = screen->getWidth();
+    int height = screen->getHeight();
+
+    if (headerApp) {
+        headerApp->onScreenResize(width, height);
+    }
+
+    if (appLauncher) {
+        if (hideHeader) {
+            appLauncher->onScreenResize(width, height);
+        } else {
+            appLauncher->onScreenResize(width, height - 30);
+        }
     }
 }
 
@@ -232,6 +252,7 @@ std::shared_ptr<Container> AviTab::createGUIContainer() {
         container->setPosition(0, 30);
         container->setDimensions(screen->getWidth(), screen->getHeight() - 30);
     }
+
     return container;
 }
 

@@ -16,7 +16,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "App.h"
-#include "src/Logger.h"
 
 namespace avitab {
 
@@ -27,6 +26,9 @@ App::App(FuncsPtr appFuncs):
         throw std::runtime_error("No API passed to app");
     }
     uiContainer = funcs->createGUIContainer();
+}
+
+void App::onScreenResize(int width, int height) {
 }
 
 AppFunctions& App::api() {

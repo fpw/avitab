@@ -14,8 +14,8 @@
  *====================*/
 
 /* Maximal horizontal and vertical resolution to support by the library.*/
-#define LV_HOR_RES_MAX          (4096)
-#define LV_VER_RES_MAX          (4096)
+#define LV_HOR_RES_MAX          (3840)
+#define LV_VER_RES_MAX          (2160)
 
 /* Color depth:
  * - 1:  1 byte per pixel
@@ -231,7 +231,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 
 /* 1: Print the log with 'printf';
  * 0: user need to register a callback with `lv_log_register_print_cb`*/
-#  define LV_LOG_PRINTF   1
+#  define LV_LOG_PRINTF   0
 #endif  /*LV_USE_LOG*/
 
 /*=================

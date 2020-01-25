@@ -25,7 +25,7 @@ Button::Button(WidgetPtr parent, const std::string& text):
     Widget(parent)
 {
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
-    lv_cont_set_fit2(button, true, true);
+    lv_cont_set_fit(button, LV_FIT_TIGHT);
 
     lv_obj_t *label = lv_label_create(button, nullptr);
     lv_label_set_text(label, text.c_str());
@@ -58,10 +58,10 @@ Button::Button(WidgetPtr parent, img::Image &&icon, const std::string& caption, 
     lv_label_set_text(label, caption.c_str());
 
     if (width >= 0) {
-        lv_cont_set_fit2(button, false, true);
+        lv_cont_set_fit2(button, LV_FIT_NONE, LV_FIT_TIGHT);
         lv_obj_set_width(button, width);
     } else {
-        lv_cont_set_fit2(button, true, true);
+        lv_cont_set_fit(button, LV_FIT_TIGHT);
     }
 
     setObj(button);
@@ -71,7 +71,7 @@ Button::Button(WidgetPtr parent, Symbol smb):
     Widget(parent)
 {
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
-    lv_cont_set_fit2(button, true, true);
+    lv_cont_set_fit(button, LV_FIT_TIGHT);
 
     lv_style_copy(&styleWhenReleased, lv_btn_get_style(button, LV_BTN_STYLE_REL));
     lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));

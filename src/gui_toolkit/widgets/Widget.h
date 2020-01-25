@@ -57,7 +57,6 @@ public:
     void alignLeftOf(WidgetPtr base);
     void alignRightOf(WidgetPtr base, int xPad = 0);
     void alignBelow(WidgetPtr base, int yPad = 0);
-    void setBackgroundWhite();
     int getWidth();
     int getHeight();
     int getX();
@@ -83,7 +82,6 @@ private:
     bool managed = false;
     lv_obj_t *lvObj = nullptr;
     WidgetPtr parent;
-    lv_style_t styleMod{};
     ClickHandler onClick;
     lv_signal_cb_t origSigFunc = nullptr;
 };

@@ -52,6 +52,8 @@ private:
     std::array<float, 30> fpsRingBuffer{};
     int fpsRingCursor = 0;
 
+    void onScreenResize(int width, int height) override;
+
     void createSettingsContainer();
     void toggleSettings();
     void onBrightnessChange(int brightness);

@@ -18,13 +18,21 @@
 #ifndef SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
 #define SRC_GUI_TOOLKIT_WIDGETS_SCREEN_H_
 
+#include <functional>
 #include "Widget.h"
 
 namespace avitab {
 
 class Screen: public Widget {
 public:
+    using ResizeCB = std::function<void()>;
+
     Screen();
+    void setOnResize(ResizeCB cb);
+
+private:
+    lv_signal_cb_t originalSignalCB;
+    ResizeCB onResize;
 };
 
 } /* namespace avitab */

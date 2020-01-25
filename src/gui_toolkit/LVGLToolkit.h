@@ -54,6 +54,9 @@ public:
 
     ~LVGLToolkit();
 private:
+    static const int INITIAL_WIDTH = 800;
+    static const int INITIAL_HEIGHT = 480;
+
     static bool lvglIsInitialized;
     MouseWheelCallback onMouseWheel;
     std::recursive_mutex guiMutex;
@@ -63,9 +66,6 @@ private:
     std::atomic_bool guiActive;
     std::shared_ptr<Screen> mainScreen;
 
-    int getFrameWidth();
-    int getFrameHeight();
-
     void initDisplayDriver();
     void initInputDriver();
     void guiLoop();
@@ -74,6 +74,7 @@ private:
 
     std::vector<uint32_t> tmpBuffer;
     lv_disp_buf_t lvDispBuf;
+    lv_disp_drv_t lvDriver;
 
     lv_obj_t *searchActiveKeyboard(lv_obj_t *obj);
 };

@@ -48,7 +48,7 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_RESIZABLE, true);
-    window = glfwCreateWindow(winWidth * 1.5, winHeight * 1.5, title.c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(winWidth * ZOOM, winHeight * ZOOM, title.c_str(), nullptr, nullptr);
 
     if (!window) {
         throw std::runtime_error("Couldn't create GLFW window");
@@ -96,8 +96,15 @@ void GlfwGUIDriver::createWindow(const std::string& title) {
             us->pushKeyInput(c);
         }
     });
-
-    glfwSetWindowAspectRatio(window, winWidth, winHeight);
+    glfwSetWindowSizeCallback(window, [] (GLFWwindow *wnd, int w, int h) {
+        GlfwGUIDriver *us = (GlfwGUIDriver *) glfwGetWindowUserPointer(wnd);
+        us->resize(w / ZOOM, h / ZOOM);
+        glBindTexture(GL_TEXTURE_2D, us->textureId);
+        glTexImage2D(GL_TEXTURE_2D, 0,
+                GL_RGBA, us->width(), us->height(), 0,
+                GL_BGRA, GL_UNSIGNED_BYTE, us->data());
+        glBindTexture(GL_TEXTURE_2D, 0);
+    });
 
     createTexture();
 }

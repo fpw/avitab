@@ -81,6 +81,7 @@ private:
     void showApp(AppId id);
     void cleanupLayout();
 
+    void onScreenResize();
     void handleLeftClick(bool down);
     void handleWheel(bool up);
 };

@@ -26,6 +26,7 @@ Window::Window(WidgetPtr parent, const std::string& title):
     lv_obj_t *win = lv_win_create(parentObj(), nullptr);
     lv_win_set_title(win, title.c_str());
     lv_obj_set_user_data(win, this);
+
     setObj(win);
 
     lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT));
@@ -36,7 +37,8 @@ Window::Window(WidgetPtr parent, const std::string& title):
     scrlStyle.body.padding.inner = 0;
     lv_win_set_style(win, LV_WIN_STYLE_CONTENT, &scrlStyle);
 
-    setDimensions(parent->getWidth(), parent->getHeight());
+    setDimensions(parent->getWidth() - 10, parent->getHeight());
+    centerInParent();
 }
 
 void Window::setCaption(const std::string& title) {

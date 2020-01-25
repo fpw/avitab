@@ -29,9 +29,24 @@ bool LVGLToolkit::lvglIsInitialized = false;
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     driver(drv)
 {
-    driver->init(getFrameWidth(), getFrameHeight());
+    driver->init(INITIAL_WIDTH, INITIAL_HEIGHT);
+
     if (!lvglIsInitialized) {
         // LVGL does not support de-initialization so we can only do this once
+        lv_log_register_print_cb([] (lv_log_level_t level, const char *file, uint32_t line, const char *msg) {
+            switch (level) {
+                case LV_LOG_LEVEL_WARN:
+                    logger::warn("GUI: %s:%d %s", file, line, msg);
+                    break;
+                case LV_LOG_LEVEL_ERROR:
+                    logger::error("GUI: %s:%d %s", file, line, msg);
+                    break;
+                default:
+                    logger::verbose("GUI: %s:%d %s", file, line, msg);
+                    break;
+            }
+        });
+
         lv_init();
         initDisplayDriver();
         initInputDriver();
@@ -48,26 +63,17 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     guiThread = std::make_unique<std::thread>(&LVGLToolkit::guiLoop, this);
 }
 
-int LVGLToolkit::getFrameWidth() {
-    return 800;
-}
-
-int LVGLToolkit::getFrameHeight() {
-    return 480;
-}
-
 void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
 
-    tmpBuffer.resize(getFrameWidth() * getFrameHeight());
+    tmpBuffer.resize(LV_HOR_RES_MAX * LV_VER_RES_MAX);
     lv_disp_buf_init(&lvDispBuf, tmpBuffer.data(), nullptr, tmpBuffer.size());
 
-    lv_disp_drv_t lvDriver;
     lv_disp_drv_init(&lvDriver);
 
     lvDriver.user_data = this;
-    lvDriver.hor_res = getFrameWidth();
-    lvDriver.ver_res = getFrameHeight();
+    lvDriver.hor_res = INITIAL_WIDTH;
+    lvDriver.ver_res = INITIAL_HEIGHT;
     lvDriver.buffer = &lvDispBuf;
 
     lvDriver.flush_cb = [] (lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *data) {
@@ -84,6 +90,14 @@ void LVGLToolkit::initDisplayDriver() {
         us->driver->blit(x1, y1, x2, y2, reinterpret_cast<const uint32_t *>(data));
         lv_disp_flush_ready(drv);
     };
+
+    driver->setResizeCallback([this] (int w, int h) {
+        executeLater([this, w, h] {
+            lvDriver.hor_res = std::min(w, LV_HOR_RES_MAX);
+            lvDriver.ver_res = std::min(h, LV_VER_RES_MAX);
+            lv_disp_drv_update(lv_disp_get_default(), &lvDriver);
+        });
+    });
 
     lv_disp_drv_register(&lvDriver);
 }

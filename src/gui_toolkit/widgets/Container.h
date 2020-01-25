@@ -24,6 +24,13 @@ namespace avitab {
 
 class Container: public Widget {
 public:
+    enum class Fit {
+        OFF,
+        TIGHT,
+        FLOOD,
+        FILL
+    };
+
     Container(); // on top layer
     Container(WidgetPtr parent);
     void setLayoutPretty();
@@ -31,7 +38,9 @@ public:
     void setLayoutRow();
     void setLayoutColumn();
     void setLayoutGrid();
-    void setFit(bool horiz, bool vert);
+    void setFit(Fit horiz, Fit vert);
+private:
+    lv_fit_t toLvFit(Fit fit);
 };
 
 } /* namespace avitab */
