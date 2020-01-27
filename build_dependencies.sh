@@ -42,7 +42,7 @@ echo "Building mupdf..."
 if [ ! -f $OUTDIR/lib/libmupdf-third.a ]; then
     cd mupdf
     patch -p1 -s -N < ../mupdf.diff
-    XCFLAGS=-fPIC HAVE_X11=no HAVE_GLUT=no make prefix=$OUTDIR -j10 install
+    XCFLAGS=-fPIC make HAVE_X11=no HAVE_GLUT=no prefix=$OUTDIR -j10 install
     cd thirdparty/libjpeg
     ./configure
     cd ../../../
