@@ -25,6 +25,7 @@
 #include <cmath>
 #include <fstream>
 #include <algorithm>
+#include <array>
 #include "Image.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
