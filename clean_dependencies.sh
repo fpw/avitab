@@ -39,3 +39,9 @@ echo "Cleaning libgeotiff..."
 cd libgeotiff
 git clean -d -x -f
 cd ..
+
+echo "Cleaning txiki..."
+cd txiki.js
+git clean -d -x -f
+cd ..
+

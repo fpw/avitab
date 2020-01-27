@@ -1,8 +1,8 @@
 diff --git a/Makethird b/Makethird
-index 9425ff3d..8b1c0b94 100644
+index 68b4b694c..7e4212d97 100644
 --- a/Makethird
 +++ b/Makethird
-@@ -195,7 +195,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.c
+@@ -199,7 +199,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.c
  THIRD_SRC += thirdparty/libjpeg/jquant1.c
  THIRD_SRC += thirdparty/libjpeg/jquant2.c
  THIRD_SRC += thirdparty/libjpeg/jutils.c
@@ -27,65 +27,51 @@ index 9425ff3d..8b1c0b94 100644
  
  $(OUT)/thirdparty/libjpeg/%.o: thirdparty/libjpeg/%.c
 diff --git a/include/mupdf/fitz/config.h b/include/mupdf/fitz/config.h
-index e5a19ed4..b165ed36 100644
+index ea91e876d..ce3c26b48 100644
 --- a/include/mupdf/fitz/config.h
 +++ b/include/mupdf/fitz/config.h
-@@ -6,7 +6,7 @@
- 	Enable the following for spot (and hence overprint/overprint
- 	simulation) capable rendering. This forces FZ_PLOTTERS_N on.
- */
--#define FZ_ENABLE_SPOT_RENDERING 1
-+/* #define FZ_ENABLE_SPOT_RENDERING 1 */
+@@ -19,6 +19,12 @@
+ /* #define FZ_PLOTTERS_CMYK 1 */
+ /* #define FZ_PLOTTERS_N 1 */
  
- /*
- 	Choose which plotters we need.
-@@ -14,24 +14,24 @@
- 	plotters in that aren't needed, define the unwanted
- 	FZ_PLOTTERS_... define to 0.
- */
--/* #define FZ_PLOTTERS_G 1 */
--/* #define FZ_PLOTTERS_RGB 1 */
--/* #define FZ_PLOTTERS_CMYK 1 */
--/* #define FZ_PLOTTERS_N 1 */
 +#define FZ_PLOTTERS_G 0
 +#define FZ_PLOTTERS_RGB 1
 +#define FZ_PLOTTERS_CMYK 0
 +#define FZ_PLOTTERS_N 0
- 
++
++
  /*
  	Choose which document agents to include.
- 	By default all but GPRF are enabled. To avoid building unwanted
- 	ones, define FZ_ENABLE_... to 0.
+ 	By default all are enabled. To avoid building unwanted
+@@ -33,9 +39,18 @@
+ /* #define FZ_ENABLE_EPUB 1 */
+ 
+ /*
+++#define FZ_ENABLE_PDF 1
+++#define FZ_ENABLE_XPS 0
+++#define FZ_ENABLE_SVG 1
+++#define FZ_ENABLE_CBZ 0
+++#define FZ_ENABLE_IMG 1
+++#define FZ_ENABLE_HTML 0
+++#define FZ_ENABLE_EPUB 0
++
++
+ 	Choose whether to enable ICC color profiles.
  */
--/* #define FZ_ENABLE_PDF 1 */
--/* #define FZ_ENABLE_XPS 1 */
--/* #define FZ_ENABLE_SVG 1 */
--/* #define FZ_ENABLE_CBZ 1 */
--/* #define FZ_ENABLE_IMG 1 */
--/* #define FZ_ENABLE_HTML 1 */
--/* #define FZ_ENABLE_EPUB 1 */
--/* #define FZ_ENABLE_GPRF 1 */
-+#define FZ_ENABLE_PDF 1
-+#define FZ_ENABLE_XPS 0
-+#define FZ_ENABLE_SVG 1
-+#define FZ_ENABLE_CBZ 0
-+#define FZ_ENABLE_IMG 1
-+#define FZ_ENABLE_HTML 0
-+#define FZ_ENABLE_EPUB 0
-+#define FZ_ENABLE_GPRF 0
+-/* #define FZ_ENABLE_ICC 1 */
++#define FZ_ENABLE_ICC 0
  
  /*
  	Choose whether to enable JPEG2000 decoding.
-@@ -45,7 +45,7 @@
- 	Choose whether to enable JavaScript.
+@@ -50,6 +65,7 @@
  	By default JavaScript is enabled both for mutool and PDF interactivity.
  */
--/* #define FZ_ENABLE_JS 1 */
+ /* #define FZ_ENABLE_JS 1 */
 +#define FZ_ENABLE_JS 0
  
  /*
  	Choose which fonts to include.
-@@ -56,22 +56,22 @@
+@@ -60,22 +76,22 @@
  	unwanted fonts.
  */
  /* To avoid all noto fonts except CJK, enable: */
@@ -113,12 +99,3 @@ index e5a19ed4..b165ed36 100644
  
  /* To skip the symbol font, enable: */
  /* #define TOFU_SYMBOL */
-@@ -80,7 +80,7 @@
- /* #define TOFU_SIL */
- 
- /* To skip the ICC profiles, enable: */
--/* #define NO_ICC */
-+#define NO_ICC
- 
- /* To skip the Base14 fonts, enable: */
- /* #define TOFU_BASE14 */

@@ -41,3 +41,6 @@
 [submodule "lib/libgeotiff"]
 	path = lib/libgeotiff
 	url = https://github.com/OSGeo/libgeotiff
+[submodule "lib/txiki.js"]
+	path = lib/txiki.js
+	url = https://github.com/saghul/txiki.js
