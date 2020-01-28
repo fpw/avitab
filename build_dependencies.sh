@@ -109,7 +109,7 @@ if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then echo "Failed"; exit; fi
 echo "Building QuickJS..."
 if [ ! -f $OUTDIR/lib/libquickjs.a ]; then
     cd QuickJS
-    make -j10 libquickjs.a
+    make CC="gcc -fPIC" -j10 libquickjs.a
     cp libquickjs.a $OUTDIR/lib
     cd ..
 fi
