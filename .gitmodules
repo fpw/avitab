@@ -41,3 +41,6 @@
 [submodule "lib/libgeotiff"]
 	path = lib/libgeotiff
 	url = https://github.com/OSGeo/libgeotiff
+[submodule "lib/QuickJS"]
+	path = lib/QuickJS
+	url = https://github.com/ldarren/QuickJS/

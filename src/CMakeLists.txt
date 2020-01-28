@@ -21,8 +21,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}"
     "${PROJECT_SOURCE_DIR}/build-third/include"
     "${PROJECT_SOURCE_DIR}/lib/"
-    "${PROJECT_SOURCE_DIR}/lib/txiki.js/deps/quickjs/include"
-    "${PROJECT_SOURCE_DIR}/lib/txiki.js/src"
+    "${PROJECT_SOURCE_DIR}/lib/QuickJS/"
     "${PROJECT_SOURCE_DIR}/lib/mupdf/thirdparty/freetype/include")
 
 add_definitions(-DCURL_STATICLIB)
@@ -39,7 +38,7 @@ target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmbedx509.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmbedcrypto.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libdetex.a
-    ${PROJECT_SOURCE_DIR}/build-third/lib/libqjs.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/libquickjs.a
     xdata
 )
 

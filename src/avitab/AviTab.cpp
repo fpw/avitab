@@ -36,6 +36,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
         env->loadNavWorldInBackground();
     }
     navigraphAPI = std::make_shared<navigraph::NavigraphAPI>(env->getProgramPath() + "/Navigraph/");
+    jsRuntime = std::make_shared<js::Runtime>();
     env->resumeEnvironmentJobs();
 }
 

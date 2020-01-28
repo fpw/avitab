@@ -27,6 +27,7 @@
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/avitab/apps/AppFunctions.h"
 #include "src/avitab/apps/AppLauncher.h"
+#include "src/scripting/Runtime.h"
 
 namespace avitab {
 
@@ -74,6 +75,7 @@ private:
     std::shared_ptr<AppLauncher> appLauncher;
 
     std::shared_ptr<navigraph::NavigraphAPI> navigraphAPI;
+    std::shared_ptr<js::Runtime> jsRuntime;
 
     void createPanel();
     void createLayout();

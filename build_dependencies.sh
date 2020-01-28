@@ -106,19 +106,13 @@ if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then
 fi
 if [ ! -f $OUTDIR/lib/libgeotiff.a ]; then echo "Failed"; exit; fi
 
-echo "Building txiki.js..."
-if [ ! -f $OUTDIR/lib/libtjs.a ]; then
-    cd txiki.js/
-    patch -p1 -s -N < ../txiki.diff
-    mkdir build
-    cd build
-    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS=-fPIC -DCMAKE_INSTALL_PREFIX=$OUTDIR ..
-    make -j10
-    cp deps/libuv/libuv_a.a $OUTDIR/lib
-    cp deps/quickjs/libqjs.a $OUTDIR/lib
-    cp libtjs.a $OUTDIR/lib
-    cd ../..
+echo "Building QuickJS..."
+if [ ! -f $OUTDIR/lib/libquickjs.a ]; then
+    cd QuickJS
+    make -j10 libquickjs.a
+    cp libquickjs.a $OUTDIR/lib
+    cd ..
 fi
-if [ ! -f $OUTDIR/lib/libtjs.a ]; then echo "Failed"; exit; fi
+if [ ! -f $OUTDIR/lib/libquickjs.a ]; then echo "Failed"; exit; fi
 
 cd ..

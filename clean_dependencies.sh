@@ -40,8 +40,8 @@ cd libgeotiff
 git clean -d -x -f
 cd ..
 
-echo "Cleaning txiki..."
-cd txiki.js
+echo "Cleaning QuickJS..."
+cd QuickJS
 git clean -d -x -f
 cd ..
 
