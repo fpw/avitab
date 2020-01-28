@@ -14,6 +14,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/maps/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/environment/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/gui_toolkit/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/platform/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/scripting/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/avitab/CMakeLists.txt)
 
 include_directories(
