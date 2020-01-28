@@ -37,10 +37,10 @@ public:
         TURF_GRASS = 3,
         DIRT_BROWN = 4,
         GRAVEL_GREY = 5,
-        DRY_LAKEBED = 12,
-        WATER_RUNWAY = 13,
-        SNOW_OR_ICE = 14,
-        TRANSPARENT_SURFACE = 15
+        DRY_LAKEBED = 12, // "Example: KEDW (Edwards AFB)"
+        WATER_RUNWAY = 13, // "Nothing displayed"
+        SNOW_OR_ICE = 14, // "Poor friction. Runway markings cannot be added"
+        TRANSPARENT_SURFACE = 15 // "Hard surface, but no texture/markings (use in custom scenery)"
     };
 
     Runway(const std::string &name);
@@ -57,6 +57,7 @@ public:
     float getWidth() const;
     bool hasHardSurface() const;
     SurfaceType getSurfaceType() const;
+    const std::string getSurfaceTypeDescription() const;
     void attachILSData(std::weak_ptr<Fix> ils);
 
     // Optional, can return nullptr

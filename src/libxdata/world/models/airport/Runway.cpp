@@ -87,9 +87,25 @@ xdata::Runway::SurfaceType xdata::Runway::getSurfaceType() const{
     return surfaceType;
 }
 
+const std::string xdata::Runway::getSurfaceTypeDescription() const {
+    switch(surfaceType) {
+    case SurfaceType::ASPHALT:              return "Asphalt";
+    case SurfaceType::CONCRETE:             return "Concrete";
+    case SurfaceType::TURF_GRASS:           return "Turf/Grass";
+    case SurfaceType::DIRT_BROWN:           return "Dirt";
+    case SurfaceType::GRAVEL_GREY:          return "Gravel";
+    case SurfaceType::DRY_LAKEBED:          return "Dry lakebed";
+    case SurfaceType::WATER_RUNWAY:         return "Water";
+    case SurfaceType::SNOW_OR_ICE:          return "Snow/Ice";
+    case SurfaceType::TRANSPARENT_SURFACE:  return "Hard?";
+    default: return "Unknown surface";
+    }
+}
+
 bool xdata::Runway::hasHardSurface() const{
-    return ((surfaceType == xdata::Runway::SurfaceType::ASPHALT) ||
-            (surfaceType == xdata::Runway::SurfaceType::CONCRETE));
+    return ((surfaceType == SurfaceType::ASPHALT) ||
+            (surfaceType == SurfaceType::CONCRETE) ||
+            (surfaceType == SurfaceType::TRANSPARENT_SURFACE));
 }
 
 } /* namespace xdata */

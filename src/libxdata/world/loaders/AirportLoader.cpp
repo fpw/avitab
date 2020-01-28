@@ -52,7 +52,8 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
 
     auto airport = world->findAirportByID(port.id);
     if (airport != nullptr) {
-        //Airport already exists so lets skip it.
+        //Airport (custom scenery) already exists so don't re-construct it, but we do want to :
+        patchCustomSceneryRunwaySurfaces(port, airport);
         return;
     }
 
@@ -132,6 +133,37 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             }
         }
     }
+}
+
+void AirportLoader::patchCustomSceneryRunwaySurfaces(const AirportData& defaultAirportData, std::shared_ptr<Airport> customAirport) const {
+    // Scenery, typically custom, may use SurfaceTypeCode 15 (= transparent) for runways. Although 15 is described
+    // in the apt.dat spec as "hard", this results is the misclassification of custom scenery grass airstrips as airports.
+    // To get better surface types for avitab, we attempt to patch good runway surface type codes from a later loaded
+    // default scenery back into the airport we first created (typically from custom scenery).
+    // Note that 15 is also used in default scenery, but there's not a lot we can do about that.
+
+    // Gather map of runway IDs and their surface types from airport in the default scenery being loaded
+    std::map<std::string, Runway::SurfaceType> defaultRwySurface;
+    for (auto &entry: defaultAirportData.runways) {
+        for (auto end = entry.ends.begin(); end != entry.ends.end(); ++end) {
+            if ((Runway::SurfaceType)entry.surfaceType != Runway::SurfaceType::TRANSPARENT_SURFACE) {
+                defaultRwySurface[end->name] = (Runway::SurfaceType)entry.surfaceType;
+            }
+        }
+    }
+
+    // Patch surface type from airport in default scenery into the airport that came from custom scenery loaded earlier
+    customAirport->forEachRunway([this, customAirport, defaultRwySurface] (std::shared_ptr<xdata::Runway> customRwy) {
+        auto runwayID = customRwy->getID();
+        if (customRwy->getSurfaceType() == Runway::SurfaceType::TRANSPARENT_SURFACE) {
+            auto defaultSurface = defaultRwySurface.find(runwayID);
+            if (defaultSurface != defaultRwySurface.end()) {
+                 customRwy->setSurfaceType(defaultSurface->second);
+                 LOG_INFO(0, "For custom scenery %s, rwy %s, transparent surface overridden with %s from default scenery",
+                     customAirport->getID().c_str(), runwayID.c_str(), customRwy->getSurfaceTypeDescription().c_str());
+            }
+        }
+    });
 }
 
 } /* namespace xdata */
