@@ -33,6 +33,8 @@ private:
     std::shared_ptr<World> world;
 
     void onAirportLoaded(const AirportData &port) const;
+
+    void patchCustomSceneryRunwaySurfaces(const AirportData& port, std::shared_ptr<Airport> airport) const;
 };
 
 } /* namespace xdata */
