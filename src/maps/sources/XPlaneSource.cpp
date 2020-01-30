@@ -70,7 +70,7 @@ int XPlaneSource::getPageCount() {
     return 1;
 }
 
-bool XPlaneSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool XPlaneSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -88,7 +88,7 @@ bool XPlaneSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int 
 }
 
 std::string XPlaneSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 
@@ -98,7 +98,7 @@ std::string XPlaneSource::getUniqueTileName(int page, int x, int y, int zoom) {
 }
 
 std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 

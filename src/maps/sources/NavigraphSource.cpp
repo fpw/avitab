@@ -97,7 +97,7 @@ int NavigraphSource::getPageCount() {
     return 1;
 }
 
-bool NavigraphSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool NavigraphSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -118,7 +118,7 @@ bool NavigraphSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, i
 }
 
 std::string NavigraphSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 

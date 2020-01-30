@@ -90,7 +90,7 @@ int GeoTIFFSource::getPageCount() {
     return 1;
 }
 
-bool GeoTIFFSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool GeoTIFFSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -107,7 +107,7 @@ bool GeoTIFFSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int
 }
 
 std::string GeoTIFFSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 

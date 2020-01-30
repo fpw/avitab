@@ -90,7 +90,7 @@ int EPSGSource::getPageCount() {
     return 1;
 }
 
-bool EPSGSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool EPSGSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -111,7 +111,7 @@ bool EPSGSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zo
 }
 
 std::string EPSGSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 

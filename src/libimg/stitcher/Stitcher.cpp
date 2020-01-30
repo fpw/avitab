@@ -171,7 +171,7 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
             int tileX = ((int) centerX) + x;
             int tileY = ((int) centerY) + y;
 
-            if (!tileSource->checkAndCorrectTileCoordinates(page, tileX, tileY, zoomLevel)) {
+            if (!tileSource->isTileValid(page, tileX, tileY, zoomLevel)) {
                 f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, emptyTile);
                 continue;
             }

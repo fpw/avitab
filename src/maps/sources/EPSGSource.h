@@ -43,7 +43,7 @@ public:
 
     // Query and load tile information
     int getPageCount() override;
-    bool checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) override;
+    bool isTileValid(int page, int x, int y, int zoom) override;
     std::string getUniqueTileName(int page, int x, int y, int zoom) override;
     std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) override;
 

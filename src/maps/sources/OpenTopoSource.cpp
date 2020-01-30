@@ -90,7 +90,7 @@ int OpenTopoSource::getPageCount() {
     return 1;
 }
 
-bool OpenTopoSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool OpenTopoSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -111,7 +111,7 @@ bool OpenTopoSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, in
 }
 
 std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!checkAndCorrectTileCoordinates(page, x, y, zoom)) {
+    if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
 

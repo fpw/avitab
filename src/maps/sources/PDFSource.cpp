@@ -80,7 +80,7 @@ int PDFSource::getPageCount() {
     return rasterizer.getPageCount();
 }
 
-bool PDFSource::checkAndCorrectTileCoordinates(int page, int &x, int &y, int zoom) {
+bool PDFSource::isTileValid(int page, int x, int y, int zoom) {
     if (page < 0 || page >= rasterizer.getPageCount()) {
         return false;
     }
