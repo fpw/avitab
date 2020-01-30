@@ -153,7 +153,7 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
     int xOff = (centerX - (int) centerX) * tileEdgeWidth;
     int yOff = (centerY - (int) centerY) * tileEdgeHeight;
 
-    // Center tile's upper left position
+    // Center tile's upper left position so that the center pixel's position will be at the image center
     int centerPosX = dstWidth / 2 - xOff;
     int centerPosY = dstHeight / 2 - yOff;
 
@@ -171,8 +171,11 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
             int tileX = ((int) centerX) + x;
             int tileY = ((int) centerY) + y;
 
+            int tilePosX = centerPosX + x * tileEdgeWidth;
+            int tilePosY = centerPosY + y * tileEdgeHeight;
+
             if (!tileSource->isTileValid(page, tileX, tileY, zoomLevel)) {
-                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, emptyTile);
+                f(tilePosX, tilePosY, emptyTile);
                 continue;
             }
 
@@ -180,18 +183,24 @@ void Stitcher::forEachTileInView(std::function<void(int, int, img::Image &)> f) 
             try {
                 tile = tileCache.getTile(page, tileX, tileY, zoomLevel);
             } catch (const std::exception &e) {
-                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, errorTile);
+                f(tilePosX, tilePosY, errorTile);
                 continue;
             }
 
             if (tile) {
-                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, *tile);
+                f(tilePosX, tilePosY, *tile);
             } else {
                 pendingTiles = true;
-                f(centerPosX + x * tileEdgeWidth, centerPosY + y * tileEdgeHeight, loadingTile);
+                f(tilePosX, tilePosY, loadingTile);
             }
         }
     }
+
+    // Due to rounding and precision, the actual drawn center will be a few
+    // pixels off the requested center.
+    // Ensure that we return the actual drawn center instead of the requested one.
+    centerX = ((int) centerX) + xOff / (double) tileEdgeWidth;
+    centerY = ((int) centerY) + yOff / (double) tileEdgeHeight;
 }
 
 void Stitcher::updateImage() {

@@ -74,10 +74,8 @@ void OverlayedMap::centerOnWorldPos(double latitude, double longitude) {
 
     int zoomLevel = stitcher->getZoomLevel();
     auto centerXY = tileSource->worldToXY(longitude, latitude, zoomLevel);
-    int checkX = centerXY.x;
-    int checkY = centerXY.y;
     int page = stitcher->getCurrentPage();
-    if (tileSource->isTileValid(page, checkX, checkY, zoomLevel)) {
+    if (tileSource->isTileValid(page, centerXY.x, centerXY.y, zoomLevel)) {
         stitcher->setCenter(centerXY.x, centerXY.y);
     }
 }
@@ -221,16 +219,14 @@ void OverlayedMap::drawDataOverlays() {
     double mapWidthNM = nmPerPixel * mapImage->getWidth();
 
     navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
-        auto fix = dynamic_cast<const xdata::Fix *>(&node);
-        if (fix) {
-            drawFix(*fix, mapWidthNM);
-        }
-    });
-
-    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
         auto airport = dynamic_cast<const xdata::Airport *>(&node);
         if (airport && isAirportVisible(*airport)) {
             drawAirport(*airport, mapWidthNM);
+        }
+
+        auto fix = dynamic_cast<const xdata::Fix *>(&node);
+        if (fix) {
+            drawFix(*fix, mapWidthNM);
         }
     });
 

@@ -45,8 +45,10 @@ private:
     std::vector<uint8_t> fontData;
     uint32_t color = 0x808080;
     std::string text;
+    size_t width = 0;
     Image stamp;
 
+    size_t calculateTextWidth();
     void loadInternalFont();
 };
 

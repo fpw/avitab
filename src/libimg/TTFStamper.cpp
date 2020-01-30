@@ -65,8 +65,10 @@ void TTFStamper::loadInternalFont() {
 }
 
 void TTFStamper::setSize(float size) {
-    fontSize = size;
-    FT_Set_Pixel_Sizes(fontFace, 0, size);
+    if (size != fontSize) {
+        fontSize = size;
+        FT_Set_Pixel_Sizes(fontFace, 0, size);
+    }
 }
 
 void TTFStamper::setText(const std::string& newText) {
@@ -74,7 +76,7 @@ void TTFStamper::setText(const std::string& newText) {
         return;
     }
     text = newText;
-    int width = getTextWidth(text);
+    width = calculateTextWidth();
     if (width == 0) {
         stamp.resize(0, 0, 0);
         return;
@@ -110,16 +112,16 @@ void TTFStamper::setColor(uint32_t textColor) {
     color = textColor;
 }
 
-size_t TTFStamper::getTextWidth(const std::string& in) {
-    if (in.empty()) {
+size_t TTFStamper::calculateTextWidth() {
+    if (text.empty()) {
         return 0;
     }
 
     size_t xPos = 0;
     auto slot = fontFace->glyph;
 
-    for (size_t i = 0; i < in.size(); i++) {
-        FT_UInt glyphIndex = FT_Get_Char_Index(fontFace, in[i]);
+    for (size_t i = 0; i < text.size(); i++) {
+        FT_UInt glyphIndex = FT_Get_Char_Index(fontFace, text[i]);
         auto error = FT_Load_Glyph(fontFace, glyphIndex, FT_LOAD_BITMAP_METRICS_ONLY);
         if (error) {
             continue;
@@ -128,6 +130,10 @@ size_t TTFStamper::getTextWidth(const std::string& in) {
         xPos += slot->advance.x / 64;
     }
     return xPos;
+}
+
+size_t TTFStamper::getTextWidth(const std::string &in) {
+    return width;
 }
 
 void TTFStamper::applyStamp(Image &dst, int angle) {

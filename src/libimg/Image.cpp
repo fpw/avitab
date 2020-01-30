@@ -754,19 +754,19 @@ void Image::rotate(Image& dst, int angle) {
     }
 }
 
-void Image::drawText(const std::string text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al) {
+void Image::drawText(const std::string &text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al) {
     static TTFStamper textBox("Inconsolata.ttf");
     textBox.setSize(size);
     textBox.setColor(fgColor & 0x00FFFFFF);
-    textBox.setText(text.c_str());
-    int width = textBox.getTextWidth(text);
+    textBox.setText(text);
+    auto textWidth = textBox.getTextWidth(text);
     int xOffset = 0;
     if (al == Align::CENTRE) {
-        xOffset = -width / 2;
+        xOffset = -textWidth / 2;
     } else if (al == Align::RIGHT) {
-        xOffset = -width;
+        xOffset = -textWidth;
     }
-    fillRectangle(x + xOffset, y, x + xOffset + width, y + size, bgColor);
+    fillRectangle(x + xOffset, y, x + xOffset + textWidth, y + size, bgColor);
     textBox.applyStamp(*this, x + xOffset, y);
 }
 
