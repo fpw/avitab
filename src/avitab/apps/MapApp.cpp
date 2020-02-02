@@ -17,6 +17,7 @@
  */
 #include <sstream>
 #include <iomanip>
+#include <math.h>
 #include "MapApp.h"
 #include "src/Logger.h"
 #include "src/maps/sources/OpenTopoSource.h"
@@ -463,9 +464,9 @@ void MapApp::startCalibrationStep1() {
     messageBox = std::make_unique<avitab::MessageBox>(
             getUIContainer(),
                 "The current file is not calibrated.\n"
-                "You need to select two points that are far away from each other.\n"
-                "I will show a red square first - center it above a known location and enter its coordinates, then click the tracking icon again.\n"
-                "The square will then turn blue.\n"
+                "Select two points that are diagonally far away from each other.\n"
+                "I will show a red square first - center it above a known location and enter its coordinates (decimal or D'M'S or D'M), then click the tracking icon again.\n"
+                "If valid, the square will turn blue.\n"
                 "Move the square to a different location and enter its coordinates, then click the tracking icon again."
             );
     messageBox->addButton("Ok", [this] () {
@@ -488,6 +489,38 @@ void MapApp::startCalibrationStep1() {
     keyboard->alignInBottomCenter();
 }
 
+double MapApp::getCoordinate(std::string coordStr) {
+    // Validate characters, since may use physical keyboard to input, and someone will
+    // mistype or attempt to enter DMS using ` (backtick) or " as a separator.
+    std::size_t found = coordStr.find_first_not_of("+-1234567890.,' ");
+    if (found != std::string::npos)  {
+        LOG_ERROR("Error parsing calibration coordinate %s, invalid character %c", coordStr.c_str(), coordStr[found]);
+        return std::numeric_limits<float>::quiet_NaN();
+    }
+
+    if (coordStr.find("'") == coordStr.npos) {
+        // Parse decimal format
+        return std::stod(coordStr);
+    } else {
+        // Parse DMS format with ' (forward tick) separator between D'M and M'S.
+        // Also handles D'M only with no seconds field.
+        std::stringstream iss(coordStr);
+        std::string token;
+        double coord = 0;
+        double divisor = 1.0;
+        while(std::getline(iss, token, '\'')) {
+            double value = std::abs(std::stod(token));
+            if ((divisor > 1) && (value >= 60)) {
+                LOG_ERROR("Error parsing calibration coordinate %s, value (%f) >= 60", coordStr.c_str(), value);
+                return std::numeric_limits<float>::quiet_NaN();
+            }
+            coord += value/divisor;
+            divisor *= 60;
+        }
+        return (coordStr.find("-") != coordStr.npos) ? -coord : coord;
+    }
+}
+
 void MapApp::startCalibrationStep2() {
     std::string coords = coordsField->getText();
     auto it = coords.find(',');
@@ -498,10 +531,16 @@ void MapApp::startCalibrationStep2() {
     try {
         std::string latStr(coords.begin(), coords.begin() + it);
         std::string lonStr(coords.begin() + it + 1, coords.end());
-        double lat = std::stod(latStr);
-        double lon = std::stod(lonStr);
+        double lat = getCoordinate(latStr);
+        double lon = getCoordinate(lonStr);
+        if (std::isnan(lat) || std::isnan(lon) || (std::abs(lat) > 90) || (std::abs(lon) > 180)) {
+            LOG_ERROR("Failed to parse %s", coords.c_str());
+            return;
+        }
+        LOG_INFO(1, "From %s, got %f, %f", coords.c_str(), lat, lon);
         map->setCalibrationPoint1(lat, lon);
     } catch (...) {
+        LOG_ERROR("Failed to parse %s", coords.c_str());
         return;
     }
 }
@@ -516,10 +555,16 @@ void MapApp::finishCalibration() {
     try {
         std::string latStr(coords.begin(), coords.begin() + it);
         std::string lonStr(coords.begin() + it + 1, coords.end());
-        double lat = std::stod(latStr);
-        double lon = std::stod(lonStr);
+        double lat = getCoordinate(latStr);
+        double lon = getCoordinate(lonStr);
+        if (std::isnan(lat) || std::isnan(lon) || (std::abs(lat) > 90) || (std::abs(lon) > 180)) {
+            LOG_ERROR("Failed to parse %s", coords.c_str());
+            return;
+        }
+        LOG_INFO(1, "From %s, got %f, %f", coords.c_str(), lat, lon);
         map->setCalibrationPoint2(lat, lon);
     } catch (...) {
+        LOG_ERROR("Failed to parse %s", coords.c_str());
         return;
     }
 
