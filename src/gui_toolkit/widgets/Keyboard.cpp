@@ -76,7 +76,7 @@ void Keyboard::hideEnterKey() {
 void Keyboard::setNumericLayout() {
     static const char * kb_map_num[] = {
             "+", "-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "\n",
-            ",", "'", LV_SYMBOL_BACKSPACE, LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, ""
+            ",", " ", LV_SYMBOL_BACKSPACE, LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
     };
 
     lv_kb_set_map(obj(), kb_map_num);

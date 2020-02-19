@@ -99,9 +99,9 @@ private:
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();
-    void startCalibrationStep1();
+    void startCalibration();
     double getCoordinate(std::string str);
-    void startCalibrationStep2();
+    void processCalibrationPoint(int step);
     void finishCalibration();
 };
 
