@@ -441,16 +441,10 @@ void MapApp::onMinusButton() {
 void MapApp::onTrackButton() {
     if (!map->isCalibrated()) {
         int step = map->getCalibrationStep();
-        switch (step) {
-        case 0:
+        if (step == 0) {
             startCalibration();
-            break;
-        case 1:
-            processCalibrationPoint(1);
-            break;
-        case 2:
-            processCalibrationPoint(2);
-            break;
+        } else {
+            processCalibrationPoint(step);
         }
         return;
     }
@@ -567,35 +561,6 @@ void MapApp::processCalibrationPoint(int step) {
     } catch (...) {
         LOG_ERROR("Failed to parse '%s'", coords.c_str());
     }
-}
-
-void MapApp::finishCalibration() {
-    std::string coords = coordsField->getText();
-    auto it = coords.find(',');
-    if (it == coords.npos) {
-        return;
-    }
-
-    try {
-        std::string latStr(coords.begin(), coords.begin() + it);
-        std::string lonStr(coords.begin() + it + 1, coords.end());
-        double lat = getCoordinate(latStr);
-        double lon = getCoordinate(lonStr);
-        if (std::isnan(lat) || std::isnan(lon) || (std::abs(lat) > 90) || (std::abs(lon) > 180)) {
-            LOG_ERROR("Failed to parse %s", coords.c_str());
-            return;
-        }
-        LOG_INFO(1, "From %s, got %f, %f", coords.c_str(), lat, lon);
-        map->setCalibrationPoint2(lat, lon);
-    } catch (...) {
-        LOG_ERROR("Failed to parse %s", coords.c_str());
-        return;
-    }
-
-    keyboard.reset();
-    coordsField.reset();
-
-    onTimer();
 }
 
 bool MapApp::onTimer() {
