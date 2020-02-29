@@ -17,6 +17,7 @@
  */
 #include <sstream>
 #include <iomanip>
+#include <math.h>
 #include "MapApp.h"
 #include "src/Logger.h"
 #include "src/maps/sources/OpenTopoSource.h"
@@ -440,16 +441,10 @@ void MapApp::onMinusButton() {
 void MapApp::onTrackButton() {
     if (!map->isCalibrated()) {
         int step = map->getCalibrationStep();
-        switch (step) {
-        case 0:
-            startCalibrationStep1();
-            break;
-        case 1:
-            startCalibrationStep2();
-            break;
-        case 2:
-            finishCalibration();
-            break;
+        if (step == 0) {
+            startCalibration();
+        } else {
+            processCalibrationPoint(step);
         }
         return;
     }
@@ -459,14 +454,11 @@ void MapApp::onTrackButton() {
     onTimer();
 }
 
-void MapApp::startCalibrationStep1() {
+void MapApp::startCalibration() {
     messageBox = std::make_unique<avitab::MessageBox>(
             getUIContainer(),
-                "The current file is not calibrated.\n"
-                "You need to select two points that are far away from each other.\n"
-                "I will show a red square first - center it above a known location and enter its coordinates, then click the tracking icon again.\n"
-                "The square will then turn blue.\n"
-                "Move the square to a different location and enter its coordinates, then click the tracking icon again."
+                "The current file is not yet calibrated.\n"
+                "Please follow the instructions in the github fpw/avitab wiki to calibrate.\n"
             );
     messageBox->addButton("Ok", [this] () {
         api().executeLater([this] () {
@@ -478,7 +470,7 @@ void MapApp::startCalibrationStep1() {
     });
     messageBox->centerInParent();
 
-    coordsField = std::make_shared<TextArea>(window, "1.234, 2.345");
+    coordsField = std::make_shared<TextArea>(window, "1.234, -2 30 59.9");
     coordsField->setDimensions(window->getContentWidth(), 40);
     coordsField->alignInTopLeft();
 
@@ -486,10 +478,62 @@ void MapApp::startCalibrationStep1() {
     keyboard->setNumericLayout();
     keyboard->setDimensions(window->getContentWidth(), 80);
     keyboard->alignInBottomCenter();
+    keyboard->setOnOk([this] {
+        api().executeLater([this] {
+            onTrackButton();
+        });
+    });
 }
 
-void MapApp::startCalibrationStep2() {
+double MapApp::getCoordinate(std::string coordStr) {
+    // Validate characters, since may use physical keyboard to input
+    std::size_t found = coordStr.find_first_not_of("+-1234567890. ");
+    if (found != std::string::npos)  {
+        LOG_ERROR("Error parsing calibration coordinate '%s', invalid character %c", coordStr.c_str(), coordStr[found]);
+        throw std::invalid_argument("");
+    }
+
+    // Strip any leading and trailing spaces
+    const auto strBegin = coordStr.find_first_not_of(" ");
+    const auto strEnd = coordStr.find_last_not_of(" ");
+    const auto strRange = strEnd - strBegin + 1;
+    coordStr = coordStr.substr(strBegin, strRange);
+
+    if (coordStr.find(" ") == coordStr.npos) {
+        // Parse decimal format
+        return std::stod(coordStr);
+    } else {
+        // Parse DMS format with space separator between D M and M S.
+        // Also handles D M only with no seconds field.
+        std::stringstream iss(coordStr);
+        std::string token;
+        double coord = 0;
+        double divisor = 1.0;
+        while(std::getline(iss, token, ' ')) {
+            double value = std::abs(std::stod(token));
+            if ((divisor > 1) && (value >= 60)) {
+                LOG_ERROR("Error parsing DMS or DM calibration coordinate %s, value (%f) >= 60", coordStr.c_str(), value);
+                throw std::invalid_argument("");
+            }
+            coord += value/divisor;
+            divisor *= 60;
+        }
+        return (coordStr.find("-") != coordStr.npos) ? -coord : coord;
+    }
+}
+
+void MapApp::processCalibrationPoint(int step) {
     std::string coords = coordsField->getText();
+
+    if (coords.empty()) {
+        // Populate coords text box with current plane position
+        std::stringstream ss;
+        Location aircraftLoc = api().getAircraftLocation();
+        ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
+        coordsField->setText(ss.str());
+        return;
+    }
+
     auto it = coords.find(',');
     if (it == coords.npos) {
         return;
@@ -498,35 +542,25 @@ void MapApp::startCalibrationStep2() {
     try {
         std::string latStr(coords.begin(), coords.begin() + it);
         std::string lonStr(coords.begin() + it + 1, coords.end());
-        double lat = std::stod(latStr);
-        double lon = std::stod(lonStr);
-        map->setCalibrationPoint1(lat, lon);
+        double lat = getCoordinate(latStr);
+        double lon = getCoordinate(lonStr);
+        if ((std::abs(lat) > 90) || (std::abs(lon) > 180)) {
+            LOG_ERROR("Out of bounds lat/lon in '%s'", coords.c_str());
+            return;
+        }
+        LOG_INFO(1, "From '%s', got %f, %f", coords.c_str(), lat, lon);
+        if (step == 1) {
+        	map->setCalibrationPoint1(lat, lon);
+        	coordsField->setText("");
+        } else {
+        	map->setCalibrationPoint2(lat, lon);
+        	keyboard.reset();
+        	coordsField.reset();
+        	onTimer();
+        }
     } catch (...) {
-        return;
+        LOG_ERROR("Failed to parse '%s'", coords.c_str());
     }
-}
-
-void MapApp::finishCalibration() {
-    std::string coords = coordsField->getText();
-    auto it = coords.find(',');
-    if (it == coords.npos) {
-        return;
-    }
-
-    try {
-        std::string latStr(coords.begin(), coords.begin() + it);
-        std::string lonStr(coords.begin() + it + 1, coords.end());
-        double lat = std::stod(latStr);
-        double lon = std::stod(lonStr);
-        map->setCalibrationPoint2(lat, lon);
-    } catch (...) {
-        return;
-    }
-
-    keyboard.reset();
-    coordsField.reset();
-
-    onTimer();
 }
 
 bool MapApp::onTimer() {

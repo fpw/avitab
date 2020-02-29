@@ -99,9 +99,9 @@ private:
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();
-    void startCalibrationStep1();
-    void startCalibrationStep2();
-    void finishCalibration();
+    void startCalibration();
+    double getCoordinate(std::string str);
+    void processCalibrationPoint(int step);
 };
 
 } /* namespace avitab */
