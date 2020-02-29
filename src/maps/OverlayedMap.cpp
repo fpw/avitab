@@ -166,25 +166,27 @@ void OverlayedMap::drawAircraftOverlay() {
 }
 
 void OverlayedMap::drawCalibrationOverlay() {
-    if (calibrationStep != 0) {
-        uint32_t color = img::COLOR_WHITE;
-        if (calibrationStep == 1) {
-            color = img::COLOR_LIGHT_RED;
-        } else if (calibrationStep == 2) {
-            color = img::COLOR_BLUE;
-        }
-        int centerX = mapImage->getWidth() / 2;
-        int centerY = mapImage->getHeight() / 2;
-        int r = 10;
-
-        mapImage->drawLine(centerX - r, centerY - r, centerX + r, centerY - r, color);
-        mapImage->drawLine(centerX - r, centerY + r, centerX + r, centerY + r, color);
-        mapImage->drawLine(centerX - r, centerY - r, centerX - r, centerY + r, color);
-        mapImage->drawLine(centerX + r, centerY - r, centerX + r, centerY + r, color);
-
-        mapImage->drawLine(centerX - r / 2, centerY, centerX + r / 2, centerY, color);
-        mapImage->drawLine(centerX, centerY + r / 2, centerX, centerY - r / 2, color);
+    if (calibrationStep == 0) {
+        return;
     }
+
+    uint32_t color = img::COLOR_WHITE;
+    if (calibrationStep == 1) {
+        color = img::COLOR_LIGHT_RED;
+    } else if (calibrationStep == 2) {
+        color = img::COLOR_BLUE;
+    }
+    int centerX = mapImage->getWidth() / 2;
+    int centerY = mapImage->getHeight() / 2;
+    int r = 10;
+
+    mapImage->drawLine(centerX - r, centerY - r, centerX + r, centerY - r, color);
+    mapImage->drawLine(centerX - r, centerY + r, centerX + r, centerY + r, color);
+    mapImage->drawLine(centerX - r, centerY - r, centerX - r, centerY + r, color);
+    mapImage->drawLine(centerX + r, centerY - r, centerX + r, centerY + r, color);
+
+    mapImage->drawLine(centerX - r / 2, centerY, centerX + r / 2, centerY, color);
+    mapImage->drawLine(centerX, centerY + r / 2, centerX, centerY - r / 2, color);
 }
 
 void OverlayedMap::drawDataOverlays() {

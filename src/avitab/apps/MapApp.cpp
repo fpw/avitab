@@ -266,6 +266,9 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
     map->setNavWorld(api().getNavWorld());
 
+    keyboard.reset();
+    coordsField.reset();
+
     onTimer();
 }
 
@@ -457,8 +460,9 @@ void MapApp::onTrackButton() {
 void MapApp::startCalibration() {
     messageBox = std::make_unique<avitab::MessageBox>(
             getUIContainer(),
-                "The current file is not yet calibrated.\n"
+                "The current file is not yet calibrated.\n\n"
                 "Please follow the instructions in the github fpw/avitab wiki to calibrate.\n"
+                "To fill the field with the current aircraft coordinates, clear the field and press the tracking button.\n"
             );
     messageBox->addButton("Ok", [this] () {
         api().executeLater([this] () {
@@ -485,21 +489,21 @@ void MapApp::startCalibration() {
     });
 }
 
-double MapApp::getCoordinate(std::string coordStr) {
+double MapApp::getCoordinate(const std::string &input) {
     // Validate characters, since may use physical keyboard to input
-    std::size_t found = coordStr.find_first_not_of("+-1234567890. ");
+    std::size_t found = input.find_first_not_of("+-1234567890. ");
     if (found != std::string::npos)  {
-        LOG_ERROR("Error parsing calibration coordinate '%s', invalid character %c", coordStr.c_str(), coordStr[found]);
-        throw std::invalid_argument("");
+        LOG_ERROR("Error parsing calibration coordinate '%s', invalid character '%c'", input.c_str(), input[found]);
+        throw std::invalid_argument("Invalid character in coordinate string");
     }
 
     // Strip any leading and trailing spaces
-    const auto strBegin = coordStr.find_first_not_of(" ");
-    const auto strEnd = coordStr.find_last_not_of(" ");
+    const auto strBegin = input.find_first_not_of(" ");
+    const auto strEnd = input.find_last_not_of(" ");
     const auto strRange = strEnd - strBegin + 1;
-    coordStr = coordStr.substr(strBegin, strRange);
+    std::string coordStr = input.substr(strBegin, strRange);
 
-    if (coordStr.find(" ") == coordStr.npos) {
+    if (coordStr.find(" ") == std::string::npos) {
         // Parse decimal format
         return std::stod(coordStr);
     } else {
@@ -513,12 +517,12 @@ double MapApp::getCoordinate(std::string coordStr) {
             double value = std::abs(std::stod(token));
             if ((divisor > 1) && (value >= 60)) {
                 LOG_ERROR("Error parsing DMS or DM calibration coordinate %s, value (%f) >= 60", coordStr.c_str(), value);
-                throw std::invalid_argument("");
+                throw std::invalid_argument("Invalid DMS or DM coordinates");
             }
-            coord += value/divisor;
+            coord += value / divisor;
             divisor *= 60;
         }
-        return (coordStr.find("-") != coordStr.npos) ? -coord : coord;
+        return (coordStr.find("-") != std::string::npos) ? -coord : coord;
     }
 }
 
@@ -535,7 +539,7 @@ void MapApp::processCalibrationPoint(int step) {
     }
 
     auto it = coords.find(',');
-    if (it == coords.npos) {
+    if (it == std::string::npos) {
         return;
     }
 
@@ -558,8 +562,8 @@ void MapApp::processCalibrationPoint(int step) {
         	coordsField.reset();
         	onTimer();
         }
-    } catch (...) {
-        LOG_ERROR("Failed to parse '%s'", coords.c_str());
+    } catch (const std::exception &e) {
+        LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
     }
 }
 

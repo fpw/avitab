@@ -100,7 +100,7 @@ private:
     void onMinusButton();
     void onTrackButton();
     void startCalibration();
-    double getCoordinate(std::string str);
+    double getCoordinate(const std::string &str);
     void processCalibrationPoint(int step);
 };
 
