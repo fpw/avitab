@@ -299,7 +299,7 @@ std::string Airport::getInitialATCContactInfo() const {
     };
     std::string initialATCContact = "";
     for (auto atcType: prioritisedATCType) {
-        if (atcFrequencies.count(atcType) > 0) {
+        if (atcFrequencies.count(atcType) > 0 && !atcFrequencies.at(atcType).empty()) {
             std::string desc;
             switch(atcType) {
                 case(xdata::Airport::ATCFrequency::RECORDED): desc = "ATIS"; break;
@@ -311,7 +311,7 @@ std::string Airport::getInitialATCContactInfo() const {
                 case(xdata::Airport::ATCFrequency::GND):      desc = "GND";  break;
                 default: desc = ""; break;
             }
-            initialATCContact = desc + "-" + atcFrequencies.at(atcType)[0].getFrequencyString(false);
+            initialATCContact = desc + "-" + atcFrequencies.at(atcType).at(0).getFrequencyString(false);
             break;
         }
     }
