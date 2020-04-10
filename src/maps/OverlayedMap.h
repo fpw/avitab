@@ -23,6 +23,7 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libxdata/world/World.h"
 #include "src/libimg/TTFStamper.h"
+#include "src/libxdata/world/models/navaids/Morse.h"
 
 namespace maps {
 
@@ -78,9 +79,11 @@ private:
     std::shared_ptr<xdata::World> navWorld;
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
+    img::Image ndbIcon;
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
     bool dbg;
+    xdata::Morse morse;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;
@@ -106,11 +109,15 @@ private:
     void drawFix(const xdata::Fix &fix, double mapWidthNM);
     void drawVOR(int px, int py, double r);
     void drawDME(int px, int py, double r, bool crossDrawn);
-    void drawNDB(int px, int py, double r, bool crossDrawn);
+    void drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+
+    void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM);
+    void drawMorse(int x, int y, std::string text, int size, uint32_t color);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
+    bool isVisible(int x, int y, int margin = 0);
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 
     static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
@@ -120,6 +127,7 @@ private:
     static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
     static const int ICAO_CIRCLE_RADIUS = 15;
     static const int ICAO_RING_RADIUS = 12;
+    static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
 
 };
 

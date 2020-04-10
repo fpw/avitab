@@ -506,6 +506,13 @@ void Image::fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3
     }
 }
 
+void Image::drawRectangle(int x0, int y0, int x1, int y1, uint32_t color) {
+    drawLine(x0, y0, x0, y1, color);
+    drawLine(x0, y1, x1, y1, color);
+    drawLine(x1, y1, x1, y0, color);
+    drawLine(x1, y0, x0, y0, color);
+}
+
 // Fill aligned rectangle, just given 2 points
 void Image::fillRectangle(int x0, int y0, int x1, int y1, uint32_t color) {
     int xMin = std::min(x0, x1);
@@ -766,8 +773,17 @@ void Image::drawText(const std::string &text, int size, int x, int y, uint32_t f
     } else if (al == Align::RIGHT) {
         xOffset = -textWidth;
     }
-    fillRectangle(x + xOffset, y, x + xOffset + textWidth, y + size, bgColor);
+    if (bgColor & 0xFF000000) {
+        fillRectangle(x + xOffset - 1, y, x + xOffset + textWidth, y + size, bgColor);
+    }
     textBox.applyStamp(*this, x + xOffset, y);
+}
+
+int Image::getTextWidth(const std::string text, int size) {
+    static TTFStamper dummyBox("Inconsolata.ttf");
+    dummyBox.setSize(size);
+    dummyBox.setText(text.c_str());
+    return dummyBox.getTextWidth(text);
 }
 
 } /* namespace img */

@@ -378,10 +378,10 @@ void MapApp::showOverlaySettings() {
             map->setOverlayConfig(conf);
         }
     });
-
+*/
     ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDBs");
     ndbCheckbox->setChecked(overlays.drawNDBs);
-    ndbCheckbox->alignBelow(vorCheckbox);
+    ndbCheckbox->alignBelow(airportCheckbox);
     ndbCheckbox->setCallback([this] (bool checked) {
         if (map) {
             auto conf = map->getOverlayConfig();
@@ -389,7 +389,7 @@ void MapApp::showOverlaySettings() {
             map->setOverlayConfig(conf);
         }
     });
-*/
+
 }
 
 void MapApp::onRedrawNeeded() {

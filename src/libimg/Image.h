@@ -82,9 +82,11 @@ public:
     void alphaBlend(uint32_t color);
     void blendPixel(int x, int y, uint32_t color);
     void fillCircle(int x, int y, int radius, uint32_t color);
+    void drawRectangle(int x0, int y0, int x1, int y1, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, uint32_t color);
     void drawText(const std::string &text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al);
+    int  getTextWidth(const std::string text, int size);
 
     // the source image must be square with edge len = max(srcWidth, srcHeight)
     void rotate0(Image &dst);
