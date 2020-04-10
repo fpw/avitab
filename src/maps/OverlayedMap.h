@@ -104,16 +104,20 @@ private:
     int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
 
     void drawFix(const xdata::Fix &fix, double mapWidthNM);
+    void drawVOR(int px, int py, double r);
+    void drawDME(int px, int py, double r, bool crossDrawn);
+    void drawNDB(int px, int py, double r, bool crossDrawn);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
+    bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 
     static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
     static const int MAX_BLOB_SIZE = 12;
     static const int BLOB_SIZE_DIVIDEND = DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM * MAX_BLOB_SIZE;
     static const int DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM = 5;
-    static const int SHOW_DETAILED_AIRPORT_INFO_AT_MAPWIDTHNM = 40;
+    static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
     static const int ICAO_CIRCLE_RADIUS = 15;
     static const int ICAO_RING_RADIUS = 12;
 

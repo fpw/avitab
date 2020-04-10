@@ -415,8 +415,8 @@ void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, 
         positionToPixel(locDownRight.latitude, locDownRight.longitude, xIgnored, yOffset);
         yOffset += ICAO_CIRCLE_RADIUS;
     }
-    if (mapWidthNM > SHOW_DETAILED_AIRPORT_INFO_AT_MAPWIDTHNM) {
-        mapImage->drawText(airport.getID(), 16, x, yOffset, color, img::COLOR_WHITE & 0xA0FFFFFF, img::Align::CENTRE);
+    if (mapWidthNM > SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
+        mapImage->drawText(airport.getID(), 14, x, yOffset, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     } else {
         std::string nameAndID = airport.getName() + " (" + airport.getID() + ")";
         std::string elevationFeet = std::to_string(airport.getElevation());
@@ -424,8 +424,8 @@ void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, 
         std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
         std::string atcInfo = airport.getInitialATCContactInfo();
         std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";
-        mapImage->drawText(nameAndID,   14, x, yOffset,      color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
-        mapImage->drawText(airportInfo, 12, x, yOffset + 14, color, img::COLOR_WHITE & 0xB8FFFFFF, img::Align::CENTRE);
+        mapImage->drawText(nameAndID,   14, x, yOffset,      color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(airportInfo, 12, x, yOffset + 14, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 
@@ -438,7 +438,7 @@ bool OverlayedMap::isAirportVisible(const xdata::Airport& airport) {
     int xmin, ymin, xmax, ymax;
     positionToPixel(locUpLeft.latitude, locUpLeft.longitude, xmin, ymin);
     positionToPixel(locDownRight.latitude, locDownRight.longitude, xmax, ymax);
-    return (xmax > 0) && (xmin < mapImage->getWidth()) && (ymax > 0) && (ymin < mapImage->getHeight());
+    return isAreaVisible(xmin, ymin, xmax, ymax);
 }
 
 void OverlayedMap::getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int& xCentre, int &yCentre) {
@@ -474,38 +474,50 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
     bool crossDrawn = false;
 
     if (vor && overlayConfig.drawVORs) {
-        mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-        mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+        drawVOR(px, py, r);
         crossDrawn = true;
-        mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_BLUE);
-        mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_BLUE);
-        mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_BLUE);
-        mapImage->drawLine(px - r / 2, py + r, px - r, py, img::COLOR_BLUE);
-        mapImage->drawLine(px - r, py, px - r / 2, py - r, img::COLOR_BLUE);
-        mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_BLUE);
     }
 
     if (dme && overlayConfig.drawVORs) {
-        if (!crossDrawn) {
-            mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-            mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
-        }
-        mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_BLUE);
-        mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_BLUE);
-        mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_BLUE);
-        mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_BLUE);
+        drawDME(px, py, r, crossDrawn);
     }
 
     if (ndb && overlayConfig.drawNDBs) {
-        if (!crossDrawn) {
-            mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-            mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
-        }
-        mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_RED);
-        mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_RED);
-        mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_RED);
-        mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_RED);
+        drawNDB(px, py, r, crossDrawn);
     }
+}
+
+void OverlayedMap::drawVOR(int px, int py, double r) {
+    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+    mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_BLUE);
+    mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_BLUE);
+    mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_BLUE);
+    mapImage->drawLine(px - r / 2, py + r, px - r, py, img::COLOR_BLUE);
+    mapImage->drawLine(px - r, py, px - r / 2, py - r, img::COLOR_BLUE);
+    mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_BLUE);
+}
+
+void OverlayedMap::drawDME(int px, int py, double r, bool crossDrawn) {
+    if (!crossDrawn) {
+        mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+    }
+    mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_BLUE);
+    mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_BLUE);
+    mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_BLUE);
+    mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_BLUE);
+}
+
+void OverlayedMap::drawNDB(int px, int py, double r, bool crossDrawn) {
+    if (!crossDrawn) {
+        mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
+        mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+    }
+    mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_RED);
+    mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_RED);
+    mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_RED);
+    mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_RED);
 }
 
 void OverlayedMap::drawScale(double nmPerPixel) {
@@ -532,7 +544,7 @@ void OverlayedMap::drawScale(double nmPerPixel) {
     }
     std::string text = std::to_string(int(rangeToShow)) + units;
     int xtext = x + lineLength + 2;
-    mapImage->drawText(text, 12, xtext, y, img::COLOR_BLACK, img::COLOR_WHITE & 0x80FFFFFF, img::Align::LEFT);
+    mapImage->drawText(text, 12, xtext, y, img::COLOR_BLACK, img::COLOR_TRANSPARENT_WHITE, img::Align::LEFT);
 }
 
 void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py) const {
@@ -565,6 +577,11 @@ void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) con
     auto world = tileSource->xyToWorld(x, y, zoomLevel);
     lat = world.y;
     lon = world.x;
+}
+
+bool OverlayedMap::isAreaVisible(int xmin, int ymin, int xmax, int ymax) {
+    return (xmax > 0) && (xmin < mapImage->getWidth()) &&
+           (ymax > 0) && (ymin < mapImage->getHeight());
 }
 
 bool OverlayedMap::isCalibrated() {

@@ -93,6 +93,7 @@ private:
 
     bool onTimer();
     void onRedrawNeeded();
+    void resetWidgets();
     void onSettingsButton();
     void onOverlaysButton();
     void onMapPan(int x, int y, bool start, bool end);

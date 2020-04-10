@@ -25,7 +25,6 @@
 #include <cmath>
 #include <fstream>
 #include <algorithm>
-#include <array>
 #include "Image.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -755,6 +754,7 @@ void Image::rotate(Image& dst, int angle) {
 }
 
 void Image::drawText(const std::string &text, int size, int x, int y, uint32_t fgColor, uint32_t bgColor, Align al) {
+    // x, y, is top left corner
     static TTFStamper textBox("Inconsolata.ttf");
     textBox.setSize(size);
     textBox.setColor(fgColor & 0x00FFFFFF);
