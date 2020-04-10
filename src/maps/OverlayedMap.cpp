@@ -205,7 +205,7 @@ void OverlayedMap::drawDataOverlays() {
         return;
     }
     if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports &&
-        !overlayConfig.drawVORs && !overlayConfig.drawNDBs) {
+        !overlayConfig.drawVORs && !overlayConfig.drawNDBs && !overlayConfig.drawILSs && !overlayConfig.drawWaypoints) {
         return;
     }
 
@@ -479,6 +479,7 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
     auto ndb = fix.getNDB();
     auto vor = fix.getVOR();
     auto dme = fix.getDME();
+    auto ils = fix.getILSLocalizer();
 
     const bool showNavAids = (mapWidthNM < SHOW_NAVAIDS_AT_MAPWIDTHNM);
 
@@ -492,6 +493,14 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
 
     if (ndb && overlayConfig.drawNDBs && showNavAids) {
         drawNDB(fix, px, py, mapWidthNM);
+    }
+
+    if (ils && overlayConfig.drawILSs && showNavAids) {
+        drawILS(fix, px, py, mapWidthNM);
+    }
+
+    if (overlayConfig.drawWaypoints && !ndb && !vor && !dme && !ils && showNavAids) {
+    	drawWaypoint(fix, px, py);
     }
 }
 
@@ -599,6 +608,59 @@ void OverlayedMap::drawNDB(const xdata::Fix &fix, int px, int py, double mapWidt
     } else {
         mapImage->drawText(fix.getID(), 12, px + radius + 5, py - radius - 5, img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
+}
+
+void OverlayedMap::drawILS(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
+    auto ils = fix.getILSLocalizer();
+    if (!ils) {
+        return;
+    }
+
+    double ilsHeading = std::fmod(ils->getRunwayHeading() + 180.0, 360);
+    double nmPerPixel = mapWidthNM / mapImage->getWidth();
+    double rangePixels = ils->getRange() / nmPerPixel;
+    double cx, cy, lx, ly, rx, ry;
+    const double OUTER_ANGLE = 2.5;
+    const uint32_t color = img::COLOR_DARK_GREEN;
+    polarToCartesian(rangePixels, ilsHeading - OUTER_ANGLE, lx, ly);
+    polarToCartesian(rangePixels * 0.95, ilsHeading, cx, cy);
+    polarToCartesian(rangePixels, ilsHeading + OUTER_ANGLE, rx, ry);
+
+    int xmin = std::min(px, (int)std::min(lx, rx));
+    int ymin = std::min(py, (int)std::min(ly, ry));
+    int xmax = std::max(px, (int)std::max(lx, rx));
+    int ymax = std::max(py, (int)std::max(ly, ry));
+    if (!isAreaVisible(xmin, ymin, xmax, ymax)) {
+        return;
+    }
+    mapImage->drawLineAA(px, py, px + lx, py + ly, color);
+    mapImage->drawLineAA(px, py, px + cx, py + cy, color);
+    mapImage->drawLineAA(px, py, px + rx, py + ry, color);
+    mapImage->drawLineAA(px + cx, py + cy, px + lx, py + ly, color);
+    mapImage->drawLineAA(px + cx, py + cy, px + rx, py + ry, color);
+
+    int x = px + (cx / 5);      // Draw NavTextBox 1/5 of the way from airport to end of tail
+    int y = py + (cy / 5) - 10; // And up a bit
+    std::string type = ils->isLocalizerOnly() ? "LOC" : "ILS";
+    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
+        auto freqString = ils->getFrequency().getFrequencyString(false).c_str();
+        drawNavTextBox(type, fix.getID(), freqString, x, y, color, mapWidthNM);
+    } else {
+        mapImage->drawText(fix.getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+    }
+}
+
+void OverlayedMap::drawWaypoint(const xdata::Fix &fix, int px, int py) {
+    if (!isVisible(px, py, 50)) {
+    	return;
+    }
+
+	uint32_t color = img::COLOR_BLACK;
+    mapImage->drawLine(px, py - 6, px + 5, py + 3, color);
+    mapImage->drawLine(px + 5, py + 3, px - 5, py + 3, color);
+    mapImage->drawLine(px - 5, py + 3, px, py - 6, color);
+
+    mapImage->drawText(fix.getID(), 10, px + 6, py - 6, color, 0, img::Align::LEFT);
 }
 
 void OverlayedMap::drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM) {
@@ -728,6 +790,10 @@ void OverlayedMap::fastPolarToCartesian(float radius, int angleDegrees, double& 
     y = -cosDegrees(angleDegrees) * radius; // 0 degrees is up, decreasing y values
 }
 
+void OverlayedMap::polarToCartesian(float radius, float angleDegrees, double& x, double& y) {
+    x = std::sin(angleDegrees * M_PI / 180.0) * radius;
+    y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
+}
 
 bool OverlayedMap::isVisible(int x, int y, int margin) {
     return  (x > -margin) && (x < mapImage->getWidth() + margin) &&

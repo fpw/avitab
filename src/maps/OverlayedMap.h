@@ -34,6 +34,8 @@ struct OverlayConfig {
     bool drawHeliportsSeaports = false;
     bool drawVORs = false;
     bool drawNDBs = false;
+    bool drawILSs = false;
+    bool drawWaypoints = false;
 };
 
 class OverlayedMap {
@@ -113,7 +115,8 @@ private:
     void drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM);
     void drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM);
     void drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM);
-
+    void drawILS(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawWaypoint(const xdata::Fix &fix, int px, int py);
     void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM);
     void drawMorse(int x, int y, std::string text, int size, uint32_t color);
 
@@ -123,6 +126,7 @@ private:
     float cosDegrees(int angleDegrees);
     float sinDegrees(int angleDegrees);
     void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y);
+    void polarToCartesian(float radius, float angleRadians, double& x, double& y);
     bool isVisible(int x, int y, int margin = 0);
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 

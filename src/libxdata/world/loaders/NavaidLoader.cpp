@@ -51,7 +51,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         world->addFix(fix);
     }
 
-    if (navaid.type == NavaidData::Type::ILS_LOC) {
+    if ((navaid.type == NavaidData::Type::ILS_LOC) || (navaid.type == NavaidData::Type::LOC)) {
         std::istringstream rwyAndDesc(navaid.name);
         std::string rwy;
         std::string desc;
@@ -60,6 +60,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         Frequency ilsFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, desc);
         auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
         ils->setRunwayHeading(navaid.bearing);
+        ils->setLocalizerOnly(navaid.type == NavaidData::Type::LOC);
         fix->attachILSLocalizer(ils);
 
         auto airport = world->findAirportByID(navaid.terminalRegion);

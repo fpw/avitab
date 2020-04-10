@@ -27,8 +27,11 @@ public:
     ILSLocalizer(Frequency frq, int range);
     void setRunwayHeading(double heading);
     double getRunwayHeading() const;
+    void setLocalizerOnly(bool localizerOnly);
+    bool isLocalizerOnly() const;
 private:
     double runwayHeading = 0;
+    bool localizerOnly = false;
 };
 
 } /* namespace xdata */

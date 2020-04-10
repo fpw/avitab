@@ -276,6 +276,8 @@ void MapApp::resetWidgets() {
     overlayLabel.reset();
     ndbCheckbox.reset();
     vorCheckbox.reset();
+    ilsCheckbox.reset();
+    waypointCheckbox.reset();
     airportCheckbox.reset();
     airstripCheckbox.reset();
     heliseaportCheckbox.reset();
@@ -385,6 +387,28 @@ void MapApp::showOverlaySettings() {
         if (map) {
             auto conf = map->getOverlayConfig();
             conf.drawNDBs = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    ilsCheckbox = std::make_shared<Checkbox>(overlaysContainer, "ILS");
+    ilsCheckbox->setChecked(overlays.drawILSs);
+    ilsCheckbox->alignRightOf(ndbCheckbox);
+    ilsCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawILSs = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    waypointCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Waypoint");
+    waypointCheckbox->setChecked(overlays.drawWaypoints);
+    waypointCheckbox->alignRightOf(ilsCheckbox);
+    waypointCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawWaypoints = checked;
             map->setOverlayConfig(conf);
         }
     });

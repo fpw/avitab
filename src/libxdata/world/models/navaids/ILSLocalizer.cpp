@@ -32,4 +32,12 @@ double ILSLocalizer::getRunwayHeading() const {
     return runwayHeading;
 }
 
+void ILSLocalizer::setLocalizerOnly(bool localizerOnly) {
+    this->localizerOnly = localizerOnly;
+}
+
+bool ILSLocalizer::isLocalizerOnly() const {
+    return localizerOnly;
+}
+
 } /* namespace xdata */
