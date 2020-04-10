@@ -73,10 +73,12 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
     } else if (navaid.type == NavaidData::Type::VOR) {
         Frequency vorFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto vor = std::make_shared<VOR>(vorFrq, navaid.range);
+        vor->setBearing(navaid.bearing);
         fix->attachVOR(vor);
     } else if (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP) {
         Frequency dmeFreq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto dme = std::make_shared<DME>(dmeFreq, navaid.range);
+        dme->setPaired(navaid.type == NavaidData::Type::DME_COMP);
         fix->attachDME(dme);
     }
 }

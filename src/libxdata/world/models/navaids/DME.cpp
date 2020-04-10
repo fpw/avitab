@@ -24,4 +24,12 @@ DME::DME(Frequency frq, int range):
 {
 }
 
+void DME::setPaired(bool paired) {
+    this->paired = paired;
+}
+
+bool DME::isPaired() const {
+    return paired;
+}
+
 } /* namespace xdata */

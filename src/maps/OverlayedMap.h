@@ -74,6 +74,9 @@ private:
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
 
+    float sinTable[360];
+    float cosTable[360];
+
     // Overlays
     OverlayConfig overlayConfig{};
     std::shared_ptr<xdata::World> navWorld;
@@ -107,8 +110,8 @@ private:
     int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
 
     void drawFix(const xdata::Fix &fix, double mapWidthNM);
-    void drawVOR(int px, int py, double r);
-    void drawDME(int px, int py, double r, bool crossDrawn);
+    void drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM);
     void drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM);
 
     void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM);
@@ -117,6 +120,9 @@ private:
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
+    float cosDegrees(int angleDegrees);
+    float sinDegrees(int angleDegrees);
+    void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y);
     bool isVisible(int x, int y, int margin = 0);
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 

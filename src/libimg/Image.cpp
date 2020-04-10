@@ -363,6 +363,39 @@ void Image::drawLineAA(float x0, float y0, float x1, float y1, uint32_t color) {
     }
 }
 
+void Image::drawCircle(int x_centre, int y_centre, int radius, uint32_t color) {
+    // Anti-aliased, by considering all pixels in the enclosing square, but with several
+    // short-cuts so that obvious transparent pixels don't take time.
+    // A lot of pythagoras, but try not to do too many sqrts.
+    float coarseInnerLimitSquared = pow((radius - 1.5), 2);
+    float coarseOuterLimitSquared = pow((radius + 1.5), 2);
+    float fineInnerLimitSquared = pow((radius - 0.5), 2);
+    float fineOuterLimitSquared = pow((radius + 0.5), 2);
+    for (int y = -radius - 1; y <= radius + 1; y++) {
+        int xRange = sqrt(coarseOuterLimitSquared - pow(abs(y),2));
+        for (int x = -xRange; x <= xRange; x++) {
+            float dSquared = (x * x) + (y * y);
+            if ((x < 0) && (dSquared < coarseInnerLimitSquared)) {
+                x = -x; // Shortcut to mirrored right hand side inside ring
+                continue;
+            }
+            // Anti-aliasing : how many of the 4 (2x2) subpixels contain part of the ring
+            int total = 0;
+            for (float ys = y - 0.25; ys <= y + 0.25; ys += 0.5) {
+                for (float xs = x - 0.25; xs <= x + 0.25; xs += 0.5) {
+                    dSquared = (xs * xs) + (ys * ys);
+                    if ((dSquared > fineInnerLimitSquared) && (dSquared < fineOuterLimitSquared)) {
+                        total++;
+                    }
+                }
+            }
+            int alpha = (total * 255) / 4;
+            int colorAA = (alpha << 24) | (color & 0x00FFFFFF);
+            blendPixel(x_centre + x, y_centre + y, colorAA);
+        }
+    }
+}
+
 void Image::fillCircleCacheImage(int x_centre, int y_centre, int radius, uint32_t color) {
     float d;
     int alpha;

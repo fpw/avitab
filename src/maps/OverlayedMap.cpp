@@ -47,6 +47,11 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
         }
     });
 
+    for (int angle = 0; angle < 360; angle++) {
+        sinTable[angle] = std::sin(angle * M_PI / 180);
+        cosTable[angle] = std::cos(angle * M_PI / 180);
+    }
+
     dbg = false;
 }
 
@@ -477,17 +482,12 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
 
     const bool showNavAids = (mapWidthNM < SHOW_NAVAIDS_AT_MAPWIDTHNM);
 
-    double r = 1400.0 / mapWidthNM;
-
-    bool crossDrawn = false;
-
-    if (vor && overlayConfig.drawVORs) {
-        drawVOR(px, py, r);
-        crossDrawn = true;
+    if (vor && overlayConfig.drawVORs && showNavAids) {
+        drawVOR(fix, px, py, mapWidthNM);
     }
 
-    if (dme && overlayConfig.drawVORs) {
-        drawDME(px, py, r, crossDrawn);
+    if (dme && overlayConfig.drawVORs && showNavAids) {
+        drawDME(fix, px, py, mapWidthNM);
     }
 
     if (ndb && overlayConfig.drawNDBs && showNavAids) {
@@ -495,26 +495,93 @@ void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
     }
 }
 
-void OverlayedMap::drawVOR(int px, int py, double r) {
-    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
-    mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_BLUE);
-    mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_BLUE);
-    mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_BLUE);
-    mapImage->drawLine(px - r / 2, py + r, px - r, py, img::COLOR_BLUE);
-    mapImage->drawLine(px - r, py, px - r / 2, py - r, img::COLOR_BLUE);
-    mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_BLUE);
+void OverlayedMap::drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
+    auto vor = fix.getVOR();
+    const float CIRCLE_RADIUS = 70;
+    if (!vor || !isVisible(px, py, CIRCLE_RADIUS)) {
+        return;
+    }
+    double r = 8;
+    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r / 2, py + r, px - r, py, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r, py, px - r / 2, py - r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_ICAO_VOR_DME);
+
+    std::string type = "VOR";
+    auto dme = fix.getDME();
+    if (dme) {
+        type = "VOR/DME";
+        mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_ICAO_VOR_DME);
+        mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_ICAO_VOR_DME);
+        mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_ICAO_VOR_DME);
+        mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_ICAO_VOR_DME);
+    }
+
+    mapImage->drawCircle(px, py, CIRCLE_RADIUS, img::COLOR_ICAO_VOR_DME);
+
+    // Draw ticks
+    const float BIG_TICK_SCALE = 0.84;
+    const float SMALL_TICK_SCALE = 0.92;
+    int bearing = (int)vor->getBearing();
+    for (int deg = 0; deg <= 360; deg += 10) {
+        double inner_x, inner_y, outer_x, outer_y;
+        float tickScale = (deg%30 == 0) ? BIG_TICK_SCALE : SMALL_TICK_SCALE;
+        fastPolarToCartesian(CIRCLE_RADIUS * tickScale, deg + bearing, inner_x, inner_y);
+        fastPolarToCartesian(CIRCLE_RADIUS, deg + bearing, outer_x, outer_y);
+
+        if (deg == 0) {
+            mapImage->drawLineAA(px, py, px + outer_x, py + outer_y, img::COLOR_ICAO_VOR_DME);
+        } else {
+            mapImage->drawLineAA(px + inner_x, py + inner_y, px + outer_x, py + outer_y, img::COLOR_ICAO_VOR_DME);
+        }
+
+        if ((deg % 90) == 0) {
+            double inner1_x, inner1_y, inner2_x, inner2_y;
+            fastPolarToCartesian(CIRCLE_RADIUS * BIG_TICK_SCALE, deg + bearing - 2, inner1_x, inner1_y);
+            fastPolarToCartesian(CIRCLE_RADIUS * BIG_TICK_SCALE, deg + bearing + 2, inner2_x, inner2_y);
+            mapImage->drawLineAA(px + inner1_x, py + inner1_y, px + outer_x,  py + outer_y,  img::COLOR_ICAO_VOR_DME);
+            mapImage->drawLineAA(px + inner2_x, py + inner2_y, px + outer_x,  py + outer_y,  img::COLOR_ICAO_VOR_DME);
+            mapImage->drawLineAA(px + inner1_x, py + inner1_y, px + inner2_x, py + inner2_y, img::COLOR_ICAO_VOR_DME);
+        }
+    }
+
+    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
+        auto freqString = vor->getFrequency().getFrequencyString(false).c_str();
+        drawNavTextBox(type, fix.getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME, mapWidthNM);
+    } else {
+        mapImage->drawText(fix.getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+    }
 }
 
-void OverlayedMap::drawDME(int px, int py, double r, bool crossDrawn) {
-    if (!crossDrawn) {
-        mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_BLUE);
-        mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_BLUE);
+void OverlayedMap::drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
+
+    auto dme = fix.getDME();
+    if (!dme || !isVisible(px, py, 40)) {
+        return;
     }
-    mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_BLUE);
-    mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_BLUE);
-    mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_BLUE);
-    mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_BLUE);
+
+    if (dme->isPaired()) {
+        // ILS/DME - let ILS take care of it
+        return;
+    }
+    int r = 8;
+    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_ICAO_VOR_DME);
+
+    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
+        auto freqString = dme->getFrequency().getFrequencyString(false).c_str();
+        drawNavTextBox("DME", fix.getID(), freqString, px - 47, py - 32, img::COLOR_ICAO_VOR_DME, mapWidthNM);
+    } else {
+        mapImage->drawText(fix.getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+    }
 }
 
 void OverlayedMap::drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
@@ -636,6 +703,31 @@ void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) con
     lat = world.y;
     lon = world.x;
 }
+
+float OverlayedMap::cosDegrees(int angleDegrees) {
+    // If you're going to use this, be sure that an integer angle is suitable.
+    int angle = angleDegrees % 360;
+    if (angle < 0) {
+        angle += 360;
+    }
+    return cosTable[angle];
+}
+
+float OverlayedMap::sinDegrees(int angleDegrees) {
+    // If you're going to use this, be sure that an integer angle is suitable.
+    int angle = angleDegrees % 360;
+    if (angle < 0) {
+        angle += 360;
+    }
+    return sinTable[angle];
+}
+
+void OverlayedMap::fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) {
+    // If you're going to use this, be sure that an integer angle is suitable.
+    x = sinDegrees(angleDegrees) * radius;
+    y = -cosDegrees(angleDegrees) * radius; // 0 degrees is up, decreasing y values
+}
+
 
 bool OverlayedMap::isVisible(int x, int y, int margin) {
     return  (x > -margin) && (x < mapImage->getWidth() + margin) &&

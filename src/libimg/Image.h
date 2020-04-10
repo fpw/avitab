@@ -37,6 +37,7 @@ constexpr const uint32_t COLOR_DARK_GREY    = 0xFF303030;
 constexpr const uint32_t COLOR_DARK_GREEN   = 0xFF006000;
 constexpr const uint32_t COLOR_ICAO_BLUE    = 0xFF107090;
 constexpr const uint32_t COLOR_ICAO_MAGENTA = 0xFF803070;
+constexpr const uint32_t COLOR_ICAO_VOR_DME = 0xFF3030FF;
 constexpr const uint32_t COLOR_TRANSPARENT_WHITE = 0x80FFFFFF;
 
 constexpr const uint32_t DARKER = -0x00101010;
@@ -82,6 +83,7 @@ public:
     void alphaBlend(uint32_t color);
     void blendPixel(int x, int y, uint32_t color);
     void fillCircle(int x, int y, int radius, uint32_t color);
+    void drawCircle(int x, int y, int radius, uint32_t color);
     void drawRectangle(int x0, int y0, int x1, int y1, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
     void fillRectangle(int x0, int y0, int x1, int y1, uint32_t color);

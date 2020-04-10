@@ -24,4 +24,14 @@ VOR::VOR(Frequency frq, int range):
 {
 }
 
+void VOR::setBearing(double bearing) {
+    this->bearing = bearing;
+}
+
+double VOR::getBearing() const
+{
+    return bearing;
+}
+  
+
 } /* namespace xdata */

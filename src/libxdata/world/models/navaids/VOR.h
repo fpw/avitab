@@ -25,6 +25,10 @@ namespace xdata {
 class VOR: public RadioNavaid {
 public:
     VOR(Frequency frq, int range);
+    void setBearing(double bearing);
+    double getBearing() const;
+private:
+    double bearing = 0;
 };
 
 } /* namespace xdata */

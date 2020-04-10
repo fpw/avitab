@@ -367,8 +367,7 @@ void MapApp::showOverlaySettings() {
         }
     });
 
-/*
-    vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VORs & DMEs");
+    vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VOR/DME");
     vorCheckbox->setChecked(overlays.drawVORs);
     vorCheckbox->alignBelow(airportCheckbox);
     vorCheckbox->setCallback([this] (bool checked) {
@@ -378,10 +377,10 @@ void MapApp::showOverlaySettings() {
             map->setOverlayConfig(conf);
         }
     });
-*/
-    ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDBs");
+
+    ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDB");
     ndbCheckbox->setChecked(overlays.drawNDBs);
-    ndbCheckbox->alignBelow(airportCheckbox);
+    ndbCheckbox->alignRightOf(vorCheckbox);
     ndbCheckbox->setCallback([this] (bool checked) {
         if (map) {
             auto conf = map->getOverlayConfig();
