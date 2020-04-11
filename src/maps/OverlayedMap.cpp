@@ -232,14 +232,15 @@ void OverlayedMap::drawDataOverlays() {
     double mapWidthNM = nmPerPixel * mapImage->getWidth();
 
     navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
-        auto airport = dynamic_cast<const xdata::Airport *>(&node);
-        if (airport && isAirportVisible(*airport)) {
-            drawAirport(*airport, mapWidthNM);
-        }
-
         auto fix = dynamic_cast<const xdata::Fix *>(&node);
         if (fix) {
             drawFix(*fix, mapWidthNM);
+        }
+    });
+    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
+        auto airport = dynamic_cast<const xdata::Airport *>(&node);
+        if (airport && isAirportVisible(*airport)) {
+            drawAirport(*airport, mapWidthNM);
         }
     });
 
