@@ -50,6 +50,7 @@ public:
     void centerInParent();
     void alignLeftInParent(int padLeft = 0);
     void alignRightInParent(int padRight = 0);
+    void alignTopRightInParent(int padRight = 0, int padTop = 0);
     void alignInTopLeft();
     void alignInTopRight(int xPad = 0);
     void alignInBottomCenter();

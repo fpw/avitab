@@ -25,6 +25,10 @@ namespace xdata {
 class DME: public RadioNavaid {
 public:
     DME(Frequency frq, int range);
+    void setPaired(bool paired);
+    bool isPaired() const;
+private:
+    bool paired = false;
 };
 
 } /* namespace xdata */

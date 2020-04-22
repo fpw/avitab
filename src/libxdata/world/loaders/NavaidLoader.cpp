@@ -51,7 +51,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         world->addFix(fix);
     }
 
-    if (navaid.type == NavaidData::Type::ILS_LOC) {
+    if ((navaid.type == NavaidData::Type::ILS_LOC) || (navaid.type == NavaidData::Type::LOC)) {
         std::istringstream rwyAndDesc(navaid.name);
         std::string rwy;
         std::string desc;
@@ -60,6 +60,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         Frequency ilsFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, desc);
         auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
         ils->setRunwayHeading(navaid.bearing);
+        ils->setLocalizerOnly(navaid.type == NavaidData::Type::LOC);
         fix->attachILSLocalizer(ils);
 
         auto airport = world->findAirportByID(navaid.terminalRegion);
@@ -73,10 +74,12 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
     } else if (navaid.type == NavaidData::Type::VOR) {
         Frequency vorFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto vor = std::make_shared<VOR>(vorFrq, navaid.range);
+        vor->setBearing(navaid.bearing);
         fix->attachVOR(vor);
     } else if (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP) {
         Frequency dmeFreq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto dme = std::make_shared<DME>(dmeFreq, navaid.range);
+        dme->setPaired(navaid.type == NavaidData::Type::DME_COMP);
         fix->attachDME(dme);
     }
 }

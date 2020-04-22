@@ -23,6 +23,7 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libxdata/world/World.h"
 #include "src/libimg/TTFStamper.h"
+#include "src/libxdata/world/models/navaids/Morse.h"
 
 namespace maps {
 
@@ -33,6 +34,8 @@ struct OverlayConfig {
     bool drawHeliportsSeaports = false;
     bool drawVORs = false;
     bool drawNDBs = false;
+    bool drawILSs = false;
+    bool drawWaypoints = false;
 };
 
 class OverlayedMap {
@@ -73,14 +76,19 @@ private:
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
 
+    float sinTable[360];
+    float cosTable[360];
+
     // Overlays
     OverlayConfig overlayConfig{};
     std::shared_ptr<xdata::World> navWorld;
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;
+    img::Image ndbIcon;
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
     bool dbg;
+    xdata::Morse morse;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;
@@ -104,18 +112,32 @@ private:
     int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
 
     void drawFix(const xdata::Fix &fix, double mapWidthNM);
+    void drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawILS(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawWaypoint(const xdata::Fix &fix, int px, int py);
+    void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM);
+    void drawMorse(int x, int y, std::string text, int size, uint32_t color);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
+    float cosDegrees(int angleDegrees);
+    float sinDegrees(int angleDegrees);
+    void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y);
+    void polarToCartesian(float radius, float angleRadians, double& x, double& y);
+    bool isVisible(int x, int y, int margin = 0);
+    bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 
     static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
     static const int MAX_BLOB_SIZE = 12;
     static const int BLOB_SIZE_DIVIDEND = DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM * MAX_BLOB_SIZE;
     static const int DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM = 5;
-    static const int SHOW_DETAILED_AIRPORT_INFO_AT_MAPWIDTHNM = 40;
+    static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
     static const int ICAO_CIRCLE_RADIUS = 15;
     static const int ICAO_RING_RADIUS = 12;
+    static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
 
 };
 

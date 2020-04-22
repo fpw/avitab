@@ -272,17 +272,23 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     onTimer();
 }
 
+void MapApp::resetWidgets() {
+    overlayLabel.reset();
+    ndbCheckbox.reset();
+    vorCheckbox.reset();
+    ilsCheckbox.reset();
+    waypointCheckbox.reset();
+    airportCheckbox.reset();
+    airstripCheckbox.reset();
+    heliseaportCheckbox.reset();
+    aircraftCheckbox.reset();
+    overlaysContainer.reset();
+}
+
 void MapApp::suspend() {
     settingsContainer->setVisible(false);
     if (overlaysContainer) {
-        overlayLabel.reset();
-        ndbCheckbox.reset();
-        vorCheckbox.reset();
-        airportCheckbox.reset();
-        airstripCheckbox.reset();
-        heliseaportCheckbox.reset();
-        aircraftCheckbox.reset();
-        overlaysContainer.reset();
+        resetWidgets();
     }
     suspended = true;
 }
@@ -297,14 +303,7 @@ void MapApp::onSettingsButton() {
 
 void MapApp::onOverlaysButton() {
     if (overlaysContainer) {
-        overlayLabel.reset();
-        ndbCheckbox.reset();
-        vorCheckbox.reset();
-        airportCheckbox.reset();
-        airstripCheckbox.reset();
-        heliseaportCheckbox.reset();
-        aircraftCheckbox.reset();
-        overlaysContainer.reset();
+        resetWidgets();
     } else {
         if (map) {
             showOverlaySettings();
@@ -317,7 +316,7 @@ void MapApp::showOverlaySettings() {
 
     overlaysContainer = std::make_shared<Container>();
     overlaysContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
-    overlaysContainer->alignLeftInParent(10);
+    overlaysContainer->alignTopRightInParent(10, 66);
     overlaysContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     overlaysContainer->setVisible(true);
 
@@ -370,8 +369,7 @@ void MapApp::showOverlaySettings() {
         }
     });
 
-/*
-    vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VORs & DMEs");
+    vorCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VOR/DME");
     vorCheckbox->setChecked(overlays.drawVORs);
     vorCheckbox->alignBelow(airportCheckbox);
     vorCheckbox->setCallback([this] (bool checked) {
@@ -382,9 +380,9 @@ void MapApp::showOverlaySettings() {
         }
     });
 
-    ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDBs");
+    ndbCheckbox = std::make_shared<Checkbox>(overlaysContainer, "NDB");
     ndbCheckbox->setChecked(overlays.drawNDBs);
-    ndbCheckbox->alignBelow(vorCheckbox);
+    ndbCheckbox->alignRightOf(vorCheckbox);
     ndbCheckbox->setCallback([this] (bool checked) {
         if (map) {
             auto conf = map->getOverlayConfig();
@@ -392,7 +390,29 @@ void MapApp::showOverlaySettings() {
             map->setOverlayConfig(conf);
         }
     });
-*/
+
+    ilsCheckbox = std::make_shared<Checkbox>(overlaysContainer, "ILS");
+    ilsCheckbox->setChecked(overlays.drawILSs);
+    ilsCheckbox->alignRightOf(ndbCheckbox);
+    ilsCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawILSs = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    waypointCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Waypoint");
+    waypointCheckbox->setChecked(overlays.drawWaypoints);
+    waypointCheckbox->alignRightOf(ilsCheckbox);
+    waypointCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawWaypoints = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
 }
 
 void MapApp::onRedrawNeeded() {
@@ -554,13 +574,13 @@ void MapApp::processCalibrationPoint(int step) {
         }
         LOG_INFO(1, "From '%s', got %f, %f", coords.c_str(), lat, lon);
         if (step == 1) {
-        	map->setCalibrationPoint1(lat, lon);
-        	coordsField->setText("");
+            map->setCalibrationPoint1(lat, lon);
+            coordsField->setText("");
         } else {
-        	map->setCalibrationPoint2(lat, lon);
-        	keyboard.reset();
-        	coordsField.reset();
-        	onTimer();
+            map->setCalibrationPoint2(lat, lon);
+            keyboard.reset();
+            coordsField.reset();
+            onTimer();
         }
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
