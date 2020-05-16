@@ -49,6 +49,15 @@ charts there, including subdirectories.
   or ancient fonts such [Linear B](https://en.wikipedia.org/wiki/Linear_B) are not supported.
   This is mainly due to font sizes - a version containing all fonts would be 40 Megabytes in size.
 
+## Compiling
+
+* If you would like to contribute to AviTab's development, a script called `setup.sh` has been added to automatically
+  download and setup your environment with the needed dependencies.
+  * Windows, Linux, and macOS are supported with their respective dependency managers.  If you do not have the
+    proper dependency manager installed, the script will prompt you to install it before proceeding.
+* There is another script called `teardown.sh` that will delete the folders where the dependencies were
+  placed to compile AviTab.
+
 ## Donate
 If you like AviTab and want to support its further development, you can donate.
 
