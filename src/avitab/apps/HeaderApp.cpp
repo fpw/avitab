@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <iomanip>
 #include "HeaderApp.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
@@ -24,12 +25,14 @@ namespace avitab {
 
 HeaderApp::HeaderApp(FuncsPtr appFuncs):
     App(appFuncs),
-    tickTimer(std::bind(&HeaderApp::onTick, this), 100)
+    tickTimer(std::bind(&HeaderApp::onTick, this), TIMER_PERIOD_MS)
 {
     auto container = getUIContainer();
     container->setPosition(0, 0);
     container->setDimensions(container->getWidth(), 30);
     clockLabel = std::make_shared<Label>(container, "");
+    clockLabel->setClickable(true);
+    clockLabel->setClickHandler([this] (int x, int y, bool pr, bool rel) { onClockClick(x, y, pr, rel); });
 
     settingsButton = std::make_shared<Button>(container, Widget::Symbol::SETTINGS);
     settingsButton->setCallback([this] (const Button &) { toggleSettings(); });
@@ -100,6 +103,14 @@ void HeaderApp::onBrightnessChange(int brightness) {
     api().setBrightness(brightness / 100.0f);
 }
 
+void HeaderApp::onClockClick(int x, int y, bool pr, bool rel) {
+    if (pr) {
+        stopwatchMode = !stopwatchMode;
+        timerCount = 0;
+        updateClock();
+    }
+}
+
 bool HeaderApp::onTick() {
     updateClock();
     updateFPS();
@@ -107,13 +118,19 @@ bool HeaderApp::onTick() {
 }
 
 void HeaderApp::updateClock() {
-    std::string time = platform::getLocalTime("%H:%M");
-    if (curTimeString != time) {
-        // to prevent rendering calls each tick
-        curTimeString = time;
-        clockLabel->setText(time);
+    if ((timerCount % TIMER_TICKS_PER_SEC) == 0) {
+        std::ostringstream t;
+        if (stopwatchMode) {
+            unsigned int mins = (timerCount/TIMER_TICKS_PER_SEC) / 60;
+            unsigned int secs = (timerCount/TIMER_TICKS_PER_SEC) % 60;
+            t << std::setfill('0') << std::setw(2) << mins << ":" << std::setw(2) << secs;
+        } else {
+            t << platform::getLocalTime("%H:%M");
+        }
+        clockLabel->setText(t.str());
         clockLabel->alignRightInParent(HOR_PADDING);
     }
+    timerCount++;
 }
 
 void HeaderApp::updateFPS() {

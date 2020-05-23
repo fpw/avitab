@@ -45,8 +45,11 @@ private:
     std::shared_ptr<Label> brightLabel, mediaLabel;
     std::shared_ptr<Button> closeButton;
 
+    static constexpr int TIMER_PERIOD_MS = 100;
+    static constexpr int TIMER_TICKS_PER_SEC = 1000 / TIMER_PERIOD_MS;
     Timer tickTimer;
-    std::string curTimeString;
+    unsigned int timerCount = 0;
+    bool stopwatchMode = false;
 
     bool showFps = true;
     std::array<float, 30> fpsRingBuffer{};
@@ -58,6 +61,7 @@ private:
     void toggleSettings();
     void onBrightnessChange(int brightness);
 
+    void onClockClick(int x, int y, bool pr, bool rel);
     bool onTick();
     void updateClock();
     void updateFPS();
