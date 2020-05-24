@@ -18,6 +18,7 @@
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+#include <cmath>
 #include "MapApp.h"
 #include "src/Logger.h"
 #include "src/maps/sources/OpenTopoSource.h"

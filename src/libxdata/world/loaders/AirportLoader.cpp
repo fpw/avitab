@@ -153,7 +153,7 @@ void AirportLoader::patchCustomSceneryRunwaySurfaces(const AirportData& defaultA
     }
 
     // Patch surface type from airport in default scenery into the airport that came from custom scenery loaded earlier
-    customAirport->forEachRunway([this, customAirport, defaultRwySurface] (std::shared_ptr<xdata::Runway> customRwy) {
+    customAirport->forEachRunway([customAirport, defaultRwySurface] (std::shared_ptr<xdata::Runway> customRwy) {
         auto runwayID = customRwy->getID();
         if (customRwy->getSurfaceType() == Runway::SurfaceType::TRANSPARENT_SURFACE) {
             auto defaultSurface = defaultRwySurface.find(runwayID);

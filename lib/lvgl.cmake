@@ -1,3 +1,5 @@
+set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+
 list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_core/lv_debug.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_core/lv_disp.c
