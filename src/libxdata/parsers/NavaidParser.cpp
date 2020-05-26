@@ -17,6 +17,7 @@
  */
 #include "NavaidParser.h"
 #include <iostream>
+#include <cmath>
 
 namespace xdata {
 
@@ -60,7 +61,16 @@ void NavaidParser::parseLine() {
         nav.range = parser.parseInt();
     }
 
-    nav.bearing = parser.parseDouble();
+    // Get true bearing taking account of XP-NAV1150-Spec.pdf format for ILS/LOC,
+    // while remaining compatible with < 11.50
+    if (nav.type == NavaidData::Type::ILS_LOC || nav.type == NavaidData::Type::LOC) {
+        nav.bearing = std::fmod(parser.parseDouble(), 360);
+    } else if (nav.type == NavaidData::Type::ILS_GS) {
+        // ILS_GS angle/bearing unused by Avitab, but at least get the bearing correct
+        nav.bearing = std::fmod(parser.parseDouble(), 100);
+    } else {
+        nav.bearing = parser.parseDouble();
+    }
     nav.id = parser.parseWord();
     nav.terminalRegion = parser.parseWord();
     nav.icaoRegion = parser.parseWord();
