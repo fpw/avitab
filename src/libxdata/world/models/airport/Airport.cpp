@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <stdexcept>
 #include "Airport.h"
 #include "src/libxdata/world/models/navaids/Fix.h"
 #include "src/Logger.h"

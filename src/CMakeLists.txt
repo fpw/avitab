@@ -67,11 +67,15 @@ if(WIN32)
     )
 elseif(APPLE)
     add_definitions(-DAPL=1)
+    add_definitions(-DGL_SILENCE_DEPRECATION)
+    include_directories("/usr/local/include")
+    link_directories("/usr/local/lib")
     target_link_libraries(avitab_plugin
         avitab_xplane
         avitab_common
         "-F${PROJECT_SOURCE_DIR}/build-third/lib/ -framework XPLM"
         "-framework OpenGL"
+        curl
     )
 elseif(UNIX)
     add_definitions(-DLIN=1)
@@ -113,11 +117,15 @@ if(WIN32)
         -Wl,--subsystem,windows
     )
 elseif(APPLE)
+    add_definitions(-DGL_SILENCE_DEPRECATION)
+    include_directories("/usr/local/include")
+    link_directories("/usr/local/lib")
     target_link_libraries(AviTab-standalone
         avitab_standalone
         avitab_common
         "-framework OpenGL"
         glfw
+        curl
     )
 elseif(UNIX)
     target_link_libraries(AviTab-standalone

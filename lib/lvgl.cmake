@@ -1,3 +1,7 @@
+if(APPLE)
+	set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -c <TARGET>")
+endif()
+
 list(APPEND lvgl_sources
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_core/lv_debug.c
     ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/lv_core/lv_disp.c
