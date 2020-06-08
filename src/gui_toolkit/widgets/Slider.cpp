@@ -24,7 +24,6 @@ Slider::Slider(WidgetPtr parent, int min, int max):
 {
     lv_obj_t *obj = lv_slider_create(parentObj(), nullptr);
     lv_slider_set_range(obj, min, max);
-    lv_slider_set_knob_in(obj, true);
     setObj(obj);
 }
 

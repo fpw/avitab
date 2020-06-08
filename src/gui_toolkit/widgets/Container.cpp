@@ -34,19 +34,19 @@ Container::Container():
 }
 
 void Container::setLayoutRightColumns() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_R);
+    lv_cont_set_layout(obj(), LV_LAYOUT_COLUMN_RIGHT);
 }
 
 void Container::setLayoutPretty() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY);
+    lv_cont_set_layout(obj(), LV_LAYOUT_PRETTY_MID);
 }
 
 void Container::setLayoutRow() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_M);
+    lv_cont_set_layout(obj(), LV_LAYOUT_ROW_MID);
 }
 
 void Container::setLayoutColumn() {
-    lv_cont_set_layout(obj(), LV_LAYOUT_COL_M);
+    lv_cont_set_layout(obj(), LV_LAYOUT_COLUMN_MID);
 }
 
 void Container::setLayoutGrid() {
@@ -61,9 +61,9 @@ lv_fit_t Container::toLvFit(Container::Fit fit) {
     switch (fit) {
         case Fit::OFF:      return LV_FIT_NONE;
         case Fit::TIGHT:    return LV_FIT_TIGHT;
-        case Fit::FLOOD:    return LV_FIT_FLOOD;
-        case Fit::FILL:     return LV_FIT_FILL;
-        default: return LV_FIT_NONE;
+        case Fit::FLOOD:    return LV_FIT_MAX;
+        case Fit::FILL:     return LV_FIT_PARENT;
+        default:            return LV_FIT_NONE;
     }
 }
 

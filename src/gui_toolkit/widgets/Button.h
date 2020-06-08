@@ -41,7 +41,6 @@ public:
 private:
     img::Image iconData;
     lv_img_dsc_t iconImage;
-    lv_style_t styleWhenPressed{}, styleWhenReleased{};
     ButtonCallback callbackFunc;
 };
 

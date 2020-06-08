@@ -72,16 +72,16 @@ void TabGroup::removeTab(size_t i) {
         ext->tab_name_ptr[j] = ext->tab_name_ptr[j + 1];
     }
 
-    lv_btnm_ext_t * btnm_ext = (lv_btnm_ext_t *) lv_obj_get_ext_attr(ext->btns);
+    lv_btnmatrix_ext_t * btnm_ext = (lv_btnmatrix_ext_t *) lv_obj_get_ext_attr(ext->btns);
     btnm_ext->map_p = nullptr;
 
     ext->tab_name_ptr = (const char **) lv_mem_realloc(ext->tab_name_ptr, sizeof(char *) * (ext->tab_cnt));
     ext->tab_cnt--;
-    lv_btnm_set_map(ext->btns, ext->tab_name_ptr);
+    lv_btnmatrix_set_map(ext->btns, ext->tab_name_ptr);
 
     lv_obj_t *page = lv_tabview_get_tab(obj(), i);
     lv_obj_del(page);
-
+/*
     const lv_style_t * style_tabs = lv_obj_get_style(ext->btns);
     lv_coord_t indic_size = (lv_obj_get_width(obj()) - style_tabs->body.padding.inner * (ext->tab_cnt - 1) -
                  style_tabs->body.padding.left - style_tabs->body.padding.right) /
@@ -91,6 +91,7 @@ void TabGroup::removeTab(size_t i) {
                                  style_tabs->body.padding.left);
 
     lv_tabview_set_btns_hidden(obj(), false);
+    */
     setActiveTab(ext->tab_cnt - 1);
     lv_obj_invalidate(obj());
 }

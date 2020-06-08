@@ -22,32 +22,32 @@ namespace avitab {
 TextArea::TextArea(WidgetPtr parent, const std::string& text):
     Widget(parent)
 {
-    lv_obj_t *ta = lv_ta_create(parentObj(), nullptr);
+    lv_obj_t *ta = lv_textarea_create(parentObj(), nullptr);
     setObj(ta);
     setText(text);
 }
 
 void TextArea::setMultiLine(bool multiLine) {
     if (multiLine) {
-        lv_ta_set_one_line(obj(), false);
+        lv_textarea_set_one_line(obj(), false);
     } else {
-        lv_ta_set_one_line(obj(), true);
+        lv_textarea_set_one_line(obj(), true);
     }
 }
 
 void TextArea::setText(const std::string& text) {
-    lv_ta_set_text(obj(), text.c_str());
+    lv_textarea_set_text(obj(), text.c_str());
 }
 
 std::string TextArea::getText() {
-    return lv_ta_get_text(obj());
+    return lv_textarea_get_text(obj());
 }
 
 void TextArea::setShowCursor(bool show) {
     if (show) {
-        lv_ta_set_cursor_type(obj(), LV_CURSOR_LINE);
+        lv_textarea_set_cursor_hidden(obj(), 1);
     } else {
-        lv_ta_set_cursor_type(obj(), static_cast<lv_cursor_type_t>(LV_CURSOR_LINE | LV_CURSOR_HIDDEN));
+        lv_textarea_set_cursor_hidden(obj(), 0);
     }
 }
 

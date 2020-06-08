@@ -33,16 +33,16 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
 
     if (!lvglIsInitialized) {
         // LVGL does not support de-initialization so we can only do this once
-        lv_log_register_print_cb([] (lv_log_level_t level, const char *file, uint32_t line, const char *msg) {
+        lv_log_register_print_cb([] (lv_log_level_t level, const char *file, uint32_t line, const char *fn, const char *msg) {
             switch (level) {
                 case LV_LOG_LEVEL_WARN:
-                    logger::warn("GUI: %s:%d %s", file, line, msg);
+                    logger::warn("GUI: %s.%s:%d %s", file, fn, line, msg);
                     break;
                 case LV_LOG_LEVEL_ERROR:
-                    logger::error("GUI: %s:%d %s", file, line, msg);
+                    logger::error("GUI: %s.%s:%d %s", file, fn, line, msg);
                     break;
                 default:
-                    logger::verbose("GUI: %s:%d %s", file, line, msg);
+                    logger::verbose("GUI: %s.%s:%d %s", file, fn, line, msg);
                     break;
             }
         });
@@ -51,8 +51,6 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         initDisplayDriver();
         initInputDriver();
 
-        lv_theme_t *theme = lv_theme_night_init(210, LV_FONT_DEFAULT);
-        lv_theme_set_current(theme);
         lvglIsInitialized = true;
     }
 
@@ -244,22 +242,22 @@ void LVGLToolkit::handleKeyboard() {
     uint32_t c = 0;
     while ((c = driver->popKeyPress()) != 0) {
         if (keyboard) {
-            auto ta = lv_kb_get_ta(keyboard);
+            auto ta = lv_keyboard_get_textarea(keyboard);
             auto keyb = (Keyboard *) lv_obj_get_user_data(keyboard);
             if (!ta) {
                 continue;
             }
 
             if (c == '\b') {
-                lv_ta_del_char(ta);
+                lv_textarea_del_char(ta);
             } else if (c == '\n') {
                 if (keyb && keyb->hasOkAction()) {
                     lv_obj_get_event_cb(keyboard)(keyboard, LV_EVENT_APPLY);
                 } else {
-                    lv_ta_add_char(ta, '\n');
+                    lv_textarea_add_char(ta, '\n');
                 }
             } else {
-                lv_ta_add_char(ta, lv_txt_encoded_conv_wc(c));
+                lv_textarea_add_char(ta, _lv_txt_encoded_conv_wc(c));
             }
         }
     }
@@ -274,7 +272,7 @@ lv_obj_t *LVGLToolkit::searchActiveKeyboard(lv_obj_t* obj) {
 
     lv_obj_t *screen = lv_scr_act();
     if (screen) {
-        if (!lv_area_is_on(&screen->coords, &obj->coords)) {
+        if (!_lv_area_is_on(&screen->coords, &obj->coords)) {
             return nullptr;
         }
     }

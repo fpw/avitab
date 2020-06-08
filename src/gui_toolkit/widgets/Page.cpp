@@ -33,7 +33,7 @@ Page::Page(WidgetPtr parent, lv_obj_t *page):
 }
 
 void Page::setShowScrollbar(bool show) {
-    lv_page_set_sb_mode(obj(), show ? LV_SB_MODE_AUTO : LV_SB_MODE_OFF);
+    lv_page_set_scrollbar_mode(obj(), show ? LV_SCROLLBAR_MODE_AUTO : LV_SCROLLBAR_MODE_OFF);
 }
 
 void Page::clear() {
@@ -49,7 +49,7 @@ int Page::getContentHeight() {
 }
 
 void Page::setFit(bool horz, bool vert) {
-    lv_page_set_scrl_fit2(obj(), horz, vert);
+    lv_page_set_scrllable_fit2(obj(), horz, vert);
 }
 
 void Page::setLayoutCenterColumns() {
@@ -57,7 +57,7 @@ void Page::setLayoutCenterColumns() {
 }
 
 void Page::setLayoutRows() {
-    lv_page_set_scrl_layout(obj(), LV_LAYOUT_ROW_T);
+    lv_page_set_scrl_layout(obj(), LV_LAYOUT_ROW_TOP);
 }
 
 } /* namespace avitab */

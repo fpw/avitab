@@ -22,7 +22,7 @@ namespace avitab {
 DropDownList::DropDownList(WidgetPtr parent, const std::vector<std::string>& choices):
     Widget(parent)
 {
-    lv_obj_t *obj = lv_ddlist_create(parentObj(), nullptr);
+    lv_obj_t *obj = lv_dropdown_create(parentObj(), nullptr);
 
     std::string choiceStr;
 
@@ -34,14 +34,14 @@ DropDownList::DropDownList(WidgetPtr parent, const std::vector<std::string>& cho
         choiceStr.pop_back();
     }
 
-    lv_ddlist_set_options(obj, choiceStr.c_str());
+    lv_dropdown_set_options(obj, choiceStr.c_str());
     lv_obj_set_user_data(obj, this);
 
     setObj(obj);
 }
 
 int DropDownList::getSelectedIndex() {
-    return lv_ddlist_get_selected(obj());
+    return lv_dropdown_get_selected(obj());
 }
 
 void DropDownList::setSelectAction(SelectCallback cb) {

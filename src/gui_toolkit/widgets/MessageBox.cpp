@@ -25,8 +25,8 @@ namespace avitab {
 MessageBox::MessageBox(WidgetPtr parent, const std::string &title):
     Widget(parent)
 {
-    lv_obj_t *mbox = lv_mbox_create(parentObj(), nullptr);
-    lv_mbox_set_text(mbox, title.c_str());
+    lv_obj_t *mbox = lv_msgbox_create(parentObj(), nullptr);
+    lv_msgbox_set_text(mbox, title.c_str());
     lv_obj_set_user_data(mbox, this);
     setObj(mbox);
 
@@ -42,10 +42,10 @@ void MessageBox::addButton(const std::string& caption, Callback cb) {
 
     callbacks.push_back(cb);
 
-    lv_mbox_add_btns(obj(), &buttons[0]);
+    lv_msgbox_add_btns(obj(), &buttons[0]);
     lv_obj_set_event_cb(obj(), [] (lv_obj_t *obj, lv_event_t ev) {
         if (ev == LV_EVENT_CLICKED) {
-            const char *txt = lv_mbox_get_active_btn_text(obj);
+            const char *txt = lv_msgbox_get_active_btn_text(obj);
             if (!txt) {
                 return;
             }

@@ -22,9 +22,9 @@ namespace avitab {
 Checkbox::Checkbox(WidgetPtr parent, const std::string& caption):
     Widget(parent)
 {
-    lv_obj_t *cb = lv_cb_create(parentObj(), nullptr);
+    lv_obj_t *cb = lv_checkbox_create(parentObj(), nullptr);
 
-    lv_cb_set_text(cb, caption.c_str());
+    lv_checkbox_set_text(cb, caption.c_str());
 
     setObj(cb);
 }
@@ -44,11 +44,11 @@ void Checkbox::setCallback(Callback cb) {
 }
 
 void Checkbox::setChecked(bool check) {
-    lv_cb_set_checked(obj(), check);
+    lv_checkbox_set_checked(obj(), check);
 }
 
 bool Checkbox::isChecked() {
-    return lv_cb_is_checked(obj());
+    return lv_checkbox_is_checked(obj());
 }
 
 } /* namespace avitab */

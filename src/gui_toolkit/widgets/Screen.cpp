@@ -26,16 +26,11 @@ Screen::Screen():
 
     lv_obj_set_user_data(obj, this);
 
-    lv_theme_t * th = lv_theme_get_current();
-    if(th) {
-        lv_obj_set_style(obj, th->style.bg);
-    }
-
     originalSignalCB = lv_obj_get_signal_cb(obj);
     lv_obj_set_signal_cb(obj, [] (lv_obj_t *obj, lv_signal_t sig, void *param) -> lv_res_t  {
         Screen *us = (Screen *) lv_obj_get_user_data(obj);
 
-        if (sig == LV_SIGNAL_CORD_CHG) {
+        if (sig == LV_SIGNAL_COORD_CHG) {
             if (us->onResize) {
                 us->onResize();
             }

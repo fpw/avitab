@@ -41,15 +41,6 @@ Button::Button(WidgetPtr parent, img::Image &&icon, const std::string& caption, 
 
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
 
-    lv_style_copy(&styleWhenReleased, lv_btn_get_style(button, LV_BTN_STYLE_REL));
-    lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));
-
-    styleWhenPressed.body.opa = 0;
-    styleWhenReleased.body.opa = 0;
-
-    lv_btn_set_style(button, LV_BTN_STYLE_PR, &styleWhenPressed);
-    lv_btn_set_style(button, LV_BTN_STYLE_REL, &styleWhenReleased);
-
     lv_obj_t *ico = lv_img_create(button, nullptr);
     lv_img_set_src(ico, &iconImage);
     lv_obj_set_click(ico, false);
@@ -72,19 +63,6 @@ Button::Button(WidgetPtr parent, Symbol smb):
 {
     lv_obj_t *button = lv_btn_create(parentObj(), nullptr);
     lv_cont_set_fit(button, LV_FIT_TIGHT);
-
-    lv_style_copy(&styleWhenReleased, lv_btn_get_style(button, LV_BTN_STYLE_REL));
-    lv_style_copy(&styleWhenPressed, lv_btn_get_style(button, LV_BTN_STYLE_PR));
-
-    styleWhenReleased.body.border.part = LV_BORDER_NONE;
-    styleWhenReleased.body.opa = 0;
-    styleWhenReleased.image.color = lv_color_hex3(0xFFF);
-
-    styleWhenPressed.body.border.part = (lv_border_part_t) (LV_BORDER_LEFT | LV_BORDER_RIGHT);
-    styleWhenPressed.body.opa = 0;
-    styleWhenPressed.image.color = lv_color_hex3(0xFFF);
-    lv_btn_set_style(button, LV_BTN_STYLE_PR, &styleWhenPressed);
-    lv_btn_set_style(button, LV_BTN_STYLE_REL, &styleWhenReleased);
 
     lv_obj_t *ico = lv_img_create(button, nullptr);
     lv_img_set_src(ico, symbolToLVSymbol(smb));
@@ -118,11 +96,11 @@ void Button::setCallback(ButtonCallback cb) {
 }
 
 void Button::setToggleable(bool toggleable) {
-    lv_btn_set_toggle(obj(), toggleable);
+    lv_btn_set_checkable(obj(), toggleable);
 }
 
 void Button::setToggleState(bool toggled) {
-    lv_btn_set_state(obj(), toggled ? LV_BTN_STATE_TGL_PR : LV_BTN_STATE_REL);
+    lv_btn_set_state(obj(), toggled ? LV_BTN_STATE_CHECKED_PRESSED : LV_BTN_STATE_CHECKED_RELEASED);
 }
 
 } /* namespace avitab */

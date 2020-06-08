@@ -23,9 +23,9 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
     Widget(parent),
     targetText(target)
 {
-    lv_obj_t *keys = lv_kb_create(parentObj(), nullptr);
-    lv_kb_set_cursor_manage(keys, true);
-    lv_kb_set_ta(keys, target->obj());
+    lv_obj_t *keys = lv_keyboard_create(parentObj(), nullptr);
+    lv_keyboard_set_cursor_manage(keys, true);
+    lv_keyboard_set_textarea(keys, target->obj());
     lv_obj_set_user_data(keys, this);
 
     lv_obj_set_event_cb(keys, [] (lv_obj_t *ref, lv_event_t ev) {
@@ -41,10 +41,10 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
                 if (us->onCancel) {
                     us->onCancel();
                 }
-                lv_kb_set_ta(ref, us->targetText->obj());
+                lv_keyboard_set_textarea(ref, us->targetText->obj());
             }
         } else if (ev == LV_EVENT_VALUE_CHANGED) {
-            lv_kb_def_event_cb(ref, ev);
+            lv_keyboard_def_event_cb(ref, ev);
         }
     });
 
@@ -52,7 +52,7 @@ Keyboard::Keyboard(WidgetPtr parent, std::shared_ptr<TextArea> target):
 }
 
 void Keyboard::setTarget(std::shared_ptr<TextArea> target) {
-    lv_kb_set_ta(obj(), target->obj());
+    lv_keyboard_set_textarea(obj(), target->obj());
 }
 
 void Keyboard::setOnCancel(Callback cb) {
@@ -70,7 +70,7 @@ void Keyboard::hideEnterKey() {
         "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
         LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
     };
-    lv_kb_set_map(obj(), defaultMapWithoutEnter);
+    lv_keyboard_set_map(obj(), LV_KEYBOARD_MODE_TEXT_LOWER, defaultMapWithoutEnter);
 }
 
 void Keyboard::setNumericLayout() {
@@ -79,7 +79,7 @@ void Keyboard::setNumericLayout() {
             ",", " ", LV_SYMBOL_BACKSPACE, LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
     };
 
-    lv_kb_set_map(obj(), kb_map_num);
+    lv_keyboard_set_map(obj(), LV_KEYBOARD_MODE_SPECIAL, kb_map_num);
 }
 
 bool Keyboard::hasOkAction() const {

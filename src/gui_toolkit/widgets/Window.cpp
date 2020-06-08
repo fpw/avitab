@@ -29,14 +29,6 @@ Window::Window(WidgetPtr parent, const std::string& title):
 
     setObj(win);
 
-    lv_style_copy(&scrlStyle, lv_win_get_style(win, LV_WIN_STYLE_CONTENT));
-    scrlStyle.body.padding.left = 0;
-    scrlStyle.body.padding.right = 0;
-    scrlStyle.body.padding.top = 0;
-    scrlStyle.body.padding.bottom = 0;
-    scrlStyle.body.padding.inner = 0;
-    lv_win_set_style(win, LV_WIN_STYLE_CONTENT, &scrlStyle);
-
     setDimensions(parent->getWidth() - 10, parent->getHeight());
     centerInParent();
 }
@@ -46,7 +38,7 @@ void Window::setCaption(const std::string& title) {
 }
 
 void Window::hideScrollbars() {
-    lv_win_set_sb_mode(obj(), LV_SB_MODE_OFF);
+    lv_win_set_scrollbar_mode(obj(), LV_SCROLLBAR_MODE_OFF);
 }
 
 int Window::getContentWidth() {
