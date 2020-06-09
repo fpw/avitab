@@ -289,7 +289,9 @@ lv_obj_t *LVGLToolkit::searchActiveKeyboard(lv_obj_t* obj) {
         lv_obj_type_t type{};
         lv_obj_get_type(curChild, &type);
         if (strcmp(type.type[0], "lv_kb") == 0) {
-            return curChild;
+            if (lv_area_is_in(&curChild->coords, &screen->coords)) {
+                return curChild;
+            }
         }
     }
     return nullptr;
