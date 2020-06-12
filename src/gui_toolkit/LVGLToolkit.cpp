@@ -41,6 +41,9 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
                 case LV_LOG_LEVEL_ERROR:
                     logger::error("GUI: %s.%s:%d %s", file, fn, line, msg);
                     break;
+                case LV_LOG_LEVEL_INFO:
+                    logger::info("GUI: %s.%s:%d %s", file, fn, line, msg);
+                    break;
                 default:
                     logger::verbose("GUI: %s.%s:%d %s", file, fn, line, msg);
                     break;
@@ -286,8 +289,8 @@ lv_obj_t *LVGLToolkit::searchActiveKeyboard(lv_obj_t* obj) {
 
         lv_obj_type_t type{};
         lv_obj_get_type(curChild, &type);
-        if (strcmp(type.type[0], "lv_kb") == 0) {
-            if (lv_area_is_in(&curChild->coords, &screen->coords)) {
+        if (strcmp(type.type[0], "lv_keyboard") == 0) {
+            if (_lv_area_is_in(&curChild->coords, &screen->coords, 0)) {
                 return curChild;
             }
         }

@@ -39,7 +39,6 @@ void RouteApp::showDeparturePage() {
     window->setCaption("Route Wizard - Departure");
 
     label = std::make_shared<Label>(window, "Departure airport code:");
-    label->alignInTopLeft();
 
     departureField = std::make_shared<TextArea>(window, "");
     departureField->setMultiLine(false);
@@ -91,7 +90,6 @@ void RouteApp::showArrivalPage() {
     window->setCaption("Route Wizard - Arrival");
 
     label = std::make_shared<Label>(window, "Arrival airport code:");
-    label->alignInTopLeft();
 
     arrivalField = std::make_shared<TextArea>(window, "");
     arrivalField->setMultiLine(false);

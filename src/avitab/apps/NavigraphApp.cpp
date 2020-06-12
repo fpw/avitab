@@ -45,7 +45,6 @@ void NavigraphApp::reset() {
             "For full coverage, you will need a Navigraph Charts or Ultimate subscription."
         );
     label->setLongMode(true);
-    label->alignInTopLeft();
 
     button.reset();
     button = std::make_shared<Button>(window, "Link Navigraph Account");

@@ -274,15 +274,15 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
 }
 
 void MapApp::resetWidgets() {
-    overlayLabel.reset();
+    waypointCheckbox.reset();
+    ilsCheckbox.reset();
     ndbCheckbox.reset();
     vorCheckbox.reset();
-    ilsCheckbox.reset();
-    waypointCheckbox.reset();
-    airportCheckbox.reset();
-    airstripCheckbox.reset();
     heliseaportCheckbox.reset();
+    airstripCheckbox.reset();
+    airportCheckbox.reset();
     aircraftCheckbox.reset();
+    overlayLabel.reset();
     overlaysContainer.reset();
 }
 
@@ -324,7 +324,6 @@ void MapApp::showOverlaySettings() {
     auto overlays = map->getOverlayConfig();
 
     overlayLabel = std::make_shared<Label>(overlaysContainer, "Overlays:");
-    overlayLabel->alignInTopLeft();
 
     aircraftCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Aircraft");
     aircraftCheckbox->setChecked(overlays.drawAircraft);
@@ -497,7 +496,6 @@ void MapApp::startCalibration() {
 
     coordsField = std::make_shared<TextArea>(window, "1.234, -2 30 59.9");
     coordsField->setDimensions(window->getContentWidth(), 40);
-    coordsField->alignInTopLeft();
 
     keyboard = std::make_unique<Keyboard>(window, coordsField);
     keyboard->setNumericLayout();

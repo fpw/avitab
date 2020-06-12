@@ -37,14 +37,14 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     std::string root = api().getDataPath() + "icons/";
 
     addEntry<ChartsApp>("Charts", root + "if_Airport_22906.png", AppId::CHARTS);
-    // addEntry<AirportApp>("Airports", root + "if_xmag_3617.png", AppId::AIRPORTS);
-    // addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png", AppId::ROUTES);
+    addEntry<AirportApp>("Airports", root + "if_xmag_3617.png", AppId::AIRPORTS);
+    addEntry<RouteApp>("Routes", root + "if_applications-internet_118835.png", AppId::ROUTES);
     addEntry<MapApp>("Maps", root + "if_starthere_18227.png", AppId::MAPS);
     addEntry<PlaneManualApp>("Aircraft", root + "if_ilustracoes_04-11_1519786.png", AppId::PLANE_MANUAL);
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png", AppId::NOTES);
 
     if (api().getNavigraph()->isSupported()) {
-        // addEntry<NavigraphApp>("Navigraph", root + "navigraph.png", AppId::NAVIGRAPH);
+        addEntry<NavigraphApp>("Navigraph", root + "navigraph.png", AppId::NAVIGRAPH);
     }
 
     addEntry<About>("About", root + "if_Help_1493288.png", AppId::ABOUT);

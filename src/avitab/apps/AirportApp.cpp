@@ -44,7 +44,6 @@ void AirportApp::resetLayout() {
     searchWindow->setOnClose([this] { exit(); });
 
     searchField = std::make_shared<TextArea>(searchWindow, "");
-    searchField->alignInTopLeft();
     searchField->setDimensions(searchField->getWidth(), 30);
 
     searchLabel = std::make_shared<Label>(searchWindow, "Enter a keyword or ICAO code");
