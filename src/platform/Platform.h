@@ -65,6 +65,7 @@ bool fileExists(const std::string &utf8Path);
 void mkdir(const std::string &utf8Path);
 void mkpath(const std::string &utf8Path);
 void removeFile(const std::string &utf8Path);
+std::string readFully(const std::string &utf8Path);
 
 std::string getLocalTime(const std::string &format);
 std::string getClipboardContent();

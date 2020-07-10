@@ -18,12 +18,8 @@
 #include <XPLM/XPLMGraphics.h>
 #include <XPLM/XPLMDisplay.h>
 #include <XPLM/XPLMUtilities.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
+#include <GL/glew.h>
+
 #include <stdexcept>
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
@@ -38,19 +34,25 @@ XPlaneGUIDriver::XPlaneGUIDriver():
 {
 }
 
-void XPlaneGUIDriver::init(int width, int height) {
+void XPlaneGUIDriver::init(int w, int h) {
+    glewInit();
+
     logger::verbose("Initializing X-Plane GUI driver");
-    GUIDriver::init(width, height);
+    GUIDriver::init(w, h);
     setupKeyboard();
     XPLMGenerateTextureNumbers(&textureId, 1);
 
     XPLMBindTexture2d(textureId, 0);
-
-    glTexImage2D(GL_TEXTURE_2D, 0,
-            GL_RGBA, this->width(), this->height(), 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    pbo.init(width(), height(), cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width()));
+
+    auto fontManager = std::make_shared<html::FontManager>();
+    htmlEngine = std::make_shared<html::Engine>(fontManager);
+    htmlEngine->setTargetSize(this->width(), this->height());
+    htmlEngine->load("");
+
+    needsRedraw = true;
 }
 
 void XPlaneGUIDriver::setupVRCapture() {
@@ -59,13 +61,13 @@ void XPlaneGUIDriver::setupVRCapture() {
         logger::warn("Could not setup VR trigger check: command not found");
         return;
     }
-    
+
     auto assignmentsRef = XPLMFindDataRef("sim/joystick/joystick_button_assignments");
     if (!assignmentsRef) {
         logger::warn("Could not setup VR trigger check: assignments ref not found");
         return;
     }
-    
+
     vrTriggerIndices.clear();
 
     int assignments[3200];
@@ -248,7 +250,7 @@ void XPlaneGUIDriver::killWindow() {
 }
 
 void XPlaneGUIDriver::blit(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint32_t* data) {
-    GUIDriver::blit(x1, y1, x2, y2, data);
+    // GUIDriver::blit(x1, y1, x2, y2, data);
 
     std::lock_guard<std::mutex> lock(drawMutex);
     needsRedraw = true;
@@ -263,15 +265,23 @@ void XPlaneGUIDriver::onDraw() {
     int left, top, right, bottom;
     XPLMGetWindowGeometry(window, &left, &top, &right, &bottom);
 
-    XPLMBindTexture2d(textureId, 0);
-    redrawTexture();
+    int newWidth = right - left;
+    int newHeight = top - bottom;
 
+    XPLMBindTexture2d(textureId, 0);
     XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
+
+    if (newWidth != width() || newHeight != height()) {
+        this->resize(newWidth, newHeight);
+        pbo.setSize(newWidth, newHeight, cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, newWidth));
+    }
+
+    redrawTexture();
 
     float b = *brightness;
     glColor3f(b, b, b);
 
-    correctRatio(left, top, right, bottom);
+    // correctRatio(left, top, right, bottom);
     renderWindowTexture(left, top, right, bottom);
 }
 
@@ -322,14 +332,7 @@ void XPlaneGUIDriver::onDrawPanel() {
 }
 
 void XPlaneGUIDriver::redrawTexture() {
-    std::lock_guard<std::mutex> lock(drawMutex);
-    if (needsRedraw) {
-        glTexSubImage2D(GL_TEXTURE_2D, 0,
-                0, 0,
-                width(), height(),
-                GL_BGRA, GL_UNSIGNED_BYTE, data());
-        needsRedraw = false;
-    }
+    pbo.drawFrontBuffer();
 }
 
 void XPlaneGUIDriver::correctRatio(int left, int top, int& right, int& bottom) {
@@ -373,6 +376,28 @@ void XPlaneGUIDriver::readPointerState(int &x, int &y, bool &pressed) {
     x = mouseX;
     y = mouseY;
     pressed = mousePressed;
+
+    void *backBuffer = pbo.getBackBuffer();
+    if (!backBuffer) {
+        return;
+    }
+
+    int dw = pbo.getBackbufferWidth();
+    int dh = pbo.getBackbufferHeight();
+    int stride = pbo.getBackBufferStride();
+
+    cairo_surface_t *surface = cairo_image_surface_create_for_data(reinterpret_cast<unsigned char *>(backBuffer), CAIRO_FORMAT_ARGB32, dw, dh, stride);
+    cairo_t *cr = cairo_create(surface);
+
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_fill(cr);
+
+    htmlEngine->setTargetSize(dw, dh);
+    htmlEngine->draw(cr, 0, 0, dw, dh);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    pbo.finishBackBuffer();
 }
 
 bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {

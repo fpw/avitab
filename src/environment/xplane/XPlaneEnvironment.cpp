@@ -231,8 +231,8 @@ std::string XPlaneEnvironment::getAirplanePath() {
     char file[512];
     char path[512];
     XPLMGetNthAircraftModel(0, file, path);
-    std::string pluginPath = platform::nativeToUTF8(path);
-    return platform::getDirNameFromPath(pluginPath) + "/";
+    std::string acfPath = platform::nativeToUTF8(path);
+    return platform::getDirNameFromPath(acfPath) + "/";
 }
 
 std::string XPlaneEnvironment::getProgramPath() {

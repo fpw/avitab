@@ -72,7 +72,7 @@ void AviTab::startApp() {
         }
     });
     createPanel();
-    guiLib->executeLater(std::bind(&AviTab::createLayout, this));
+    // guiLib->executeLater(std::bind(&AviTab::createLayout, this));
 }
 
 void AviTab::toggleTablet() {

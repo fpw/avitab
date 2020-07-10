@@ -68,6 +68,7 @@ msys*)
     pacmanInstall msys/autoconf
     pacmanInstall msys/automake
     pacmanInstall msys/libtool
+    pacmanInstall msys/pkg-config
     pacmanInstall mingw64/mingw-w64-x86_64-glfw
   elif [ "$answer" == "2" ]; then
     echo "Please download it from: https://www.msys2.org/ and install it, then run this script again."

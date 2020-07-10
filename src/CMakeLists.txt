@@ -24,13 +24,15 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/lib/QuickJS/"
     "${PROJECT_SOURCE_DIR}/lib/mupdf/thirdparty/freetype/include")
 
-add_definitions(-DCURL_STATICLIB)
+add_definitions(-DCURL_STATICLIB -DGLEW_STATIC -DFONS_USE_FREETYPE -DLITEHTML_UTF8)
 
 target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libgeotiff.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libproj.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libtiff.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libxtiff.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/libcairo.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/libpixman-1.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmupdf.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmupdf-third.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libcurl.a
@@ -39,6 +41,8 @@ target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmbedcrypto.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libdetex.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libquickjs.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/liblitehtml.a
+    ${PROJECT_SOURCE_DIR}/build-third/lib/libgumbo.a
     xdata
 )
 
@@ -63,6 +67,7 @@ if(WIN32)
         avitab_common
         ${PROJECT_SOURCE_DIR}/build-third/lib/libcurl.a
         ${PROJECT_SOURCE_DIR}/build-third/lib/XPLM_64.lib
+        glew32
         opengl32
     )
 elseif(APPLE)
@@ -113,6 +118,7 @@ if(WIN32)
         avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libcurl.a
         glfw3
+        glew32
         opengl32
         -Wl,--subsystem,windows
     )

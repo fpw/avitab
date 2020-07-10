@@ -20,9 +20,12 @@
 
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <memory>
 #include <mutex>
 #include <atomic>
 #include "src/environment/GUIDriver.h"
+#include "src/gui_toolkit/html/Engine.h"
+#include "src/gui_toolkit/AsyncPBO.h"
 
 namespace avitab {
 
@@ -43,17 +46,18 @@ public:
     int getWheelDirection() override;
     ~GlfwGUIDriver();
 private:
-    static constexpr const float ZOOM = 1.5f;
-
+    bool ready = false;
     std::mutex driverMutex;
     GLFWwindow *window {};
     GLuint textureId{};
     std::atomic<uint32_t> lastDrawTime {0};
     float brightness = 1;
-    bool needsRedraw = false;
 
     std::atomic_int mouseX {0}, mouseY {0}, wheelDir {0};
     bool mousePressed {false};
+
+    std::shared_ptr<html::Engine> htmlEngine;
+    AsyncPBO pbo;
 
     void createTexture();
     void render();

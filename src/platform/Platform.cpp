@@ -254,6 +254,16 @@ void removeFile(const std::string& utf8Path) {
     (void) ::remove(nativePath.c_str());
 }
 
+std::string readFully(const std::string &utf8Path) {
+    std::string nativePath = UTF8ToNative(utf8Path);
+    std::ifstream fileStream(nativePath);
+    if (!fileStream) {
+        throw std::runtime_error("Could not read file string");
+    }
+    std::string data((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+    return data;
+}
+
 std::string getLocalTime(const std::string &format) {
     time_t now = time(nullptr);
     tm *local = localtime(&now);

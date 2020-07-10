@@ -27,13 +27,18 @@
 #include "src/environment/GUIDriver.h"
 #include "DataRef.h"
 
+#include "src/gui_toolkit/html/Engine.h"
+#include "src/gui_toolkit/AsyncPBO.h"
+
 namespace avitab {
+
+class XPlaneEnvironment;
 
 class XPlaneGUIDriver: public GUIDriver {
 public:
     XPlaneGUIDriver();
 
-    void init(int width, int height) override;
+    void init(int w, int h) override;
     void createWindow(const std::string &title) override;
     bool hasWindow() override;
     void killWindow() override;
@@ -55,6 +60,7 @@ public:
 
     ~XPlaneGUIDriver();
 private:
+    AsyncPBO pbo;
     std::shared_ptr<float> brightness;
     DataRef<bool> isVrEnabled;
     DataRef<float> clickX, clickY;
@@ -71,6 +77,8 @@ private:
     std::vector<int> vrTriggerIndices;
     bool mouseDownFromTrigger = false;
     bool hasPanel = false;
+
+    std::shared_ptr<html::Engine> htmlEngine;
 
     void onDraw();
     void onDrawPanel();

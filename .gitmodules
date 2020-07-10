@@ -46,3 +46,12 @@
 	path = lib/QuickJS
     url = https://github.com/ldarren/QuickJS/
     ignore = dirty
+[submodule "lib/litehtml"]
+	path = lib/litehtml
+	url = https://github.com/litehtml/litehtml.git
+[submodule "lib/pixman"]
+	path = lib/pixman
+	url = git://anongit.freedesktop.org/git/pixman.git
+[submodule "lib/cairo"]
+	path = lib/cairo
+	url = git://anongit.freedesktop.org/git/cairo

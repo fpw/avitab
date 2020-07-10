@@ -1,8 +1,16 @@
 diff --git a/Makethird b/Makethird
-index 68b4b694c..7e4212d97 100644
+index 68b4b694c..ac5caa5c1 100644
 --- a/Makethird
 +++ b/Makethird
-@@ -199,7 +199,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.c
+@@ -43,6 +43,7 @@ THIRD_SRC += thirdparty/freetype/src/base/ftstroke.c
+ THIRD_SRC += thirdparty/freetype/src/base/ftsynth.c
+ THIRD_SRC += thirdparty/freetype/src/base/ftsystem.c
+ THIRD_SRC += thirdparty/freetype/src/base/fttype1.c
++THIRD_SRC += thirdparty/freetype/src/base/ftmm.c
+ THIRD_SRC += thirdparty/freetype/src/cff/cff.c
+ THIRD_SRC += thirdparty/freetype/src/cid/type1cid.c
+ THIRD_SRC += thirdparty/freetype/src/psaux/psaux.c
+@@ -199,7 +200,22 @@ THIRD_SRC += thirdparty/libjpeg/jmemmgr.c
  THIRD_SRC += thirdparty/libjpeg/jquant1.c
  THIRD_SRC += thirdparty/libjpeg/jquant2.c
  THIRD_SRC += thirdparty/libjpeg/jutils.c
@@ -24,7 +32,7 @@ index 68b4b694c..7e4212d97 100644
 +THIRD_SRC += thirdparty/libjpeg/jcsample.c
 +THIRD_SRC += thirdparty/libjpeg/jmemansi.c
  THIRD_CFLAGS += -Iscripts/libjpeg -Ithirdparty/libjpeg
- 
+
  $(OUT)/thirdparty/libjpeg/%.o: thirdparty/libjpeg/%.c
 diff --git a/include/mupdf/fitz/config.h b/include/mupdf/fitz/config.h
 index ea91e876d..ce3c26b48 100644

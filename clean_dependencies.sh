@@ -45,3 +45,13 @@ cd QuickJS
 git clean -d -x -f
 cd ..
 
+echo "Cleaning pixman..."
+cd pixman
+git clean -d -x -f
+cd ..
+
+echo "Cleaning cairo..."
+cd cairo
+git clean -d -x -f
+cd ..
+
