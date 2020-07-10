@@ -80,10 +80,18 @@ void XData::loadAirports() {
 void XData::loadCustomScenery(const AirportLoader& loader) {
     CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
     parser.setAcceptor([this,loader] (const std::string &data) {
-        auto customSceneryDir = xplaneRoot + data + "/Earth nav data/apt.dat";
-        
-        if (!platform::fileExists(customSceneryDir))
+        std::string customSceneryDir;
+        if (data.find(":") != std::string::npos || (!data.empty() && data[0] == '/')) {
+            customSceneryDir = platform::UTF8ToNative(data + "/Earth nav data/apt.dat");
+        } else {
+            customSceneryDir = platform::UTF8ToNative(xplaneRoot + data + "/Earth nav data/apt.dat");
+        }
+
+        logger::verbose("Parsing scenery pack '%s'", data.c_str());
+
+        if (!platform::fileExists(customSceneryDir)) {
             return;
+        }
 
         logger::info("Loading custom scenery airport for %s", data.c_str());
         loader.load(customSceneryDir);
