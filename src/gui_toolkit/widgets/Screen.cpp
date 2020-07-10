@@ -48,6 +48,10 @@ Screen::Screen():
     setManaged();
 }
 
+Screen::~Screen() {
+    lv_obj_set_signal_cb(obj(), originalSignalCB);
+}
+
 void Screen::setOnResize(Screen::ResizeCB cb) {
     onResize = cb;
 }

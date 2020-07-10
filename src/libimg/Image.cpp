@@ -17,10 +17,12 @@
  */
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STBI_WINDOWS_UTF8
 #include <stb/stb_image.h>
 #include <stb/stb_image_resize.h>
 #include <stdexcept>
 #include <cstring>
+#include <filesystem>
 #include <cstdlib>
 #include <cmath>
 #include <fstream>
@@ -60,14 +62,13 @@ Image& Image::operator =(Image&& other) {
 }
 
 void Image::loadImageFile(const std::string& utf8Path) {
-    std::string nativePath = platform::UTF8ToNative(utf8Path);
     int nChannels = 4;
     int nComponents = 0;
     int imgWidth, imgHeight;
-    uint8_t *decodedData = stbi_load(nativePath.c_str(), &imgWidth, &imgHeight, &nComponents, nChannels);
+    uint8_t *decodedData = stbi_load(utf8Path.c_str(), &imgWidth, &imgHeight, &nComponents, nChannels);
 
     if (!decodedData) {
-        throw std::runtime_error("Couldn't load image " + nativePath + ": " + stbi_failure_reason());
+        throw std::runtime_error("Couldn't load image " + utf8Path + ": " + stbi_failure_reason());
     }
 
     setPixels(decodedData, imgWidth, imgHeight);
@@ -121,8 +122,7 @@ void Image::storeAndClearEncodedData(const std::string& utf8Path) {
     auto path = platform::getDirNameFromPath(utf8Path);
     platform::mkpath(path);
 
-    std::string nativeName = platform::UTF8ToNative(utf8Path);
-    std::ofstream stream(nativeName, std::ios::out | std::ios::binary);
+    std::ofstream stream(std::filesystem::u8path(utf8Path), std::ios::out | std::ios::binary);
     stream.write(reinterpret_cast<const char *>(encodedData->data()), encodedData->size());
 
     encodedData.reset();

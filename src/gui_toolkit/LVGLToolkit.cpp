@@ -24,7 +24,13 @@
 
 namespace avitab {
 
-bool LVGLToolkit::lvglIsInitialized = false;
+namespace {
+bool lvglIsInitialized = false;
+lv_disp_buf_t lvDispBuf;
+lv_disp_drv_t lvDriver;
+lv_indev_drv_t inputDriver;
+std::vector<uint32_t> tmpBuffer;
+}
 
 LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
     driver(drv)
@@ -48,13 +54,14 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
         });
 
         lv_init();
-        initDisplayDriver();
-        initInputDriver();
 
         lv_theme_t *theme = lv_theme_night_init(210, LV_FONT_DEFAULT);
         lv_theme_set_current(theme);
         lvglIsInitialized = true;
     }
+
+    initDisplayDriver();
+    initInputDriver();
 
     // if keepAlive if true, the window was hidden without us noticing
     // so it's enough to re-create it without starting rendering again
@@ -65,6 +72,7 @@ LVGLToolkit::LVGLToolkit(std::shared_ptr<GUIDriver> drv):
 
 void LVGLToolkit::initDisplayDriver() {
     static_assert(sizeof(lv_color_t) == sizeof(uint32_t), "Invalid lvgl color type");
+    bool isUpdate = (lvDriver.buffer != nullptr);
 
     tmpBuffer.resize(LV_HOR_RES_MAX * LV_VER_RES_MAX);
     lv_disp_buf_init(&lvDispBuf, tmpBuffer.data(), nullptr, tmpBuffer.size());
@@ -92,19 +100,26 @@ void LVGLToolkit::initDisplayDriver() {
     };
 
     driver->setResizeCallback([this] (int w, int h) {
-        executeLater([this, w, h] {
+        executeLater([w, h] {
             lvDriver.hor_res = std::min(w, LV_HOR_RES_MAX);
             lvDriver.ver_res = std::min(h, LV_VER_RES_MAX);
             lv_disp_drv_update(lv_disp_get_default(), &lvDriver);
         });
     });
 
-    lv_disp_drv_register(&lvDriver);
+    if (isUpdate) {
+        lv_disp_drv_update(lv_disp_get_default(), &lvDriver);
+    } else {
+        lv_disp_drv_register(&lvDriver);
+    }
 }
 
 void LVGLToolkit::initInputDriver() {
-    lv_indev_drv_t inputDriver;
-    lv_indev_drv_init(&inputDriver);
+    bool isUpdate = (inputDriver.read_cb != nullptr);
+
+    if (!isUpdate) {
+        lv_indev_drv_init(&inputDriver);
+    }
 
     inputDriver.type = LV_INDEV_TYPE_POINTER;
     inputDriver.user_data = this;
@@ -122,7 +137,12 @@ void LVGLToolkit::initInputDriver() {
         data->point.y = y;
         return false;
     };
-    lv_indev_drv_register(&inputDriver);
+
+    if (isUpdate) {
+        lv_indev_drv_update(lv_indev_get_next(nullptr), &inputDriver);
+    } else {
+        lv_indev_drv_register(&inputDriver);
+    }
 }
 
 void LVGLToolkit::createNativeWindow(const std::string& title) {
@@ -305,6 +325,9 @@ void LVGLToolkit::executeLater(GUITask func) {
 }
 
 LVGLToolkit::~LVGLToolkit() {
+    logger::verbose("~LVGLToolkit");
+    inputDriver.user_data = nullptr;
+    lvDriver.user_data = nullptr;
     destroyNativeWindow();
 }
 

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <fstream>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include "OIDCClient.h"
 #include "src/Logger.h"
@@ -281,7 +282,7 @@ void OIDCClient::tryWithRelogin(std::function<void()> f) {
 void OIDCClient::loadTokens() {
     auto key = clientSecret + platform::getMachineID();
 
-    std::ifstream fileStream(platform::UTF8ToNative(tokenFile));
+    std::ifstream fileStream(std::filesystem::u8path(tokenFile));
     std::string line;
     std::getline(fileStream, line);
 
@@ -310,7 +311,7 @@ void OIDCClient::storeTokens() {
         {"id_token", idToken},
     };
 
-    std::ofstream fileStream(platform::UTF8ToNative(tokenFile));
+    std::ofstream fileStream(std::filesystem::u8path(tokenFile));
     fileStream << crypto.aesEncrypt(tokenStream.str(), key);
 }
 

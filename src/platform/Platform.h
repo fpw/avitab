@@ -53,8 +53,7 @@ int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt)
 #endif
 
 constexpr size_t getMaxPathLen();
-std::string nativeToUTF8(const std::string &native);
-std::string UTF8ToNative(const std::string &utf8);
+std::string UTF8ToACP(const std::string &utf8);
 
 std::string getProgramPath();
 std::vector<DirEntry> readDirectory(const std::string &utf8Path);

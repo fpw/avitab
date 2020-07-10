@@ -82,9 +82,9 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
     parser.setAcceptor([this,loader] (const std::string &data) {
         std::string customSceneryDir;
         if (data.find(":") != std::string::npos || (!data.empty() && data[0] == '/')) {
-            customSceneryDir = platform::UTF8ToNative(data + "/Earth nav data/apt.dat");
+            customSceneryDir = data + "/Earth nav data/apt.dat";
         } else {
-            customSceneryDir = platform::UTF8ToNative(xplaneRoot + data + "/Earth nav data/apt.dat");
+            customSceneryDir = xplaneRoot + data + "/Earth nav data/apt.dat";
         }
 
         logger::verbose("Parsing scenery pack '%s'", data.c_str());
@@ -93,8 +93,12 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
             return;
         }
 
-        logger::info("Loading custom scenery airport for %s", data.c_str());
-        loader.load(customSceneryDir);
+        try {
+            logger::info("Loading custom scenery airport for %s", data.c_str());
+            loader.load(customSceneryDir);
+        } catch (const std::exception &e) {
+            logger::warn("Unable to parse custom scenery: %s", e.what());
+        }
     });
     parser.loadCustomScenery();
 }

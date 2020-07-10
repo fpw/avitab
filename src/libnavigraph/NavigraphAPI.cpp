@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include "NavigraphAPI.h"
 #include "src/Logger.h"
@@ -205,11 +206,11 @@ void NavigraphAPI::loadAirports() {
         auto jsonData = oidc->get("https://charts.api.navigraph.com/1/airports");
         nlohmann::json tmpJson = nlohmann::json::parse(jsonData);
 
-        std::ofstream jsonStream(platform::UTF8ToNative(airportFileName));
+        std::ofstream jsonStream(std::filesystem::u8path(airportFileName));
         jsonStream << std::setw(4) << tmpJson;
     }
 
-    std::ifstream jsonStream(platform::UTF8ToNative(airportFileName));
+    std::ifstream jsonStream(std::filesystem::u8path(airportFileName));
     airportJson = std::make_shared<nlohmann::json>();
     jsonStream >> *airportJson;
 }

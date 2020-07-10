@@ -32,11 +32,10 @@ namespace {
 namespace img {
 
 void XTiffImage::loadTIFF(const std::string& utf8Path) {
-    std::string nativePath = platform::UTF8ToNative(utf8Path);
-
     TIFFSetWarningHandler(onTiffWarning);
     TIFFSetErrorHandler(onTiffError);
-    tif = XTIFFOpen(nativePath.c_str(), "r");
+    auto path = platform::UTF8ToACP(utf8Path);
+    tif = XTIFFOpen(path.c_str(), "r");
 
     if (!tif) {
         throw std::runtime_error("Couldn't open TIFF");

@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include "Config.h"
@@ -25,7 +26,7 @@ using json = nlohmann::json;
 namespace avitab {
 
 Config::Config(const std::string& configFile) {
-    std::ifstream configStream(configFile);
+    std::ifstream configStream(std::filesystem::u8path(configFile));
 
     if (!configStream) {
         throw std::runtime_error(std::string("Couldn't read config file ") + configFile);

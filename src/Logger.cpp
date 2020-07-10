@@ -22,6 +22,7 @@
 #include <sstream>
 #include <cstring>
 #include <libgen.h>
+#include <filesystem>
 
 #include "Logger.h"
 #include "src/platform/Platform.h"
@@ -48,7 +49,7 @@ void log(const std::string format, va_list args) {
 }
 
 void logger::init(const std::string &path) {
-    logFile = std::ofstream(path + "AviTab.log");
+    logFile = std::ofstream(std::filesystem::u8path(path + "AviTab.log"));
     info("AviTab logger initialized");
 }
 

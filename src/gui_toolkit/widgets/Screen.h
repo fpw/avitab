@@ -28,6 +28,7 @@ public:
     using ResizeCB = std::function<void()>;
 
     Screen();
+    ~Screen();
     void setOnResize(ResizeCB cb);
 
 private:
