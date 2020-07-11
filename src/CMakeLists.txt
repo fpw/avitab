@@ -82,6 +82,7 @@ elseif(UNIX)
     target_link_libraries(avitab_plugin
         -static-libgcc
         -static-libstdc++
+	-lstdc++fs
         -fPIC
         avitab_xplane
         avitab_common
@@ -134,5 +135,6 @@ elseif(UNIX)
         GL
         glfw
         pthread
+	-lstdc++fs
     )
 endif()

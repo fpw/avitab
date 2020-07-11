@@ -124,7 +124,7 @@ std::string getProgramPath() {
     if (!getcwd(buf, sizeof(buf))) {
         throw std::runtime_error("Couldn't get current directory");
     }
-    std::string path = nativeToUTF8(buf) + "/";
+    std::string path = std::string(buf) + "/";
     return path;
 }
 #endif
