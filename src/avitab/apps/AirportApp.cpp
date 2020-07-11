@@ -25,6 +25,10 @@
 
 namespace avitab {
 
+namespace {
+int padHeight = 40;
+}
+
 AirportApp::AirportApp(FuncsPtr appFuncs):
     App(appFuncs),
     updateTimer(std::bind(&AirportApp::onTimer, this), 200)
@@ -309,7 +313,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
     tab.label->setVisible(false);
     tab.charts = charts;
     tab.chartSelect = std::make_shared<List>(tab.window);
-    tab.chartSelect->setDimensions(tab.window->getContentWidth() - 5, tab.window->getHeight() - 75);
+    tab.chartSelect->setDimensions(tab.window->getContentWidth() - 5, tab.window->getHeight() - padHeight);
 
     if (tab.requestedList == "ROOT") {
         tab.chartSelect->add("Airport (" + std::to_string(countCharts(charts, "APT")) + ")", -1);
@@ -427,7 +431,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     tab.pixMap->draw(*tab.mapImage);
     tab.pixMap->setClickable(true);
     tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
-    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - 68);
+    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - padHeight);
     tab.pixMap->centerInParent();
 
     auto chartImage = getChartImage(tab.chart);
