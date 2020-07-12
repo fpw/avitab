@@ -66,6 +66,9 @@ void XData::discoverSceneries() {
     } catch (const std::exception &e) {
         logger::warn("Could not load scenery_packs.ini: %s", e.what());
     }
+
+    logger::verbose("Loading METAR...");
+    loadMetar();
 }
 
 std::shared_ptr<World> XData::getWorld() {
@@ -74,14 +77,20 @@ std::shared_ptr<World> XData::getWorld() {
 
 void XData::load() {
     auto startAt = std::chrono::steady_clock::now();
+    logger::verbose("Loading airports...");
     loadAirports();
+    logger::verbose("Loading fixes...");
     loadFixes();
+    logger::verbose("Loading navaids...");
     loadNavaids();
+    logger::verbose("Loading airways...");
     loadAirways();
+    logger::verbose("Loading CIFP...");
     loadProcedures();
-    loadMetar();
     auto duration = std::chrono::steady_clock::now() - startAt;
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+
+    logger::verbose("Build node network...");
     world->registerNavNodes();
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
