@@ -46,3 +46,6 @@
 	path = lib/QuickJS
     url = https://github.com/ldarren/QuickJS/
     ignore = dirty
+[submodule "lib/filesystem"]
+	path = lib/filesystem
+	url = https://github.com/gulrak/filesystem.git

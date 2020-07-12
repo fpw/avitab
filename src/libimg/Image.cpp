@@ -22,7 +22,6 @@
 #include <stb/stb_image_resize.h>
 #include <stdexcept>
 #include <cstring>
-#include <filesystem>
 #include <cstdlib>
 #include <cmath>
 #include <fstream>
@@ -122,7 +121,7 @@ void Image::storeAndClearEncodedData(const std::string& utf8Path) {
     auto path = platform::getDirNameFromPath(utf8Path);
     platform::mkpath(path);
 
-    std::ofstream stream(std::filesystem::u8path(utf8Path), std::ios::out | std::ios::binary);
+    fs::ofstream stream(fs::u8path(utf8Path), std::ios::out | std::ios::binary);
     stream.write(reinterpret_cast<const char *>(encodedData->data()), encodedData->size());
 
     encodedData.reset();

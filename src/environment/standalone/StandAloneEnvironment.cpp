@@ -15,9 +15,6 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
-#include <filesystem>
-#include <fstream>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -53,7 +50,7 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
         return "";
     }
 
-    std::ifstream file(std::filesystem::u8path(installFile));
+    fs::ifstream file(fs::u8path(installFile));
     std::string installDir;
     std::getline(file, installDir);
     return installDir;

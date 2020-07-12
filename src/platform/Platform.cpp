@@ -17,7 +17,6 @@
  */
 #ifdef _WIN32
 #   define WIN32_LEAN_AND_MEAN
-#   define _WIN32_WINNT 0x0600
 #   include <windows.h>
 #   include <shellapi.h>
 #else
@@ -25,7 +24,6 @@
 #   include <uuid/uuid.h>
 #endif
 
-#include <filesystem>
 #include <locale>
 #include <codecvt>
 #include <ctime>
@@ -147,7 +145,7 @@ std::string UTF8ToACP(const std::string& utf8) {
 std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
     std::vector<DirEntry> entries;
 
-    for (auto &e: std::filesystem::directory_iterator(std::filesystem::u8path(utf8Path))) {
+    for (auto &e: fs::directory_iterator(fs::u8path(utf8Path))) {
         std::string name = e.path().filename().string();
 
         if (name.empty() || name[0] == '.') {
@@ -166,12 +164,12 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 }
 
 std::string realPath(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
-    return std::filesystem::canonical(path).string();
+    auto path = fs::u8path(utf8Path);
+    return fs::canonical(path).string();
 }
 
 std::string getFileNameFromPath(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
+    auto path = fs::u8path(utf8Path);
     if (path.has_filename()) {
         return path.filename().string();
     } else {
@@ -180,28 +178,28 @@ std::string getFileNameFromPath(const std::string& utf8Path) {
 }
 
 std::string getDirNameFromPath(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
+    auto path = fs::u8path(utf8Path);
     return path.parent_path().string();
 }
 
 bool fileExists(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
-    return std::filesystem::exists(std::filesystem::u8path(utf8Path));
+    auto path = fs::u8path(utf8Path);
+    return fs::exists(fs::u8path(utf8Path));
 }
 
 void mkdir(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
-    std::filesystem::create_directory(path);
+    auto path = fs::u8path(utf8Path);
+    fs::create_directory(path);
 }
 
 void mkpath(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
-    std::filesystem::create_directories(path);
+    auto path = fs::u8path(utf8Path);
+    fs::create_directories(path);
 }
 
 void removeFile(const std::string& utf8Path) {
-    auto path = std::filesystem::u8path(utf8Path);
-    std::filesystem::remove(path);
+    auto path = fs::u8path(utf8Path);
+    fs::remove(path);
 }
 
 std::string getLocalTime(const std::string &format) {

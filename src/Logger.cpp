@@ -17,19 +17,17 @@
  */
 #include <cstdarg>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <cstring>
 #include <libgen.h>
-#include <filesystem>
 
 #include "Logger.h"
 #include "src/platform/Platform.h"
 
 namespace {
 
-std::ofstream logFile;
+fs::ofstream logFile;
 bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
@@ -49,7 +47,7 @@ void log(const std::string format, va_list args) {
 }
 
 void logger::init(const std::string &path) {
-    logFile = std::ofstream(std::filesystem::u8path(path + "AviTab.log"));
+    logFile.open(fs::u8path(path + "AviTab.log"));
     info("AviTab logger initialized");
 }
 

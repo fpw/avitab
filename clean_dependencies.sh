@@ -5,7 +5,7 @@ rm -rf "$OUTDIR"
 
 cd lib
 
-echo "Clearning detex..."
+echo "Cleaning detex..."
 cd detex
 git clean -d -x -f
 cd ..
