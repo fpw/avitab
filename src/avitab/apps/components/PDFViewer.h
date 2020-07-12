@@ -42,13 +42,13 @@ public:
     void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<Window> window;
-    std::unique_ptr<PixMap> pixMap;
     Timer updateTimer;
 
     std::vector<std::string> fileNames;
     size_t fileIndex = 0;
 
     std::shared_ptr<img::Image> rasterImage;
+    std::unique_ptr<PixMap> pixMap;
     std::shared_ptr<maps::PDFSource> source;
     std::shared_ptr<img::Stitcher> stitcher;
     std::unique_ptr<maps::OverlayedMap> map;
