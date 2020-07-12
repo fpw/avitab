@@ -45,24 +45,27 @@ std::string XData::determineNavDataPath() {
 
 void XData::discoverSceneries() {
     logger::verbose("Discovering user sceneries...");
-    CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
-    parser.setAcceptor([this] (const std::string &entry) {
-        std::string customSceneryDir;
-        if (entry.find(":") != std::string::npos || (!entry.empty() && entry[0] == '/')) {
-            customSceneryDir = entry + "/Earth nav data/apt.dat";
-        } else {
-            customSceneryDir = xplaneRoot + entry + "/Earth nav data/apt.dat";
-        }
+    try {
+        CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
+        parser.setAcceptor([this](const std::string &entry) {
+            std::string customSceneryDir;
+            if (entry.find(":") != std::string::npos || (!entry.empty() && entry[0] == '/')) {
+                customSceneryDir = entry + "/Earth nav data/apt.dat";
+            } else {
+                customSceneryDir = xplaneRoot + entry + "/Earth nav data/apt.dat";
+            }
 
-        if (!platform::fileExists(customSceneryDir)) {
-            logger::verbose("Skipping scenery %s", entry.c_str());
-            return;
-        }
+            if (!platform::fileExists(customSceneryDir)) {
+                logger::verbose("Skipping scenery %s", entry.c_str());
+                return;
+            }
 
-        customSceneries.push_back(customSceneryDir);
-    });
-
-    parser.loadCustomScenery();
+            customSceneries.push_back(customSceneryDir);
+        });
+        parser.loadCustomScenery();
+    } catch (const std::exception &e) {
+        logger::warn("Could not load scenery_packs.ini: %s", e.what());
+    }
 }
 
 std::shared_ptr<World> XData::getWorld() {
