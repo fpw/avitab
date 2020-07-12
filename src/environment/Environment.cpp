@@ -22,6 +22,7 @@
 namespace avitab {
 
 void Environment::loadNavWorldInBackground() {
+    getNavData()->discoverSceneries();
     navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
 }
 

@@ -20,6 +20,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include "src/libxdata/world/World.h"
 #include "src/libxdata/world/loaders/AirportLoader.h"
 
@@ -28,6 +29,7 @@ namespace xdata {
 class XData {
 public:
     XData(const std::string &dataRootPath);
+    void discoverSceneries();
     void load();
     void cancelLoading();
     void reloadMetar();
@@ -36,6 +38,7 @@ private:
     std::string xplaneRoot;
     std::string navDataPath;
     std::shared_ptr<World> world;
+    std::vector<std::string> customSceneries;
 
     std::string determineNavDataPath();
 
