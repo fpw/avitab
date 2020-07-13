@@ -153,6 +153,7 @@ bool AirportParser::parseWaterwayEnd(AirportData::RunwayEnd& end) {
     end.name = firstWord;
     end.latitude = parser.parseDouble();
     end.longitude = parser.parseDouble();
+    end.displace = 0;
 
     return true;
 }

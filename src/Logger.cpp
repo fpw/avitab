@@ -21,17 +21,22 @@
 #include <sstream>
 #include <cstring>
 #include <libgen.h>
+#include <mutex>
 
 #include "Logger.h"
 #include "src/platform/Platform.h"
 
 namespace {
 
+std::mutex logMutex;
+
 fs::ofstream logFile;
 bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
     if (logFile) {
+        std::lock_guard<std::mutex> lock(logMutex);
+
         char buf[8192];
         vsnprintf(buf, sizeof(buf), format.c_str(), args);
 
