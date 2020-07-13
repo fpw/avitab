@@ -143,9 +143,10 @@ std::string UTF8ToACP(const std::string& utf8) {
 #endif
 
 std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
     std::vector<DirEntry> entries;
 
-    for (auto &e: fs::directory_iterator(fs::u8path(utf8Path))) {
+    for (auto &e: fs::directory_iterator(path)) {
         std::string name = e.path().filename().string();
 
         if (name.empty() || name[0] == '.') {
@@ -184,7 +185,7 @@ std::string getDirNameFromPath(const std::string& utf8Path) {
 
 bool fileExists(const std::string& utf8Path) {
     auto path = fs::u8path(utf8Path);
-    return fs::exists(fs::u8path(utf8Path));
+    return fs::exists(path);
 }
 
 void mkdir(const std::string& utf8Path) {

@@ -31,6 +31,7 @@ public:
     void show() override;
     void onMouseWheel(int dir, int x, int y) override;
 private:
+    std::string currentAircraft;
     std::shared_ptr<MessageBox> errorMsg;
     std::string currentPath;
     std::shared_ptr<App> childApp;
@@ -38,6 +39,8 @@ private:
     void showFileSelect();
     void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
     void onSelectionClosed();
+
+    void showAircraftFolder();
 };
 
 } /* namespace avitab */

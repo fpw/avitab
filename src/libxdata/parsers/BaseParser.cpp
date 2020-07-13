@@ -18,15 +18,13 @@
 #include "BaseParser.h"
 #include <iostream>
 #include <stdexcept>
-#include <sstream>
-#include <algorithm>
 #include <limits>
 
 namespace xdata {
 
-BaseParser::BaseParser(const std::string& file):
-    stream(fs::u8path(file))
-{
+BaseParser::BaseParser(const std::string& file) {
+    stream.open(fs::u8path(file));
+
     if (!stream) {
         throw std::runtime_error("Couldn't open file: " + file);
     }

@@ -48,27 +48,23 @@ void XData::discoverSceneries() {
     try {
         CustomSceneryParser parser(xplaneRoot + "Custom Scenery/scenery_packs.ini");
         parser.setAcceptor([this](const std::string &entry) {
-            std::string customSceneryDir;
+            std::string aptFilePath;
             if (entry.find(":") != std::string::npos || (!entry.empty() && entry[0] == '/')) {
-                customSceneryDir = entry + "/Earth nav data/apt.dat";
+                aptFilePath = entry + "/Earth nav data/apt.dat";
             } else {
-                customSceneryDir = xplaneRoot + entry + "/Earth nav data/apt.dat";
+                aptFilePath = xplaneRoot + entry + "/Earth nav data/apt.dat";
             }
 
-            if (!platform::fileExists(customSceneryDir)) {
-                logger::verbose("Skipping scenery %s", entry.c_str());
+            if (!platform::fileExists(aptFilePath)) {
                 return;
             }
 
-            customSceneries.push_back(customSceneryDir);
+            customSceneries.push_back(aptFilePath);
         });
         parser.loadCustomScenery();
     } catch (const std::exception &e) {
         logger::warn("Could not load scenery_packs.ini: %s", e.what());
     }
-
-    logger::verbose("Loading METAR...");
-    loadMetar();
 }
 
 std::shared_ptr<World> XData::getWorld() {
@@ -104,14 +100,15 @@ void XData::loadAirports() {
 
     loadCustomScenery(loader);
 
+    logger::verbose("Loading default apt.dat");
     loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
 }
 
 void XData::loadCustomScenery(const AirportLoader& loader) {
-    for (auto &customSceneryDir: customSceneries) {
+    for (auto &aptDatPath: customSceneries) {
         try {
-            logger::info("Loading custom scenery airport for %s", customSceneryDir.c_str());
-            loader.load(customSceneryDir);
+            logger::info("Loading custom scenery airport for %s", aptDatPath.c_str());
+            loader.load(aptDatPath);
         } catch (const std::exception &e) {
             logger::warn("Unable to parse custom scenery: %s", e.what());
         }
@@ -149,6 +146,8 @@ void XData::loadProcedures() {
 
 void XData::loadMetar() {
     using namespace std::placeholders;
+
+    logger::verbose("Loading METAR...");
 
     try {
         MetarLoader loader(world);

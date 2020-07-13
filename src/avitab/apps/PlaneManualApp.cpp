@@ -26,40 +26,57 @@ namespace avitab {
 PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
     App(appFuncs)
 {
-    std::string planePath = api().getAirplanePath();
-    std::string manualPath = planePath + "manuals/";
+    showAircraftFolder();
+}
+
+void PlaneManualApp::show() {
+    auto aircraftPath = api().getAirplanePath();
+    if (aircraftPath != currentAircraft) {
+        errorMsg.reset();
+        childApp.reset();
+        showAircraftFolder();
+    }
+
+    if (childApp) {
+        childApp->show();
+    } else {
+        App::show();
+    }
+}
+
+void PlaneManualApp::showAircraftFolder() {
+    currentAircraft = api().getAirplanePath();
     bool showError = false;
 
-    if (platform::fileExists(manualPath)) {
-        currentPath = manualPath;
+    if (platform::fileExists(currentAircraft + "manual/")) {
+        currentPath = currentAircraft + "manual/";
+    } else if (platform::fileExists(currentAircraft + "manuals/")) {
+        currentPath = currentAircraft + "manuals/";
+    } else if (platform::fileExists(currentAircraft + "documentation/")) {
+        currentPath = currentAircraft + "documentation/";
     } else {
         showError = true;
-        if (platform::fileExists(planePath)) {
-            currentPath = planePath;
+        if (platform::fileExists(currentAircraft)) {
+            currentPath = currentAircraft;
         } else {
             currentPath = api().getDataPath();
         }
     }
 
-    if (showError) {
+    if (showError && !errorMsg) {
         errorMsg = std::make_shared<MessageBox>(
                 getUIContainer(),
                 "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
         errorMsg->addButton("Ok", [this] () {
-            showFileSelect();
-            childApp->show();
+            api().executeLater([this] () {
+                showFileSelect();
+                childApp->show();
+                errorMsg.reset();
+            });
         });
         errorMsg->centerInParent();
     } else {
         showFileSelect();
-    }
-}
-
-void PlaneManualApp::show() {
-    if (childApp) {
-        childApp->show();
-    } else {
-        App::show();
     }
 }
 
