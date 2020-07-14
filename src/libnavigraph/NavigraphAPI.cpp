@@ -16,13 +16,12 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include <fstream>
 #include <iomanip>
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include "NavigraphAPI.h"
-#include "src/Logger.h"
 #include "src/platform/Platform.h"
+#include "src/Logger.h"
 
 namespace navigraph {
 
@@ -205,11 +204,11 @@ void NavigraphAPI::loadAirports() {
         auto jsonData = oidc->get("https://charts.api.navigraph.com/1/airports");
         nlohmann::json tmpJson = nlohmann::json::parse(jsonData);
 
-        std::ofstream jsonStream(platform::UTF8ToNative(airportFileName));
+        fs::ofstream jsonStream(fs::u8path(airportFileName));
         jsonStream << std::setw(4) << tmpJson;
     }
 
-    std::ifstream jsonStream(platform::UTF8ToNative(airportFileName));
+    fs::ifstream jsonStream(fs::u8path(airportFileName));
     airportJson = std::make_shared<nlohmann::json>();
     jsonStream >> *airportJson;
 }

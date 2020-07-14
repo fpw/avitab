@@ -1,4 +1,4 @@
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -fPIC")
 
 add_library(avitab_common "${CMAKE_CURRENT_LIST_DIR}/Logger.cpp")
@@ -87,6 +87,7 @@ elseif(UNIX)
     target_link_libraries(avitab_plugin
         -static-libgcc
         -static-libstdc++
+	-lstdc++fs
         -fPIC
         avitab_xplane
         avitab_common
@@ -140,5 +141,6 @@ elseif(UNIX)
         GL
         glfw
         pthread
+	-lstdc++fs
     )
 endif()

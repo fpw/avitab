@@ -57,7 +57,6 @@ private:
     static const int INITIAL_WIDTH = 800;
     static const int INITIAL_HEIGHT = 480;
 
-    static bool lvglIsInitialized;
     MouseWheelCallback onMouseWheel;
     std::recursive_mutex guiMutex;
     std::vector<GUITask> pendingTasks;
@@ -71,10 +70,6 @@ private:
     void guiLoop();
     void handleMouseWheel();
     void handleKeyboard();
-
-    std::vector<uint32_t> tmpBuffer;
-    lv_disp_buf_t lvDispBuf;
-    lv_disp_drv_t lvDriver;
 
     lv_obj_t *searchActiveKeyboard(lv_obj_t *obj);
 };

@@ -51,8 +51,8 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     }
 
     auto airport = world->findAirportByID(port.id);
-    if (airport != nullptr) {
-        //Airport (custom scenery) already exists so don't re-construct it, but we do want to :
+    if (airport) {
+        //Airport (custom scenery) already exists so don't re-construct it, but we do want to:
         patchCustomSceneryRunwaySurfaces(port, airport);
         return;
     }
@@ -96,9 +96,9 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     }
 
     for (auto &entry: port.heliports) {
-        auto port = std::make_shared<Heliport>(entry.name);
-        port->setLocation(Location(entry.latitude, entry.longitude));
-        airport->addHeliport(port);
+        auto heliport = std::make_shared<Heliport>(entry.name);
+        heliport->setLocation(Location(entry.latitude, entry.longitude));
+        airport->addHeliport(heliport);
     }
 
     for (auto &entry: port.runways) {
@@ -118,7 +118,7 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             auto rwy = std::make_shared<Runway>(end->name);
             rwy->setLocation(Location(end->latitude, end->longitude));
             rwy->setWidth(entry.width);
-            rwy->setSurfaceType((Runway::SurfaceType)entry.surfaceType);
+            rwy->setSurfaceType((Runway::SurfaceType) entry.surfaceType);
             if (!std::isnan(length)) {
                 rwy->setLength(length);
             }
@@ -146,8 +146,8 @@ void AirportLoader::patchCustomSceneryRunwaySurfaces(const AirportData& defaultA
     std::map<std::string, Runway::SurfaceType> defaultRwySurface;
     for (auto &entry: defaultAirportData.runways) {
         for (auto end = entry.ends.begin(); end != entry.ends.end(); ++end) {
-            if ((Runway::SurfaceType)entry.surfaceType != Runway::SurfaceType::TRANSPARENT_SURFACE) {
-                defaultRwySurface[end->name] = (Runway::SurfaceType)entry.surfaceType;
+            if ((Runway::SurfaceType) entry.surfaceType != Runway::SurfaceType::TRANSPARENT_SURFACE) {
+                defaultRwySurface[end->name] = (Runway::SurfaceType) entry.surfaceType;
             }
         }
     }

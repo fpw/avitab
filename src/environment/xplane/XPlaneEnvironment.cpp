@@ -31,10 +31,10 @@ XPlaneEnvironment::XPlaneEnvironment() {
     XPLMDebugString("AviTab version " AVITAB_VERSION_STR "\n");
 
     // Called by the X-Plane thread via StartPlugin
-    pluginPath = platform::nativeToUTF8(getPluginPath());
+    pluginPath = getPluginPath();
     flightLoopId = createFlightLoop();
 
-    xplaneRootPath = platform::nativeToUTF8(getXPlanePath());
+    xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
     panelEnabled = std::make_shared<int>(0);
     panelPowered = std::make_shared<int>(0);
@@ -231,8 +231,7 @@ std::string XPlaneEnvironment::getAirplanePath() {
     char file[512];
     char path[512];
     XPLMGetNthAircraftModel(0, file, path);
-    std::string acfPath = platform::nativeToUTF8(path);
-    return platform::getDirNameFromPath(acfPath) + "/";
+    return platform::getDirNameFromPath(path) + "/";
 }
 
 std::string XPlaneEnvironment::getProgramPath() {

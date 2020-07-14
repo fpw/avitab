@@ -23,6 +23,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <atomic>
 #include <functional>
 
 namespace avitab {
@@ -66,7 +67,7 @@ private:
     ResizeCallback onResize;
     std::mutex keyMutex;
     bool enableKeyInput = false;
-    int bufferWidth = 0, bufferHeight = 0;
+    std::atomic_int bufferWidth{0}, bufferHeight{0};
     std::vector<uint32_t> buffer;
     std::queue<uint32_t> keyInput;
 };

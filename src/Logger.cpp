@@ -17,22 +17,26 @@
  */
 #include <cstdarg>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <cstring>
 #include <libgen.h>
+#include <mutex>
 
 #include "Logger.h"
 #include "src/platform/Platform.h"
 
 namespace {
 
-std::ofstream logFile;
+std::mutex logMutex;
+
+fs::ofstream logFile;
 bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
     if (logFile) {
+        std::lock_guard<std::mutex> lock(logMutex);
+
         char buf[8192];
         vsnprintf(buf, sizeof(buf), format.c_str(), args);
 
@@ -48,7 +52,7 @@ void log(const std::string format, va_list args) {
 }
 
 void logger::init(const std::string &path) {
-    logFile = std::ofstream(path + "AviTab.log");
+    logFile.open(fs::u8path(path + "AviTab.log"));
     info("AviTab logger initialized");
 }
 

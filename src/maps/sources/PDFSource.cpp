@@ -17,7 +17,6 @@
  */
 #include <stdexcept>
 #include <sstream>
-#include <fstream>
 #include "PDFSource.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -155,14 +154,14 @@ img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
 }
 
 void PDFSource::storeCalibration() {
-    std::string calFileName = platform::UTF8ToNative(utf8FileName + ".json");
-    std::ofstream jsonFile(calFileName);
+    std::string calFileName = utf8FileName + ".json";
+    fs::ofstream jsonFile(fs::u8path(calFileName));
     jsonFile << calibration.toString();
 }
 
 void PDFSource::loadCalibration() {
-    std::string calFileName = platform::UTF8ToNative(utf8FileName + ".json");
-    std::ifstream jsonFile(calFileName);
+    std::string calFileName = utf8FileName + ".json";
+    fs::ifstream jsonFile(fs::u8path(calFileName));
 
     if (jsonFile.fail()) {
         return;

@@ -18,11 +18,11 @@
 #ifndef SRC_LIBXDATA_LOADERS_PARSERS_BASEPARSER_H_
 #define SRC_LIBXDATA_LOADERS_PARSERS_BASEPARSER_H_
 
-#include <fstream>
 #include <string>
 #include <functional>
 #include <sstream>
 #include <iosfwd>
+#include "src/platform/Platform.h"
 
 namespace xdata {
 
@@ -44,7 +44,7 @@ public:
 
     void skipWhiteSpace();
 private:
-    std::ifstream stream;
+    fs::ifstream stream;
     std::istringstream lineStream;
     std::istream &getLine(std::string &str);
 };

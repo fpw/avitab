@@ -33,7 +33,7 @@ TTFStamper::TTFStamper(const std::string &fontName) {
         throw std::runtime_error("Couldn't init freetype");
     }
 
-    error = FT_New_Face(ft, platform::UTF8ToNative(fontDir + fontName).c_str(), 0, &fontFace);
+    error = FT_New_Face(ft, platform::UTF8ToACP(fontDir + fontName).c_str(), 0, &fontFace);
     if (error) {
         logger::verbose("Couldn't load desired font, using fallback font");
         loadInternalFont();

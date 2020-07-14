@@ -14,6 +14,13 @@ fi
 
 if [ ! -f $OUTDIR/include/nlohmann/json.hpp ]; then echo "Failed"; exit; fi
 
+echo "Building gulrak/filesystem..."
+if [ ! -f $OUTDIR/include/ghc/filesystem.hpp ]; then
+    mkdir -p $OUTDIR/include/ghc
+    cp filesystem/include/ghc/*.hpp $OUTDIR/include/ghc/
+fi
+if [ ! -f $OUTDIR/include/ghc/filesystem.hpp ]; then echo "Failed"; exit; fi
+
 echo "Building stb..."
 if [ ! -f $OUTDIR/include/stb/stb.h ]; then
     mkdir -p $OUTDIR/include/stb

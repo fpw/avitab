@@ -16,7 +16,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "PixMap.h"
-#include "src/Logger.h"
 
 namespace avitab {
 
@@ -33,6 +32,7 @@ void PixMap::draw(const img::Image& img) {
 
 void PixMap::draw(const uint32_t* pix, int dataWidth, int dataHeight) {
     image = toLVImage(pix, dataWidth, dataHeight);
+    lv_img_cache_invalidate_src(&image);
     lv_img_set_src(obj(), &image);
 }
 

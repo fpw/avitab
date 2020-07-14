@@ -23,7 +23,7 @@
 namespace img {
 
 DDSImage::DDSImage(const std::string& utf8Path, int mipLevel) {
-    std::string nativePath = platform::UTF8ToNative(utf8Path);
+    std::string nativePath = platform::UTF8ToACP(utf8Path);
 
     detexTexture **textures;
     int numMipsLoaded = 0;

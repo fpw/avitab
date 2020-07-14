@@ -23,8 +23,8 @@ namespace avitab {
 PDFViewer::PDFViewer(FuncsPtr appFuncs):
     App(appFuncs),
     window(std::make_shared<Window>(getUIContainer(), "Document Viewer")),
-    pixMap(std::make_unique<PixMap>(window)),
-    updateTimer(std::bind(&PDFViewer::onTimer, this), 200)
+    updateTimer(std::bind(&PDFViewer::onTimer, this), 200),
+    pixMap(std::make_unique<PixMap>(window))
 {
     window->hideScrollbars();
     window->setOnClose([this] () { exit(); });

@@ -18,6 +18,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
+#include "src/platform/Platform.h"
 #include "Config.h"
 
 using json = nlohmann::json;
@@ -25,7 +26,7 @@ using json = nlohmann::json;
 namespace avitab {
 
 Config::Config(const std::string& configFile) {
-    std::ifstream configStream(configFile);
+    fs::ifstream configStream(fs::u8path(configFile));
 
     if (!configStream) {
         throw std::runtime_error(std::string("Couldn't read config file ") + configFile);

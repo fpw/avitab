@@ -22,6 +22,29 @@
 #include <vector>
 #include <cstdarg>
 #include <chrono>
+#include <fstream>
+
+#ifdef APL
+// OS X does not support std::filesystem before Catalina, use this
+// replacement library
+
+#include <ghc/fs_fwd.hpp>
+namespace fs {
+    using namespace ghc::filesystem;
+    using ifstream = ghc::filesystem::ifstream;
+    using ofstream = ghc::filesystem::ofstream;
+    using fstream = ghc::filesystem::fstream;
+}
+#else
+// The replacement library doesn't work properly on Windows
+#include <filesystem>
+namespace fs {
+    using namespace std::filesystem;
+    using ifstream = std::ifstream;
+    using ofstream = std::ofstream;
+    using fstream = std::fstream;
+}
+#endif
 
 namespace platform {
 
@@ -53,8 +76,7 @@ int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt)
 #endif
 
 constexpr size_t getMaxPathLen();
-std::string nativeToUTF8(const std::string &native);
-std::string UTF8ToNative(const std::string &utf8);
+std::string UTF8ToACP(const std::string &utf8);
 
 std::string getProgramPath();
 std::vector<DirEntry> readDirectory(const std::string &utf8Path);

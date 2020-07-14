@@ -17,15 +17,15 @@
  */
 #ifdef _WIN32
 #   define WIN32_LEAN_AND_MEAN
-#   define _WIN32_WINNT 0x0600
 #   include <windows.h>
 #   include <shellapi.h>
-#   define realpath(N, R) _fullpath((R), (N), AVITAB_PATH_LEN_MAX)
 #else
 #   include <unistd.h>
 #   include <uuid/uuid.h>
 #endif
 
+#include <locale>
+#include <codecvt>
 #include <ctime>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -104,22 +104,31 @@ constexpr size_t getMaxPathLen() {
 }
 
 #ifdef _WIN32
-std::string nativeToUTF8(const std::string& native) {
+std::string getProgramPath() {
     wchar_t buf[AVITAB_PATH_LEN_MAX];
-    char res[AVITAB_PATH_LEN_MAX];
+    DWORD size = AVITAB_PATH_LEN_MAX;
+    HANDLE proc = GetCurrentProcess();
+    QueryFullProcessImageNameW(proc, 0, buf, &size);
 
-    MultiByteToWideChar(CP_ACP, 0, native.c_str(), -1, buf, sizeof(buf));
-    WideCharToMultiByte(CP_UTF8, 0, buf, -1, res, sizeof(res), nullptr, nullptr);
-    return res;
+    auto u16str = std::wstring(buf);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
+    auto u8str = convert.to_bytes(buf);
+
+    return getDirNameFromPath(u8str) + "/";
 }
 #else
-std::string nativeToUTF8(const std::string& native) {
-    return native;
+std::string getProgramPath() {
+    char buf[AVITAB_PATH_LEN_MAX];
+    if (!getcwd(buf, sizeof(buf))) {
+        throw std::runtime_error("Couldn't get current directory");
+    }
+    std::string path = std::string(buf) + "/";
+    return path;
 }
 #endif
 
 #ifdef _WIN32
-std::string UTF8ToNative(const std::string& utf8) {
+std::string UTF8ToACP(const std::string& utf8) {
     wchar_t buf[AVITAB_PATH_LEN_MAX];
     char res[AVITAB_PATH_LEN_MAX];
 
@@ -128,135 +137,75 @@ std::string UTF8ToNative(const std::string& utf8) {
     return res;
 }
 #else
-std::string UTF8ToNative(const std::string& utf8) {
+std::string UTF8ToACP(const std::string& utf8) {
     return utf8;
 }
 #endif
 
-#ifdef _WIN32
-std::string getProgramPath() {
-    char buf[AVITAB_PATH_LEN_MAX];
-    DWORD size = AVITAB_PATH_LEN_MAX;
-    HANDLE proc = GetCurrentProcess();
-    QueryFullProcessImageNameA(proc, 0, buf, &size);
-
-    std::string path = nativeToUTF8(std::string(buf));
-    return getDirNameFromPath(path) + "/";
-}
-#else
-std::string getProgramPath() {
-    char buf[AVITAB_PATH_LEN_MAX];
-    if (!getcwd(buf, sizeof(buf))) {
-        throw std::runtime_error("Couldn't get current directory");
-    }
-    std::string path = nativeToUTF8(buf) + "/";
-    return path;
-}
-#endif
-
 std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
     std::vector<DirEntry> entries;
 
-    std::string path = UTF8ToNative(utf8Path);
-
-    DIR *dir = opendir(path.c_str());
-    if (!dir) {
-        logger::verbose("Couldn't open directory '%s'", path.c_str());
-        return entries;
-    }
-
-    struct dirent *dirEntry;
-
-    while ((dirEntry = readdir(dir)) != nullptr) {
-        std::string name = dirEntry->d_name;
+    for (auto &e: fs::directory_iterator(path)) {
+        std::string name = e.path().filename().string();
 
         if (name.empty() || name[0] == '.') {
             continue;
         }
 
-        std::string filePath = path + name;
-
-        struct stat fileStat;
-        if (stat(filePath.c_str(), &fileStat) != 0) {
-            logger::verbose("Couldn't stat '%s'", filePath.c_str());
-            continue;
-        }
+        std::string filePath = utf8Path + name;
 
         DirEntry entry;
-        entry.utf8Name = nativeToUTF8(name);
-        entry.isDirectory = S_ISDIR(fileStat.st_mode);
+        entry.utf8Name = name;
+        entry.isDirectory = e.is_directory();
         entries.push_back(entry);
     }
-    closedir(dir);
 
     return entries;
 }
 
 std::string realPath(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    char *res = realpath(nativePath.c_str(), nullptr);
-    if (!res) {
-        throw std::runtime_error("realpath failed");
-    }
-    std::string resStr(res);
-    free(res);
-    return resStr;
+    auto path = fs::u8path(utf8Path);
+    return fs::canonical(path).string();
 }
 
 std::string getFileNameFromPath(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    std::string base = basename(&nativePath[0]);
-    return nativeToUTF8(base);
-}
-
-std::string getDirNameFromPath(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    std::string dir = dirname(&nativePath[0]);
-    return nativeToUTF8(dir);
-}
-
-bool fileExists(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    struct stat fileStat;
-    return (stat(nativePath.c_str(), &fileStat) == 0);
-}
-
-void mkdir(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-#ifdef _WIN32
-    (void) ::mkdir(utf8Path.c_str());
-#else
-    (void) ::mkdir(utf8Path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-#endif
-}
-
-void mkpath(const std::string& utf8Path) {
-    std::string path = utf8Path;
-    std::replace(path.begin(), path.end(), '\\', '/');
-
-    for (std::string::iterator iter = path.begin(); iter != path.end(); ) {
-        std::string::iterator newIter = std::find(iter, path.end(), '/');
-        std::string newPath = std::string(path.begin(), newIter);
-
-        if (!fileExists(newPath + "/")) {
-            mkdir(newPath);
-        }
-
-        iter = newIter;
-        if (newIter != path.end()) {
-            ++iter;
-        }
+    auto path = fs::u8path(utf8Path);
+    if (path.has_filename()) {
+        return path.filename().string();
+    } else {
+        return path.parent_path().filename().string();
     }
 }
 
+std::string getDirNameFromPath(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
+    return path.parent_path().string();
+}
+
+bool fileExists(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
+    return fs::exists(path);
+}
+
+void mkdir(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
+    fs::create_directory(path);
+}
+
+void mkpath(const std::string& utf8Path) {
+    auto path = fs::u8path(utf8Path);
+    fs::create_directories(path);
+}
+
 void removeFile(const std::string& utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    (void) ::remove(nativePath.c_str());
+    auto path = fs::u8path(utf8Path);
+    fs::remove(path);
 }
 
 std::string readFully(const std::string &utf8Path) {
-    std::string nativePath = UTF8ToNative(utf8Path);
-    std::ifstream fileStream(nativePath);
+    auto path = fs::u8path(utf8Path);
+    fs::ifstream fileStream(path);
     if (!fileStream) {
         throw std::runtime_error("Could not read file string");
     }

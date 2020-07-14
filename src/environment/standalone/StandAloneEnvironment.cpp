@@ -15,8 +15,6 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
-#include <fstream>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -47,12 +45,12 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
         break;
     }
 
-    std::string installFile = platform::nativeToUTF8(installFilePath + "/x-plane_install_11.txt");
+    std::string installFile = installFilePath + "/x-plane_install_11.txt";
     if (!platform::fileExists(installFile.c_str())) {
         return "";
     }
 
-    std::ifstream file(platform::UTF8ToNative(installFile));
+    fs::ifstream file(fs::u8path(installFile));
     std::string installDir;
     std::getline(file, installDir);
     return installDir;
@@ -99,7 +97,7 @@ std::string StandAloneEnvironment::getAirplanePath() {
 }
 
 std::string StandAloneEnvironment::getProgramPath() {
-    return platform::nativeToUTF8(ourPath);
+    return ourPath;
 }
 
 double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {

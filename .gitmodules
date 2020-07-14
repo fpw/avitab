@@ -55,3 +55,6 @@
 [submodule "lib/cairo"]
 	path = lib/cairo
 	url = git://anongit.freedesktop.org/git/cairo
+[submodule "lib/filesystem"]
+	path = lib/filesystem
+	url = https://github.com/gulrak/filesystem.git
