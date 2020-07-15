@@ -16,31 +16,27 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
-#include "Runtime.h"
-#include "src/Logger.h"
+#ifndef AVITAB_CRASHHANDLER_H
+#define AVITAB_CRASHHANDLER_H
 
-namespace js {
+// Based on X-Plane's example: https://developer.x-plane.com/code-sample/crash-handling/
 
-Runtime::Runtime() {
-/*
-    runtime = JS_NewRuntime();
-    if (!runtime) {
-        throw std::runtime_error("Couldn't initialize QuickJS");
-    }
+namespace crash {
+    void registerHandler(int (*getPluginId)());
+    void unregisterHandler();
 
-    ctx = JS_NewContext(runtime);
-    if (!ctx) {
-        throw std::runtime_error("Couldn't create QuickJS context");
-    }
-*/
+    void registerThread();
+    void unregisterThread();
+
+    struct ThreadCookie final {
+        ThreadCookie() {
+            registerThread();
+        }
+
+        ~ThreadCookie() {
+            unregisterThread();
+        }
+    };
 }
 
-Runtime::~Runtime() {
-/*
-    JS_FreeContext(ctx);
-    JS_FreeRuntime(runtime);
-*/
-}
-
-}
+#endif //AVITAB_CRASHHANDLER_H

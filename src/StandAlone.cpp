@@ -21,8 +21,11 @@
 #include "src/environment/standalone/StandAloneEnvironment.h"
 #include "src/avitab/AviTab.h"
 #include "src/Logger.h"
+#include "src/platform/CrashHandler.h"
 
 int main() {
+    crash::registerHandler([] () {return 0;});
+
     try {
         // Using the heap so we can debug destructors with log messages
         auto env = std::make_shared<avitab::StandAloneEnvironment>();
@@ -46,6 +49,8 @@ int main() {
     }
 
     logger::verbose("Quitting main");
+
+    crash::unregisterHandler();
 
     return 0;
 }

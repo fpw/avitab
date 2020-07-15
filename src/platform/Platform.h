@@ -24,10 +24,18 @@
 #include <chrono>
 #include <fstream>
 
-#ifdef APL
-// OS X does not support std::filesystem before Catalina, use this
-// replacement library
+// OS X does not support std::filesystem before Catalina
 
+// Linux has different implementations for gcc8 and gcc9,
+// so there are conflicts when our compiler doesn't match the user's runtime
+
+// For these reasons, the GHC replacement library for std::filesystem is used,
+// but that one doesn't work properly on Windows >:(
+
+// For that reason, we're using a custom namespace that uses different
+// implementations depending on the platform...
+
+#ifndef IBM
 #include <ghc/fs_fwd.hpp>
 namespace fs {
     using namespace ghc::filesystem;

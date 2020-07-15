@@ -27,6 +27,7 @@
 #endif
 #include "AuthServer.h"
 #include "src/Logger.h"
+#include "src/platform/CrashHandler.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -89,6 +90,8 @@ int AuthServer::start() {
 }
 
 void AuthServer::loop() {
+    crash::ThreadCookie crashCookie;
+
     sockaddr_in clientAddr {};
     socklen_t clientLen = sizeof(clientAddr);
 

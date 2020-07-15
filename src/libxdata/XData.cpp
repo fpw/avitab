@@ -16,8 +16,9 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <chrono>
+#include <thread>
+
 #include "XData.h"
-#include "src/platform/Platform.h"
 #include "src/libxdata/world/loaders/FixLoader.h"
 #include "src/libxdata/world/loaders/NavaidLoader.h"
 #include "src/libxdata/world/loaders/AirwayLoader.h"
@@ -25,7 +26,7 @@
 #include "src/libxdata/world/loaders/MetarLoader.h"
 #include "src/libxdata/parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
-#include <thread>
+
 namespace xdata {
 
 XData::XData(const std::string& dataRootPath):
