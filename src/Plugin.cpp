@@ -23,6 +23,7 @@
 #include "src/environment/xplane/XPlaneEnvironment.h"
 #include "src/avitab/AviTab.h"
 #include "src/Logger.h"
+#include "src/platform/CrashHandler.h"
 
 std::shared_ptr<avitab::Environment> environment;
 std::unique_ptr<avitab::AviTab> aviTab;
@@ -30,6 +31,8 @@ std::unique_ptr<avitab::AviTab> aviTab;
 PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescription) {
     strncpy(outName, "AviTab", 255);
     strncpy(outSignature, "org.solhost.folko.avitab", 255);
+
+    crash::registerHandler([] () { return XPLMGetMyID(); });
 
     try {
         XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
@@ -100,6 +103,8 @@ PLUGIN_API void XPluginStop(void) {
     } catch (const std::exception &e) {
         logger::error("Exception in XPluginStop: %s", e.what());
     }
+
+    crash::unregisterHandler();
 }
 
 #ifdef _WIN32

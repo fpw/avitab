@@ -18,6 +18,7 @@
 
 #include "Environment.h"
 #include "src/Logger.h"
+#include "src/platform/CrashHandler.h"
 
 namespace avitab {
 
@@ -36,6 +37,8 @@ std::shared_ptr<Config> Environment::getConfig() {
 }
 
 std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
+    crash::ThreadCookie crashCookie;
+
     auto data = getNavData();
     logger::info("Loading nav data...");
     try {

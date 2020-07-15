@@ -20,6 +20,7 @@
 #include "LVGLToolkit.h"
 #include "widgets/Keyboard.h"
 #include "src/platform/Platform.h"
+#include "src/platform/CrashHandler.h"
 #include "src/Logger.h"
 
 namespace avitab {
@@ -199,6 +200,7 @@ float LVGLToolkit::getBrightness() {
 
 void LVGLToolkit::guiLoop() {
     using namespace std::chrono_literals;
+    crash::ThreadCookie crashCookie;
 
     logger::verbose("LVGL thread has id %d", std::this_thread::get_id());
 

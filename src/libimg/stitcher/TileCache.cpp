@@ -19,6 +19,7 @@
 #include <sstream>
 #include "TileCache.h"
 #include "src/platform/Platform.h"
+#include "src/platform/CrashHandler.h"
 #include "src/Logger.h"
 
 namespace img {
@@ -113,6 +114,8 @@ bool TileCache::hasWork() {
 }
 
 void TileCache::loadLoop() {
+    crash::ThreadCookie crashCookie;
+
     logger::verbose("TileCache spawned thread %d", std::this_thread::get_id());
     while (keepAlive) {
         TileCoords coords;

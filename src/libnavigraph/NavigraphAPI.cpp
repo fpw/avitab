@@ -21,6 +21,7 @@
 #include <nlohmann/json.hpp>
 #include "NavigraphAPI.h"
 #include "src/platform/Platform.h"
+#include "src/platform/CrashHandler.h"
 #include "src/Logger.h"
 
 namespace navigraph {
@@ -60,6 +61,8 @@ bool NavigraphAPI::hasWork() {
 }
 
 void NavigraphAPI::workLoop() {
+    crash::ThreadCookie crashCookie;
+
     while (keepAlive) {
         using namespace std::chrono_literals;
 
