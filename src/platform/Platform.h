@@ -32,7 +32,7 @@
 // For these reasons, the GHC replacement library for std::filesystem is used,
 // but that one doesn't work properly on Windows >:(
 
-// For that reason, we're using different a custom namespace that uses different
+// For that reason, we're using a custom namespace that uses different
 // implementations depending on the platform...
 
 #ifndef IBM
