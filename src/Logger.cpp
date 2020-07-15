@@ -34,9 +34,9 @@ fs::ofstream logFile;
 bool toStdOut = false;
 
 void log(const std::string format, va_list args) {
-    if (logFile) {
-        std::lock_guard<std::mutex> lock(logMutex);
+    std::lock_guard<std::mutex> lock(logMutex);
 
+    if (logFile) {
         char buf[8192];
         vsnprintf(buf, sizeof(buf), format.c_str(), args);
 
@@ -46,6 +46,7 @@ void log(const std::string format, va_list args) {
         if (toStdOut) {
             std::cout << logStr.str() << std::endl;
         }
+        std::flush(logFile);
     }
 }
 
@@ -79,9 +80,6 @@ void logger::warn(const std::string format, ...) {
     va_start(args, format);
     log("w: " + format, args);
     va_end(args);
-    if (logFile) {
-        std::flush(logFile);
-    }
 }
 
 void logger::error(const std::string format, ...) {
@@ -89,9 +87,6 @@ void logger::error(const std::string format, ...) {
     va_start(args, format);
     log("e: " + format, args);
     va_end(args);
-    if (logFile) {
-        std::flush(logFile);
-    }
 }
 
 void logger::log_info(bool enable, const char *file, const char *function, const int line, const char *format, ... ) {
