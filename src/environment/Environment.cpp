@@ -119,4 +119,8 @@ void Environment::enableAndPowerPanel() {
 void Environment::setIsInMenu(bool menu) {
 }
 
+void Environment::onAircraftReload() {
+
+}
+
 }

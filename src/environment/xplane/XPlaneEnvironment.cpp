@@ -40,6 +40,8 @@ XPlaneEnvironment::XPlaneEnvironment() {
     panelPowered = std::make_shared<int>(0);
     brightness = std::make_shared<float>(1);
 
+    reloadAircraftPath();
+
     panelEnabledRef = XPLMRegisterDataAccessor("avitab/panel_enabled", xplmType_Int, true,
             [] (void *ref) {
                 XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
@@ -228,10 +230,8 @@ void XPlaneEnvironment::destroyCommands() {
 }
 
 std::string XPlaneEnvironment::getAirplanePath() {
-    char file[512];
-    char path[512];
-    XPLMGetNthAircraftModel(0, file, path);
-    return platform::getDirNameFromPath(path) + "/";
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return aircraftPath;
 }
 
 std::string XPlaneEnvironment::getProgramPath() {
@@ -337,6 +337,18 @@ XPlaneEnvironment::~XPlaneEnvironment() {
 
     logger::verbose("~XPlaneEnvironment");
     destroyMenu();
+}
+
+void XPlaneEnvironment::reloadAircraftPath() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    char file[512];
+    char path[512];
+    XPLMGetNthAircraftModel(0, file, path);
+    aircraftPath = platform::getDirNameFromPath(path) + "/";
+}
+
+void XPlaneEnvironment::onAircraftReload() {
+    reloadAircraftPath();
 }
 
 } /* namespace avitab */

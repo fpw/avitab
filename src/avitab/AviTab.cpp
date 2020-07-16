@@ -93,6 +93,7 @@ void AviTab::onPlaneLoad() {
     // runs in environment thread
     // close on plane reload to reset the VR window position
     close();
+    env->onAircraftReload();
     createPanel();
 
     guiLib->executeLater([this] () {
