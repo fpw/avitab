@@ -59,13 +59,13 @@ void XPlaneGUIDriver::setupVRCapture() {
         logger::warn("Could not setup VR trigger check: command not found");
         return;
     }
-    
+
     auto assignmentsRef = XPLMFindDataRef("sim/joystick/joystick_button_assignments");
     if (!assignmentsRef) {
         logger::warn("Could not setup VR trigger check: assignments ref not found");
         return;
     }
-    
+
     vrTriggerIndices.clear();
 
     int assignments[3200];
@@ -266,7 +266,7 @@ void XPlaneGUIDriver::onDraw() {
     XPLMBindTexture2d(textureId, 0);
     redrawTexture();
 
-    XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
+    XPLMSetGraphicsState(0, 1, 0, 0, 0, 0, 0);
 
     float b = *brightness;
     glColor3f(b, b, b);
@@ -286,7 +286,7 @@ void XPlaneGUIDriver::onDrawPanel() {
     }
 
     if (*panelPowered == 0) {
-        XPLMSetGraphicsState(0, 0, 0, 0, 1, 1, 0);
+        XPLMSetGraphicsState(0, 0, 0, 0, 0, 0, 0);
         glColor3f(0, 0, 0);
         glBegin(GL_QUADS);
             glVertex2i(left, bottom);
@@ -315,7 +315,7 @@ void XPlaneGUIDriver::onDrawPanel() {
     XPLMBindTexture2d(textureId, 0);
     redrawTexture();
 
-    XPLMSetGraphicsState(0, 1, 0, 0, 1, 1, 0);
+    XPLMSetGraphicsState(0, 1, 0, 0, 0, 0, 0);
     float b = *brightness;
     glColor3f(b, b, b);
     renderWindowTexture(left, top, right, bottom);
