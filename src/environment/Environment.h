@@ -57,13 +57,13 @@ public:
     std::shared_ptr<Config> getConfig();
     void loadNavWorldInBackground();
     bool isNavWorldReady();
+    virtual void onAircraftReload();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, MenuCallback cb) = 0;
     virtual void destroyMenu() = 0;
     virtual void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) = 0;
     virtual void destroyCommands() = 0;
-    virtual std::string getAirplanePath() = 0;
     void pauseEnvironmentJobs();
     void resumeEnvironmentJobs();
 
@@ -74,6 +74,7 @@ public:
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     std::shared_ptr<xdata::World> getNavWorld();
+    virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
     virtual void enableAndPowerPanel();

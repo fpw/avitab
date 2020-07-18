@@ -19,6 +19,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <limits>
+#include "src/Logger.h"
 
 namespace xdata {
 
@@ -111,10 +112,12 @@ std::string BaseParser::nextDelimitedWord(char delim) {
 double BaseParser::parseDouble() {
     skipWhiteSpace();
 
-    double res;
-    if (lineStream >> res) {
-        return res;
-    } else {
+    std::string doubleStr;
+    lineStream >> doubleStr;
+
+    try {
+        return std::stod(doubleStr);
+    } catch (...) {
         return std::numeric_limits<double>::quiet_NaN();
     }
 }
