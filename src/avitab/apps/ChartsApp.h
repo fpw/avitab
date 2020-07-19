@@ -27,6 +27,8 @@
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/libimg/Image.h"
 
 namespace avitab {
 
@@ -62,11 +64,14 @@ private:
         std::string name;
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
+        std::shared_ptr<img::Image> rasterImage;
+        std::shared_ptr<PixMap> pixMap;
     };
     std::vector<PdfPage> pages;
 
     void createPdfTab(const std::string &pdfPath);
     void removeTab(std::shared_ptr<Page> page);
+    void onPan(int x, int y, bool start, bool end);
 };
 
 } /* namespace avitab */

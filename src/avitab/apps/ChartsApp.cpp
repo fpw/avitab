@@ -149,6 +149,12 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
     tab.window->alignInTopLeft();
 
+    tab.pixMap = std::make_shared<PixMap>(tab.window);
+    tab.rasterImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getContentHeight(), img::COLOR_TRANSPARENT);
+    tab.pixMap->setClickable(true);
+    tab.pixMap->setClickHandler([this, tab] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
+    tab.pixMap->draw(*tab.rasterImage);
+
     auto page = tab.page;
     tab.window->setOnClose([this, page] {
         api().executeLater([this, page] {
@@ -169,6 +175,21 @@ void ChartsApp::removeTab(std::shared_ptr<Page> page) {
             break;
         }
     }
+}
+
+void ChartsApp::onPan(int x, int y, bool start, bool end) {
+    // if (start) {
+    //     panStartX = x;
+    //     panStartY = y;
+    // } else if (!end) {
+    //     int vx = panStartX - x;
+    //     int vy = panStartY - y;
+    //     if (vx != 0 || vy != 0) {
+    //         stitcher->pan(vx, vy);
+    //     }
+    //     panStartX = x;
+    //     panStartY = y;
+    // }
 }
 
 
