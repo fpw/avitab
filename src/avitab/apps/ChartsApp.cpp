@@ -44,6 +44,7 @@ void ChartsApp::createBrowseTab() {
     browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
     browseWindow->centerInParent();
 
+    browseWindow->setOnClose([this] { exit(); });
     browseWindow->addSymbol(Widget::Symbol::DOWN, [this] () { onDown(); });
     browseWindow->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
     list = std::make_shared<List>(browseWindow);
