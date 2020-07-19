@@ -198,58 +198,84 @@ void ChartsApp::loadFile(PdfPage& tab, const std::string &pdfPath) {
     tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
     tab.map->setRedrawCallback([this, tab] () { tab.pixMap->invalidate(); });
     tab.map->updateImage();
+
+    setTitle(tab);
+}
+
+void ChartsApp::setTitle(PdfPage& tab) {
+    int page = tab.stitcher->getCurrentPage() + 1;
+    int pageCount = tab.stitcher->getPageCount();
+    tab.window->setCaption(std::string("Page ") + std::to_string(page) + " / " + std::to_string(pageCount));
+}
+
+ChartsApp::PdfPage* ChartsApp::getActivePdfPage() {
+    size_t tabIndex = tabs->getActiveTab();
+    if (tabIndex > 0) {
+        return &pages[tabIndex - 1];
+    } else {
+        return nullptr;
+    }
 }
 
 void ChartsApp::onPan(int x, int y, bool start, bool end) {
-    // if (start) {
-    //     panStartX = x;
-    //     panStartY = y;
-    // } else if (!end) {
-    //     int vx = panStartX - x;
-    //     int vy = panStartY - y;
-    //     if (vx != 0 || vy != 0) {
-    //         stitcher->pan(vx, vy);
-    //     }
-    //     panStartX = x;
-    //     panStartY = y;
-    // }
+    PdfPage* tab(getActivePdfPage());
+    if (tab) {
+        if (start) {
+            tab->panStartX = x;
+            tab->panStartY = y;
+        } else if (!end) {
+            int vx = tab->panStartX - x;
+            int vy = tab->panStartY - y;
+            if (vx != 0 || vy != 0) {
+                tab->stitcher->pan(vx, vy);
+            }
+            tab->panStartX = x;
+            tab->panStartY = y;
+        }
+    }
 }
 
 void ChartsApp::onNextPage() {
-    // if (source) {
-    //     stitcher->nextPage();
-    // }
-    // setTitle();
+    PdfPage* tab(getActivePdfPage());
+    if (tab && tab->source) {
+        tab->stitcher->nextPage();
+        setTitle(*tab);
+    }
 }
 
 void ChartsApp::onPrevPage() {
-    // if (source) {
-    //     stitcher->prevPage();
-    // }
-    // setTitle();
+    PdfPage* tab(getActivePdfPage());
+    if (tab && tab->source) {
+        tab->stitcher->prevPage();
+        setTitle(*tab);
+    }
 }
 
 void ChartsApp::onPlus() {
-    // if (map) {
-    //     map->zoomIn();
-    // }
+    PdfPage* tab(getActivePdfPage());
+    if (tab && tab->map) {
+        tab->map->zoomIn();
+    }
 }
 
 void ChartsApp::onMinus() {
-    // if (map) {
-    //     map->zoomOut();
-    // }
+    PdfPage* tab(getActivePdfPage());
+    if (tab && tab->map) {
+        tab->map->zoomOut();
+    }
 }
 
 void ChartsApp::onRotate() {
-    // if (stitcher) {
-    //     stitcher->rotateRight();
-    // }
+    PdfPage* tab(getActivePdfPage());
+    if (tab && tab->stitcher) {
+        tab->stitcher->rotateRight();
+    }
 }
 
 bool ChartsApp::onTimer() {
-    for (auto tabPage: pages) {  // Not sure how to find active tab
-        tabPage.map->doWork();
+    PdfPage* tab(getActivePdfPage());
+    if (tab) {
+        tab->map->doWork();
     }
     return true;
 }

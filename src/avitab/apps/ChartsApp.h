@@ -74,6 +74,7 @@ private:
         std::shared_ptr<maps::PDFSource> source;
         std::shared_ptr<img::Stitcher> stitcher;
         std::shared_ptr<maps::OverlayedMap> map;
+        int panStartX = 0, panStartY = 0;
     };
     std::vector<PdfPage> pages;
 
@@ -81,6 +82,8 @@ private:
     void removeTab(std::shared_ptr<Page> page);
     void setupCallbacks(PdfPage& tab);
     void loadFile(PdfPage& tab, const std::string &pdfPath);
+    void setTitle(PdfPage& tab);
+    PdfPage* getActivePdfPage();
     void onNextPage();
     void onPrevPage();
     void onPlus();
