@@ -45,7 +45,7 @@ void ChartsApp::createBrowseTab() {
     browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
     browseWindow->centerInParent();
 
-    browseWindow->setOnClose([this] { exit(); });
+    // browseWindow->setOnClose([this] { exit(); });
     browseWindow->addSymbol(Widget::Symbol::DOWN, [this] () { onDown(); });
     browseWindow->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
     list = std::make_shared<List>(browseWindow);
@@ -106,15 +106,33 @@ void ChartsApp::showCurrentEntries() {
 }
 
 void ChartsApp::onDown() {
-
+    list->scrollDown();
 }
 
 void ChartsApp::onUp() {
-
+    list->scrollUp();
 }
 
 void ChartsApp::onSelect(int data) {
+    if (data == -1) {
+        upOneDirectory();
+        return;
+    }
 
+    auto &entry = currentEntries.at(data);
+    if (entry.isDirectory) {
+        showDirectory(currentPath + entry.utf8Name + "/");
+    } else {
+        // if (selectCallback) {
+        //     selectCallback(currentEntries, data);
+        // }
+        // TODO open PDF tab
+    }
+}
+
+void ChartsApp::upOneDirectory() {
+    std::string upOne = platform::realPath(currentPath +  "../") + "/";
+    showDirectory(upOne);
 }
 
 

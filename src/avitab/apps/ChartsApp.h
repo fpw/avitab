@@ -33,8 +33,6 @@ namespace avitab {
 class ChartsApp: public App {
 public:
     ChartsApp(FuncsPtr appFuncs);
-    // void show() override;
-    // void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<App> childApp;
 
@@ -55,14 +53,10 @@ private:
     void filterEntries();
     void sortEntries();
     void showCurrentEntries();
+    void upOneDirectory();
     void onDown();
     void onUp();
     void onSelect(int data);
-
-    // void showFileSelect();
-    // void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
-    // void onSelectionClosed();
-
 };
 
 } /* namespace avitab */
