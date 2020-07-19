@@ -28,7 +28,11 @@
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/Timer.h"
 #include "src/libimg/Image.h"
+#include "src/libimg/stitcher/Stitcher.h"
+#include "src/maps/OverlayedMap.h"
+#include "src/maps/sources/PDFSource.h"
 
 namespace avitab {
 
@@ -37,6 +41,7 @@ public:
     ChartsApp(FuncsPtr appFuncs);
 private:
     std::shared_ptr<App> childApp;
+    Timer updateTimer;
 
     void resetLayout();
 
@@ -66,18 +71,23 @@ private:
         std::shared_ptr<Window> window;
         std::shared_ptr<img::Image> rasterImage;
         std::shared_ptr<PixMap> pixMap;
+        std::shared_ptr<maps::PDFSource> source;
+        std::shared_ptr<img::Stitcher> stitcher;
+        std::shared_ptr<maps::OverlayedMap> map;
     };
     std::vector<PdfPage> pages;
 
     void createPdfTab(const std::string &pdfPath);
     void removeTab(std::shared_ptr<Page> page);
     void setupCallbacks(PdfPage& tab);
+    void loadFile(PdfPage& tab, const std::string &pdfPath);
     void onNextPage();
     void onPrevPage();
     void onPlus();
     void onMinus();
     void onRotate();
     void onPan(int x, int y, bool start, bool end);
+    bool onTimer();
 };
 
 } /* namespace avitab */

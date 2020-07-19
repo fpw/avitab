@@ -23,7 +23,8 @@
 namespace avitab {
 
 ChartsApp::ChartsApp(FuncsPtr appFuncs):
-    App(appFuncs)
+    App(appFuncs),
+    updateTimer(std::bind(&ChartsApp::onTimer, this), 200)
 {
     currentPath = api().getDataPath() + "charts/";
 
@@ -163,6 +164,8 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     });
     setupCallbacks(tab);
 
+    loadFile(tab, pdfPath);
+
     pages.push_back(tab);
     tabs->showTab(page);
 }
@@ -178,6 +181,25 @@ void ChartsApp::removeTab(std::shared_ptr<Page> page) {
     }
 }
 
+void ChartsApp::setupCallbacks(PdfPage& tab) {
+    tab.window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
+    tab.window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
+    tab.window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
+    tab.window->addSymbol(Widget::Symbol::LEFT, std::bind(&ChartsApp::onPrevPage, this));
+    tab.window->addSymbol(Widget::Symbol::ROTATE, std::bind(&ChartsApp::onRotate, this));
+}
+
+void ChartsApp::loadFile(PdfPage& tab, const std::string &pdfPath) {
+    tab.source = std::make_shared<maps::PDFSource>(pdfPath);
+    tab.stitcher = std::make_shared<img::Stitcher>(tab.rasterImage, tab.source);
+    tab.stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
+
+    tab.map = std::make_shared<maps::OverlayedMap>(tab.stitcher);
+    tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
+    tab.map->setRedrawCallback([this, tab] () { tab.pixMap->invalidate(); });
+    tab.map->updateImage();
+}
+
 void ChartsApp::onPan(int x, int y, bool start, bool end) {
     // if (start) {
     //     panStartX = x;
@@ -191,14 +213,6 @@ void ChartsApp::onPan(int x, int y, bool start, bool end) {
     //     panStartX = x;
     //     panStartY = y;
     // }
-}
-
-void ChartsApp::setupCallbacks(PdfPage& tab) {
-    tab.window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
-    tab.window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
-    tab.window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
-    tab.window->addSymbol(Widget::Symbol::LEFT, std::bind(&ChartsApp::onPrevPage, this));
-    tab.window->addSymbol(Widget::Symbol::ROTATE, std::bind(&ChartsApp::onRotate, this));
 }
 
 void ChartsApp::onNextPage() {
@@ -231,6 +245,13 @@ void ChartsApp::onRotate() {
     // if (stitcher) {
     //     stitcher->rotateRight();
     // }
+}
+
+bool ChartsApp::onTimer() {
+    for (auto tabPage: pages) {  // Not sure how to find active tab
+        tabPage.map->doWork();
+    }
+    return true;
 }
 
 
