@@ -41,7 +41,6 @@ public:
     ChartsApp(FuncsPtr appFuncs);
     void onMouseWheel(int dir, int x, int y) override;
 private:
-    std::shared_ptr<App> childApp;
     Timer updateTimer;
 
     void resetLayout();

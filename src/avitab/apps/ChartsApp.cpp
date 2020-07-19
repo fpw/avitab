@@ -16,8 +16,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "ChartsApp.h"
-#include "src/avitab/apps/components/FileSelect.h"
-#include "src/avitab/apps/components/PDFViewer.h"
 #include "src/platform/Platform.h"
 
 namespace avitab {
@@ -296,54 +294,5 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
         }
     }
 }
-
-
-
-
-
-
-
-// void ChartsApp::show() {
-//     if (childApp) {
-//         childApp->show();
-//     }
-// }
-
-// void ChartsApp::showFileSelect() {
-//     auto fileSelect = startSubApp<FileSelect>();
-//     fileSelect->setOnExit([this] () { exit(); });
-//     fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
-//         onSelect(entries, i);
-//     });
-//     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
-//     fileSelect->showDirectory(currentPath);
-//     childApp = std::move(fileSelect);
-// }
-
-// void ChartsApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
-//     currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
-
-//     auto pdfApp = startSubApp<PDFViewer>();
-//     pdfApp->showDirectory(currentPath, entries, chosenIndex);
-//     pdfApp->setOnExit([this] () {
-//         api().executeLater([this] {
-//             onSelectionClosed();
-//         });
-//     });
-
-//     childApp = std::move(pdfApp);
-//     childApp->show();
-// }
-
-// void ChartsApp::onMouseWheel(int dir, int x, int y) {
-//     if (childApp) {
-//         childApp->onMouseWheel(dir, x, y);
-//     }
-// }
-
-// void ChartsApp::onSelectionClosed() {
-//     showFileSelect();
-//     childApp->show();
-// }
 
 } /* namespace avitab */
