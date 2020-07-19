@@ -280,6 +280,23 @@ bool ChartsApp::onTimer() {
     return true;
 }
 
+void ChartsApp::onMouseWheel(int dir, int x, int y) {
+    PdfPage* tab(getActivePdfPage());
+    if (tab) {
+        if (dir > 0) {
+            onPlus();
+        } else if (dir < 0) {
+            onMinus();
+        }
+    } else {  // on file select tab
+        if (dir > 0) {
+            onUp();
+        } else if (dir < 0) {
+            onDown();
+        }
+    }
+}
+
 
 
 

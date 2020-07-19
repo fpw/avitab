@@ -39,6 +39,7 @@ namespace avitab {
 class ChartsApp: public App {
 public:
     ChartsApp(FuncsPtr appFuncs);
+    void onMouseWheel(int dir, int x, int y) override;
 private:
     std::shared_ptr<App> childApp;
     Timer updateTimer;
