@@ -152,7 +152,7 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     tab.pixMap = std::make_shared<PixMap>(tab.window);
     tab.rasterImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getContentHeight(), img::COLOR_TRANSPARENT);
     tab.pixMap->setClickable(true);
-    tab.pixMap->setClickHandler([this, tab] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
+    tab.pixMap->setClickHandler([this] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
     tab.pixMap->draw(*tab.rasterImage);
 
     auto page = tab.page;
@@ -161,6 +161,7 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
             removeTab(page);
         });
     });
+    setupCallbacks(tab);
 
     pages.push_back(tab);
     tabs->showTab(page);
@@ -189,6 +190,46 @@ void ChartsApp::onPan(int x, int y, bool start, bool end) {
     //     }
     //     panStartX = x;
     //     panStartY = y;
+    // }
+}
+
+void ChartsApp::setupCallbacks(PdfPage& tab) {
+    tab.window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
+    tab.window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
+    tab.window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
+    tab.window->addSymbol(Widget::Symbol::LEFT, std::bind(&ChartsApp::onPrevPage, this));
+    tab.window->addSymbol(Widget::Symbol::ROTATE, std::bind(&ChartsApp::onRotate, this));
+}
+
+void ChartsApp::onNextPage() {
+    // if (source) {
+    //     stitcher->nextPage();
+    // }
+    // setTitle();
+}
+
+void ChartsApp::onPrevPage() {
+    // if (source) {
+    //     stitcher->prevPage();
+    // }
+    // setTitle();
+}
+
+void ChartsApp::onPlus() {
+    // if (map) {
+    //     map->zoomIn();
+    // }
+}
+
+void ChartsApp::onMinus() {
+    // if (map) {
+    //     map->zoomOut();
+    // }
+}
+
+void ChartsApp::onRotate() {
+    // if (stitcher) {
+    //     stitcher->rotateRight();
     // }
 }
 

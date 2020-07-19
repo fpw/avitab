@@ -71,6 +71,12 @@ private:
 
     void createPdfTab(const std::string &pdfPath);
     void removeTab(std::shared_ptr<Page> page);
+    void setupCallbacks(PdfPage& tab);
+    void onNextPage();
+    void onPrevPage();
+    void onPlus();
+    void onMinus();
+    void onRotate();
     void onPan(int x, int y, bool start, bool end);
 };
 
