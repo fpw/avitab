@@ -36,6 +36,8 @@ public:
 private:
     std::shared_ptr<App> childApp;
 
+    void resetLayout();
+
     std::shared_ptr<TabGroup> tabs;
     
     std::shared_ptr<Page> browsePage;
@@ -45,8 +47,6 @@ private:
     std::vector<platform::DirEntry> currentEntries;
     std::regex filter;
 
-    void resetLayout();
-    
     void createBrowseTab();
     void showDirectory(const std::string &path);
     void setFilterRegex(const std::string regex);
@@ -57,6 +57,16 @@ private:
     void onDown();
     void onUp();
     void onSelect(int data);
+
+    struct PdfPage {
+        std::string name;
+        std::shared_ptr<Page> page;
+        std::shared_ptr<Window> window;
+    };
+    std::vector<PdfPage> pages;
+
+    void createPdfTab(const std::string &pdfPath);
+    void removeTab(std::shared_ptr<Page> page);
 };
 
 } /* namespace avitab */

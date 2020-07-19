@@ -45,7 +45,6 @@ void ChartsApp::createBrowseTab() {
     browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
     browseWindow->centerInParent();
 
-    // browseWindow->setOnClose([this] { exit(); });
     browseWindow->addSymbol(Widget::Symbol::DOWN, [this] () { onDown(); });
     browseWindow->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
     list = std::make_shared<List>(browseWindow);
@@ -123,10 +122,7 @@ void ChartsApp::onSelect(int data) {
     if (entry.isDirectory) {
         showDirectory(currentPath + entry.utf8Name + "/");
     } else {
-        // if (selectCallback) {
-        //     selectCallback(currentEntries, data);
-        // }
-        // TODO open PDF tab
+        createPdfTab(currentPath + entry.utf8Name);
     }
 }
 
@@ -135,6 +131,45 @@ void ChartsApp::upOneDirectory() {
     showDirectory(upOne);
 }
 
+
+void ChartsApp::createPdfTab(const std::string &pdfPath) {
+    std::string name = pdfPath.substr(pdfPath.find_last_of("/\\") + 1);
+
+    for (auto tabPage: pages) {
+        if (tabPage.name == name) {
+            tabs->setActiveTab(tabs->getTabIndex(tabPage.page));
+            return;
+        }
+    }
+
+    PdfPage tab;
+    tab.name = name;
+    tab.page = tabs->addTab(tabs, name);
+    tab.window = std::make_shared<Window>(tab.page, name);
+    tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
+    tab.window->alignInTopLeft();
+
+    auto page = tab.page;
+    tab.window->setOnClose([this, page] {
+        api().executeLater([this, page] {
+            removeTab(page);
+        });
+    });
+
+    pages.push_back(tab);
+    tabs->showTab(page);
+}
+
+void ChartsApp::removeTab(std::shared_ptr<Page> page) {
+    for (auto it = pages.begin(); it != pages.end(); ++it) {
+        if (it->page == page) {
+            size_t index = tabs->getTabIndex(it->page);
+            pages.erase(it);
+            tabs->removeTab(index);
+            break;
+        }
+    }
+}
 
 
 
