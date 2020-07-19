@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <vector>
+#include <regex>
 #include "src/platform/Platform.h"
 #include "App.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
@@ -35,17 +36,25 @@ public:
     // void show() override;
     // void onMouseWheel(int dir, int x, int y) override;
 private:
-    std::string currentPath;
     std::shared_ptr<App> childApp;
 
     std::shared_ptr<TabGroup> tabs;
+    
     std::shared_ptr<Page> browsePage;
     std::shared_ptr<Window> browseWindow;
-    std::shared_ptr<List> browseList;
+    std::shared_ptr<List> list;
+    std::string currentPath;
+    std::vector<platform::DirEntry> currentEntries;
+    std::regex filter;
 
     void resetLayout();
     
     void createBrowseTab();
+    void showDirectory(const std::string &path);
+    void setFilterRegex(const std::string regex);
+    void filterEntries();
+    void sortEntries();
+    void showCurrentEntries();
     void onDown();
     void onUp();
     void onSelect(int data);
