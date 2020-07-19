@@ -132,22 +132,21 @@ void ChartsApp::upOneDirectory() {
 
 
 void ChartsApp::createPdfTab(const std::string &pdfPath) {
-    std::string name = pdfPath.substr(pdfPath.find_last_of("/\\") + 1);
-    std::string name_trunc = name;
-    if (name_trunc.size() > 12) {
-        name_trunc = name_trunc.substr(0, 9) + "...";
-    }
-
     for (auto tabPage: pages) {
-        if (tabPage.name == name) {
+        if (tabPage.path == pdfPath) {
             tabs->setActiveTab(tabs->getTabIndex(tabPage.page));
             return;
         }
     }
 
+    std::string name = pdfPath.substr(pdfPath.find_last_of("/\\") + 1);
+    if (name.size() > 12) {
+        name = name.substr(0, 9) + "...";
+    }
+
     PdfPage tab;
-    tab.name = name;
-    tab.page = tabs->addTab(tabs, name_trunc);
+    tab.path = pdfPath;
+    tab.page = tabs->addTab(tabs, name);
     tab.window = std::make_shared<Window>(tab.page, name);
     tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
     tab.window->alignInTopLeft();

@@ -66,7 +66,7 @@ private:
     void onSelect(int data);
 
     struct PdfPage {
-        std::string name;
+        std::string path;
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<img::Image> rasterImage;
