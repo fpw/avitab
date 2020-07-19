@@ -26,50 +26,94 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     App(appFuncs)
 {
     currentPath = api().getDataPath() + "charts/";
-    showFileSelect();
+    // showFileSelect();
+    resetLayout();
 }
 
-void ChartsApp::show() {
-    if (childApp) {
-        childApp->show();
-    }
+void ChartsApp::resetLayout() {
+    tabs = std::make_shared<TabGroup>(getUIContainer());
+    tabs->centerInParent();
+    createBrowseTab();
 }
 
-void ChartsApp::showFileSelect() {
-    auto fileSelect = startSubApp<FileSelect>();
-    fileSelect->setOnExit([this] () { exit(); });
-    fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
-        onSelect(entries, i);
-    });
-    fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
-    fileSelect->showDirectory(currentPath);
-    childApp = std::move(fileSelect);
-}
+void ChartsApp::createBrowseTab() {
+    browsePage = tabs->addTab(tabs, "Files");
+    browseWindow = std::make_shared<Window>(browsePage, "Files");
+    browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
+    browseWindow->centerInParent();
 
-void ChartsApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
-    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
-
-    auto pdfApp = startSubApp<PDFViewer>();
-    pdfApp->showDirectory(currentPath, entries, chosenIndex);
-    pdfApp->setOnExit([this] () {
-        api().executeLater([this] {
-            onSelectionClosed();
+    browseWindow->setOnClose([this] { exit(); });
+    browseWindow->addSymbol(Widget::Symbol::DOWN, [this] () { onDown(); });
+    browseWindow->addSymbol(Widget::Symbol::UP, [this] () { onUp(); });
+    browseList = std::make_shared<List>(browseWindow);
+    browseList->setDimensions(browseWindow->getContentWidth(), browseWindow->getContentHeight());
+    browseList->setCallback([this] (int data) {
+        api().executeLater([this, data] {
+            onSelect(data);
         });
     });
-
-    childApp = std::move(pdfApp);
-    childApp->show();
 }
 
-void ChartsApp::onMouseWheel(int dir, int x, int y) {
-    if (childApp) {
-        childApp->onMouseWheel(dir, x, y);
-    }
+void ChartsApp::onDown() {
+
 }
 
-void ChartsApp::onSelectionClosed() {
-    showFileSelect();
-    childApp->show();
+void ChartsApp::onUp() {
+
 }
+
+void ChartsApp::onSelect(int data) {
+
+}
+
+
+
+
+
+
+
+
+// void ChartsApp::show() {
+//     if (childApp) {
+//         childApp->show();
+//     }
+// }
+
+// void ChartsApp::showFileSelect() {
+//     auto fileSelect = startSubApp<FileSelect>();
+//     fileSelect->setOnExit([this] () { exit(); });
+//     fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
+//         onSelect(entries, i);
+//     });
+//     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
+//     fileSelect->showDirectory(currentPath);
+//     childApp = std::move(fileSelect);
+// }
+
+// void ChartsApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
+//     currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
+
+//     auto pdfApp = startSubApp<PDFViewer>();
+//     pdfApp->showDirectory(currentPath, entries, chosenIndex);
+//     pdfApp->setOnExit([this] () {
+//         api().executeLater([this] {
+//             onSelectionClosed();
+//         });
+//     });
+
+//     childApp = std::move(pdfApp);
+//     childApp->show();
+// }
+
+// void ChartsApp::onMouseWheel(int dir, int x, int y) {
+//     if (childApp) {
+//         childApp->onMouseWheel(dir, x, y);
+//     }
+// }
+
+// void ChartsApp::onSelectionClosed() {
+//     showFileSelect();
+//     childApp->show();
+// }
 
 } /* namespace avitab */

@@ -22,21 +22,38 @@
 #include <vector>
 #include "src/platform/Platform.h"
 #include "App.h"
+#include "src/gui_toolkit/widgets/TabGroup.h"
+#include "src/gui_toolkit/widgets/Page.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/List.h"
 
 namespace avitab {
 
 class ChartsApp: public App {
 public:
     ChartsApp(FuncsPtr appFuncs);
-    void show() override;
-    void onMouseWheel(int dir, int x, int y) override;
+    // void show() override;
+    // void onMouseWheel(int dir, int x, int y) override;
 private:
     std::string currentPath;
     std::shared_ptr<App> childApp;
 
-    void showFileSelect();
-    void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
-    void onSelectionClosed();
+    std::shared_ptr<TabGroup> tabs;
+    std::shared_ptr<Page> browsePage;
+    std::shared_ptr<Window> browseWindow;
+    std::shared_ptr<List> browseList;
+
+    void resetLayout();
+    
+    void createBrowseTab();
+    void onDown();
+    void onUp();
+    void onSelect(int data);
+
+    // void showFileSelect();
+    // void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
+    // void onSelectionClosed();
+
 };
 
 } /* namespace avitab */
