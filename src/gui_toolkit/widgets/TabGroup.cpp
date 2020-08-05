@@ -60,6 +60,10 @@ void TabGroup::setActiveTab(size_t i) {
     lv_tabview_set_tab_act(obj(), i, true);
 }
 
+size_t TabGroup::getActiveTab() {
+    return lv_tabview_get_tab_act(obj());
+}
+
 void TabGroup::removeTab(size_t i) {
     lv_tabview_ext_t *ext = reinterpret_cast<lv_tabview_ext_t *>(lv_obj_get_ext_attr(obj()));
 

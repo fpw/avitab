@@ -39,3 +39,6 @@ build-third
 
 # Jetbrains IDE
 .idea/
+
+# VSCode IDE
+.vscode/
