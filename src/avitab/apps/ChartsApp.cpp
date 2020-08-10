@@ -178,6 +178,8 @@ void ChartsApp::removeTab(std::shared_ptr<Page> page) {
             size_t index = tabs->getTabIndex(it->page);
             pages.erase(it);
             tabs->removeTab(index);
+            if (index > pages.size()) index--;
+            tabs->setActiveTab(index);
             break;
         }
     }
