@@ -28,8 +28,10 @@ public:
     Runtime();
     ~Runtime();
 private:
+#if 0 // experimental
     JSRuntime *runtime;
     JSContext *ctx;
+#endif
 };
 
 }

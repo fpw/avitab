@@ -23,7 +23,7 @@
 namespace js {
 
 Runtime::Runtime() {
-/*
+#if 0 // experimental
     runtime = JS_NewRuntime();
     if (!runtime) {
         throw std::runtime_error("Couldn't initialize QuickJS");
@@ -33,14 +33,14 @@ Runtime::Runtime() {
     if (!ctx) {
         throw std::runtime_error("Couldn't create QuickJS context");
     }
-*/
+#endif
 }
 
 Runtime::~Runtime() {
-/*
+#if 0 // experimental
     JS_FreeContext(ctx);
     JS_FreeRuntime(runtime);
-*/
+#endif
 }
 
 }
