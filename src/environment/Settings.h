@@ -27,6 +27,13 @@ public:
     ~Settings();
 
 private:
+    void init();
+    void load();
+    void save();
+
+private:
+    const std::string filePath;
+    std::shared_ptr<nlohmann::json> database;
 };
 
 } /* namespace avitab */
