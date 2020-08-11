@@ -29,6 +29,7 @@
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "EnvData.h"
 #include "Config.h"
+#include "Settings.h"
 
 namespace avitab {
 
@@ -55,6 +56,8 @@ public:
     // Must be called from the environment thread - do not call from GUI thread!
     void loadConfig();
     std::shared_ptr<Config> getConfig();
+    void loadSettings();
+    std::shared_ptr<Settings> getSettings();
     void loadNavWorldInBackground();
     bool isNavWorldReady();
     virtual void onAircraftReload();
@@ -70,6 +73,7 @@ public:
     // Can be called from any thread
     virtual std::string getFontDirectory() = 0;
     virtual std::string getProgramPath() = 0;
+    virtual std::string getSettingsDir() = 0;
     virtual std::string getEarthTexturePath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
@@ -94,6 +98,7 @@ protected:
     virtual std::shared_ptr<xdata::XData> getNavData() = 0;
 private:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Settings> settings;
     std::mutex envMutex;
     std::vector<EnvironmentCallback> envCallbacks;
     std::shared_future<std::shared_ptr<xdata::World>> navWorldFuture;

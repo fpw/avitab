@@ -39,3 +39,6 @@ build-third
 
 # Jetbrains IDE
 .idea/
+
+# OS X artefacts
+.DS_Store

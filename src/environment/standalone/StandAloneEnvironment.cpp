@@ -100,6 +100,10 @@ std::string StandAloneEnvironment::getProgramPath() {
     return ourPath;
 }
 
+std::string StandAloneEnvironment::getSettingsDir() {
+    return ourPath;
+}
+
 double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
     return 0;
 }

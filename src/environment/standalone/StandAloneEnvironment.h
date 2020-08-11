@@ -43,6 +43,7 @@ public:
     // Can be called from any thread
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
+    std::string getSettingsDir() override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<xdata::XData> getNavData() override;
