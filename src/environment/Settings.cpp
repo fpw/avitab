@@ -45,6 +45,12 @@ bool Settings::getOverlaySetting(const std::string &id) {
     return b;
 }
 
+template<>
+void Settings::setOverlaySetting(const std::string &id, const bool value) {
+    json::json_pointer jp("/overlay/"+id);
+    (*database)[jp] = value;
+}
+
 void Settings::init() {
     // full init not required, just defaults that aren't zero/false/empty
     *database = { { "overlay", { { "my_aircraft", true } } } };

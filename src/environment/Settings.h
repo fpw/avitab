@@ -29,6 +29,9 @@ public:
     template<typename T>
     T getOverlaySetting(const std::string &id);
 
+    template<typename T>
+    void setOverlaySetting(const std::string &id, const T value);
+
 private:
     void init();
     void load();
