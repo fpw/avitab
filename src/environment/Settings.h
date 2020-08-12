@@ -26,6 +26,9 @@ public:
     Settings(const std::string &settingsFile);
     ~Settings();
 
+    template<typename T>
+    T getOverlaySetting(const std::string &id);
+
 private:
     void init();
     void load();

@@ -52,8 +52,10 @@ protected:
         return child;
     }
 
-private:
+protected:
     FuncsPtr funcs;
+
+private:
     ContPtr uiContainer;
     ExitFunct onExit;
 };

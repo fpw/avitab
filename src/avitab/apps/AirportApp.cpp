@@ -437,7 +437,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     auto chartImage = getChartImage(tab.chart);
     tab.mapSource = std::make_shared<maps::ImageSource>(chartImage);
     tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
-    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher);
+    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, funcs->getSettings());
     tab.map->setOverlayDirectory(api().getDataPath() + "icons/");
     tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
     tab.map->setNavWorld(api().getNavWorld());

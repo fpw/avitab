@@ -326,6 +326,10 @@ float avitab::AviTab::getLastFrameTime() {
     return env->getLastFrameTime();
 }
 
+std::shared_ptr<Settings> avitab::AviTab::getSettings() {
+    return env->getSettings();
+}
+
 void AviTab::onHomeButton() {
     showAppLauncher();
 }

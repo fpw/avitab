@@ -59,6 +59,7 @@ public:
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() override;
     Location getAircraftLocation() override;
     float getLastFrameTime() override;
+    std::shared_ptr<Settings> getSettings() override;
 
     ~AviTab();
 

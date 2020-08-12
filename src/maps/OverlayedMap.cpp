@@ -23,9 +23,10 @@
 
 namespace maps {
 
-OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
+OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<avitab::Settings> settings):
     mapImage(stitchedMap->getPreRotatedImage()),
     tileSource(stitchedMap->getTileSource()),
+    savedSettings(settings),
     copyrightStamp("Inconsolata.ttf"),
     stitcher(stitchedMap)
 {
@@ -46,6 +47,15 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap):
             onOverlaysDrawn();
         }
     });
+
+    overlayConfig.drawAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
+    overlayConfig.drawAirports = savedSettings->getOverlaySetting<bool>("airports");
+    overlayConfig.drawAirstrips = savedSettings->getOverlaySetting<bool>("airstrips");
+    overlayConfig.drawHeliportsSeaports = savedSettings->getOverlaySetting<bool>("heliports_seaports");
+    overlayConfig.drawVORs = savedSettings->getOverlaySetting<bool>("VORs");
+    overlayConfig.drawNDBs = savedSettings->getOverlaySetting<bool>("NDBs");
+    overlayConfig.drawILSs = savedSettings->getOverlaySetting<bool>("ILSs");
+    overlayConfig.drawWaypoints = savedSettings->getOverlaySetting<bool>("waypoints");
 
     for (int angle = 0; angle < 360; angle++) {
         sinTable[angle] = std::sin(angle * M_PI / 180);
@@ -146,6 +156,7 @@ void OverlayedMap::doWork() {
 }
 
 void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
+    // TODO - update persistent settings
     overlayConfig = conf;
     updateImage();
 }
