@@ -27,13 +27,18 @@ public:
     ~Settings();
 
     template<typename T>
-    T getOverlaySetting(const std::string &id);
+    T getGeneralSetting(const std::string &id);
+    template<typename T>
+    void setGeneralSetting(const std::string &id, const T value);
 
+    template<typename T>
+    T getOverlaySetting(const std::string &id);
     template<typename T>
     void setOverlaySetting(const std::string &id, const T value);
 
 private:
     void init();
+    void upgrade();
     void load();
     void save();
 

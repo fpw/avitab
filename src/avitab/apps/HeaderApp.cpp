@@ -25,6 +25,7 @@ namespace avitab {
 
 HeaderApp::HeaderApp(FuncsPtr appFuncs):
     App(appFuncs),
+    savedSettings(appFuncs->getSettings()),
     tickTimer(std::bind(&HeaderApp::onTick, this), TIMER_PERIOD_MS)
 {
     auto container = getUIContainer();
@@ -38,6 +39,7 @@ HeaderApp::HeaderApp(FuncsPtr appFuncs):
     settingsButton->setCallback([this] (const Button &) { toggleSettings(); });
     settingsButton->alignLeftInParent(HOR_PADDING);
 
+    showFps = savedSettings->getGeneralSetting<bool>("show_fps");
     fpsLabel = std::make_shared<Label>(container, "-- FPS");
     fpsLabel->alignRightOf(settingsButton);
     fpsLabel->setVisible(showFps);
@@ -72,7 +74,7 @@ void HeaderApp::createSettingsContainer() {
 
     fpsCheckbox = std::make_shared<Checkbox>(prefContainer, "Show FPS");
     fpsCheckbox->setChecked(showFps);
-    fpsCheckbox->setCallback([this] (bool checked) { showFps = checked; fpsLabel->setVisible(showFps); });
+    fpsCheckbox->setCallback([this] (bool checked) { showFps = checked; savedSettings->setGeneralSetting<bool>("show_fps", showFps); fpsLabel->setVisible(showFps); });
     fpsCheckbox->alignRightOf(brightnessSlider);
 
     mediaLabel = std::make_shared<Label>(prefContainer, "Ext. Media");
