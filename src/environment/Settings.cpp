@@ -42,34 +42,34 @@ Settings::~Settings()
 
 template<>
 bool Settings::getGeneralSetting(const std::string &id) {
-    json::json_pointer jp("/general/"+id);
-    bool b = database->value(jp,false);
+    json::json_pointer jp("/general/" + id);
+    bool b = database->value(jp, false);
     return b;
 }
 
 template<>
 int Settings::getGeneralSetting(const std::string &id) {
-    json::json_pointer jp("/general/"+id);
-    int b = database->value(jp,0);
+    json::json_pointer jp("/general/" + id);
+    int b = database->value(jp, 0);
     return b;
 }
 
 template<>
 void Settings::setGeneralSetting(const std::string &id, const bool value) {
-    json::json_pointer jp("/general/"+id);
+    json::json_pointer jp("/general/" + id);
     (*database)[jp] = value;
 }
 
 template<>
 bool Settings::getOverlaySetting(const std::string &id) {
-    json::json_pointer jp("/overlay/"+id);
-    bool b = database->value(jp,false);
+    json::json_pointer jp("/overlay/" + id);
+    bool b = database->value(jp, false);
     return b;
 }
 
 template<>
 void Settings::setOverlaySetting(const std::string &id, const bool value) {
-    json::json_pointer jp("/overlay/"+id);
+    json::json_pointer jp("/overlay/" + id);
     (*database)[jp] = value;
 }
 

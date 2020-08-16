@@ -156,30 +156,14 @@ void OverlayedMap::doWork() {
 }
 
 void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
-    if (overlayConfig.drawAircraft != conf.drawAircraft) {
-        savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawAircraft);
-    }
-    if (overlayConfig.drawAirports != conf.drawAirports) {
-        savedSettings->setOverlaySetting<bool>("airports", conf.drawAirports);
-    }
-    if (overlayConfig.drawAirstrips != conf.drawAirstrips) {
-        savedSettings->setOverlaySetting<bool>("airstrips", conf.drawAirstrips);
-    }
-    if (overlayConfig.drawHeliportsSeaports != conf.drawHeliportsSeaports) {
-        savedSettings->setOverlaySetting<bool>("heliports_seaports", conf.drawHeliportsSeaports);
-    }
-    if (overlayConfig.drawVORs != conf.drawVORs) {
-        savedSettings->setOverlaySetting<bool>("VORs", conf.drawVORs);
-    }
-    if (overlayConfig.drawNDBs != conf.drawNDBs) {
-        savedSettings->setOverlaySetting<bool>("NDBs", conf.drawNDBs);
-    }
-    if (overlayConfig.drawILSs != conf.drawILSs) {
-        savedSettings->setOverlaySetting<bool>("ILSs", conf.drawILSs);
-    }
-    if (overlayConfig.drawWaypoints != conf.drawWaypoints) {
-        savedSettings->setOverlaySetting<bool>("waypoints", conf.drawWaypoints);
-    }
+    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawAircraft);
+    savedSettings->setOverlaySetting<bool>("airports", conf.drawAirports);
+    savedSettings->setOverlaySetting<bool>("airstrips", conf.drawAirstrips);
+    savedSettings->setOverlaySetting<bool>("heliports_seaports", conf.drawHeliportsSeaports);
+    savedSettings->setOverlaySetting<bool>("VORs", conf.drawVORs);
+    savedSettings->setOverlaySetting<bool>("NDBs", conf.drawNDBs);
+    savedSettings->setOverlaySetting<bool>("ILSs", conf.drawILSs);
+    savedSettings->setOverlaySetting<bool>("waypoints", conf.drawWaypoints);
     overlayConfig = conf;
     updateImage();
 }

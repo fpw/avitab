@@ -15,7 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#ifndef SRC_ENVIRONMENT_SETTINGS_H_
+#define SRC_ENVIRONMENT_SETTINGS_H_
 
 #include <nlohmann/json_fwd.hpp>
 
@@ -48,3 +49,5 @@ private:
 };
 
 } /* namespace avitab */
+
+#endif /* SRC_ENVIRONMENT_SETTINGS_H_ */

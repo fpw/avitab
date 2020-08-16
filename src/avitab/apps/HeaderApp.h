@@ -53,7 +53,7 @@ private:
     unsigned int timerCount = 0;
     bool stopwatchMode = false;
 
-    bool showFps;
+    bool showFps = true;
     std::array<float, 30> fpsRingBuffer{};
     int fpsRingCursor = 0;
 

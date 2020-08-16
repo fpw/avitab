@@ -262,7 +262,7 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     mapStitcher = std::make_shared<img::Stitcher>(mapImage, tileSource);
     mapStitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
-    map = std::make_unique<maps::OverlayedMap>(mapStitcher, funcs->getSettings());
+    map = std::make_unique<maps::OverlayedMap>(mapStitcher, api().getSettings());
     map->setOverlayDirectory(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
     map->setNavWorld(api().getNavWorld());
