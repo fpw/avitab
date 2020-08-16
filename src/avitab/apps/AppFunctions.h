@@ -57,6 +57,7 @@ public:
     virtual std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() = 0;
     virtual Location getAircraftLocation() = 0;
     virtual float getLastFrameTime() = 0;
+    virtual std::shared_ptr<Settings> getSettings() = 0;
     virtual ~AppFunctions() = default;
 };
 

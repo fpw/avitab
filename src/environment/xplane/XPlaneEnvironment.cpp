@@ -32,6 +32,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
 
     // Called by the X-Plane thread via StartPlugin
     pluginPath = getPluginPath();
+    xplanePrefsDir = findPreferencesDir();
     flightLoopId = createFlightLoop();
 
     xplaneRootPath = getXPlanePath();
@@ -120,8 +121,15 @@ std::string XPlaneEnvironment::getPluginPath() {
     XPLMPluginID ourId = XPLMGetMyID();
     char pathBuf[2048];
     XPLMGetPluginInfo(ourId, nullptr, pathBuf, nullptr, nullptr);
-    char *pathPart = XPLMExtractFileAndPath(pathBuf);
-    return std::string(pathBuf, 0, pathPart - pathBuf) + "/../";
+    char *filePart = XPLMExtractFileAndPath(pathBuf);
+    return std::string(pathBuf, 0, filePart - pathBuf) + "/../";
+}
+
+std::string XPlaneEnvironment::findPreferencesDir() {
+    char pathBuf[2048];
+    XPLMGetPrefsPath(pathBuf);
+    char *filePart = XPLMExtractFileAndPath(pathBuf);
+    return std::string(pathBuf, 0, filePart - pathBuf);
 }
 
 XPLMFlightLoopID XPlaneEnvironment::createFlightLoop() {
@@ -236,6 +244,10 @@ std::string XPlaneEnvironment::getAirplanePath() {
 
 std::string XPlaneEnvironment::getProgramPath() {
     return pluginPath;
+}
+
+std::string XPlaneEnvironment::getSettingsDir() {
+    return xplanePrefsDir;
 }
 
 std::string XPlaneEnvironment::getEarthTexturePath() {

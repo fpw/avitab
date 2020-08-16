@@ -318,12 +318,16 @@ std::shared_ptr<navigraph::NavigraphAPI> AviTab::getNavigraph() {
     return navigraphAPI;
 }
 
-Location avitab::AviTab::getAircraftLocation() {
+Location AviTab::getAircraftLocation() {
     return env->getAircraftLocation();
 }
 
-float avitab::AviTab::getLastFrameTime() {
+float AviTab::getLastFrameTime() {
     return env->getLastFrameTime();
+}
+
+std::shared_ptr<Settings> AviTab::getSettings() {
+    return env->getSettings();
 }
 
 void AviTab::onHomeButton() {

@@ -36,6 +36,16 @@ std::shared_ptr<Config> Environment::getConfig() {
     return config;
 }
 
+void Environment::loadSettings() {
+    std::string fname(getSettingsDir() + "/avitab.prf");
+    logger::info("Settings file: %s", fname.c_str());
+    settings = std::make_unique<Settings>(fname);
+}
+
+std::shared_ptr<Settings> Environment::getSettings() {
+    return settings;
+}
+
 std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
     crash::ThreadCookie crashCookie;
 

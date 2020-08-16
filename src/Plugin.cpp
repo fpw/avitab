@@ -42,6 +42,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
         environment->loadConfig();
         logger::setStdOut(environment->getConfig()->getBool("/AviTab/logToStdOut"));
         logger::init(environment->getProgramPath());
+        environment->loadSettings();
         strncpy(outDescription, "A tablet to help in VR.", 255);
     } catch (const std::exception &e) {
         try {

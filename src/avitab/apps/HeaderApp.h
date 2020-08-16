@@ -45,6 +45,8 @@ private:
     std::shared_ptr<Label> brightLabel, mediaLabel;
     std::shared_ptr<Button> closeButton;
 
+    std::shared_ptr<avitab::Settings> savedSettings;
+
     static constexpr int TIMER_PERIOD_MS = 100;
     static constexpr int TIMER_TICKS_PER_SEC = 1000 / TIMER_PERIOD_MS;
     Timer tickTimer;

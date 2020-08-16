@@ -77,7 +77,7 @@ void PDFViewer::loadCurrentFile() {
     stitcher = std::make_shared<img::Stitcher>(rasterImage, source);
     stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
-    map = std::make_unique<maps::OverlayedMap>(stitcher);
+    map = std::make_unique<maps::OverlayedMap>(stitcher, api().getSettings());
     map->setOverlayDirectory(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { pixMap->invalidate(); });
     map->updateImage();

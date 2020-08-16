@@ -24,25 +24,26 @@
 #include "src/libxdata/world/World.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/libxdata/world/models/navaids/Morse.h"
+#include "src/environment/Settings.h"
 
 namespace maps {
 
 struct OverlayConfig {
-    bool drawAircraft = true;
-    bool drawAirports = false;
-    bool drawAirstrips = false;
-    bool drawHeliportsSeaports = false;
-    bool drawVORs = false;
-    bool drawNDBs = false;
-    bool drawILSs = false;
-    bool drawWaypoints = false;
+    bool drawAircraft;
+    bool drawAirports;
+    bool drawAirstrips;
+    bool drawHeliportsSeaports;
+    bool drawVORs;
+    bool drawNDBs;
+    bool drawILSs;
+    bool drawWaypoints;
 };
 
 class OverlayedMap {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
 
-    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap);
+    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<avitab::Settings> settings);
     void setOverlayDirectory(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
@@ -80,7 +81,8 @@ private:
     float cosTable[360];
 
     // Overlays
-    OverlayConfig overlayConfig{};
+    OverlayConfig overlayConfig;
+    std::shared_ptr<avitab::Settings> savedSettings;
     std::shared_ptr<xdata::World> navWorld;
     double planeLat = 0, planeLong = 0, planeHeading = 0;
     img::Image planeIcon;

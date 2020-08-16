@@ -33,6 +33,7 @@ int main() {
         logger::setStdOut(env->getConfig()->getBool("/AviTab/logToStdOut"));
         logger::init(env->getProgramPath());
         logger::verbose("Main thread has id %d", std::this_thread::get_id());
+        env->loadSettings();
 
         auto aviTab = std::make_unique<avitab::AviTab>(env);
         aviTab->startApp();

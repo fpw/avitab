@@ -48,6 +48,7 @@ public:
     // Can be called from any thread
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
+    std::string getSettingsDir() override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<xdata::XData> getNavData() override;
@@ -69,7 +70,7 @@ private:
 
     // Cached data
     DataCache dataCache;
-    std::string pluginPath, xplaneRootPath;
+    std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
     Location aircraftLocation{};
     std::atomic<float> lastDrawTime{};
@@ -89,6 +90,7 @@ private:
 
     std::string getXPlanePath();
     std::string getPluginPath();
+    std::string findPreferencesDir();
     XPLMFlightLoopID createFlightLoop();
     float onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count);
     static int handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref);
