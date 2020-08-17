@@ -25,19 +25,9 @@
 #include "src/libimg/TTFStamper.h"
 #include "src/libxdata/world/models/navaids/Morse.h"
 #include "src/environment/Settings.h"
+#include "OverlayConfig.h"
 
 namespace maps {
-
-struct OverlayConfig {
-    bool drawAircraft;
-    bool drawAirports;
-    bool drawAirstrips;
-    bool drawHeliportsSeaports;
-    bool drawVORs;
-    bool drawNDBs;
-    bool drawILSs;
-    bool drawWaypoints;
-};
 
 class OverlayedMap {
 public:
@@ -54,6 +44,8 @@ public:
     void centerOnPlane(double latitude, double longitude, double heading);
     void setPlanePosition(double latitude, double longitude, double heading);
     void getCenterLocation(double &latitude, double &longitude);
+    double getMapWidthNM() const;
+    bool isVisibleWithMargin(int x, int y, int marginPixels=0);
 
     void updateImage();
     void zoomIn();
@@ -76,6 +68,7 @@ private:
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
+    double mapWidthNM;
 
     float sinTable[360];
     float cosTable[360];
@@ -101,25 +94,25 @@ private:
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
 
-    void drawAirport(const xdata::Airport &airport, double mapWidthNM);
+    void drawAirport(const xdata::Airport &airport);
     bool isAirportVisible(const xdata::Airport& airport);
-    void drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color);
+    void drawAirportBlob(int x, int y, uint32_t color);
     void drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color);
     void drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color);
     void drawAirportICAOGeographicRunways(const xdata::Airport& airport, uint32_t color);
     void drawAirportGeographicRunways(const xdata::Airport& airport);
     void drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color);
-    void drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color);
+    void drawAirportText(const xdata::Airport& airport, int x, int y, uint32_t color);
     void getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int & xCentre, int & yCentre);
     int  getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre);
 
-    void drawFix(const xdata::Fix &fix, double mapWidthNM);
-    void drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM);
-    void drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM);
-    void drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM);
-    void drawILS(const xdata::Fix &fix, int px, int py, double mapWidthNM);
+    void drawFix(const xdata::Fix &fix);
+    void drawVOR(const xdata::Fix &fix, int px, int py);
+    void drawDME(const xdata::Fix &fix, int px, int py);
+    void drawNDB(const xdata::Fix &fix, int px, int py);
+    void drawILS(const xdata::Fix &fix, int px, int py);
     void drawWaypoint(const xdata::Fix &fix, int px, int py);
-    void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM);
+    void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color);
     void drawMorse(int x, int y, std::string text, int size, uint32_t color);
 
     void positionToPixel(double lat, double lon, int &px, int &py) const;
@@ -129,7 +122,6 @@ private:
     float sinDegrees(int angleDegrees);
     void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y);
     void polarToCartesian(float radius, float angleRadians, double& x, double& y);
-    bool isVisible(int x, int y, int margin = 0);
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax);
 
     static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
