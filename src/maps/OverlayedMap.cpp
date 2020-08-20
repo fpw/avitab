@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <cmath>
 #include "OverlayedMap.h"
-
 #include "OverlayedNode.h"
 #include "OverlayedNDB.h"
 #include "src/Logger.h"
@@ -74,18 +73,12 @@ void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
     onOverlaysDrawn = cb;
 }
 
-void OverlayedMap::setOverlayDirectory(const std::string& path) {
+void OverlayedMap::loadOverlayIcons(const std::string& path) {
     std::string planeIconName = "if_icon-plane_211875.png";
     try {
         planeIcon.loadImageFile(path + planeIconName);
     } catch (const std::exception &e) {
         logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
-    }
-    std::string NDBIconName = "if_icon_ndb.png";
-    try {
-        ndbIcon.loadImageFile(path + NDBIconName);
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't load icon %s: %s", NDBIconName.c_str(), e.what());
     }
     OverlayedNDB::createNDBIcon();
 }
@@ -255,21 +248,20 @@ void OverlayedMap::drawDataOverlays() {
     double nmPerPixel = metresPerPixel / 1852;
     mapWidthNM = nmPerPixel * mapImage->getWidth();
 
-    
     // Gather list of visible OverlayedNodes, instancing those that are visible
     std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
     std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
     navWorld->visitNodes(upLeft, downRight, [&overlayedAerodromes, &overlayedFixes] (const xdata::NavNode &node) {
         auto overlayedNode = OverlayedNode::getInstanceIfVisible(node);
         if (overlayedNode) {
-        	if (dynamic_cast<const xdata::Airport *>(&node)) {
+            if (dynamic_cast<const xdata::Airport *>(&node)) {
                 overlayedAerodromes.push_back(overlayedNode);
             } else if (dynamic_cast<const xdata::Fix *>(&node)) {
                 overlayedFixes.push_back(overlayedNode);
             }
         }
     });
-    
+
     LOG_INFO(dbg, "%d aerodromes, %d fixes visible", overlayedAerodromes.size(), overlayedFixes.size());
 
     // Render the list of visible OverlayedNodes:

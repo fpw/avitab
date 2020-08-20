@@ -49,7 +49,7 @@ std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisib
 
 void OverlayedILSLocalizer::drawGraphics() {
     int cx, cy, lx, ly, rx, ry;
-    getTailCoords(fix, cx, cy, lx, ly, rx, ry);
+    getTailCoords(fix, lx, ly, cx, cy, rx, ry);
     mapImage->drawLineAA(px, py, lx, ly, color);
     mapImage->drawLineAA(px, py, cx, cy, color);
     mapImage->drawLineAA(px, py, rx, ry, color);
@@ -93,7 +93,6 @@ void OverlayedILSLocalizer::getTailCoords(const xdata::Fix *fix, int &lx, int &l
     double rangePixels = ils->getRange() / nmPerPixel;
     double dcx, dcy, dlx, dly, drx, dry;
     const double OUTER_ANGLE = 2.5;
-    // const uint32_t color = img::COLOR_DARK_GREEN;
     polarToCartesian(rangePixels, ilsHeading - OUTER_ANGLE, dlx, dly);
     polarToCartesian(rangePixels * 0.95, ilsHeading, dcx, dcy);
     polarToCartesian(rangePixels, ilsHeading + OUTER_ANGLE, drx, dry);

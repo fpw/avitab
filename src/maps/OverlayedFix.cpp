@@ -43,7 +43,7 @@ std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(const xdata::Fi
     if (overlayHelper->getMapWidthNM() > SHOW_NAVAIDS_AT_MAPWIDTHNM) {
         return NULL;
     }
-    
+
     if (fix.getNDB()) {
         return OverlayedNDB::getInstanceIfVisible(fix);
     } else if (fix.getVOR()) {

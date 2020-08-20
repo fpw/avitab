@@ -37,7 +37,7 @@ public:
     virtual void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const = 0;
     virtual int getZoomLevel() const = 0;
     virtual int getMaxZoomLevel() const = 0;
-    
+
     virtual ~IOverlayHelper(){};
 };
 
