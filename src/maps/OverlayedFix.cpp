@@ -80,7 +80,7 @@ void OverlayedFix::drawNavTextBox(std::string type, std::string id, std::string 
 
     mapImage->drawRectangle(x, y, x + boxWidth, y + boxHeight, color);
     if (type != "") {
-        mapImage->drawText(type, TEXT_SIZE, x + boxWidth/2, y - yo + 1, color, img::COLOR_WHITE, img::Align::CENTRE);
+        mapImage->drawText(type, TEXT_SIZE, x + boxWidth / 2, y - yo + 1, color, img::COLOR_WHITE, img::Align::CENTRE);
     }
 }
 

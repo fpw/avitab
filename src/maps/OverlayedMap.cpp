@@ -173,7 +173,7 @@ OverlayConfig OverlayedMap::getOverlayConfig() const {
 
 void OverlayedMap::drawOverlays() {
     if ((mapImage->getWidth() == 0) || (mapImage->getHeight() == 0)) {
-    	return;
+        return;
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
@@ -287,7 +287,7 @@ void OverlayedMap::drawDataOverlays() {
             overlayedNode->drawText(detailedText);
         }
     }
-    
+
     LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
         stitcher->getZoomLevel(), deltaLon, nmPerPixel);
 
@@ -316,7 +316,7 @@ void OverlayedMap::drawScale(double nmPerPixel) {
     int x = 5;
     int y = 195;
     if (perPixel == 0) {
-    	return;
+        return;
     }
     int lineLength = rangeToShow / perPixel;
     mapImage->drawLine(x, y,  x + lineLength, y,  img::COLOR_BLACK);

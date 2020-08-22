@@ -50,19 +50,19 @@ void registerHandler(int (*getPluginId)()) {
     mainThreadId = std::this_thread::get_id();
     ourPluginId = getPluginId();
 
-	HMODULE module = ::GetModuleHandleA("dbghelp.dll");
+    HMODULE module = ::GetModuleHandleA("dbghelp.dll");
 
-	if (!module) {
+    if (!module) {
         ::LoadLibraryA("dbghelp.dll");
     }
 
-	previousHandler = SetUnhandledExceptionFilter(handleException);
+    previousHandler = SetUnhandledExceptionFilter(handleException);
 }
 
 void unregisterHandler() {
     if (previousHandler) {
-    	SetUnhandledExceptionFilter(previousHandler);
-    	previousHandler = nullptr;
+        SetUnhandledExceptionFilter(previousHandler);
+        previousHandler = nullptr;
     }
 }
 
@@ -99,10 +99,10 @@ bool isOurFault() {
 }
 
 typedef BOOL(WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile,
-	MINIDUMP_TYPE DumpType,
-	CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-	CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-	CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+    MINIDUMP_TYPE DumpType,
+    CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+    CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
+    CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
 
 LONG WINAPI handleException(EXCEPTION_POINTERS *ei) {
     if (!isOurFault()) {
@@ -114,20 +114,20 @@ LONG WINAPI handleException(EXCEPTION_POINTERS *ei) {
     }
 
     HMODULE module = ::GetModuleHandleA("dbghelp.dll");
-	if (!module) {
+    if (!module) {
         module = ::LoadLibraryA("dbghelp.dll");
     }
 
-	if (!module) {
-	    return EXCEPTION_CONTINUE_SEARCH;
-	}
+    if (!module) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
 
     const MINIDUMPWRITEDUMP pDump = MINIDUMPWRITEDUMP(::GetProcAddress(module, "MiniDumpWriteDump"));
-	if (!pDump) {
-	    return EXCEPTION_CONTINUE_SEARCH;
-	}
+    if (!pDump) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
 
-	char name[MAX_PATH];
+    char name[MAX_PATH];
     SYSTEMTIME t;
     GetSystemTime(&t);
     wsprintfA(name,
@@ -135,9 +135,9 @@ LONG WINAPI handleException(EXCEPTION_POINTERS *ei) {
         t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
 
     const HANDLE handle = ::CreateFileA(name, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-	if (handle == INVALID_HANDLE_VALUE) {
-	    return EXCEPTION_CONTINUE_SEARCH;
-	}
+    if (handle == INVALID_HANDLE_VALUE) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
 
     MINIDUMP_EXCEPTION_INFORMATION exception_information = {};
     exception_information.ThreadId = ::GetCurrentThreadId();

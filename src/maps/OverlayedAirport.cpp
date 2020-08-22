@@ -134,10 +134,10 @@ uint32_t OverlayedAirport::getAirportColor(const xdata::Airport *airport) {
 }
 
 void OverlayedAirport::drawAirportBlob(int x, int y, uint32_t color) {
-	if ( overlayHelper->getMapWidthNM() != 0) {
-		int radius = BLOB_SIZE_DIVIDEND / overlayHelper->getMapWidthNM();
-		mapImage->fillCircle(x, y, radius, color);
-	}
+    if ( overlayHelper->getMapWidthNM() != 0) {
+        int radius = BLOB_SIZE_DIVIDEND / overlayHelper->getMapWidthNM();
+        mapImage->fillCircle(x, y, radius, color);
+    }
 }
 
 void OverlayedAirport::getRunwaysCentre(const xdata::Airport *airport, int zoomLevel, int& xCentre, int &yCentre) {
@@ -235,7 +235,7 @@ void OverlayedAirport::drawAirportICAOCircleAndRwyPattern(const xdata::Airport *
     getRunwaysCentre(airport, overlayHelper->getMaxZoomLevel(), xCentre, yCentre);
     int maxDistance = getMaxRunwayDistanceFromCentre(airport, overlayHelper->getMaxZoomLevel(), xCentre, yCentre);
     if (maxDistance == 0) {
-    	return;
+        return;
     }
     float scale = (float)maxDistance / (float)(ICAO_CIRCLE_RADIUS - 4);
     xCentre /= scale;

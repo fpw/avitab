@@ -38,13 +38,13 @@ std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(const xdata::Fi
 
 void OverlayedNDB::createNDBIcon() {
     int angleStep[] = {2, 30, 24, 20, 15};
-    int numRings = (int)(sizeof(angleStep)/sizeof(angleStep[0]));
+    int numRings = (int)(sizeof(angleStep) / sizeof(angleStep[0]));
     int bgSize = (numRings + 2) * 14;
     ndbIcon.resize(bgSize * 2 + 1, bgSize * 2 + 1, 0);
     ndbIcon.fillCircle(bgSize, bgSize, 4, img::COLOR_ICAO_MAGENTA);
     for (int ring = 0; ring < numRings; ring++) {
         int radius = (ring + 1) * 14;
-        for (int angleDegrees = 0; angleDegrees < 360; angleDegrees+=angleStep[ring]) {
+        for (int angleDegrees = 0; angleDegrees < 360; angleDegrees += angleStep[ring]) {
             LOG_INFO(0, "ring = %d, radius = %d, angle = %d", ring, radius, angleDegrees);
             int dx = radius * cos(angleDegrees * M_PI / 180.0);
             int dy = radius * sin(angleDegrees * M_PI / 180.0);
