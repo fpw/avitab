@@ -45,13 +45,13 @@ void OverlayedAirport::drawGraphics() {
             drawAirportBlob(px, py, color);
         }
     } else if (overlayHelper->getMapWidthNM() < DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM) {
-        if ((type == HELIPORT) || (type == SEAPORT)) {
+        if ((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT)) {
             drawAirportICAORing(airport, px, py, color);
         } else {
             drawAirportGeographicRunways(airport);
         }
     } else {
-        if ((type == HELIPORT) || (type == SEAPORT) || (type == AIRSTRIP)) {
+        if ((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT) || (type == AerodromeType::AIRSTRIP)) {
             drawAirportICAORing(airport, px, py, color);
         } else {
             int xCentre = 0;
@@ -61,7 +61,7 @@ void OverlayedAirport::drawGraphics() {
             if (maxDistance > ICAO_CIRCLE_RADIUS) {
                 drawAirportICAOGeographicRunways(airport, color);
             } else {
-                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_CIRCLE_RADIUS, color);
+                drawAirportICAOCircleAndRwyPattern(airport, px, py, color);
             }
         }
     }
@@ -112,20 +112,20 @@ bool OverlayedAirport::isVisible(const xdata::Airport *airport) {
 bool OverlayedAirport::isEnabled(const xdata::Airport *airport) {
     auto type = getAerodromeType(airport);
     auto cfg = overlayHelper->getOverlayConfig();
-    return ((type == AIRPORT) && cfg.drawAirports) ||
-           ((type == AIRSTRIP) && cfg.drawAirstrips) ||
-           (((type == HELIPORT) || (type == SEAPORT)) && cfg.drawHeliportsSeaports);
+    return ((type == AerodromeType::AIRPORT) && cfg.drawAirports) ||
+           ((type == AerodromeType::AIRSTRIP) && cfg.drawAirstrips) ||
+           (((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT)) && cfg.drawHeliportsSeaports);
 }
 
 OverlayedAirport::AerodromeType OverlayedAirport::getAerodromeType(const xdata::Airport *airport) {
     if (airport->hasWaterRunway()) {
-        return SEAPORT;
+        return AerodromeType::SEAPORT;
     } else if (airport->hasOnlyHeliports()) {
-        return HELIPORT;
+        return AerodromeType::HELIPORT;
     } else if (airport->hasHardRunway()) {
-        return AIRPORT;
+        return AerodromeType::AIRPORT;
     } else {
-        return AIRSTRIP;
+        return AerodromeType::AIRSTRIP;
     }
 }
 
@@ -134,8 +134,10 @@ uint32_t OverlayedAirport::getAirportColor(const xdata::Airport *airport) {
 }
 
 void OverlayedAirport::drawAirportBlob(int x, int y, uint32_t color) {
-    int radius = BLOB_SIZE_DIVIDEND / overlayHelper->getMapWidthNM();
-    mapImage->fillCircle(x, y, radius, color);
+	if ( overlayHelper->getMapWidthNM() != 0) {
+		int radius = BLOB_SIZE_DIVIDEND / overlayHelper->getMapWidthNM();
+		mapImage->fillCircle(x, y, radius, color);
+	}
 }
 
 void OverlayedAirport::getRunwaysCentre(const xdata::Airport *airport, int zoomLevel, int& xCentre, int &yCentre) {
@@ -225,14 +227,17 @@ void OverlayedAirport::drawAirportGeographicRunways(const xdata::Airport *airpor
    });
 }
 
-void OverlayedAirport::drawAirportICAOCircleAndRwyPattern(const xdata::Airport *airport, int x, int y, int radius, uint32_t color) {
-    mapImage->fillCircle(x, y, radius, color);
+void OverlayedAirport::drawAirportICAOCircleAndRwyPattern(const xdata::Airport *airport, int x, int y, uint32_t color) {
+    mapImage->fillCircle(x, y, ICAO_CIRCLE_RADIUS, color);
     // Scale up to fill circle - calculate pixels at higher resolution zoom level and scale down.
     int xCentre = 0;
     int yCentre = 0;
     getRunwaysCentre(airport, overlayHelper->getMaxZoomLevel(), xCentre, yCentre);
     int maxDistance = getMaxRunwayDistanceFromCentre(airport, overlayHelper->getMaxZoomLevel(), xCentre, yCentre);
-    float scale = (float)maxDistance / (float)(radius - 4);
+    if (maxDistance == 0) {
+    	return;
+    }
+    float scale = (float)maxDistance / (float)(ICAO_CIRCLE_RADIUS - 4);
     xCentre /= scale;
     yCentre /= scale;
 

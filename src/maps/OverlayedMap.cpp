@@ -172,6 +172,9 @@ OverlayConfig OverlayedMap::getOverlayConfig() const {
 }
 
 void OverlayedMap::drawOverlays() {
+    if ((mapImage->getWidth() == 0) || (mapImage->getHeight() == 0)) {
+    	return;
+    }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
         drawAircraftOverlay();
@@ -312,6 +315,9 @@ void OverlayedMap::drawScale(double nmPerPixel) {
         step, units.c_str(),  rangeToShow, units.c_str());
     int x = 5;
     int y = 195;
+    if (perPixel == 0) {
+    	return;
+    }
     int lineLength = rangeToShow / perPixel;
     mapImage->drawLine(x, y,  x + lineLength, y,  img::COLOR_BLACK);
     for (int tick = 0; tick <= rangeToShow; tick += step) {

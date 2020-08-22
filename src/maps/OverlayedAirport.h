@@ -35,12 +35,12 @@ public:
 
 private:
 
-    typedef enum {
+    enum class AerodromeType {
         AIRPORT,
         AIRSTRIP,
         SEAPORT,
         HELIPORT
-    } AerodromeType;
+    };
 
     const xdata::Airport *airport;
     AerodromeType type;
@@ -54,7 +54,7 @@ private:
     static uint32_t getAirportColor(const xdata::Airport *airport);
 
     static void drawAirportBlob(int x, int y, uint32_t color);
-    static void drawAirportICAOCircleAndRwyPattern(const xdata::Airport *airport, int x, int y, int radius, uint32_t color);
+    static void drawAirportICAOCircleAndRwyPattern(const xdata::Airport *airport, int x, int y, uint32_t color);
     static void drawAirportICAORing(const xdata::Airport *airport, int x, int y, uint32_t color);
     static void drawAirportICAOGeographicRunways(const xdata::Airport *airport, uint32_t color);
     static void drawAirportGeographicRunways(const xdata::Airport *airport);

@@ -89,8 +89,10 @@ void OverlayedILSLocalizer::getTailCoords(const xdata::Fix *fix, int &lx, int &l
         return;
     }
     double ilsHeading = std::fmod(ils->getRunwayHeading() + 180.0, 360);
-    double nmPerPixel = overlayHelper->getMapWidthNM() / mapImage->getWidth();
-    double rangePixels = ils->getRange() / nmPerPixel;
+    double rangePixels = 0.0;
+    if (overlayHelper->getMapWidthNM() != 0) {
+    	rangePixels = (ils->getRange() * mapImage->getWidth()) / overlayHelper->getMapWidthNM();
+    }
     double dcx, dcy, dlx, dly, drx, dry;
     const double OUTER_ANGLE = 2.5;
     polarToCartesian(rangePixels, ilsHeading - OUTER_ANGLE, dlx, dly);
