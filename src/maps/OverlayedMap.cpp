@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cmath>
 #include "OverlayedMap.h"
+#include "OverlayedNode.h"
+#include "OverlayedNDB.h"
 #include "src/Logger.h"
 
 namespace maps {
@@ -62,6 +64,8 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         cosTable[angle] = std::cos(angle * M_PI / 180);
     }
 
+    OverlayedNode::setHelpers(this, mapImage);
+
     dbg = false;
 }
 
@@ -69,19 +73,14 @@ void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
     onOverlaysDrawn = cb;
 }
 
-void OverlayedMap::setOverlayDirectory(const std::string& path) {
+void OverlayedMap::loadOverlayIcons(const std::string& path) {
     std::string planeIconName = "if_icon-plane_211875.png";
     try {
         planeIcon.loadImageFile(path + planeIconName);
     } catch (const std::exception &e) {
         logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
     }
-    std::string NDBIconName = "if_icon_ndb.png";
-    try {
-        ndbIcon.loadImageFile(path + NDBIconName);
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't load icon %s: %s", NDBIconName.c_str(), e.what());
-    }
+    OverlayedNDB::createNDBIcon();
 }
 
 void OverlayedMap::setNavWorld(std::shared_ptr<xdata::World> world) {
@@ -173,6 +172,9 @@ OverlayConfig OverlayedMap::getOverlayConfig() const {
 }
 
 void OverlayedMap::drawOverlays() {
+    if ((mapImage->getWidth() == 0) || (mapImage->getHeight() == 0)) {
+        return;
+    }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
         drawAircraftOverlay();
@@ -247,483 +249,53 @@ void OverlayedMap::drawDataOverlays() {
     double diagonalPixels = sqrt(pow(mapImage->getWidth(), 2) + pow(mapImage->getHeight(), 2));
     double metresPerPixel = upLeft.distanceTo(downRight) / diagonalPixels;
     double nmPerPixel = metresPerPixel / 1852;
-    double mapWidthNM = nmPerPixel * mapImage->getWidth();
+    mapWidthNM = nmPerPixel * mapImage->getWidth();
 
-    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
-        auto fix = dynamic_cast<const xdata::Fix *>(&node);
-        if (fix) {
-            drawFix(*fix, mapWidthNM);
+    // Gather list of visible OverlayedNodes, instancing those that are visible
+    std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
+    std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
+    navWorld->visitNodes(upLeft, downRight, [&overlayedAerodromes, &overlayedFixes] (const xdata::NavNode &node) {
+        auto overlayedNode = OverlayedNode::getInstanceIfVisible(node);
+        if (overlayedNode) {
+            if (dynamic_cast<const xdata::Airport *>(&node)) {
+                overlayedAerodromes.push_back(overlayedNode);
+            } else if (dynamic_cast<const xdata::Fix *>(&node)) {
+                overlayedFixes.push_back(overlayedNode);
+            }
         }
     });
-    navWorld->visitNodes(upLeft, downRight, [this, &mapWidthNM] (const xdata::NavNode &node) {
-        auto airport = dynamic_cast<const xdata::Airport *>(&node);
-        if (airport && isAirportVisible(*airport)) {
-            drawAirport(*airport, mapWidthNM);
+
+    LOG_INFO(dbg, "%d aerodromes, %d fixes visible", overlayedAerodromes.size(), overlayedFixes.size());
+
+    // Render the list of visible OverlayedNodes:
+    // Fix graphics, aerodrome graphics, then fix text and aerodrome text.
+    for (auto overlayedNode : overlayedFixes) {
+        overlayedNode->drawGraphics();
+    }
+
+    for (auto overlayedNode : overlayedAerodromes) {
+        overlayedNode->drawGraphics();
+    }
+
+    int numNodesVisible = overlayedAerodromes.size() + overlayedFixes.size();
+    if (numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT) {
+        bool detailedText = numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT;
+        for (auto overlayedNode : overlayedFixes) {
+            overlayedNode->drawText(detailedText);
         }
-    });
+        for (auto overlayedNode : overlayedAerodromes) {
+            overlayedNode->drawText(detailedText);
+        }
+    }
 
     LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
-        stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);
+        stitcher->getZoomLevel(), deltaLon, nmPerPixel);
 
     drawScale(nmPerPixel);
 }
 
-void OverlayedMap::drawAirport(const xdata::Airport& airport, double mapWidthNM) {
-
-    if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports ) {
-        return;
-    }
-
-    auto &loc = airport.getLocation();
-    int px, py;
-    positionToPixel(loc.latitude, loc.longitude, px, py);
-
-    bool hasControlTower = airport.hasControlTower();
-    uint32_t color = hasControlTower ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
-    bool hasHardRunway = airport.hasHardRunway();
-
-    if (mapWidthNM > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) {
-        if (hasHardRunway) {
-            drawAirportBlob(px, py, mapWidthNM, color);
-        }
-        return;
-    }
-
-    bool isSeaplaneport = airport.hasWaterRunway();
-    bool isHeliport = airport.hasOnlyHeliports();
-    bool isAirport  = !isSeaplaneport && !isHeliport &&  hasHardRunway;
-    bool isAirstrip = !isSeaplaneport && !isHeliport && !hasHardRunway;
-
-    if (isSeaplaneport) {
-        LOG_INFO(dbg, "%s %s -> Seaplane port", airport.getID().c_str(), airport.getName().c_str());
-    } else if (isHeliport) {
-        LOG_INFO(dbg, "%s %s -> Heliport", airport.getID().c_str(), airport.getName().c_str());
-    } else {
-        LOG_INFO(dbg, "%s %s -> %s %s", airport.getID().c_str(), airport.getName().c_str(), hasHardRunway ? "Airport":"Airstrip", hasControlTower ? "control tower" : "");
-    }
-
-    if ( (isAirport &&  !overlayConfig.drawAirports) ||
-         (isAirstrip && !overlayConfig.drawAirstrips) ||
-         ((isHeliport || isSeaplaneport) && !overlayConfig.drawHeliportsSeaports)) {
-        return;
-    }
-
-    if (mapWidthNM < DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM) {
-        if (isHeliport || isSeaplaneport) {
-            drawAirportICAORing(airport, px, py, color);
-        } else {
-            drawAirportGeographicRunways(airport);
-        }
-    } else {
-        if (isHeliport || isSeaplaneport || isAirstrip) {
-            drawAirportICAORing(airport, px, py, color);
-        } else {
-            int xCentre = 0;
-            int yCentre = 0;
-            getRunwaysCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
-            int maxDistance = getMaxRunwayDistanceFromCentre(airport, stitcher->getZoomLevel(), xCentre, yCentre);
-            if (maxDistance > ICAO_CIRCLE_RADIUS) {
-                drawAirportICAOGeographicRunways(airport, color);
-            } else {
-                drawAirportICAOCircleAndRwyPattern(airport, px, py, ICAO_CIRCLE_RADIUS, color);
-            }
-        }
-    }
-
-    drawAirportText(airport, px, py, mapWidthNM, color + img::DARKER);
-}
-
-void OverlayedMap::drawAirportBlob(int x, int y, int mapWidthNM, uint32_t color) {
-    int radius = BLOB_SIZE_DIVIDEND / mapWidthNM;
-    mapImage->fillCircle(x, y, radius, color);
-}
-
-void OverlayedMap::drawAirportGeographicRunways(const xdata::Airport& airport) {
-    // Draw the runways as on the ground, but with slightly exaggerated widths for visibility
-    LOG_INFO(dbg, "%s", airport.getID().c_str());
-    airport.forEachRunwayPair([this](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
-        auto loc1 = rwy1->getLocation();
-        auto loc2 = rwy2->getLocation();
-        int px1, py1, px2, py2;
-        positionToPixel(loc1.latitude, loc1.longitude, px1, py1);
-        positionToPixel(loc2.latitude, loc2.longitude, px2, py2);
-        float rwyLength = rwy1->getLength();
-        float rwyWidth = rwy1->getWidth();
-        if (std::isnan(rwyLength) || (rwyLength == 0)) {
-            return;
-        }
-        if (std::isnan(rwyWidth) || (rwyWidth == 0)) {
-            return;
-        }
-        float aspectRatio = rwyLength / (rwyWidth * 1.1);
-        uint32_t color = (rwy1->hasHardSurface()) ? img::COLOR_DARK_GREY : img::COLOR_DARK_GREEN;
-        int xo = (px1 - px2) / aspectRatio;
-        int yo = (py1 - py2) / aspectRatio;
-        if ((xo == 0) && (yo == 0)) {
-            mapImage->drawLineAA(px1, py1, px2, py2, color);
-        } else {
-            mapImage->fillRectangle(px1 + yo, py1 - xo, px1 - yo, py1 + xo, px2 - yo, py2 + xo, px2 + yo, py2 - xo, color);
-        }
-   });
-}
-
-void OverlayedMap::drawAirportICAOGeographicRunways(const xdata::Airport& airport, uint32_t color) {
-    LOG_INFO(dbg, "%s", airport.getID().c_str());
-    drawRunwayRectangles(airport, 10, color);
-    drawRunwayRectangles(airport,  3, img::COLOR_WHITE);
-}
-
-void OverlayedMap::drawRunwayRectangles(const xdata::Airport& airport, float size, uint32_t color) {
-    LOG_INFO(dbg, "%s", airport.getID().c_str());
-    airport.forEachRunwayPair([this, size, color](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
-        auto loc1 = rwy1->getLocation();
-        auto loc2 = rwy2->getLocation();
-        int x1, y1, x2, y2;
-        positionToPixel(loc1.latitude, loc1.longitude, x1, y1);
-        positionToPixel(loc2.latitude, loc2.longitude, x2, y2);
-        float angleDegrees = atan2((float)(y2 - y1), (float)(x2 - x1)) * 180.0 / M_PI;
-        float angleClockwiseCorner =      angleDegrees + 45;
-        float angleAnticlockwiseCorner  = angleDegrees - 45;
-        int xc = size * cos(angleClockwiseCorner * M_PI / 180.0);
-        int yc = size * sin(angleClockwiseCorner * M_PI / 180.0);
-        int xa = size * cos(angleAnticlockwiseCorner * M_PI / 180.0);
-        int ya = size * sin(angleAnticlockwiseCorner * M_PI / 180.0);
-        mapImage->fillRectangle(x2 + xc, y2 + yc, x2 + xa, y2 + ya, x1 - xc, y1 - yc, x1 - xa, y1 - ya, color);
-    });
-}
-
-void OverlayedMap::drawAirportICAOCircleAndRwyPattern(const xdata::Airport& airport, int x, int y, int radius, uint32_t color) {
-    LOG_INFO(dbg, "%s", airport.getID().c_str());
-    mapImage->fillCircle(x, y, radius, color);
-    // Scale up to fill circle - calculate pixels at higher resolution zoom level and scale down.
-    int xCentre = 0;
-    int yCentre = 0;
-    getRunwaysCentre(airport, tileSource->getMaxZoomLevel(), xCentre, yCentre);
-    int maxDistance = getMaxRunwayDistanceFromCentre(airport, tileSource->getMaxZoomLevel(), xCentre, yCentre);
-    float scale = (float)maxDistance / (float)(radius - 4);
-    xCentre /= scale;
-    yCentre /= scale;
-
-    airport.forEachRunwayPair([this, xCentre, yCentre, x, y, scale](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
-        auto loc1 = rwy1->getLocation();
-        auto loc2 = rwy2->getLocation();
-        int px1, py1, px2, py2;
-        positionToPixel(loc1.latitude, loc1.longitude, px1, py1, tileSource->getMaxZoomLevel());
-        positionToPixel(loc2.latitude, loc2.longitude, px2, py2, tileSource->getMaxZoomLevel());
-        px1 /= scale;
-        px2 /= scale;
-        py1 /= scale;
-        py2 /= scale;
-        mapImage->drawLineAA(px1 - xCentre + x, py1 - yCentre + y, px2 - xCentre + x, py2 - yCentre + y, img::COLOR_WHITE);
-    });
-}
-
-void OverlayedMap::drawAirportICAORing(const xdata::Airport& airport, int x, int y, uint32_t color) {
-    LOG_INFO(dbg, "%s", airport.getID().c_str());
-    mapImage->fillCircle(x, y, ICAO_RING_RADIUS, color);
-    mapImage->fillCircle(x, y, ICAO_RING_RADIUS - 3, img::COLOR_WHITE);
-    if (airport.hasOnlyHeliports()) {
-        // Draw 'H'
-        mapImage->drawLine(x - 3, y - 5, x - 3, y + 5, color); // Left vertical
-        mapImage->drawLine(x + 3, y - 5, x + 3, y + 5, color); // Right vertical
-        mapImage->drawLine(x - 3, y    , x + 3, y    , color); // Horizonatal
-    } else if (airport.hasWaterRunway()) {
-        // Draw anchor
-        mapImage->drawLine(  x - 3, y - 4, x + 3, y - 4, color); // Top
-        mapImage->drawLine(  x    , y - 4, x    , y + 4, color); // Vertical
-        mapImage->drawLineAA(x    , y + 4, x + 4, y + 1, color); // Right bottom
-        mapImage->drawLineAA(x    , y + 4, x - 4, y + 1, color); // Left bottom
-    }
-}
-
-void OverlayedMap::drawAirportText(const xdata::Airport& airport, int x, int y, double mapWidthNM, uint32_t color) {
-    // Place text below southern airport boundary and below symbol
-    int yOffset = y + ICAO_CIRCLE_RADIUS;
-    auto &locDownRight = airport.getLocationDownRight();
-    if (locDownRight.isValid()) {
-        int xIgnored;
-        positionToPixel(locDownRight.latitude, locDownRight.longitude, xIgnored, yOffset);
-        yOffset += ICAO_CIRCLE_RADIUS;
-    }
-    if (mapWidthNM > SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
-        mapImage->drawText(airport.getID(), 14, x, yOffset, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    } else {
-        std::string nameAndID = airport.getName() + " (" + airport.getID() + ")";
-        std::string elevationFeet = std::to_string(airport.getElevation());
-        int rwyLengthHundredsFeet = (airport.getLongestRunwayLength() * 3.28) / 100.0;
-        std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
-        std::string atcInfo = airport.getInitialATCContactInfo();
-        std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";
-        mapImage->drawText(nameAndID,   14, x, yOffset,      color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-        mapImage->drawText(airportInfo, 12, x, yOffset + 14, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    }
-}
-
-bool OverlayedMap::isAirportVisible(const xdata::Airport& airport) {
-    auto &locUpLeft = airport.getLocationUpLeft();
-    auto &locDownRight = airport.getLocationDownRight();
-    if (!locUpLeft.isValid() || !locDownRight.isValid()) {
-        return true; // Not sure, let later stages figure it out
-    }
-    int xmin, ymin, xmax, ymax;
-    positionToPixel(locUpLeft.latitude, locUpLeft.longitude, xmin, ymin);
-    positionToPixel(locDownRight.latitude, locDownRight.longitude, xmax, ymax);
-    return isAreaVisible(xmin, ymin, xmax, ymax);
-}
-
-void OverlayedMap::getRunwaysCentre(const xdata::Airport& airport, int zoomLevel, int& xCentre, int &yCentre) {
-    auto &locUpLeft    = airport.getLocationUpLeft();
-    auto &locDownRight = airport.getLocationDownRight();
-    double latitudeCentre  = (locUpLeft.latitude +  locDownRight.latitude) / 2;
-    double longitudeCentre = (locUpLeft.longitude + locDownRight.longitude) / 2;
-    positionToPixel(latitudeCentre, longitudeCentre, xCentre, yCentre, zoomLevel);
-}
-
-int OverlayedMap::getMaxRunwayDistanceFromCentre(const xdata::Airport& airport, int zoomLevel, int xCentre, int yCentre) {
-    int maxDistance = 0;
-    airport.forEachRunway([this, zoomLevel, xCentre, yCentre, &maxDistance](const std::shared_ptr<xdata::Runway> rwy) {
-        auto loc = rwy->getLocation();
-        int x, y;
-        positionToPixel(loc.latitude, loc.longitude, x, y, zoomLevel);
-        maxDistance = std::max(maxDistance, (x - xCentre) * (x - xCentre) + (y - yCentre) * (y - yCentre));
-    });
-    return std::sqrt(maxDistance);
-}
-
-void OverlayedMap::drawFix(const xdata::Fix& fix, double mapWidthNM) {
-    auto &loc = fix.getLocation();
-    int px, py;
-    positionToPixel(loc.latitude, loc.longitude, px, py);
-
-    auto ndb = fix.getNDB();
-    auto vor = fix.getVOR();
-    auto dme = fix.getDME();
-    auto ils = fix.getILSLocalizer();
-
-    const bool showNavAids = (mapWidthNM < SHOW_NAVAIDS_AT_MAPWIDTHNM);
-
-    if (vor && overlayConfig.drawVORs && showNavAids) {
-        drawVOR(fix, px, py, mapWidthNM);
-    }
-
-    if (dme && overlayConfig.drawVORs && showNavAids) {
-        drawDME(fix, px, py, mapWidthNM);
-    }
-
-    if (ndb && overlayConfig.drawNDBs && showNavAids) {
-        drawNDB(fix, px, py, mapWidthNM);
-    }
-
-    if (ils && overlayConfig.drawILSs && showNavAids) {
-        drawILS(fix, px, py, mapWidthNM);
-    }
-
-    if (overlayConfig.drawWaypoints && !ndb && !vor && !dme && !ils && showNavAids) {
-    	drawWaypoint(fix, px, py);
-    }
-}
-
-void OverlayedMap::drawVOR(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
-    auto vor = fix.getVOR();
-    const float CIRCLE_RADIUS = 70;
-    if (!vor || !isVisible(px, py, CIRCLE_RADIUS)) {
-        return;
-    }
-    double r = 8;
-    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px + r, py, px + r / 2, py + r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px + r / 2, py + r, px - r / 2, py + r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r / 2, py + r, px - r, py, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r, py, px - r / 2, py - r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r / 2, py - r, px + r / 2, py - r, img::COLOR_ICAO_VOR_DME);
-
-    std::string type = "VOR";
-    auto dme = fix.getDME();
-    if (dme) {
-        type = "VOR/DME";
-        mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_ICAO_VOR_DME);
-    }
-
-    mapImage->drawCircle(px, py, CIRCLE_RADIUS, img::COLOR_ICAO_VOR_DME);
-
-    // Draw ticks
-    const float BIG_TICK_SCALE = 0.84;
-    const float SMALL_TICK_SCALE = 0.92;
-    int bearing = (int)vor->getBearing();
-    for (int deg = 0; deg <= 360; deg += 10) {
-        double inner_x, inner_y, outer_x, outer_y;
-        float tickScale = (deg%30 == 0) ? BIG_TICK_SCALE : SMALL_TICK_SCALE;
-        fastPolarToCartesian(CIRCLE_RADIUS * tickScale, deg + bearing, inner_x, inner_y);
-        fastPolarToCartesian(CIRCLE_RADIUS, deg + bearing, outer_x, outer_y);
-
-        if (deg == 0) {
-            mapImage->drawLineAA(px, py, px + outer_x, py + outer_y, img::COLOR_ICAO_VOR_DME);
-        } else {
-            mapImage->drawLineAA(px + inner_x, py + inner_y, px + outer_x, py + outer_y, img::COLOR_ICAO_VOR_DME);
-        }
-
-        if ((deg % 90) == 0) {
-            double inner1_x, inner1_y, inner2_x, inner2_y;
-            fastPolarToCartesian(CIRCLE_RADIUS * BIG_TICK_SCALE, deg + bearing - 2, inner1_x, inner1_y);
-            fastPolarToCartesian(CIRCLE_RADIUS * BIG_TICK_SCALE, deg + bearing + 2, inner2_x, inner2_y);
-            mapImage->drawLineAA(px + inner1_x, py + inner1_y, px + outer_x,  py + outer_y,  img::COLOR_ICAO_VOR_DME);
-            mapImage->drawLineAA(px + inner2_x, py + inner2_y, px + outer_x,  py + outer_y,  img::COLOR_ICAO_VOR_DME);
-            mapImage->drawLineAA(px + inner1_x, py + inner1_y, px + inner2_x, py + inner2_y, img::COLOR_ICAO_VOR_DME);
-        }
-    }
-
-    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
-        auto freqString = vor->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox(type, fix.getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME, mapWidthNM);
-    } else {
-        mapImage->drawText(fix.getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    }
-}
-
-void OverlayedMap::drawDME(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
-
-    auto dme = fix.getDME();
-    if (!dme || !isVisible(px, py, 40)) {
-        return;
-    }
-
-    if (dme->isPaired()) {
-        // ILS/DME - let ILS take care of it
-        return;
-    }
-    int r = 8;
-    mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_ICAO_VOR_DME);
-    mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_ICAO_VOR_DME);
-
-    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
-        auto freqString = dme->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox("DME", fix.getID(), freqString, px - 47, py - 32, img::COLOR_ICAO_VOR_DME, mapWidthNM);
-    } else {
-        mapImage->drawText(fix.getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    }
-}
-
-void OverlayedMap::drawNDB(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
-    auto ndb = fix.getNDB();
-    int radius = ndbIcon.getWidth() / 2; // Assume icon is square
-    if (!ndb || !isVisible(px, py, radius * 2)) {
-        return;
-    }
-
-    mapImage->blendImage0(ndbIcon, px - radius, py - radius);
-
-    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
-        auto freqString = ndb->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox("", fix.getID(), freqString, px + radius, py - radius - 10, img::COLOR_ICAO_MAGENTA, mapWidthNM);
-    } else {
-        mapImage->drawText(fix.getID(), 12, px + radius + 5, py - radius - 5, img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    }
-}
-
-void OverlayedMap::drawILS(const xdata::Fix &fix, int px, int py, double mapWidthNM) {
-    auto ils = fix.getILSLocalizer();
-    if (!ils) {
-        return;
-    }
-
-    double ilsHeading = std::fmod(ils->getRunwayHeading() + 180.0, 360);
-    double nmPerPixel = mapWidthNM / mapImage->getWidth();
-    double rangePixels = ils->getRange() / nmPerPixel;
-    double cx, cy, lx, ly, rx, ry;
-    const double OUTER_ANGLE = 2.5;
-    const uint32_t color = img::COLOR_DARK_GREEN;
-    polarToCartesian(rangePixels, ilsHeading - OUTER_ANGLE, lx, ly);
-    polarToCartesian(rangePixels * 0.95, ilsHeading, cx, cy);
-    polarToCartesian(rangePixels, ilsHeading + OUTER_ANGLE, rx, ry);
-
-    int xmin = std::min(px, (int)std::min(lx, rx));
-    int ymin = std::min(py, (int)std::min(ly, ry));
-    int xmax = std::max(px, (int)std::max(lx, rx));
-    int ymax = std::max(py, (int)std::max(ly, ry));
-    if (!isAreaVisible(xmin, ymin, xmax, ymax)) {
-        return;
-    }
-    mapImage->drawLineAA(px, py, px + lx, py + ly, color);
-    mapImage->drawLineAA(px, py, px + cx, py + cy, color);
-    mapImage->drawLineAA(px, py, px + rx, py + ry, color);
-    mapImage->drawLineAA(px + cx, py + cy, px + lx, py + ly, color);
-    mapImage->drawLineAA(px + cx, py + cy, px + rx, py + ry, color);
-
-    int x = px + (cx / 5);      // Draw NavTextBox 1/5 of the way from airport to end of tail
-    int y = py + (cy / 5) - 10; // And up a bit
-    std::string type = ils->isLocalizerOnly() ? "LOC" : "ILS";
-    if (mapWidthNM < SHOW_DETAILED_INFO_AT_MAPWIDTHNM) {
-        auto freqString = ils->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox(type, fix.getID(), freqString, x, y, color, mapWidthNM);
-    } else {
-        mapImage->drawText(fix.getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
-    }
-}
-
-void OverlayedMap::drawWaypoint(const xdata::Fix &fix, int px, int py) {
-    if (!isVisible(px, py, 50)) {
-    	return;
-    }
-
-	uint32_t color = img::COLOR_BLACK;
-    mapImage->drawLine(px, py - 6, px + 5, py + 3, color);
-    mapImage->drawLine(px + 5, py + 3, px - 5, py + 3, color);
-    mapImage->drawLine(px - 5, py + 3, px, py - 6, color);
-
-    mapImage->drawText(fix.getID(), 10, px + 6, py - 6, color, 0, img::Align::LEFT);
-}
-
-void OverlayedMap::drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color, double mapWidthNM) {
-    // x, y is top left corner of rectangular border. If type is not required, pass in as ""
-    const int TEXT_SIZE = 10;
-    const int MORSE_SIZE = 2;
-    const int XBORDER = 2;
-    // If type is required, id and freq text and bottom of rectangular border drop by half text height
-    int yo = ((type == "") ? 0 : (TEXT_SIZE / 2));
-    int textWidth = std::max(mapImage->getTextWidth(id, TEXT_SIZE), mapImage->getTextWidth(freq, TEXT_SIZE));
-    int morseWidth = 0;
-    for (char const &c: id) {
-        morseWidth = std::max(morseWidth, morse.getLength(c) * MORSE_SIZE);
-    }
-    int boxWidth = textWidth + morseWidth + (XBORDER * 4);
-    int boxHeight = (TEXT_SIZE * 2) + yo + 2;
-    int xTextCentre = x + textWidth / 2 + XBORDER + 1;
-
-    mapImage->fillRectangle(x + 1, y + 1, x + boxWidth, y + boxHeight, img::COLOR_WHITE);
-    mapImage->drawText(id, TEXT_SIZE, xTextCentre, y + yo + 1, color, 0, img::Align::CENTRE);
-    mapImage->drawText(freq, TEXT_SIZE, xTextCentre, y + TEXT_SIZE + yo + 1, color, 0, img::Align::CENTRE);
-    drawMorse(x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
-
-    mapImage->drawRectangle(x, y, x + boxWidth, y + boxHeight, color);
-    if (type != "") {
-        mapImage->drawText(type, TEXT_SIZE, x + boxWidth/2, y - yo + 1, color, img::COLOR_WHITE, img::Align::CENTRE);
-    }
-}
-
-void OverlayedMap::drawMorse(int x, int y, std::string text, int size, uint32_t color) {
-    for (char const &c: text) {
-        std::string morseForChar = morse.getCode(c);
-        for (int row = 0; row < size; row++) {
-            int col = 0;
-            for (char const &d: morseForChar) {
-                int numPixels = size * ((d == '.') ? 1 : 3);
-                for (int p = 0; p < numPixels; p++) {
-                    mapImage->blendPixel(x + col++, y + row, color);
-                }
-                col += size;
-            }
-        }
-        y += (size * 2);
-    }
+double OverlayedMap::getMapWidthNM() const {
+    return mapWidthNM;
 }
 
 void OverlayedMap::drawScale(double nmPerPixel) {
@@ -743,6 +315,9 @@ void OverlayedMap::drawScale(double nmPerPixel) {
         step, units.c_str(),  rangeToShow, units.c_str());
     int x = 5;
     int y = 195;
+    if (perPixel == 0) {
+        return;
+    }
     int lineLength = rangeToShow / perPixel;
     mapImage->drawLine(x, y,  x + lineLength, y,  img::COLOR_BLACK);
     for (int tick = 0; tick <= rangeToShow; tick += step) {
@@ -785,7 +360,7 @@ void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) con
     lon = world.x;
 }
 
-float OverlayedMap::cosDegrees(int angleDegrees) {
+float OverlayedMap::cosDegrees(int angleDegrees) const {
     // If you're going to use this, be sure that an integer angle is suitable.
     int angle = angleDegrees % 360;
     if (angle < 0) {
@@ -794,7 +369,7 @@ float OverlayedMap::cosDegrees(int angleDegrees) {
     return cosTable[angle];
 }
 
-float OverlayedMap::sinDegrees(int angleDegrees) {
+float OverlayedMap::sinDegrees(int angleDegrees) const {
     // If you're going to use this, be sure that an integer angle is suitable.
     int angle = angleDegrees % 360;
     if (angle < 0) {
@@ -803,7 +378,7 @@ float OverlayedMap::sinDegrees(int angleDegrees) {
     return sinTable[angle];
 }
 
-void OverlayedMap::fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) {
+void OverlayedMap::fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const {
     // If you're going to use this, be sure that an integer angle is suitable.
     x = sinDegrees(angleDegrees) * radius;
     y = -cosDegrees(angleDegrees) * radius; // 0 degrees is up, decreasing y values
@@ -814,14 +389,28 @@ void OverlayedMap::polarToCartesian(float radius, float angleDegrees, double& x,
     y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
 }
 
-bool OverlayedMap::isVisible(int x, int y, int margin) {
-    return  (x > -margin) && (x < mapImage->getWidth() + margin) &&
-            (y > -margin) && (y < mapImage->getHeight() + margin);
+bool OverlayedMap::isLocVisibleWithMargin(const xdata::Location &loc, int marginPixels) const {
+    int x, y;
+    positionToPixel(loc.latitude, loc.longitude, x, y);
+    return isVisibleWithMargin(x, y, marginPixels);
 }
 
-bool OverlayedMap::isAreaVisible(int xmin, int ymin, int xmax, int ymax) {
+bool OverlayedMap::isVisibleWithMargin(int x, int y, int marginPixels) const {
+    return  (x > -marginPixels) && (x < mapImage->getWidth() + marginPixels) &&
+            (y > -marginPixels) && (y < mapImage->getHeight() + marginPixels);
+}
+
+bool OverlayedMap::isAreaVisible(int xmin, int ymin, int xmax, int ymax) const {
     return (xmax > 0) && (xmin < mapImage->getWidth()) &&
            (ymax > 0) && (ymin < mapImage->getHeight());
+}
+
+int OverlayedMap::getZoomLevel() const {
+    return stitcher->getZoomLevel();
+}
+
+int OverlayedMap::getMaxZoomLevel() const {
+    return tileSource->getMaxZoomLevel();
 }
 
 bool OverlayedMap::isCalibrated() {

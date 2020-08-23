@@ -174,13 +174,13 @@ static unsigned char *stb__dout;
 static void stb__match(const unsigned char *data, unsigned int length) {
     // INVERSE of memmove... write each byte before copying the next...
     if (stb__dout + length > stb__barrier_out_e) { stb__dout += length; return; }
-    if (data < stb__barrier_out_b) { stb__dout = stb__barrier_out_e+1; return; }
+    if (data < stb__barrier_out_b) { stb__dout = stb__barrier_out_e + 1; return; }
     while (length--) *stb__dout++ = *data++;
 }
 
 static void stb__lit(const unsigned char *data, unsigned int length) {
     if (stb__dout + length > stb__barrier_out_e) { stb__dout += length; return; }
-    if (data < stb__barrier_in_b) { stb__dout = stb__barrier_out_e+1; return; }
+    if (data < stb__barrier_in_b) { stb__dout = stb__barrier_out_e + 1; return; }
     memcpy(stb__dout, data, length);
     stb__dout += length;
 }
@@ -191,16 +191,16 @@ static void stb__lit(const unsigned char *data, unsigned int length) {
 
 static const unsigned char *stb_decompress_token(const unsigned char *i) {
     if (*i >= 0x20) { // use fewer if's for cases that expand small
-        if (*i >= 0x80)       stb__match(stb__dout-i[1]-1, i[0] - 0x80 + 1), i += 2;
-        else if (*i >= 0x40)  stb__match(stb__dout-(stb__in2(0) - 0x4000 + 1), i[2]+1), i += 3;
+        if (*i >= 0x80)       stb__match(stb__dout - i[1]-1, i[0] - 0x80 + 1), i += 2;
+        else if (*i >= 0x40)  stb__match(stb__dout - (stb__in2(0) - 0x4000 + 1), i[2]+1), i += 3;
         else /* *i >= 0x20 */ stb__lit(i+1, i[0] - 0x20 + 1), i += 1 + (i[0] - 0x20 + 1);
     } else { // more ifs for cases that expand large, since overhead is amortized
-        if (*i >= 0x18)       stb__match(stb__dout-(stb__in3(0) - 0x180000 + 1), i[3]+1), i += 4;
-        else if (*i >= 0x10)  stb__match(stb__dout-(stb__in3(0) - 0x100000 + 1), stb__in2(3)+1), i += 5;
+        if (*i >= 0x18)       stb__match(stb__dout - (stb__in3(0) - 0x180000 + 1), i[3]+1), i += 4;
+        else if (*i >= 0x10)  stb__match(stb__dout - (stb__in3(0) - 0x100000 + 1), stb__in2(3)+1), i += 5;
         else if (*i >= 0x08)  stb__lit(i+2, stb__in2(0) - 0x0800 + 1), i += 2 + (stb__in2(0) - 0x0800 + 1);
         else if (*i == 0x07)  stb__lit(i+3, stb__in2(1) + 1), i += 3 + (stb__in2(1) + 1);
-        else if (*i == 0x06)  stb__match(stb__dout-(stb__in3(1)+1), i[4]+1), i += 5;
-        else if (*i == 0x04)  stb__match(stb__dout-(stb__in3(1)+1), stb__in2(4)+1), i += 6;
+        else if (*i == 0x06)  stb__match(stb__dout - (stb__in3(1)+1), i[4]+1), i += 5;
+        else if (*i == 0x04)  stb__match(stb__dout - (stb__in3(1)+1), stb__in2(4)+1), i += 6;
     }
     return i;
 }
@@ -367,7 +367,7 @@ const char* GetDefaultCompressedFontDataTTFBase85() {
 }
 
 static unsigned int Decode85Byte(char c) {
-    return c >= '\\' ? c-36 : c-35;
+    return c >= '\\' ? (c - 36) : (c - 35);
 }
 
 void Decode85(const unsigned char* src, unsigned char* dst) {

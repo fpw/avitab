@@ -123,8 +123,8 @@ void HeaderApp::updateClock() {
     if ((timerCount % TIMER_TICKS_PER_SEC) == 0) {
         std::ostringstream t;
         if (stopwatchMode) {
-            unsigned int mins = (timerCount/TIMER_TICKS_PER_SEC) / 60;
-            unsigned int secs = (timerCount/TIMER_TICKS_PER_SEC) % 60;
+            unsigned int mins = (timerCount / TIMER_TICKS_PER_SEC) / 60;
+            unsigned int secs = (timerCount / TIMER_TICKS_PER_SEC) % 60;
             t << std::setfill('0') << std::setw(2) << mins << ":" << std::setw(2) << secs;
         } else {
             t << platform::getLocalTime("%H:%M");

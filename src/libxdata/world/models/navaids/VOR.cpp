@@ -32,6 +32,5 @@ double VOR::getBearing() const
 {
     return bearing;
 }
-  
 
 } /* namespace xdata */
