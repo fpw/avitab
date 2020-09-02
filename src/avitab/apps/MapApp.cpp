@@ -553,7 +553,7 @@ void MapApp::processCalibrationPoint(int step) {
     if (coords.empty()) {
         // Populate coords text box with current plane position
         std::stringstream ss;
-        Location aircraftLoc = api().getAircraftLocation();
+        Location aircraftLoc = api().getAircraftLocation(0);
         ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
         coordsField->setText(ss.str());
         return;
@@ -593,7 +593,7 @@ bool MapApp::onTimer() {
         return true;
     }
 
-    Location aircraftLoc = api().getAircraftLocation();
+    Location aircraftLoc = api().getAircraftLocation(0);
 
     if (trackPlane) {
         map->centerOnPlane(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);

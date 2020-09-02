@@ -26,6 +26,8 @@ struct EnvData {
     double doubleValue;
 };
 
+const static int MAX_AI_AIRCRAFT = 19;
+
 } /* namespace avitab */
 
 #endif /* SRC_ENVIRONMENT_ENVDATA_H_ */

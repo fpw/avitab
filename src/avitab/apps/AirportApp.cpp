@@ -504,7 +504,7 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 }
 
 bool AirportApp::onTimer() {
-    Location aircraftLoc = api().getAircraftLocation();
+    Location aircraftLoc = api().getAircraftLocation(0);
 
     for (auto &tab: pages) {
         if (tab.map) {

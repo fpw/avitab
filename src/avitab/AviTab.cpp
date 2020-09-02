@@ -318,8 +318,12 @@ std::shared_ptr<navigraph::NavigraphAPI> AviTab::getNavigraph() {
     return navigraphAPI;
 }
 
-Location AviTab::getAircraftLocation() {
-    return env->getAircraftLocation();
+unsigned int AviTab::getActiveAircraftCount() {
+    return env->getActiveAircraftCount();
+}
+
+Location AviTab::getAircraftLocation(unsigned int id) {
+    return env->getAircraftLocation(id);
 }
 
 float AviTab::getLastFrameTime() {

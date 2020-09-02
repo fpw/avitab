@@ -22,7 +22,7 @@
 namespace avitab {
 
 EnvData DataCache::getData(const std::string& dataRef) {
-    XPLMDataRef ref = nullptr;;
+    XPLMDataRef ref = nullptr;
 
     auto iter = refCache.find(dataRef);
     if (iter == refCache.end()) {
@@ -32,6 +32,44 @@ EnvData DataCache::getData(const std::string& dataRef) {
         ref = iter->second;
     }
 
+    return toEnvData(ref);
+}
+
+EnvData DataCache::getLocationData(const int plane, const int part) {
+
+    if (locationRefCache.empty()) {
+        // populate location references first time only
+        locationRefCache.push_back(XPLMFindDataRef("sim/flightmodel/position/latitude"));
+        locationRefCache.push_back(XPLMFindDataRef("sim/flightmodel/position/longitude"));
+        locationRefCache.push_back(XPLMFindDataRef("sim/flightmodel/position/elevation"));
+        locationRefCache.push_back(XPLMFindDataRef("sim/flightmodel/position/psi"));
+        std::string b0("sim/multiplayer/position/plane");
+        for (int i = 1; i < 10; ++i) {
+            char d = '0' + i;
+            locationRefCache.push_back(XPLMFindDataRef((b0 + d + "_lat").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b0 + d + "_lon").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b0 + d + "_el").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b0 + d +"_psi").c_str()));
+        }
+        std::string b1("sim/multiplayer/position/plane1");
+        for (int i = 0; i < 10; ++i) {
+            char d = '0' + i;
+            locationRefCache.push_back(XPLMFindDataRef((b1 + d + "_lat").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b1 + d + "_lon").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b1 + d + "_el").c_str()));
+            locationRefCache.push_back(XPLMFindDataRef((b1 + d + "_psi").c_str()));
+        }
+    }
+
+    XPLMDataRef ref = nullptr;
+    int id = plane * 4 + part;
+    if ((plane <= MAX_AI_AIRCRAFT) && (part < 4)) {
+        ref = locationRefCache[id];
+    }
+    if (!ref) {
+        std::string invalid("location entry " + std::to_string(id));
+        throw std::runtime_error("Invalid ref: " + invalid);
+    }
     return toEnvData(ref);
 }
 

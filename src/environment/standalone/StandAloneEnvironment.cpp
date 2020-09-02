@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cmath>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -120,12 +121,41 @@ void StandAloneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
 }
 
-Location StandAloneEnvironment::getAircraftLocation() {
-    Location res{};
-    res.latitude = 53.8019434;
-    res.longitude = 10.7017287;
-    res.heading = 70;
-    return res;
+unsigned int StandAloneEnvironment::getActiveAircraftCount() {
+    return 4;
+}
+
+Location StandAloneEnvironment::getAircraftLocation(unsigned int id) {
+    static unsigned int t = 0;
+    static Location loc[4];
+    static double vel[4];
+    if (t == 0) {
+        loc[0] = { 10.7017287, 53.8019434, 400, 70 };
+        vel[0] = 0.0;
+        loc[1] = { 10.69, 53.81, 400, 230 };
+        vel[1] = 0.0001;
+        loc[2] = { 10.7, 53.79, 25, 2 };
+        vel[2] = 0.00004;
+        loc[3] = { 10.74, 53.82, 5000, 100 };
+        vel[3] = 0.0003;
+    } else {
+        for (size_t i = 0; i < 4; ++i) {
+            if ( vel[i] > 0.0 ) {
+                loc[i].longitude += (std::sin(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
+                loc[i].latitude += (std::cos(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
+            }
+        }
+        loc[0].heading += 0.7;
+        loc[1].heading += 0.4;
+        loc[2].heading -= 0.2;
+        loc[3].heading += 1.0;
+        for (size_t i = 0; i < 4; ++i) {
+            if (loc[i].heading < 0.0) { loc[i].heading += 360.0; }
+            if (loc[i].heading >= 360.0) { loc[i].heading -= 360.0; }
+        }
+    }
+    ++t;
+    return loc[id];
 }
 
 float StandAloneEnvironment::getLastFrameTime() {
