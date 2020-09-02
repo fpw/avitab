@@ -21,7 +21,8 @@
 namespace maps {
 
 struct OverlayConfig {
-    bool drawAircraft = true;
+    bool drawMyAircraft = true;
+    bool drawOtherAircraft = true;
     bool drawAirports = false;
     bool drawAirstrips = false;
     bool drawHeliportsSeaports = false;

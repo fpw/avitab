@@ -282,7 +282,8 @@ void MapApp::resetWidgets() {
     airportCheckbox.reset();
     airstripCheckbox.reset();
     heliseaportCheckbox.reset();
-    aircraftCheckbox.reset();
+    myAircraftCheckbox.reset();
+    otherAircraftCheckbox.reset();
     overlaysContainer.reset();
 }
 
@@ -326,20 +327,31 @@ void MapApp::showOverlaySettings() {
     overlayLabel = std::make_shared<Label>(overlaysContainer, "Overlays:");
     overlayLabel->alignInTopLeft();
 
-    aircraftCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Aircraft");
-    aircraftCheckbox->setChecked(overlays.drawAircraft);
-    aircraftCheckbox->alignBelow(overlayLabel);
-    aircraftCheckbox->setCallback([this] (bool checked) {
+    myAircraftCheckbox = std::make_shared<Checkbox>(overlaysContainer, "My Aircraft");
+    myAircraftCheckbox->setChecked(overlays.drawMyAircraft);
+    myAircraftCheckbox->alignBelow(overlayLabel);
+    myAircraftCheckbox->setCallback([this] (bool checked) {
         if (map) {
             auto conf = map->getOverlayConfig();
-            conf.drawAircraft = checked;
+            conf.drawMyAircraft = checked;
+            map->setOverlayConfig(conf);
+        }
+    });
+
+    otherAircraftCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Other Aircraft");
+    otherAircraftCheckbox->setChecked(overlays.drawOtherAircraft);
+    otherAircraftCheckbox->alignRightOf(myAircraftCheckbox);
+    otherAircraftCheckbox->setCallback([this] (bool checked) {
+        if (map) {
+            auto conf = map->getOverlayConfig();
+            conf.drawOtherAircraft = checked;
             map->setOverlayConfig(conf);
         }
     });
 
     airportCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Airports");
     airportCheckbox->setChecked(overlays.drawAirports);
-    airportCheckbox->alignBelow(aircraftCheckbox);
+    airportCheckbox->alignBelow(myAircraftCheckbox);
     airportCheckbox->setCallback([this] (bool checked) {
         if (map) {
             auto conf = map->getOverlayConfig();

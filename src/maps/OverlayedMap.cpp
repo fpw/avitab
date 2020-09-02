@@ -50,7 +50,8 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         }
     });
 
-    overlayConfig.drawAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
+    overlayConfig.drawMyAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
+    overlayConfig.drawOtherAircraft = savedSettings->getOverlaySetting<bool>("other_aircraft");
     overlayConfig.drawAirports = savedSettings->getOverlaySetting<bool>("airports");
     overlayConfig.drawAirstrips = savedSettings->getOverlaySetting<bool>("airstrips");
     overlayConfig.drawHeliportsSeaports = savedSettings->getOverlaySetting<bool>("heliports_seaports");
@@ -155,7 +156,8 @@ void OverlayedMap::doWork() {
 }
 
 void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
-    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawAircraft);
+    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawMyAircraft);
+    savedSettings->setOverlaySetting<bool>("other_aircraft", conf.drawOtherAircraft);
     savedSettings->setOverlaySetting<bool>("airports", conf.drawAirports);
     savedSettings->setOverlaySetting<bool>("airstrips", conf.drawAirstrips);
     savedSettings->setOverlaySetting<bool>("heliports_seaports", conf.drawHeliportsSeaports);
@@ -183,7 +185,7 @@ void OverlayedMap::drawOverlays() {
 }
 
 void OverlayedMap::drawAircraftOverlay() {
-    if (!overlayConfig.drawAircraft) {
+    if (!overlayConfig.drawMyAircraft) {
         return;
     }
 
