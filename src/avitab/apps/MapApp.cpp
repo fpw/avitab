@@ -605,12 +605,14 @@ bool MapApp::onTimer() {
         return true;
     }
 
-    Location aircraftLoc = api().getAircraftLocation(0);
+    std::vector<avitab::Location> locs;
+    for (unsigned int i = 0; i < api().getActiveAircraftCount(); ++i) {
+        locs.push_back(api().getAircraftLocation(i));
+    }
 
+    map->setPlaneLocations(locs);
     if (trackPlane) {
-        map->centerOnPlane(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
-    } else {
-        map->setPlanePosition(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
+        map->centerOnPlane();
     }
 
     map->doWork();

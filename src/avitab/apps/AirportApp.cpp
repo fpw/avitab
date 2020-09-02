@@ -504,11 +504,11 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 }
 
 bool AirportApp::onTimer() {
-    Location aircraftLoc = api().getAircraftLocation(0);
-
     for (auto &tab: pages) {
         if (tab.map) {
-            tab.map->setPlanePosition(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
+            std::vector<avitab::Location> loc;
+            loc.push_back(api().getAircraftLocation(0));
+            tab.map->setPlaneLocations(loc);
             tab.map->doWork();
         }
     }

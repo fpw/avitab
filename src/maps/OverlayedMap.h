@@ -24,6 +24,7 @@
 #include "src/libxdata/world/World.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/libxdata/world/models/navaids/Morse.h"
+#include "src/environment/Environment.h"
 #include "src/environment/Settings.h"
 #include "OverlayHelper.h"
 #include "OverlayConfig.h"
@@ -42,8 +43,8 @@ public:
     void pan(int dx, int dy);
 
     void centerOnWorldPos(double latitude, double longitude);
-    void centerOnPlane(double latitude, double longitude, double heading);
-    void setPlanePosition(double latitude, double longitude, double heading);
+    void centerOnPlane();
+    void setPlaneLocations(std::vector<avitab::Location> &locs);
     void getCenterLocation(double &latitude, double &longitude);
 
     void updateImage();
@@ -87,7 +88,7 @@ private:
     OverlayConfig overlayConfig;
     std::shared_ptr<avitab::Settings> savedSettings;
     std::shared_ptr<xdata::World> navWorld;
-    double planeLat = 0, planeLong = 0, planeHeading = 0;
+    std::vector<avitab::Location> planeLocations;
     img::Image planeIcon;
     img::Image ndbIcon;
     int calibrationStep = 0;
