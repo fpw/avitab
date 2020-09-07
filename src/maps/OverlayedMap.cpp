@@ -129,7 +129,7 @@ void OverlayedMap::centerOnPlane() {
         return;
     }
 
-    if (planeLocations.size() > 0) {
+    if (!planeLocations.empty()) {
         centerOnWorldPos(planeLocations[0].latitude, planeLocations[0].longitude);
     }
 }
