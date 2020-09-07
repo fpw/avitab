@@ -121,23 +121,28 @@ void StandAloneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
 }
 
-unsigned int StandAloneEnvironment::getActiveAircraftCount() {
+AircraftID StandAloneEnvironment::getActiveAircraftCount() {
     return 4;
 }
 
-Location StandAloneEnvironment::getAircraftLocation(unsigned int id) {
+Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
     static unsigned int t = 0;
     static Location loc[4];
     static double vel[4];
+    static double asc[4];
     if (t == 0) {
         loc[0] = { 10.7017287, 53.8019434, 400, 70 };
         vel[0] = 0.0;
+        asc[0] = 2;
         loc[1] = { 10.69, 53.81, 400, 230 };
-        vel[1] = 0.0001;
-        loc[2] = { 10.7, 53.79, 25, 2 };
+        vel[1] = 0.00007;
+        asc[1] = 3;
+        loc[2] = { 10.7, 53.79, 200, 2 };
         vel[2] = 0.00004;
+        asc[2] = 5;
         loc[3] = { 10.74, 53.82, 5000, 100 };
-        vel[3] = 0.0003;
+        vel[3] = 0.00013;
+        asc[3] = -8;
     } else {
         for (size_t i = 0; i < 4; ++i) {
             if ( vel[i] > 0.0 ) {
@@ -148,10 +153,13 @@ Location StandAloneEnvironment::getAircraftLocation(unsigned int id) {
         loc[0].heading += 0.7;
         loc[1].heading += 0.4;
         loc[2].heading -= 0.2;
-        loc[3].heading += 1.0;
+        loc[3].heading += 0.3;
         for (size_t i = 0; i < 4; ++i) {
             if (loc[i].heading < 0.0) { loc[i].heading += 360.0; }
             if (loc[i].heading >= 360.0) { loc[i].heading -= 360.0; }
+            loc[i].elevation += asc[i];
+            if (loc[i].elevation < 30) { asc[i] = std::fabs(asc[i]); }
+            if (loc[i].elevation > 5000) { asc[i] = 0.0 - std::fabs(asc[i]); }
         }
     }
     ++t;

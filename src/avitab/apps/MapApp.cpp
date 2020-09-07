@@ -606,7 +606,7 @@ bool MapApp::onTimer() {
     }
 
     std::vector<avitab::Location> locs;
-    for (unsigned int i = 0; i < api().getActiveAircraftCount(); ++i) {
+    for (AircraftID i = 0; i < api().getActiveAircraftCount(); ++i) {
         locs.push_back(api().getAircraftLocation(i));
     }
 

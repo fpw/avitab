@@ -37,7 +37,13 @@ XPlaneEnvironment::XPlaneEnvironment() {
 
     xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
-    prevLocations.resize(MAX_AI_AIRCRAFT + 1);
+
+    Location loc;
+    for (size_t i = 0; i < MAX_AI_AIRCRAFT + 1; ++i) {
+        prevLocations.push_back(loc);
+        noMovementCount.push_back(100);
+    }
+
     panelEnabled = std::make_shared<int>(0);
     panelPowered = std::make_shared<int>(0);
     brightness = std::make_shared<float>(1);
@@ -266,18 +272,22 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
     std::vector<Location> activeAircraftLocations;
 
-    for (unsigned int i = 0; i <= MAX_AI_AIRCRAFT; ++i) {
+    for (AircraftID i = 0; i <= MAX_AI_AIRCRAFT; ++i) {
         Location loc;
         loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
         loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
         loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
         loc.heading = dataCache.getLocationData(i, 3).floatValue;
         // only add user aircraft or ones that appear to be active
+        noMovementCount[i] += 1;
         if ((i == 0) ||
             ((loc.elevation > 0.0) &&
                 ((loc.latitude != prevLocations[i].latitude) ||
                 (loc.longitude != prevLocations[i].longitude) ||
                 (loc.heading != prevLocations[i].heading)))) {
+            noMovementCount[i] = 0;
+        }
+        if (noMovementCount[i] < 100) {
             activeAircraftLocations.push_back(loc);
         }
         prevLocations[i] = loc;
@@ -294,12 +304,12 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
     return -1;
 }
 
-unsigned int XPlaneEnvironment::getActiveAircraftCount() {
+AircraftID XPlaneEnvironment::getActiveAircraftCount() {
     std::lock_guard<std::mutex> lock(stateMutex);
     return aircraftLocations.size();
 }
 
-Location XPlaneEnvironment::getAircraftLocation(unsigned int id) {
+Location XPlaneEnvironment::getAircraftLocation(AircraftID id) {
     std::lock_guard<std::mutex> lock(stateMutex);
     if (id < aircraftLocations.size()) {
         return aircraftLocations[id];

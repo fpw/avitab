@@ -30,7 +30,7 @@ namespace avitab {
 class DataCache {
 public:
     EnvData getData(const std::string &dataRef);
-    EnvData getLocationData(const int plane, const int part);
+    EnvData getLocationData(const AircraftID plane, const LocationPartIndex part);
 private:
     std::map<std::string, XPLMDataRef> refCache;
     std::vector<XPLMDataRef> locationRefCache;

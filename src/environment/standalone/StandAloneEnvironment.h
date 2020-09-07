@@ -49,8 +49,8 @@ public:
     std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
-    unsigned int getActiveAircraftCount() override;
-    Location getAircraftLocation(unsigned int id) override;
+    AircraftID getActiveAircraftCount() override;
+    Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
 
     virtual ~StandAloneEnvironment();

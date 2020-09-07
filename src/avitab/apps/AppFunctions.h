@@ -56,7 +56,7 @@ public:
     virtual void setIsInMenu(bool inMenu) = 0;
     virtual std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() = 0;
     virtual unsigned int getActiveAircraftCount() = 0;
-    virtual Location getAircraftLocation(unsigned int id) = 0;
+    virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;
     virtual std::shared_ptr<Settings> getSettings() = 0;
     virtual ~AppFunctions() = default;

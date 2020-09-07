@@ -57,8 +57,8 @@ public:
     void reloadMetar() override;
     void enableAndPowerPanel() override;
     void setIsInMenu(bool menu) override;
-    unsigned int getActiveAircraftCount() override;
-    Location getAircraftLocation(unsigned int id) override;
+    AircraftID getActiveAircraftCount() override;
+    Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
 
     ~XPlaneEnvironment();
@@ -74,6 +74,7 @@ private:
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
     std::vector<Location> prevLocations;
+    std::vector<unsigned long> noMovementCount;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};

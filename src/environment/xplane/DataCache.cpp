@@ -35,7 +35,7 @@ EnvData DataCache::getData(const std::string& dataRef) {
     return toEnvData(ref);
 }
 
-EnvData DataCache::getLocationData(const int plane, const int part) {
+EnvData DataCache::getLocationData(const AircraftID plane, const LocationPartIndex part) {
 
     if (locationRefCache.empty()) {
         // populate location references first time only
@@ -62,8 +62,8 @@ EnvData DataCache::getLocationData(const int plane, const int part) {
     }
 
     XPLMDataRef ref = nullptr;
-    int id = plane * 4 + part;
-    if ((plane <= MAX_AI_AIRCRAFT) && (part < 4)) {
+    size_t id = plane * NUM_LOCATION_PARTS + part;
+    if ((plane <= MAX_AI_AIRCRAFT) && (part < NUM_LOCATION_PARTS)) {
         ref = locationRefCache[id];
     }
     if (!ref) {

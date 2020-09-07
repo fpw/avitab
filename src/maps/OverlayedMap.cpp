@@ -184,51 +184,57 @@ void OverlayedMap::drawOverlays() {
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
+        drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
     drawCalibrationOverlay();
 }
 
 void OverlayedMap::drawAircraftOverlay() {
-    if (planeLocations.size() == 0) {
+    if (!overlayConfig.drawMyAircraft || planeLocations.empty()) {
+        return;
+    }
+
+    int px = 0, py = 0;
+    positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, px, py);
+
+    px -= planeIcon.getWidth() / 2;
+    py -= planeIcon.getHeight() / 2;
+
+    mapImage->blendImage(planeIcon, px, py, planeLocations[0].heading);
+}
+
+void OverlayedMap::drawOtherAircraftOverlay() {
+    if (!overlayConfig.drawOtherAircraft || (planeLocations.size() < 2)) {
         return;
     }
 
     int px = 0, py = 0;
 
-    if (overlayConfig.drawOtherAircraft) {
-        // draw the other aircraft first, so that the user aircraft is always on top
-        for (size_t i = 1; i < planeLocations.size(); ++i) {
-            bool isAbove = (planeLocations[i].elevation > (planeLocations[0].elevation + 30));
-            bool isBelow = (planeLocations[i].elevation < (planeLocations[0].elevation - 30));
-            uint32_t color = (isAbove ? img::COLOR_BLUE : (isBelow ? img::COLOR_DARK_GREEN : img::COLOR_BLACK));
-            positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
-            mapImage->drawCircle(px, py, 6, color);
-            mapImage->drawCircle(px, py, 7, color);
-            double ax, ay, tx, ty, rx, ry;
-            fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading), ax, ay);
-            fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading), tx, ty);
-            fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading) + 90, rx, ry);
-            mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
-            mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
-            if (isAbove) {
-                mapImage->drawLineAA(px - 10, py - 11, px + 10, py - 11, color);
-                mapImage->drawLineAA(px - 10, py - 12, px + 10, py - 12, color);
-            }
-            if (isBelow) {
-                mapImage->drawLineAA(px - 10, py + 11, px + 10, py + 11, color);
-                mapImage->drawLineAA(px - 10, py + 12, px + 10, py + 12, color);
-            }
+    for (size_t i = 1; i < planeLocations.size(); ++i) {
+        bool isAbove = (planeLocations[i].elevation > (planeLocations[0].elevation + 30));
+        bool isBelow = (planeLocations[i].elevation < (planeLocations[0].elevation - 30));
+        uint32_t color = (isAbove ? img::COLOR_BLUE : (isBelow ? img::COLOR_DARK_GREEN : img::COLOR_BLACK));
+        positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
+        mapImage->drawCircle(px, py, 6, color);
+        mapImage->drawCircle(px, py, 7, color);
+        double ax, ay, tx, ty, rx, ry;
+        fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading), ax, ay);
+        fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading), tx, ty);
+        fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading) + 90, rx, ry);
+        mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
+        mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
+        unsigned int elevationFeet = static_cast<unsigned int>(planeLocations[i].elevation * 3.28084);
+        std::string flText = "---";
+        flText[0] = '0' + (elevationFeet / 10000) % 10;
+        flText[1] = '0' + (elevationFeet / 1000) % 10;
+        flText[2] = '0' + (elevationFeet / 100) % 10;
+        if (isAbove) {
+            mapImage->drawText(flText, 12, px, py - 17, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
         }
-    }
-
-    if (overlayConfig.drawMyAircraft) {
-        positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, px, py);
-
-        px -= planeIcon.getWidth() / 2;
-        py -= planeIcon.getHeight() / 2;
-
-        mapImage->blendImage(planeIcon, px, py, planeLocations[0].heading);
+        if (isBelow) {
+            mapImage->drawText(flText, 12, px, py + 7, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        }
     }
 }
 

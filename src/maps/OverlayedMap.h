@@ -101,6 +101,7 @@ private:
 
     void drawOverlays();
     void drawAircraftOverlay();
+    void drawOtherAircraftOverlay();
     void drawDataOverlays();
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
