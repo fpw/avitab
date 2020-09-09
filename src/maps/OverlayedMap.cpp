@@ -224,11 +224,11 @@ void OverlayedMap::drawOtherAircraftOverlay() {
         fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading) + 90, rx, ry);
         mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
         mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
-        unsigned int elevationFeet = static_cast<unsigned int>(planeLocations[i].elevation * 3.28084);
+        unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * xdata::M_TO_FT + 50.0) / 100.0;
         std::string flText = "---";
-        flText[0] = '0' + (elevationFeet / 10000) % 10;
-        flText[1] = '0' + (elevationFeet / 1000) % 10;
-        flText[2] = '0' + (elevationFeet / 100) % 10;
+        flText[0] = '0' + (flightLevel / 100) % 10;
+        flText[1] = '0' + (flightLevel / 10) % 10;
+        flText[2] = '0' + (flightLevel / 1) % 10;
         if (isAbove) {
             mapImage->drawText(flText, 12, px, py - 17, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
         }

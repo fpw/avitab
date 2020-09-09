@@ -38,10 +38,9 @@ XPlaneEnvironment::XPlaneEnvironment() {
     xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
 
-    Location loc;
     for (size_t i = 0; i < MAX_AI_AIRCRAFT + 1; ++i) {
-        prevLocations.push_back(loc);
-        noMovementCount.push_back(100);
+        prevLocations.push_back(nullLocation);
+        noMovementCount.push_back(NO_MOVEMENT_THRESHOLD);
     }
 
     panelEnabled = std::make_shared<int>(0);
@@ -287,8 +286,10 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
                 (loc.heading != prevLocations[i].heading)))) {
             noMovementCount[i] = 0;
         }
-        if (noMovementCount[i] < 100) {
+        if (noMovementCount[i] < NO_MOVEMENT_THRESHOLD) {
             activeAircraftLocations.push_back(loc);
+        } else {
+            noMovementCount[i] = NO_MOVEMENT_THRESHOLD;
         }
         prevLocations[i] = loc;
     }

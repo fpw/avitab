@@ -244,7 +244,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {
-            str << ", " << std::to_string((int) (length * 3.28084 + 0.5)) << " ft";
+            str << ", " << std::to_string((int) (length * xdata::M_TO_FT + 0.5)) << " ft";
         }
         str << ", " << rwy->getSurfaceTypeDescription();
         str << "\n";

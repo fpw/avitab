@@ -74,7 +74,8 @@ private:
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
     std::vector<Location> prevLocations;
-    std::vector<unsigned long> noMovementCount;
+    std::vector<int> noMovementCount;
+    const int NO_MOVEMENT_THRESHOLD = 100;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
