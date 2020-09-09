@@ -66,6 +66,7 @@ public:
     void positionToPixel(double lat, double lon, int &px, int &py) const;
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
     double getMapWidthNM() const;
+    int getNumAerodromesVisible() const;
     OverlayConfig getOverlayConfig() const;
     bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const;
     bool isVisibleWithMargin(int x, int y, int marginPixels) const;
@@ -80,6 +81,7 @@ private:
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
     double mapWidthNM;
+    int numAerodromesVisible;
 
     float sinTable[360];
     float cosTable[360];
@@ -114,7 +116,7 @@ private:
     void polarToCartesian(float radius, float angleRadians, double& x, double& y);
 
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT = 200;
-    static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 50;
+    static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 40;
 };
 
 } /* namespace maps */

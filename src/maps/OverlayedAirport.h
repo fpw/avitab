@@ -61,11 +61,12 @@ private:
     void getRunwaysCentre(int zoomLevel, int & xCentre, int & yCentre);
     int getMaxRunwayDistanceFromCentre(int zoomLevel, int xCentre, int yCentre);
     void drawRunwayRectangles(float size, uint32_t color);
-
+    bool isBlob();
 
     static const int ICAO_CIRCLE_RADIUS = 15;
     static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
     static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
+    static const int DRAW_BLOB_RUNWAYS_NUM_AERODROMES_VISIBLE = 100;
     static const int MAX_BLOB_SIZE = 12;
     static const int BLOB_SIZE_DIVIDEND = DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM * MAX_BLOB_SIZE;
     static const int DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM = 5;

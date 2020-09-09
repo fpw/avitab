@@ -41,10 +41,8 @@ std::shared_ptr<OverlayedAirport> OverlayedAirport::getInstanceIfVisible(const x
 }
 
 void OverlayedAirport::drawGraphics() {
-    if (overlayHelper->getMapWidthNM() > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) {
-        if (airport->hasHardRunway()) {
-            drawAirportBlob();
-        }
+    if (isBlob()) {
+        drawAirportBlob();
     } else if (overlayHelper->getMapWidthNM() < DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM) {
         if ((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT)) {
             drawAirportICAORing();
@@ -69,7 +67,7 @@ void OverlayedAirport::drawGraphics() {
 }
 
 void OverlayedAirport::drawText(bool detailed) {
-    if (overlayHelper->getMapWidthNM() > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) {
+    if (isBlob()) {
         return;
     }
     // Place text below southern airport boundary and below symbol
@@ -134,10 +132,19 @@ uint32_t OverlayedAirport::getAirportColor(const xdata::Airport *airport) {
     return airport->hasControlTower() ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
 }
 
+bool OverlayedAirport::isBlob() {
+    return ((overlayHelper->getMapWidthNM() > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) &&
+    	    (overlayHelper->getNumAerodromesVisible() > DRAW_BLOB_RUNWAYS_NUM_AERODROMES_VISIBLE));
+}
+
 void OverlayedAirport::drawAirportBlob() {
     if ( overlayHelper->getMapWidthNM() != 0) {
         int radius = BLOB_SIZE_DIVIDEND / overlayHelper->getMapWidthNM();
-        mapImage->fillCircle(px, py, radius, color);
+        if (type != AerodromeType::AIRPORT) {
+            mapImage->fillCircle(px, py, radius, img::COLOR_WHITE);
+        } else {
+            mapImage->fillCircle(px, py, radius, color);
+        }
     }
 }
 

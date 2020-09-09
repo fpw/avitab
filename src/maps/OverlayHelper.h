@@ -30,6 +30,7 @@ public:
     virtual void positionToPixel(double lat, double lon, int &px, int &py) const = 0;
     virtual void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const = 0;
     virtual double getMapWidthNM() const = 0;
+    virtual int getNumAerodromesVisible() const = 0;
     virtual OverlayConfig getOverlayConfig() const = 0;
     virtual bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const = 0;
     virtual bool isVisibleWithMargin(int x, int y, int margin) const = 0;

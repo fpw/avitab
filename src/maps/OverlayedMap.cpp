@@ -307,7 +307,8 @@ void OverlayedMap::drawDataOverlays() {
         }
     });
 
-    LOG_INFO(dbg, "%d aerodromes, %d fixes visible", overlayedAerodromes.size(), overlayedFixes.size());
+    numAerodromesVisible = overlayedAerodromes.size();
+    LOG_INFO(dbg, "%d aerodromes, %d fixes visible", numAerodromesVisible, overlayedFixes.size());
 
     // Render the list of visible OverlayedNodes:
     // Fix graphics, aerodrome graphics, then fix text and aerodrome text.
@@ -331,13 +332,17 @@ void OverlayedMap::drawDataOverlays() {
     }
 
     LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
-        stitcher->getZoomLevel(), deltaLon, nmPerPixel);
+        stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);
 
     drawScale(nmPerPixel);
 }
 
 double OverlayedMap::getMapWidthNM() const {
     return mapWidthNM;
+}
+
+int OverlayedMap::getNumAerodromesVisible() const {
+    return numAerodromesVisible;
 }
 
 void OverlayedMap::drawScale(double nmPerPixel) {
