@@ -34,7 +34,7 @@
 namespace avitab {
 
 struct Location {
-    double longitude{}, latitude{}, heading{};
+    double longitude{}, latitude{}, elevation{}, heading{};
 };
 
 enum class CommandState {
@@ -83,7 +83,8 @@ public:
     virtual void reloadMetar() = 0;
     virtual void enableAndPowerPanel();
     virtual void setIsInMenu(bool menu);
-    virtual Location getAircraftLocation() = 0;
+    virtual AircraftID getActiveAircraftCount() = 0;
+    virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;
 
     virtual ~Environment() = default;

@@ -17,6 +17,7 @@
  */
 
 #include "OverlayedAirport.h"
+#include "src/libxdata/world/World.h"
 
 #include <cmath>
 
@@ -82,7 +83,7 @@ void OverlayedAirport::drawText(bool detailed) {
     if (detailed) {
         std::string nameAndID = airport->getName() + " (" + airport->getID() + ")";
         std::string elevationFeet = std::to_string(airport->getElevation());
-        int rwyLengthHundredsFeet = (airport->getLongestRunwayLength() * 3.28) / 100.0;
+        int rwyLengthHundredsFeet = (airport->getLongestRunwayLength() * xdata::M_TO_FT) / 100.0;
         std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
         std::string atcInfo = airport->getInitialATCContactInfo();
         std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";

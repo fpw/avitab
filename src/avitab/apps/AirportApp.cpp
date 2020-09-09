@@ -244,7 +244,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {
-            str << ", " << std::to_string((int) (length * 3.28084 + 0.5)) << " ft";
+            str << ", " << std::to_string((int) (length * xdata::M_TO_FT + 0.5)) << " ft";
         }
         str << ", " << rwy->getSurfaceTypeDescription();
         str << "\n";
@@ -421,9 +421,9 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
         TabPage &tab = findPage(page);
         auto conf = tab.map->getOverlayConfig();
-        conf.drawAircraft = !conf.drawAircraft;
+        conf.drawMyAircraft = !conf.drawMyAircraft;
         tab.map->setOverlayConfig(conf);
-        tab.aircraftButton->setToggleState(conf.drawAircraft);
+        tab.aircraftButton->setToggleState(conf.drawMyAircraft);
     });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
@@ -442,7 +442,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
     tab.map->setNavWorld(api().getNavWorld());
 
-    tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawAircraft);
+    tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawMyAircraft);
 
     auto geoRef = tab.chart->getGeoReference();
     if (geoRef.valid) {
@@ -504,11 +504,11 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 }
 
 bool AirportApp::onTimer() {
-    Location aircraftLoc = api().getAircraftLocation();
-
     for (auto &tab: pages) {
         if (tab.map) {
-            tab.map->setPlanePosition(aircraftLoc.latitude, aircraftLoc.longitude, aircraftLoc.heading);
+            std::vector<avitab::Location> loc;
+            loc.push_back(api().getAircraftLocation(0));
+            tab.map->setPlaneLocations(loc);
             tab.map->doWork();
         }
     }

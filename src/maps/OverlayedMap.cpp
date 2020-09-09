@@ -50,7 +50,8 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         }
     });
 
-    overlayConfig.drawAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
+    overlayConfig.drawMyAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
+    overlayConfig.drawOtherAircraft = savedSettings->getOverlaySetting<bool>("other_aircraft");
     overlayConfig.drawAirports = savedSettings->getOverlaySetting<bool>("airports");
     overlayConfig.drawAirstrips = savedSettings->getOverlaySetting<bool>("airstrips");
     overlayConfig.drawHeliportsSeaports = savedSettings->getOverlaySetting<bool>("heliports_seaports");
@@ -100,32 +101,37 @@ void OverlayedMap::centerOnWorldPos(double latitude, double longitude) {
     }
 }
 
-void OverlayedMap::setPlanePosition(double latitude, double longitude, double heading) {
+void OverlayedMap::setPlaneLocations(std::vector<avitab::Location> &locs) {
     if (!tileSource->supportsWorldCoords()) {
         return;
     }
 
-    double deltaLat = std::abs(latitude - this->planeLat);
-    double deltaLon = std::abs(longitude - this->planeLong);
-    double deltaHeading = std::abs(heading - this->planeHeading);
+    bool movement = false;
+    for (size_t i = 0; i < locs.size(); ++i) {
+        if (i < planeLocations.size()) {
+            double deltaLat = std::abs(locs[i].latitude - planeLocations[i].latitude);
+            double deltaLon = std::abs(locs[i].longitude - planeLocations[i].longitude);
+            double deltaHeading = std::abs(locs[i].heading - planeLocations[i].heading);
+            movement |= (deltaLat > 0.0000001 || deltaLon > 0.0000001 || deltaHeading > 0.1);
+        } else {
+            movement = true;
+        }
+    }
+    planeLocations = locs;
 
-    if (deltaLat > 0.0000001 || deltaLon > 0.0000001 || deltaHeading > 0.1) {
-        planeLat = latitude;
-        planeLong = longitude;
-        planeHeading = heading;
+    if (movement) {
         stitcher->updateImage();
     }
 }
 
-void OverlayedMap::centerOnPlane(double latitude, double longitude, double heading) {
+void OverlayedMap::centerOnPlane() {
     if (!tileSource->supportsWorldCoords()) {
         return;
     }
 
-    planeLat = latitude;
-    planeLong = longitude;
-    planeHeading = heading;
-    centerOnWorldPos(latitude, longitude);
+    if (!planeLocations.empty()) {
+        centerOnWorldPos(planeLocations[0].latitude, planeLocations[0].longitude);
+    }
 }
 
 void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
@@ -155,7 +161,8 @@ void OverlayedMap::doWork() {
 }
 
 void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
-    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawAircraft);
+    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawMyAircraft);
+    savedSettings->setOverlaySetting<bool>("other_aircraft", conf.drawOtherAircraft);
     savedSettings->setOverlaySetting<bool>("airports", conf.drawAirports);
     savedSettings->setOverlaySetting<bool>("airstrips", conf.drawAirstrips);
     savedSettings->setOverlaySetting<bool>("heliports_seaports", conf.drawHeliportsSeaports);
@@ -177,23 +184,58 @@ void OverlayedMap::drawOverlays() {
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
+        drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
     drawCalibrationOverlay();
 }
 
 void OverlayedMap::drawAircraftOverlay() {
-    if (!overlayConfig.drawAircraft) {
+    if (!overlayConfig.drawMyAircraft || planeLocations.empty()) {
         return;
     }
 
     int px = 0, py = 0;
-    positionToPixel(planeLat, planeLong, px, py);
+    positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, px, py);
 
     px -= planeIcon.getWidth() / 2;
     py -= planeIcon.getHeight() / 2;
 
-    mapImage->blendImage(planeIcon, px, py, planeHeading);
+    mapImage->blendImage(planeIcon, px, py, planeLocations[0].heading);
+}
+
+void OverlayedMap::drawOtherAircraftOverlay() {
+    if (!overlayConfig.drawOtherAircraft || (planeLocations.size() < 2)) {
+        return;
+    }
+
+    int px = 0, py = 0;
+
+    for (size_t i = 1; i < planeLocations.size(); ++i) {
+        bool isAbove = (planeLocations[i].elevation > (planeLocations[0].elevation + 30));
+        bool isBelow = (planeLocations[i].elevation < (planeLocations[0].elevation - 30));
+        uint32_t color = (isAbove ? img::COLOR_BLUE : (isBelow ? img::COLOR_DARK_GREEN : img::COLOR_BLACK));
+        positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
+        mapImage->drawCircle(px, py, 6, color);
+        mapImage->drawCircle(px, py, 7, color);
+        double ax, ay, tx, ty, rx, ry;
+        fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading), ax, ay);
+        fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading), tx, ty);
+        fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading) + 90, rx, ry);
+        mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
+        mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
+        unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * xdata::M_TO_FT + 50.0) / 100.0;
+        std::string flText = "---";
+        flText[0] = '0' + (flightLevel / 100) % 10;
+        flText[1] = '0' + (flightLevel / 10) % 10;
+        flText[2] = '0' + (flightLevel / 1) % 10;
+        if (isAbove) {
+            mapImage->drawText(flText, 12, px, py - 17, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        }
+        if (isBelow) {
+            mapImage->drawText(flText, 12, px, py + 7, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        }
+    }
 }
 
 void OverlayedMap::drawCalibrationOverlay() {

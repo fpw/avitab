@@ -57,7 +57,8 @@ public:
     void close() override;
     void setIsInMenu(bool inMenu) override;
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() override;
-    Location getAircraftLocation() override;
+    AircraftID getActiveAircraftCount() override;
+    Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
     std::shared_ptr<Settings> getSettings() override;
 

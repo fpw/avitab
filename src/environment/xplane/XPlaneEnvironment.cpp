@@ -37,6 +37,12 @@ XPlaneEnvironment::XPlaneEnvironment() {
 
     xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
+
+    for (size_t i = 0; i < MAX_AI_AIRCRAFT + 1; ++i) {
+        prevLocations.push_back(nullLocation);
+        noMovementCount.push_back(NO_MOVEMENT_THRESHOLD);
+    }
+
     panelEnabled = std::make_shared<int>(0);
     panelPowered = std::make_shared<int>(0);
     brightness = std::make_shared<float>(1);
@@ -263,14 +269,34 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 }
 
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
-    Location loc{};
-    loc.latitude = dataCache.getData("sim/flightmodel/position/latitude").doubleValue;
-    loc.longitude = dataCache.getData("sim/flightmodel/position/longitude").doubleValue;
-    loc.heading = dataCache.getData("sim/flightmodel/position/psi").floatValue;
+    std::vector<Location> activeAircraftLocations;
+
+    for (AircraftID i = 0; i <= MAX_AI_AIRCRAFT; ++i) {
+        Location loc;
+        loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
+        loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
+        loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
+        loc.heading = dataCache.getLocationData(i, 3).floatValue;
+        // only add user aircraft or ones that appear to be active
+        noMovementCount[i] += 1;
+        if ((i == 0) ||
+            ((loc.elevation > 0.0) &&
+                ((loc.latitude != prevLocations[i].latitude) ||
+                (loc.longitude != prevLocations[i].longitude) ||
+                (loc.heading != prevLocations[i].heading)))) {
+            noMovementCount[i] = 0;
+        }
+        if (noMovementCount[i] < NO_MOVEMENT_THRESHOLD) {
+            activeAircraftLocations.push_back(loc);
+        } else {
+            noMovementCount[i] = NO_MOVEMENT_THRESHOLD;
+        }
+        prevLocations[i] = loc;
+    }
 
     {
         std::lock_guard<std::mutex> lock(stateMutex);
-        aircraftLocation = loc;
+        aircraftLocations = activeAircraftLocations;
     }
 
     lastDrawTime = dataCache.getData("sim/operation/misc/frame_rate_period").floatValue;
@@ -279,9 +305,18 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
     return -1;
 }
 
-Location XPlaneEnvironment::getAircraftLocation() {
+AircraftID XPlaneEnvironment::getActiveAircraftCount() {
     std::lock_guard<std::mutex> lock(stateMutex);
-    return aircraftLocation;
+    return aircraftLocations.size();
+}
+
+Location XPlaneEnvironment::getAircraftLocation(AircraftID id) {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    if (id < aircraftLocations.size()) {
+        return aircraftLocations[id];
+    } else {
+        return nullLocation;
+    }
 }
 
 float XPlaneEnvironment::getLastFrameTime() {

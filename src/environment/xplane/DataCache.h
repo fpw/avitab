@@ -19,6 +19,7 @@
 #define SRC_ENVIRONMENT_XPLANE_DATACACHE_H_
 
 #include <map>
+#include <vector>
 #include <string>
 #include <XPLM/XPLMDataAccess.h>
 #include "src/environment/EnvData.h"
@@ -29,8 +30,10 @@ namespace avitab {
 class DataCache {
 public:
     EnvData getData(const std::string &dataRef);
+    EnvData getLocationData(const AircraftID plane, const LocationPartIndex part);
 private:
     std::map<std::string, XPLMDataRef> refCache;
+    std::vector<XPLMDataRef> locationRefCache;
 
     XPLMDataRef createDataRef(const std::string &dataRef);
     EnvData toEnvData(XPLMDataRef ref);

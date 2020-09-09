@@ -26,6 +26,13 @@ struct EnvData {
     double doubleValue;
 };
 
+using AircraftID = unsigned int;
+const static AircraftID MAX_AI_AIRCRAFT = 19;
+
+using LocationPartIndex = unsigned int;
+const static LocationPartIndex NUM_LOCATION_PARTS = 4;
+
+
 } /* namespace avitab */
 
 #endif /* SRC_ENVIRONMENT_ENVDATA_H_ */

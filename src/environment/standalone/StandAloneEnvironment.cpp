@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cmath>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -120,12 +121,49 @@ void StandAloneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
 }
 
-Location StandAloneEnvironment::getAircraftLocation() {
-    Location res{};
-    res.latitude = 53.8019434;
-    res.longitude = 10.7017287;
-    res.heading = 70;
-    return res;
+AircraftID StandAloneEnvironment::getActiveAircraftCount() {
+    return 4;
+}
+
+Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
+    static unsigned int t = 0;
+    static Location loc[4];
+    static double vel[4];
+    static double asc[4];
+    if (t == 0) {
+        loc[0] = { 10.7017287, 53.8019434, 400, 70 };
+        vel[0] = 0.0;
+        asc[0] = 2;
+        loc[1] = { 10.69, 53.81, 400, 230 };
+        vel[1] = 0.00007;
+        asc[1] = 3;
+        loc[2] = { 10.7, 53.79, 200, 2 };
+        vel[2] = 0.00004;
+        asc[2] = 5;
+        loc[3] = { 10.74, 53.82, 5000, 100 };
+        vel[3] = 0.00013;
+        asc[3] = -8;
+    } else {
+        for (size_t i = 0; i < 4; ++i) {
+            if ( vel[i] > 0.0 ) {
+                loc[i].longitude += (std::sin(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
+                loc[i].latitude += (std::cos(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
+            }
+        }
+        loc[0].heading += 0.7;
+        loc[1].heading += 0.4;
+        loc[2].heading -= 0.2;
+        loc[3].heading += 0.3;
+        for (size_t i = 0; i < 4; ++i) {
+            if (loc[i].heading < 0.0) { loc[i].heading += 360.0; }
+            if (loc[i].heading >= 360.0) { loc[i].heading -= 360.0; }
+            loc[i].elevation += asc[i];
+            if (loc[i].elevation < 30) { asc[i] = std::fabs(asc[i]); }
+            if (loc[i].elevation > 5000) { asc[i] = 0.0 - std::fabs(asc[i]); }
+        }
+    }
+    ++t;
+    return loc[id];
 }
 
 float StandAloneEnvironment::getLastFrameTime() {
