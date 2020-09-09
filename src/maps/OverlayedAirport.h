@@ -53,14 +53,15 @@ private:
     static AerodromeType getAerodromeType(const xdata::Airport *airport);
     static uint32_t getAirportColor(const xdata::Airport *airport);
 
-    static void drawAirportBlob(int x, int y, uint32_t color);
-    static void drawAirportICAOCircleAndRwyPattern(const xdata::Airport *airport, int x, int y, uint32_t color);
-    static void drawAirportICAORing(const xdata::Airport *airport, int x, int y, uint32_t color);
-    static void drawAirportICAOGeographicRunways(const xdata::Airport *airport, uint32_t color);
-    static void drawAirportGeographicRunways(const xdata::Airport *airport);
-    static void getRunwaysCentre(const xdata::Airport *airport, int zoomLevel, int & xCentre, int & yCentre);
-    static int getMaxRunwayDistanceFromCentre(const xdata::Airport *airport, int zoomLevel, int xCentre, int yCentre);
-    static void drawRunwayRectangles(const xdata::Airport *airport, float size, uint32_t color);
+    void drawAirportBlob();
+    void drawAirportICAOCircleAndRwyPattern();
+    void drawAirportICAORing();
+    void drawAirportICAOGeographicRunways();
+    void drawAirportGeographicRunways();
+    void getRunwaysCentre(int zoomLevel, int & xCentre, int & yCentre);
+    int getMaxRunwayDistanceFromCentre(int zoomLevel, int xCentre, int yCentre);
+    void drawRunwayRectangles(float size, uint32_t color);
+
 
     static const int ICAO_CIRCLE_RADIUS = 15;
     static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
