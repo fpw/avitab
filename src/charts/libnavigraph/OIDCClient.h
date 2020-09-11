@@ -24,9 +24,9 @@
 #include <thread>
 #include <memory>
 #include <functional>
-#include "Crypto.h"
+#include "src/charts/Crypto.h"
+#include "src/charts/RESTClient.h"
 #include "AuthServer.h"
-#include "RESTClient.h"
 
 namespace navigraph {
 
@@ -62,9 +62,9 @@ private:
     std::string tokenFile;
     std::string accountName;
 
-    RESTClient restClient;
+    apis::RESTClient restClient;
     AuthServer server;
-    Crypto crypto;
+    apis::Crypto crypto;
 
     // for auth process
     int authPort = 0;

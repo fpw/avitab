@@ -20,7 +20,8 @@
 
 #include <memory>
 #include <future>
-#include "src/libnavigraph/NavigraphAPI.h"
+#include "src/charts/libnavigraph/NavigraphAPI.h"
+#include "src/charts/ChartService.h"
 #include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
@@ -56,7 +57,7 @@ public:
     void reloadMetar() override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
-    std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() override;
+    std::shared_ptr<apis::ChartService> getChartService() override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
@@ -76,7 +77,7 @@ private:
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
 
-    std::shared_ptr<navigraph::NavigraphAPI> navigraphAPI;
+    std::shared_ptr<apis::ChartService> chartService;
     std::shared_ptr<js::Runtime> jsRuntime;
 
     void createPanel();

@@ -35,7 +35,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
-    navigraphAPI = std::make_shared<navigraph::NavigraphAPI>(env->getProgramPath() + "/Navigraph/");
+    chartService = std::make_shared<apis::ChartService>(env->getProgramPath() + "/Navigraph/");
     jsRuntime = std::make_shared<js::Runtime>();
     env->resumeEnvironmentJobs();
 }
@@ -314,8 +314,8 @@ void AviTab::reloadMetar() {
     logger::info("Done METAR");
 }
 
-std::shared_ptr<navigraph::NavigraphAPI> AviTab::getNavigraph() {
-    return navigraphAPI;
+std::shared_ptr<apis::ChartService> AviTab::getChartService() {
+    return chartService;
 }
 
 AircraftID AviTab::getActiveAircraftCount() {
@@ -357,8 +357,8 @@ void AviTab::stopApp() {
     // Cancel the loading if it is still running
     env->cancelNavWorldLoading();
 
-    // Stop the Navigraph API so it no longer calls the GUI
-    navigraphAPI->stop();
+    // Stop the chart APIs so they no longer call the GUI
+    chartService->stop();
 
     // Tell the GUI to not execute more background jobs
     // after the current ones have finished

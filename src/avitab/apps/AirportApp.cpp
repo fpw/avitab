@@ -144,13 +144,11 @@ void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
         }
     });
 
-    if (api().getNavigraph()->hasChartsFor(airport->getID())) {
-        tab.window->addSymbol(Widget::Symbol::LIST, [this, airport, page] {
-            api().executeLater([this, airport, page] {
-                toggleCharts(page, airport);
-            });
+    tab.window->addSymbol(Widget::Symbol::LIST, [this, airport, page] {
+        api().executeLater([this, airport, page] {
+            toggleCharts(page, airport);
         });
-    }
+    });
 
     pages.push_back(tab);
     fillPage(page, airport);
@@ -290,13 +288,13 @@ void AirportApp::toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata:
 }
 
 void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
-    auto navigraph = api().getNavigraph();
+    auto svc = api().getChartService();
 
     TabPage &tab = findPage(page);
     tab.label->setText("Loading...");
 
-    auto call = navigraph->getChartsFor(airport->getID());
-    call->andThen([this, page] (std::future<navigraph::NavigraphAPI::ChartsList> res) {
+    auto call = svc->getChartsFor(airport->getID());
+    call->andThen([this, page] (std::future<apis::ChartService::ChartList> res) {
         try {
             auto charts = res.get();
             api().executeLater([this, page, charts] { onChartsLoaded(page, charts); });
@@ -305,27 +303,27 @@ void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdat
             tab.label->setTextFormatted("Error: %s", e.what());
         }
     });
-    navigraph->submitCall(call);
+    svc->submitCall(call);
 }
 
-void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts) {
+void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartService::ChartList &charts) {
     TabPage &tab = findPage(page);
     tab.label->setVisible(false);
     tab.charts = charts;
     tab.chartSelect = std::make_shared<List>(tab.window);
     tab.chartSelect->setDimensions(tab.window->getContentWidth() - 5, tab.window->getHeight() - padHeight);
 
-    if (tab.requestedList == "ROOT") {
-        tab.chartSelect->add("Airport (" + std::to_string(countCharts(charts, "APT")) + ")", -1);
-        tab.chartSelect->add("Arrival (" + std::to_string(countCharts(charts, "ARR")) + ")", -2);
-        tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, "DEP")) + ")", -3);
-        tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, "APP")) + ")", -4);
-        tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, "REF")) + ")", -5);
+    if (tab.requestedList == apis::ChartCategory::ROOT) {
+        tab.chartSelect->add("Airport (" + std::to_string(countCharts(charts, apis::ChartCategory::APT)) + ")", -1);
+        tab.chartSelect->add("Arrival (" + std::to_string(countCharts(charts, apis::ChartCategory::ARR)) + ")", -2);
+        tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, apis::ChartCategory::DEP)) + ")", -3);
+        tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, apis::ChartCategory::APP)) + ")", -4);
+        tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, apis::ChartCategory::REF)) + ")", -5);
     } else {
         tab.chartSelect->add("Back", Widget::Symbol::LEFT, -6);
         for (size_t i = 0; i < charts.size(); i++) {
-            if (charts[i]->getSection() == tab.requestedList) {
-                tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getDescription(), i);
+            if (charts[i]->getCategory() == tab.requestedList) {
+                tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getName(), i);
             }
         }
     }
@@ -337,12 +335,12 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
 
             if (index < 0) {
                 switch (index) {
-                case -1: listTab.requestedList = "APT"; break;
-                case -2: listTab.requestedList = "ARR"; break;
-                case -3: listTab.requestedList = "DEP"; break;
-                case -4: listTab.requestedList = "APP"; break;
-                case -5: listTab.requestedList = "REF"; break;
-                case -6: listTab.requestedList = "ROOT"; break;
+                case -1: listTab.requestedList = apis::ChartCategory::APT; break;
+                case -2: listTab.requestedList = apis::ChartCategory::ARR; break;
+                case -3: listTab.requestedList = apis::ChartCategory::DEP; break;
+                case -4: listTab.requestedList = apis::ChartCategory::APP; break;
+                case -5: listTab.requestedList = apis::ChartCategory::REF; break;
+                case -6: listTab.requestedList = apis::ChartCategory::ROOT; break;
                 }
                 onChartsLoaded(page, listTab.charts);
                 return;
@@ -356,7 +354,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             newTab.page->setShowScrollbar(false);
             auto newPage = newTab.page;
 
-            newTab.window = std::make_shared<Window>(newTab.page, chart->getDescription());
+            newTab.window = std::make_shared<Window>(newTab.page, chart->getName());
             newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() + 30);
             newTab.window->alignInTopLeft();
             newTab.window->setOnClose([this, newPage] {
@@ -369,9 +367,9 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
             pages.push_back(newTab);
             tabs->showTab(newTab.page);
 
-            auto navigraph = api().getNavigraph();
-            auto call = navigraph->loadChartImages(chart);
-            call->andThen([this, newPage] (std::future<std::shared_ptr<navigraph::Chart>> res) {
+            auto svc = api().getChartService();
+            auto call = svc->loadChart(chart);
+            call->andThen([this, newPage] (std::future<std::shared_ptr<apis::Chart>> res) {
                 try {
                     TabPage &tab = findPage(newPage);
                     tab.chart = res.get();
@@ -388,7 +386,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const navigraph::Nav
                     }
                 }
             });
-            navigraph->submitCall(call);
+            svc->submitCall(call);
         });
     });
 }
@@ -414,7 +412,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         TabPage &tab = findPage(page);
         nightMode = !nightMode;
         tab.nightModeButton->setToggleState(nightMode);
-        tab.mapSource->changeImage(getChartImage(tab.chart));
+        tab.chart->changeNightMode(tab.mapSource, nightMode);
         tab.mapStitcher->invalidateCache();
     });
     tab.nightModeButton->setToggleState(nightMode);
@@ -434,8 +432,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - padHeight);
     tab.pixMap->centerInParent();
 
-    auto chartImage = getChartImage(tab.chart);
-    tab.mapSource = std::make_shared<maps::ImageSource>(chartImage);
+    tab.mapSource = tab.chart->createTileSource(nightMode);
     tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
     tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, api().getSettings());
     tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
@@ -444,17 +441,16 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
 
     tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawMyAircraft);
 
-    auto geoRef = tab.chart->getGeoReference();
-    if (geoRef.valid) {
-        try {
-            int w = chartImage->getWidth();
-            int h = chartImage->getHeight();
-            tab.mapSource->attachCalibration1(geoRef.x1 * w, geoRef.y1 * h, geoRef.lat1, geoRef.lon1, 0);
-            tab.mapSource->attachCalibration2(geoRef.x2 * w, geoRef.y2 * h, geoRef.lat2, geoRef.lon2, 0);
-        } catch (const std::exception &e) {
-            logger::verbose("Invalid geo reference for chart: %s", e.what());
-        }
-        logger::verbose("Attached geo-reference to chart");
+    if (tab.mapSource->getPageCount() > 1) {
+        tab.window->addSymbol(Widget::Symbol::RIGHT, [this, page] {
+            TabPage &tab = findPage(page);
+            tab.mapStitcher->nextPage();
+        });
+
+        tab.window->addSymbol(Widget::Symbol::LEFT, [this, page] {
+            TabPage &tab = findPage(page);
+            tab.mapStitcher->prevPage();
+        });
     }
 
     onTimer();
@@ -515,16 +511,8 @@ bool AirportApp::onTimer() {
     return true;
 }
 
-std::shared_ptr<img::Image> AirportApp::getChartImage(std::shared_ptr<navigraph::Chart> chart) {
-    if (nightMode) {
-        return chart->getNightImage();
-    } else {
-        return chart->getDayImage();
-    }
-}
-
-size_t AirportApp::countCharts(const navigraph::NavigraphAPI::ChartsList& list, const std::string& type) {
-    return std::count_if(list.begin(), list.end(), [&type] (auto chart) { return chart->getSection() == type; });
+size_t AirportApp::countCharts(const apis::ChartService::ChartList& list, apis::ChartCategory category) {
+    return std::count_if(list.begin(), list.end(), [category] (auto chart) { return chart->getCategory() == category; });
 }
 
 } /* namespace avitab */

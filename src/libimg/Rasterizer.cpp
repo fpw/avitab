@@ -26,7 +26,12 @@ namespace img {
 
 Rasterizer::Rasterizer(const std::string &utf8Path) {
     initFitz();
-    loadDocument(utf8Path);
+    loadFile(utf8Path);
+}
+
+Rasterizer::Rasterizer(const std::vector<uint8_t> &data) {
+    initFitz();
+    loadMemory(data);
 }
 
 void Rasterizer::initFitz() {
@@ -44,14 +49,35 @@ void Rasterizer::initFitz() {
     }
 }
 
-void Rasterizer::loadDocument(const std::string& utf8Path) {
-    logger::info("Loading '%s in thread %d'", utf8Path.c_str(), std::this_thread::get_id());
-
+void Rasterizer::loadFile(const std::string& file) {
     fz_try(ctx) {
-        doc = fz_open_document(ctx, utf8Path.c_str());
+        doc = fz_open_document(ctx, file.c_str());
     } fz_catch(ctx) {
         throw std::runtime_error("Cannot open document: " + std::string(fz_caught_message(ctx)));
     }
+
+    loadDocument();
+}
+
+void Rasterizer::loadMemory(const std::vector<uint8_t> &data) {
+    dataBuf = data;
+
+    fz_try(ctx) {
+        stream = fz_open_memory(ctx, dataBuf.data(), dataBuf.size());
+        doc = fz_open_document_with_stream(ctx, "application/pdf", stream);
+    } fz_catch(ctx) {
+        if (stream) {
+            fz_drop_stream(ctx, stream);
+            stream = nullptr;
+        }
+        throw std::runtime_error("Cannot open document: " + std::string(fz_caught_message(ctx)));
+    }
+
+    loadDocument();
+}
+
+void Rasterizer::loadDocument() {
+    logger::info("Loading document in thread %d'", std::this_thread::get_id());
 
     fz_try(ctx) {
         totalPages = fz_count_pages(ctx, doc);
@@ -214,6 +240,9 @@ void Rasterizer::freeCurrentPage() {
 Rasterizer::~Rasterizer() {
     freeCurrentPage();
     fz_drop_document(ctx, doc);
+    if (stream) {
+        fz_drop_stream(ctx, stream);
+    }
     fz_drop_context(ctx);
 }
 

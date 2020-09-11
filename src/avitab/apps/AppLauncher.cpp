@@ -43,7 +43,7 @@ AppLauncher::AppLauncher(FuncsPtr appFuncs):
     addEntry<PlaneManualApp>("Aircraft", root + "if_ilustracoes_04-11_1519786.png", AppId::PLANE_MANUAL);
     addEntry<NotesApp>("Notes", root + "if_txt2_3783.png", AppId::NOTES);
 
-    if (api().getNavigraph()->isSupported()) {
+    if (api().getChartService()->getNavigraph()->isSupported()) {
         addEntry<NavigraphApp>("Navigraph", root + "navigraph.png", AppId::NAVIGRAPH);
     }
 

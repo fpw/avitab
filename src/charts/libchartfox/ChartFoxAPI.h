@@ -16,9 +16,35 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define AVITAB_VERSION_MAJOR @AviTab_VERSION_MAJOR@
-#define AVITAB_VERSION_MINOR @AviTab_VERSION_MINOR@
-#define AVITAB_VERSION_PATCH @AviTab_VERSION_PATCH@
-#define AVITAB_VERSION_STR "@AviTab_VERSION_MAJOR@.@AviTab_VERSION_MINOR@.@AviTab_VERSION_PATCH@"
-#define NAVIGRAPH_CLIENT_SECRET "@NAVIGRAPH_SECRET@"
-#define CHARTFOX_CLIENT_SECRET "@CHARTFOX_SECRET@"
+#ifndef AVITAB_CHARTFOXAPI_H
+#define AVITAB_CHARTFOXAPI_H
+
+#include <string>
+#include <vector>
+#include "ChartFoxChart.h"
+#include "src/charts/RESTClient.h"
+
+namespace chartfox {
+
+class ChartFoxAPI {
+public:
+    ChartFoxAPI();
+    ~ChartFoxAPI();
+
+    bool isSupported();
+
+    bool test();
+    std::vector<std::shared_ptr<apis::Chart>> getChartsFor(const std::string &icao);
+    void loadChart(std::shared_ptr<ChartFoxChart> chart);
+
+private:
+    bool cancelToken = false;
+    std::string apiKey;
+    apis::RESTClient restClient;
+
+    std::string urlFor(const std::string &path, bool withToken = false);
+};
+
+} // namespace chartfox
+
+#endif //AVITAB_CHARTFOXAPI_H

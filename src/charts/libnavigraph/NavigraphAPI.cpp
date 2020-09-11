@@ -36,11 +36,6 @@ NavigraphAPI::NavigraphAPI(const std::string &cacheDirectory):
     }
 
     oidc->setCacheDirectory(cacheDirectory);
-
-    if (isSupported()) {
-        keepAlive = true;
-        apiThread = std::make_unique<std::thread>(&NavigraphAPI::workLoop, this);
-    }
 }
 
 bool NavigraphAPI::isSupported() const {
@@ -51,132 +46,69 @@ bool NavigraphAPI::hasLoggedInBefore() const {
     return oidc->canRelogin();
 }
 
-bool NavigraphAPI::hasWork() {
-    // gets called with locked mutex
-    if (!keepAlive) {
-        return true;
+bool NavigraphAPI::init() {
+    if (hasChartsSubscription()) {
+        demoMode = false;
+    }
+    loadAirports();
+    loadCycle();
+    stamper.setSize(20);
+    stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
+    return demoMode;
+}
+
+NavigraphAPI::ChartsList NavigraphAPI::getChartsFor(const std::string& icao) {
+    std::vector<std::shared_ptr<apis::Chart>> res;
+
+    if (!canAccess(icao)) {
+        return res;
     }
 
-    return !pendingCalls.empty();
-}
-
-void NavigraphAPI::workLoop() {
-    crash::ThreadCookie crashCookie;
-
-    while (keepAlive) {
-        using namespace std::chrono_literals;
-
-        std::unique_lock<std::mutex> lock(mutex);
-        workCondition.wait_for(lock, std::chrono::seconds(1), [this] () { return hasWork(); });
-
-        if (!keepAlive) {
-            break;
+    auto lower = charts.lower_bound(icao);
+    auto upper = charts.upper_bound(icao);
+    if (lower != upper) {
+        for (auto it = lower; it != upper; ++it) {
+            res.push_back(it->second);
         }
-
-        // create copy to work on while locked so we can work unlocked
-        std::vector<std::shared_ptr<BaseCall>> callsCopy;
-        std::swap(callsCopy, pendingCalls);
-        lock.unlock();
-
-        for (auto call: callsCopy) {
-            try {
-                call->exec();
-            } catch (const std::exception &e) {
-                logger::warn("Oof! Uncaught exception in Navigraph API: %s", e.what());
-            }
-        }
+        return res;
     }
-}
 
-void NavigraphAPI::stop() {
-    if (apiThread) {
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            keepAlive = false;
-            pendingCalls.clear();
-            workCondition.notify_one();
-        }
-        apiThread->join();
-        apiThread.reset();
-    }
-}
-
-void NavigraphAPI::submitCall(std::shared_ptr<BaseCall> call) {
-    std::lock_guard<std::mutex> lock(mutex);
-    if (!keepAlive) {
-        return;
-    }
-    pendingCalls.push_back(call);
-    workCondition.notify_one();
-}
-
-std::shared_ptr<APICall<bool>> NavigraphAPI::init() {
-    auto call = std::make_shared<APICall<bool>>([this] {
-        if (hasChartsSubscription()) {
-            demoMode = false;
-        }
-        loadAirports();
-        loadCycle();
-        stamper.setSize(20);
-        stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
-        return demoMode;
-    });
-    return call;
-}
-
-std::shared_ptr<APICall<NavigraphAPI::ChartsList>> NavigraphAPI::getChartsFor(const std::string& icao) {
-    auto call = std::make_shared<APICall<ChartsList>>([this, icao] {
-        std::vector<std::shared_ptr<Chart>> res;
-
-        if (!canAccess(icao)) {
-            return res;
-        }
-
-        auto lower = charts.lower_bound(icao);
-        auto upper = charts.upper_bound(icao);
-        if (lower != upper) {
-            for (auto it = lower; it != upper; ++it) {
-                res.push_back(it->second);
-            }
-            return res;
-        }
-
-        // not cached -> load
+    // not cached -> load
+    try {
         std::string url = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/charts.json";
         std::string signedUrl = oidc->get(url);
         std::string content = oidc->get(signedUrl);
 
         nlohmann::json chartData = nlohmann::json::parse(content);
         for (auto chartJson: chartData.at("charts")) {
-            auto chart = std::make_shared<Chart>(chartJson);
+            auto chart = std::make_shared<NavigraphChart>(chartJson);
             res.push_back(chart);
             charts.insert(std::make_pair(icao, chart));
         }
-        return res;
-    });
-    return call;
+    } catch (const std::exception &e) {
+        logger::warn("Error fetching charts: %s", e.what());
+    }
+
+    return res;
 }
 
-std::shared_ptr<APICall<std::shared_ptr<Chart>>> NavigraphAPI::loadChartImages(std::shared_ptr<Chart> chart) {
-    auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart] {
-        if (chart->isLoaded()) {
-            return chart;
-        }
-
-        std::string icao = chart->getICAO();
-        if (!canAccess(icao)) {
-            throw std::runtime_error("Cannot access this chart in demo mode");
-        }
-
-        std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
-
-        auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
-        auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
-        chart->attachImages(imgDay, imgNight);
-
+std::shared_ptr<apis::Chart> NavigraphAPI::loadChartImages(std::shared_ptr<NavigraphChart> chart) {
+    if (chart->isLoaded()) {
         return chart;
-    });
-    return call;
+    }
+
+    std::string icao = chart->getICAO();
+    if (!canAccess(icao)) {
+        throw std::runtime_error("Cannot access this chart in demo mode");
+    }
+
+    std::string airportUrl = std::string("https://charts.api.navigraph.com/1/airports/") + icao + "/signedurls/";
+
+    auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
+    auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
+    chart->attachImages(imgDay, imgNight);
+
+    return chart;
 }
 
 void NavigraphAPI::logout() {
@@ -226,8 +158,8 @@ bool NavigraphAPI::hasChartsSubscription() {
     std::string reply;
     try {
         reply = oidc->get("https://subscriptions.api.navigraph.com/1/subscriptions/valid");
-    } catch (const HTTPException &e) {
-        if (e.getStatusCode() == HTTPException::NO_CONTENT) {
+    } catch (const apis::HTTPException &e) {
+        if (e.getStatusCode() == apis::HTTPException::NO_CONTENT) {
             return false;
         } else {
             throw;
@@ -284,10 +216,6 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
     stamper.applyStamp(*img, 270);
 
     return img;
-}
-
-NavigraphAPI::~NavigraphAPI() {
-    stop();
 }
 
 } /* namespace navigraph */

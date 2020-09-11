@@ -28,7 +28,7 @@ NavigraphApp::NavigraphApp(FuncsPtr appFuncs):
     window->setOnClose([this] () { exit(); });
     reset();
 
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
     if (navigraph->hasLoggedInBefore()) {
         onLoginButton();
     }
@@ -56,12 +56,12 @@ void NavigraphApp::reset() {
 }
 
 void NavigraphApp::onLoginButton() {
-    auto navigraph = api().getNavigraph();
+    auto svc = api().getChartService();
 
     button.reset();
     label->setText("Logging in...");
 
-    auto call = navigraph->init();
+    auto call = svc->init();
     call->andThen([this] (std::future<bool> result) {
         try {
             result.get();
@@ -73,11 +73,11 @@ void NavigraphApp::onLoginButton() {
         }
     });
 
-    navigraph->submitCall(call);
+    svc->submitCall(call);
 }
 
 void NavigraphApp::onAuthRequired() {
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
 
     label->setText("Linking required\n"
                    "Clicking the button will open your browser to login to your Navigraph account.\n"
@@ -93,7 +93,7 @@ void NavigraphApp::onAuthRequired() {
 }
 
 void NavigraphApp::onStartAuth() {
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
     auto link = navigraph->startAuthentication([this] {
         api().executeLater([this] () {
             onLoginButton();
@@ -113,13 +113,13 @@ void NavigraphApp::onStartAuth() {
 }
 
 void NavigraphApp::onCancelLoginButton() {
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
     navigraph->cancelAuth();
     reset();
 }
 
 void NavigraphApp::onAuthSuccess() {
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
     if (navigraph->isInDemoMode()) {
         label->setText("Your Navigraph account is linked but doesn't have a charts subscription.\n"
                        "Only LEAL and KONT are usable in demo mode.\n"
@@ -140,7 +140,7 @@ void NavigraphApp::onAuthSuccess() {
 }
 
 void NavigraphApp::onLogoutButton() {
-    auto navigraph = api().getNavigraph();
+    auto navigraph = api().getChartService()->getNavigraph();
     navigraph->logout();
     reset();
 }

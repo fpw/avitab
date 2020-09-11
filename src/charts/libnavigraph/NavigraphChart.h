@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include "src/libimg/Image.h"
+#include "src/charts/Chart.h"
 
 namespace navigraph {
 
@@ -31,30 +32,29 @@ struct ChartGEOReference {
     bool valid = false;
 };
 
-class Chart {
+class NavigraphChart: public apis::Chart {
 public:
-    Chart(const nlohmann::json &json);
-    std::string getICAO() const;
-    std::string getIndex() const;
-    std::string getSection() const;
+    NavigraphChart(const nlohmann::json &json);
+
+    virtual std::string getICAO() const override;
+    virtual std::string getIndex() const override;
+    virtual apis::ChartCategory getCategory() const override;
+    virtual std::string getName() const override;
+
+    virtual bool isLoaded() const override;
+    virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
+    virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
+
     std::string getFileDay() const;
     std::string getFileNight() const;
-    bool isLoaded() const;
     void attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night);
-
-    std::string getDescription() const;
-    ChartGEOReference getGeoReference() const;
-
-    std::shared_ptr<img::Image> getDayImage() const;
-    std::shared_ptr<img::Image> getNightImage() const;
-
 private:
+    ChartGEOReference geoRef{};
     std::string fileDay, fileNight;
     std::string icao;
     std::string section;
     std::string desc;
     std::string index;
-    ChartGEOReference geoRef {};
 
     std::shared_ptr<img::Image> imgDay, imgNight;
 

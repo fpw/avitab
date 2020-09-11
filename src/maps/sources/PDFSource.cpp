@@ -34,6 +34,11 @@ PDFSource::PDFSource(const std::string& file):
     }
 }
 
+PDFSource::PDFSource(const std::vector<uint8_t> &pdfData):
+    rasterizer(pdfData)
+{
+}
+
 int PDFSource::getMinZoomLevel() {
     return -10;
 }

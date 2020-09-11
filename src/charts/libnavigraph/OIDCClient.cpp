@@ -63,7 +63,7 @@ bool OIDCClient::relogin() {
     try {
         restClient.setBasicAuth(crypto.base64BasicAuthEncode(clientId, clientSecret));
         reply = restClient.post("https://identity.api.navigraph.com/connect/token", request, cancelToken);
-    } catch (const HTTPException &e) {
+    } catch (const apis::HTTPException &e) {
         // token no longer valid
         logger::verbose("Refresh token no longer valid");
         logout();
@@ -262,8 +262,8 @@ void OIDCClient::tryWithRelogin(std::function<void()> f) {
     try {
         restClient.setBearer(accessToken);
         f();
-    } catch (const HTTPException &e) {
-        if (e.getStatusCode() == HTTPException::UNAUTHORIZED) {
+    } catch (const apis::HTTPException &e) {
+        if (e.getStatusCode() == apis::HTTPException::UNAUTHORIZED) {
             logger::info("Access token expired, trying refresh_token");
             if (relogin()) {
                 restClient.setBearer(accessToken);

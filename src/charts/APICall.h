@@ -15,14 +15,14 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_APICALL_H_
-#define SRC_LIBNAVIGRAPH_APICALL_H_
+#ifndef SRC_CHARTS_APICALL_H_
+#define SRC_CHARTS_APICALL_H_
 
 #include <functional>
 #include <future>
 #include <stdexcept>
 
-namespace navigraph {
+namespace apis {
 
 struct BaseCall {
     virtual void exec() = 0;
@@ -61,6 +61,6 @@ private:
     ThenCB thenCb;
 };
 
-} /* namespace navigraph */
+} /* namespace apis */
 
-#endif /* SRC_LIBNAVIGRAPH_APICALL_H_ */
+#endif /* SRC_CHARTS_APICALL_H_ */

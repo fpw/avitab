@@ -114,7 +114,7 @@ void MapApp::createSettingsLayout() {
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
-
+#if 0
     if (api().getNavigraph()->isSupported() && false) {
         naviLowButton = std::make_shared<Button>(settingsContainer, "Navigraph L");
         naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
@@ -134,6 +134,7 @@ void MapApp::createSettingsLayout() {
         naviHighLabel->alignRightOf(naviHighButton, 10);
         naviHighLabel->setManaged();
     }
+#endif
 }
 
 void MapApp::setMapSource(MapSource style) {
@@ -247,8 +248,10 @@ void MapApp::selectEPSG() {
 }
 
 void MapApp::selectNavigraph(bool highEnroute) {
+#if 0
     auto source = std::make_shared<maps::NavigraphSource>(api().getNavigraph()->getEnrouteKey(), true, highEnroute);
     setTileSource(source);
+#endif
 }
 
 void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {

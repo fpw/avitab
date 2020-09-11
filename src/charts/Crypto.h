@@ -15,8 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_CRYPTO_H_
-#define SRC_LIBNAVIGRAPH_CRYPTO_H_
+#ifndef SRC_CHARTS_CRYPTO_H_
+#define SRC_CHARTS_CRYPTO_H_
 
 #include <mbedtls/config.h>
 #include <mbedtls/platform.h>
@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-namespace navigraph {
+namespace apis {
 
 class Crypto {
 public:
@@ -47,6 +47,6 @@ private:
     mbedtls_ctr_drbg_context randomGenerator {};
 };
 
-} /* namespace navigraph */
+} /* namespace apis */
 
-#endif /* SRC_LIBNAVIGRAPH_CRYPTO_H_ */
+#endif /* SRC_CHARTS_CRYPTO_H_ */

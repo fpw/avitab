@@ -22,33 +22,26 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include <thread>
-#include <atomic>
 #include <functional>
 #include <mutex>
 #include <condition_variable>
 #include <nlohmann/json_fwd.hpp>
 #include "src/libimg/Image.h"
 #include "src/libimg/TTFStamper.h"
+#include "src/charts/APICall.h"
 #include "OIDCClient.h"
-#include "APICall.h"
-#include "Chart.h"
+#include "NavigraphChart.h"
 
 namespace navigraph {
 
 class NavigraphAPI {
 public:
-    using ChartsList = std::vector<std::shared_ptr<Chart>>;
+    using ChartsList = std::vector<std::shared_ptr<apis::Chart>>;
 
     NavigraphAPI(const std::string &cacheDirectory);
 
-    // asynchronous calls
-    std::shared_ptr<APICall<bool>> init();
-    std::shared_ptr<APICall<ChartsList>> getChartsFor(const std::string &icao);
-    std::shared_ptr<APICall<std::shared_ptr<Chart>>> loadChartImages(std::shared_ptr<Chart> chart);
-    void submitCall(std::shared_ptr<BaseCall> call);
+    bool init();
 
-    // synchronous calls
     bool hasLoggedInBefore() const;
     bool isSupported() const;
     std::string startAuthentication(std::function<void()> onAuth);
@@ -58,9 +51,8 @@ public:
     std::string getEnrouteKey();
     void logout();
 
-    void stop();
-
-    ~NavigraphAPI();
+    ChartsList getChartsFor(const std::string &icao);
+    std::shared_ptr<apis::Chart> loadChartImages(std::shared_ptr<NavigraphChart> chart);
 
 private:
     std::string cacheDirectory;
@@ -70,16 +62,7 @@ private:
     img::TTFStamper stamper;
     bool demoMode = true;
 
-    std::mutex mutex;
-    std::condition_variable workCondition;
-    std::atomic_bool keepAlive { false };
-    std::unique_ptr<std::thread> apiThread;
-    std::vector<std::shared_ptr<BaseCall>> pendingCalls;
-
-    std::multimap<std::string, std::shared_ptr<Chart>> charts;
-
-    bool hasWork();
-    void workLoop();
+    std::multimap<std::string, std::shared_ptr<NavigraphChart>> charts;
 
     void loadAirports();
     void loadCycle();

@@ -22,7 +22,7 @@
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/libxdata/world/World.h"
-#include "src/libnavigraph/NavigraphAPI.h"
+#include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 
 namespace avitab {
@@ -54,7 +54,7 @@ public:
     virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;
-    virtual std::shared_ptr<navigraph::NavigraphAPI> getNavigraph() = 0;
+    virtual std::shared_ptr<apis::ChartService> getChartService() = 0;
     virtual unsigned int getActiveAircraftCount() = 0;
     virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;

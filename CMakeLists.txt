@@ -3,6 +3,7 @@ project(AviTab VERSION 0.3.21 DESCRIPTION "AviTab X-Plane plugin")
 
 if (NOT "$ENV{NAVIGRAPH_SECRET}" STREQUAL "")
     set(NAVIGRAPH_SECRET "$ENV{NAVIGRAPH_SECRET}" CACHE INTERNAL "Copied from environment variable")
+    set(CHARTFOX_SECRET "$ENV{CHARTFOX_SECRET}" CACHE INTERNAL "Copied from environment variable")
 endif()
 
 configure_file(

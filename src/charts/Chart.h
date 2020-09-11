@@ -15,10 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifndef AVITAB_CHART_H
+#define AVITAB_CHART_H
 
-#define AVITAB_VERSION_MAJOR @AviTab_VERSION_MAJOR@
-#define AVITAB_VERSION_MINOR @AviTab_VERSION_MINOR@
-#define AVITAB_VERSION_PATCH @AviTab_VERSION_PATCH@
-#define AVITAB_VERSION_STR "@AviTab_VERSION_MAJOR@.@AviTab_VERSION_MINOR@.@AviTab_VERSION_PATCH@"
-#define NAVIGRAPH_CLIENT_SECRET "@NAVIGRAPH_SECRET@"
-#define CHARTFOX_CLIENT_SECRET "@CHARTFOX_SECRET@"
+#include <string>
+#include "src/libimg/stitcher/TileSource.h"
+
+namespace apis {
+
+enum class ChartCategory {
+    ROOT,
+    REF,
+    APT,
+    DEP,
+    ARR,
+    APP,
+};
+
+class Chart {
+public:
+    virtual std::string getICAO() const = 0;
+    virtual std::string getIndex() const = 0;
+    virtual ChartCategory getCategory() const = 0;
+    virtual std::string getName() const = 0;
+
+    virtual bool isLoaded() const = 0;
+    virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) = 0;
+    virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) = 0;
+};
+
+} /* namespace navigraph */
+
+#endif //AVITAB_CHART_H

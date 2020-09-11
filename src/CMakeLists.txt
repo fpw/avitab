@@ -9,7 +9,7 @@ add_definitions(-DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)
-include(${CMAKE_CURRENT_LIST_DIR}/libnavigraph/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/charts/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/maps/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/environment/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/gui_toolkit/CMakeLists.txt)

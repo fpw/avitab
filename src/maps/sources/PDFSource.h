@@ -19,6 +19,7 @@
 #define SRC_MAPS_PDFSOURCE_H_
 
 #include <string>
+#include <vector>
 #include <atomic>
 #include "Calibration.h"
 #include "src/libimg/stitcher/TileSource.h"
@@ -29,6 +30,7 @@ namespace maps {
 class PDFSource: public img::TileSource {
 public:
     PDFSource(const std::string &file);
+    PDFSource(const std::vector<uint8_t> &pdfData);
 
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;

@@ -32,7 +32,7 @@
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/Timer.h"
-#include "src/maps/sources/ImageSource.h"
+#include "src/libimg/stitcher/TileSource.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/libimg/stitcher/Stitcher.h"
 
@@ -50,12 +50,12 @@ private:
         std::shared_ptr<Button> aircraftButton, nightModeButton;
         std::shared_ptr<xdata::Airport> airport;
 
-        std::string requestedList = "ROOT";
-        navigraph::NavigraphAPI::ChartsList charts;
+        apis::ChartCategory requestedList = apis::ChartCategory::ROOT;
+        apis::ChartService::ChartList charts;
         std::shared_ptr<List> chartSelect;
 
-        std::shared_ptr<navigraph::Chart> chart;
-        std::shared_ptr<maps::ImageSource> mapSource;
+        std::shared_ptr<apis::Chart> chart;
+        std::shared_ptr<img::TileSource> mapSource;
         std::shared_ptr<img::Image> mapImage;
         std::shared_ptr<img::Stitcher> mapStitcher;
         std::shared_ptr<maps::OverlayedMap> map;
@@ -91,14 +91,13 @@ private:
 
     void toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
-    void onChartsLoaded(std::shared_ptr<Page> page, const navigraph::NavigraphAPI::ChartsList &charts);
+    void onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartService::ChartList &charts);
     void onChartLoaded(std::shared_ptr<Page> page);
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
     void redrawPage(std::shared_ptr<Page> page);
     bool onTimer();
 
-    std::shared_ptr<img::Image> getChartImage(std::shared_ptr<navigraph::Chart> chart);
-    size_t countCharts(const navigraph::NavigraphAPI::ChartsList &list, const std::string &type);
+    size_t countCharts(const apis::ChartService::ChartList &list, apis::ChartCategory category);
 };
 
 } /* namespace avitab */

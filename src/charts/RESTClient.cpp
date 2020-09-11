@@ -22,7 +22,7 @@
 #include "RESTClient.h"
 #include "src/Logger.h"
 
-namespace navigraph {
+namespace apis {
 
 HTTPException::HTTPException(int status) {
     this->status = status;
@@ -40,6 +40,10 @@ int HTTPException::getStatusCode() const {
 void RESTClient::setBearer(const std::string& token) {
     bearer = token;
     basicAuth = "";
+}
+
+void RESTClient::setReferrer(const std::string &ref) {
+    referrer = ref;
 }
 
 void RESTClient::setBasicAuth(const std::string& basic) {
@@ -69,6 +73,10 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     } else if (!basicAuth.empty()) {
         list = curl_slist_append(list, std::string("Authorization: Basic " + basicAuth).c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    }
+
+    if (!referrer.empty()) {
+        curl_easy_setopt(curl, CURLOPT_REFERER, referrer.c_str());
     }
 
     CURLcode code = curl_easy_perform(curl);
@@ -120,6 +128,10 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     } else if (!basicAuth.empty()) {
         list = curl_slist_append(list, std::string("Authorization: Basic " + basicAuth).c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+    }
+
+    if (!referrer.empty()) {
+        curl_easy_setopt(curl, CURLOPT_REFERER, referrer.c_str());
     }
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, fieldStr.length());
@@ -271,4 +283,4 @@ int RESTClient::onProgress(void* client, curl_off_t dlTotal, curl_off_t dlNow, c
     return *cancel;
 }
 
-} /* namespace navigraph */
+} /* namespace apis */

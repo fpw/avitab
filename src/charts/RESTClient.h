@@ -15,8 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBNAVIGRAPH_RESTCLIENT_H_
-#define SRC_LIBNAVIGRAPH_RESTCLIENT_H_
+#ifndef SRC_CHARTS_RESTCLIENT_H_
+#define SRC_CHARTS_RESTCLIENT_H_
 
 #include <vector>
 #include <cstdint>
@@ -26,7 +26,7 @@
 #include <curl/curl.h>
 #undef MessageBox
 
-namespace navigraph {
+namespace apis {
 
 class HTTPException: public std::exception {
 public:
@@ -43,6 +43,7 @@ private:
 
 class RESTClient {
 public:
+    void setReferrer(const std::string &ref);
     void setBasicAuth(const std::string &basic);
     void setBearer(const std::string &token);
     std::string get(const std::string &url, bool &cancel);
@@ -52,6 +53,7 @@ public:
     long head(const std::string &Turl, bool &cancel);
 private:
     std::vector<uint8_t> downloadBuf;
+    std::string referrer;
     std::string bearer;
     std::string basicAuth;
 
@@ -62,6 +64,6 @@ private:
     static int onProgress(void *client, curl_off_t dlTotal, curl_off_t dlNow, curl_off_t ulTotal, curl_off_t ulNow);
 };
 
-} /* namespace navigraph */
+} /* namespace apis */
 
-#endif /* SRC_LIBNAVIGRAPH_RESTCLIENT_H_ */
+#endif /* SRC_CHARTS_RESTCLIENT_H_ */

@@ -24,7 +24,7 @@
 #include "src/Logger.h"
 #include "Crypto.h"
 
-namespace navigraph {
+namespace apis {
 
 Crypto::Crypto() {
     mbedtls_ctr_drbg_init(&randomGenerator);
@@ -194,4 +194,4 @@ Crypto::~Crypto() {
     mbedtls_aes_free(&aesCtx);
 }
 
-} /* namespace navigraph */
+} /* namespace avitab */

@@ -19,6 +19,7 @@
 #define SRC_LIBIMG_RASTERIZER_H_
 
 #include <memory>
+#include <vector>
 #include <string>
 #include <atomic>
 #include <mupdf/fitz.h>
@@ -29,6 +30,7 @@ namespace img {
 class Rasterizer {
 public:
     Rasterizer(const std::string &utf8Path);
+    Rasterizer(const std::vector<uint8_t> &data);
 
     int getTileSize();
     int getPageWidth(int page, int zoom);
@@ -39,17 +41,21 @@ public:
 
     ~Rasterizer();
 private:
+    std::vector<uint8_t> dataBuf;
     std::vector<fz_rect> pageRects;
     bool logLoadTimes = false;
     int tileSize = 1024;
     int totalPages = 0;
     int currentPageNum = 0;
     fz_context *ctx {};
-    fz_document *doc {};
+    fz_stream *stream{};
+    fz_document *doc{};
     fz_display_list *currentPageList {};
 
     void initFitz();
-    void loadDocument(const std::string &file);
+    void loadFile(const std::string &file);
+    void loadMemory(const std::vector<uint8_t> &data);
+    void loadDocument();
     void loadPage(int page);
     float zoomToScale(int zoom) const;
     void freeCurrentPage();

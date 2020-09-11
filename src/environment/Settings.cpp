@@ -16,12 +16,11 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <nlohmann/json.hpp>
 #include <iomanip>
-#include <fstream>
-#include "src/platform/Platform.h"
 #include "Settings.h"
 #include "src/Logger.h"
-#include <nlohmann/json.hpp>
+#include "src/platform/Platform.h"
 
 using json = nlohmann::json;
 
