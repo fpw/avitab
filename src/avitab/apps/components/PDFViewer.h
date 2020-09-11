@@ -51,7 +51,7 @@ private:
     std::unique_ptr<PixMap> pixMap;
     std::shared_ptr<maps::PDFSource> source;
     std::shared_ptr<img::Stitcher> stitcher;
-    std::unique_ptr<maps::OverlayedMap> map;
+    std::shared_ptr<maps::OverlayedMap> map;
 
     int width = 0, height = 0;
     int panStartX = 0, panStartY = 0;

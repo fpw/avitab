@@ -18,15 +18,16 @@
 #ifndef SRC_MAPS_OVERLAY_HELPER_H_
 #define SRC_MAPS_OVERLAY_HELPER_H_
 
+#include <memory>
 #include "OverlayConfig.h"
-
+#include "src/libimg/Image.h"
 #include "src/libxdata/world/models/Location.h"
 
 namespace maps {
 
 class IOverlayHelper {
-
 public:
+    virtual std::shared_ptr<img::Image> getMapImage() = 0;
     virtual void positionToPixel(double lat, double lon, int &px, int &py) const = 0;
     virtual void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const = 0;
     virtual double getMapWidthNM() const = 0;
@@ -39,7 +40,7 @@ public:
     virtual int getZoomLevel() const = 0;
     virtual int getMaxZoomLevel() const = 0;
 
-    virtual ~IOverlayHelper(){};
+    virtual ~IOverlayHelper() = default;
 };
 
 } /* namespace maps */

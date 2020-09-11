@@ -25,22 +25,19 @@
 
 namespace maps {
 
+using OverlayHelper = std::shared_ptr<IOverlayHelper>;
+
 class OverlayedNode {
-
 public:
-    static void setHelpers(IOverlayHelper *helper, std::shared_ptr<img::Image> image);
-
-    static std::shared_ptr<OverlayedNode> getInstanceIfVisible(const xdata::NavNode &node);
+    static std::shared_ptr<OverlayedNode> getInstanceIfVisible(OverlayHelper helper, const xdata::NavNode &node);
 
     virtual void drawGraphics() = 0;
     virtual void drawText(bool detailed) = 0;
 
 protected:
-    OverlayedNode();
-    virtual ~OverlayedNode() = default;
+    OverlayedNode(OverlayHelper helper);
 
-    static IOverlayHelper *overlayHelper;
-    static std::shared_ptr<img::Image> mapImage;
+    OverlayHelper overlayHelper;
 };
 
 } /* namespace maps */

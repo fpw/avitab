@@ -26,9 +26,9 @@ namespace maps {
 class OverlayedAirport : public OverlayedNode {
 
 public:
-    static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(const xdata::Airport *airport);
+    static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(OverlayHelper helper, const xdata::Airport *airport);
 
-    OverlayedAirport(const xdata::Airport *airport);
+    OverlayedAirport(OverlayHelper helper, const xdata::Airport *airport);
 
     void drawGraphics();
     void drawText(bool detailed);
@@ -43,13 +43,13 @@ private:
     };
 
     const xdata::Airport *airport;
-    AerodromeType type;
-    uint32_t color;
-    int px;
-    int py;
+    AerodromeType type = AerodromeType::AIRPORT;
+    uint32_t color = 0;
+    int px = 0;
+    int py = 0;
 
-    static bool isVisible(const xdata::Airport *airport);
-    static bool isEnabled(const xdata::Airport *airport);
+    static bool isVisible(OverlayHelper helper, const xdata::Airport *airport);
+    static bool isEnabled(OverlayHelper helper, const xdata::Airport *airport);
     static AerodromeType getAerodromeType(const xdata::Airport *airport);
     static uint32_t getAirportColor(const xdata::Airport *airport);
 
@@ -60,7 +60,7 @@ private:
     void drawAirportGeographicRunways();
     void getRunwaysCentre(int zoomLevel, int & xCentre, int & yCentre);
     int getMaxRunwayDistanceFromCentre(int zoomLevel, int xCentre, int yCentre);
-    void drawRunwayRectangles(float size, uint32_t color);
+    void drawRunwayRectangles(float size, uint32_t rectColor);
     bool isBlob();
 
     static const int ICAO_CIRCLE_RADIUS = 15;

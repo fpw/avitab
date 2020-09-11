@@ -24,13 +24,17 @@ namespace maps {
 img::Image OverlayedNDB::ndbIcon;
 int OverlayedNDB::radius;
 
-OverlayedNDB::OverlayedNDB(const xdata::Fix *fix):
-    OverlayedFix(fix) {
+OverlayedNDB::OverlayedNDB(OverlayHelper helper, const xdata::Fix *fix):
+    OverlayedFix(helper, fix)
+{
+    if (ndbIcon.getHeight() == 0) {
+        createNDBIcon();
+    }
 }
 
-std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(const xdata::Fix &fix) {
-    if (fix.getNDB() && overlayHelper->getOverlayConfig().drawNDBs && overlayHelper->isLocVisibleWithMargin(fix.getLocation(), radius)) {
-        return std::make_shared<OverlayedNDB>(&fix);
+std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+    if (fix.getNDB() && helper->getOverlayConfig().drawNDBs && helper->isLocVisibleWithMargin(fix.getLocation(), radius)) {
+        return std::make_shared<OverlayedNDB>(helper, &fix);
     } else {
         return NULL;
     }
@@ -43,11 +47,11 @@ void OverlayedNDB::createNDBIcon() {
     ndbIcon.resize(bgSize * 2 + 1, bgSize * 2 + 1, 0);
     ndbIcon.fillCircle(bgSize, bgSize, 4, img::COLOR_ICAO_MAGENTA);
     for (int ring = 0; ring < numRings; ring++) {
-        int radius = (ring + 1) * 14;
+        int r = (ring + 1) * 14;
         for (int angleDegrees = 0; angleDegrees < 360; angleDegrees += angleStep[ring]) {
-            LOG_INFO(0, "ring = %d, radius = %d, angle = %d", ring, radius, angleDegrees);
-            int dx = radius * cos(angleDegrees * M_PI / 180.0);
-            int dy = radius * sin(angleDegrees * M_PI / 180.0);
+            LOG_INFO(0, "ring = %d, radius = %d, angle = %d", ring, r, angleDegrees);
+            int dx = r * cos(angleDegrees * M_PI / 180.0);
+            int dy = r * sin(angleDegrees * M_PI / 180.0);
             ndbIcon.fillCircle(bgSize + dx, bgSize + dy, 4, img::COLOR_ICAO_MAGENTA);
         }
     }
@@ -56,14 +60,16 @@ void OverlayedNDB::createNDBIcon() {
 }
 
 void OverlayedNDB::drawGraphics() {
+    auto mapImage = overlayHelper->getMapImage();
     mapImage->blendImage0(ndbIcon, px - radius, py - radius);
 }
 
 void OverlayedNDB::drawText(bool detailed) {
     if (detailed) {
-        auto freqString = fix->getNDB()->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox("", fix->getID(), freqString, px + radius, py - radius - 10, img::COLOR_ICAO_MAGENTA);
+        auto freqString = fix->getNDB()->getFrequency().getFrequencyString(false);
+        drawNavTextBox(overlayHelper, "", fix->getID(), freqString, px + radius, py - radius - 10, img::COLOR_ICAO_MAGENTA);
     } else {
+        auto mapImage = overlayHelper->getMapImage();
         mapImage->drawText(fix->getID(), 12, px + radius + 5, py - radius - 5, img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }

@@ -27,16 +27,16 @@ namespace maps {
 class OverlayedFix : public OverlayedNode {
 
 public:
-    static std::shared_ptr<OverlayedFix> getInstanceIfVisible(const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedFix> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
 
     virtual void drawGraphics() = 0;
     virtual void drawText(bool detailed) = 0;
 
 protected:
-    OverlayedFix(const xdata::Fix *fix);
+    OverlayedFix(OverlayHelper helper, const xdata::Fix *fix);
     virtual ~OverlayedFix() = default;
 
-    static void drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color);
+    static void drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color);
 
     const xdata::Fix *fix;
     int px;
@@ -45,7 +45,7 @@ protected:
 private:
     static xdata::Morse morse;
 
-    static void drawMorse(int x, int y, std::string text, int size, uint32_t color);
+    static void drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color);
     static bool isDMEOnly(const xdata::Fix &fix);
     static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
 };

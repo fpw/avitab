@@ -21,35 +21,37 @@
 
 namespace maps {
 
-OverlayedILSLocalizer::OverlayedILSLocalizer(const xdata::Fix *fix):
-    OverlayedFix(fix) {
+OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *fix):
+    OverlayedFix(helper, fix)
+{
 }
 
-std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(const xdata::Fix &fix) {
-    if (!fix.getILSLocalizer() || !overlayHelper->getOverlayConfig().drawILSs) {
+std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+    if (!fix.getILSLocalizer() || !helper->getOverlayConfig().drawILSs) {
         return NULL;
     }
 
     int px, py, lx, ly, cx, cy, rx, ry;
     auto &loc = fix.getLocation();
-    overlayHelper->positionToPixel(loc.latitude, loc.longitude, px, py);
-    getTailCoords(&fix, lx, ly, cx, cy, rx, ry);
+    helper->positionToPixel(loc.latitude, loc.longitude, px, py);
+    getTailCoords(helper, &fix, lx, ly, cx, cy, rx, ry);
 
     int xmin = std::min(px, (int)std::min(lx, rx));
     int ymin = std::min(py, (int)std::min(ly, ry));
     int xmax = std::max(px, (int)std::max(lx, rx));
     int ymax = std::max(py, (int)std::max(ly, ry));
 
-    if (overlayHelper->isAreaVisible(xmin, ymin, xmax, ymax)) {
-        return std::make_shared<OverlayedILSLocalizer>(&fix);
+    if (helper->isAreaVisible(xmin, ymin, xmax, ymax)) {
+        return std::make_shared<OverlayedILSLocalizer>(helper, &fix);
     } else {
         return NULL;
     }
 }
 
 void OverlayedILSLocalizer::drawGraphics() {
+    auto mapImage = overlayHelper->getMapImage();
     int cx, cy, lx, ly, rx, ry;
-    getTailCoords(fix, lx, ly, cx, cy, rx, ry);
+    getTailCoords(overlayHelper, fix, lx, ly, cx, cy, rx, ry);
     mapImage->drawLineAA(px, py, lx, ly, color);
     mapImage->drawLineAA(px, py, cx, cy, color);
     mapImage->drawLineAA(px, py, rx, ry, color);
@@ -63,14 +65,15 @@ void OverlayedILSLocalizer::drawText(bool detailed) {
         return;
     }
     int lx, ly, cx, cy, rx, ry;
-    getTailCoords(fix, lx, ly, cx, cy, rx, ry);
+    getTailCoords(overlayHelper, fix, lx, ly, cx, cy, rx, ry);
     int x =  (4 * px + cx) / 5;       // Draw NavTextBox 1/5 of the way from airport to end of tail
     int y = ((4 * py + cy) / 5) - 20; // And up a bit
     std::string type = ils->isLocalizerOnly() ? "LOC" : "ILS";
     if (detailed) {
-        auto freqString = ils->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox(type, fix->getID(), freqString, x, y, color);
+        auto freqString = ils->getFrequency().getFrequencyString(false);
+        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color);
     } else {
+        auto mapImage = overlayHelper->getMapImage();
         mapImage->drawText(fix->getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
@@ -80,18 +83,19 @@ void OverlayedILSLocalizer::polarToCartesian(float radius, float angleDegrees, d
     y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
 }
 
-void OverlayedILSLocalizer::getTailCoords(const xdata::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry) {
+void OverlayedILSLocalizer::getTailCoords(OverlayHelper helper, const xdata::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry) {
     auto &loc = fix->getLocation();
     int px, py;
-    overlayHelper->positionToPixel(loc.latitude, loc.longitude, px, py);
+    helper->positionToPixel(loc.latitude, loc.longitude, px, py);
     auto ils = fix->getILSLocalizer();
     if (!ils) {
         return;
     }
     double ilsHeading = std::fmod(ils->getRunwayHeading() + 180.0, 360);
     double rangePixels = 0.0;
-    if (overlayHelper->getMapWidthNM() != 0) {
-        rangePixels = (ils->getRange() * mapImage->getWidth()) / overlayHelper->getMapWidthNM();
+    if (helper->getMapWidthNM() != 0) {
+        auto mapImage = helper->getMapImage();
+        rangePixels = (ils->getRange() * mapImage->getWidth()) / helper->getMapWidthNM();
     }
     double dcx, dcy, dlx, dly, drx, dry;
     const double OUTER_ANGLE = 2.5;

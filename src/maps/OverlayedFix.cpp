@@ -28,8 +28,10 @@ namespace maps {
 
 xdata::Morse OverlayedFix::morse;
 
-OverlayedFix::OverlayedFix(const xdata::Fix *fix):
-    fix(fix) {
+OverlayedFix::OverlayedFix(OverlayHelper helper, const xdata::Fix *fix):
+    OverlayedNode(helper),
+    fix(fix)
+{
     auto &loc = fix->getLocation();
     overlayHelper->positionToPixel(loc.latitude, loc.longitude, px, py);
 }
@@ -39,25 +41,26 @@ bool OverlayedFix::isDMEOnly(const xdata::Fix &fix) {
     return fix.getDME() && !fix.getVOR() && !fix.getILSLocalizer();
 }
 
-std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(const xdata::Fix &fix) {
-    if (overlayHelper->getMapWidthNM() > SHOW_NAVAIDS_AT_MAPWIDTHNM) {
+std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+    if (helper->getMapWidthNM() > SHOW_NAVAIDS_AT_MAPWIDTHNM) {
         return NULL;
     }
 
     if (fix.getNDB()) {
-        return OverlayedNDB::getInstanceIfVisible(fix);
+        return OverlayedNDB::getInstanceIfVisible(helper, fix);
     } else if (fix.getVOR()) {
-        return OverlayedVOR::getInstanceIfVisible(fix);
+        return OverlayedVOR::getInstanceIfVisible(helper, fix);
     } else if (isDMEOnly(fix)) {
-        return OverlayedDME::getInstanceIfVisible(fix);
+        return OverlayedDME::getInstanceIfVisible(helper, fix);
     } else if (fix.getILSLocalizer()) {
-        return OverlayedILSLocalizer::getInstanceIfVisible(fix);
+        return OverlayedILSLocalizer::getInstanceIfVisible(helper, fix);
     } else {
-        return OverlayedWaypoint::getInstanceIfVisible(fix);
+        return OverlayedWaypoint::getInstanceIfVisible(helper, fix);
     }
 }
 
-void OverlayedFix::drawNavTextBox(std::string type, std::string id, std::string freq, int x, int y, uint32_t color) {
+void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color) {
+    auto mapImage = helper->getMapImage();
     // x, y is top left corner of rectangular border. If type is not required, pass in as ""
     const int TEXT_SIZE = 10;
     const int MORSE_SIZE = 2;
@@ -76,7 +79,7 @@ void OverlayedFix::drawNavTextBox(std::string type, std::string id, std::string 
     mapImage->fillRectangle(x + 1, y + 1, x + boxWidth, y + boxHeight, img::COLOR_WHITE);
     mapImage->drawText(id, TEXT_SIZE, xTextCentre, y + yo + 1, color, 0, img::Align::CENTRE);
     mapImage->drawText(freq, TEXT_SIZE, xTextCentre, y + TEXT_SIZE + yo + 1, color, 0, img::Align::CENTRE);
-    drawMorse(x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
+    drawMorse(helper, x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
 
     mapImage->drawRectangle(x, y, x + boxWidth, y + boxHeight, color);
     if (type != "") {
@@ -84,7 +87,8 @@ void OverlayedFix::drawNavTextBox(std::string type, std::string id, std::string 
     }
 }
 
-void OverlayedFix::drawMorse(int x, int y, std::string text, int size, uint32_t color) {
+void OverlayedFix::drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color) {
+    auto mapImage = helper->getMapImage();
     for (char const &c: text) {
         std::string morseForChar = morse.getCode(c);
         for (int row = 0; row < size; row++) {

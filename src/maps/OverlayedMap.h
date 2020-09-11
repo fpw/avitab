@@ -31,7 +31,7 @@
 
 namespace maps {
 
-class OverlayedMap : public IOverlayHelper {
+class OverlayedMap: public IOverlayHelper, private std::enable_shared_from_this<OverlayedMap> {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
 
@@ -63,17 +63,18 @@ public:
     void doWork();
 
     // IOverlayHelper functions
-    void positionToPixel(double lat, double lon, int &px, int &py) const;
-    void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const;
-    double getMapWidthNM() const;
-    int getNumAerodromesVisible() const;
-    OverlayConfig getOverlayConfig() const;
-    bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const;
-    bool isVisibleWithMargin(int x, int y, int marginPixels) const;
-    bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const;
-    void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const;
-    int getZoomLevel() const;
-    int getMaxZoomLevel() const;
+    std::shared_ptr<img::Image> getMapImage() override;
+    void positionToPixel(double lat, double lon, int &px, int &py) const override;
+    void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const override;
+    double getMapWidthNM() const override;
+    int getNumAerodromesVisible() const override;
+    OverlayConfig getOverlayConfig() const override;
+    bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const override;
+    bool isVisibleWithMargin(int x, int y, int marginPixels) const override;
+    bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const override;
+    void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const override;
+    int getZoomLevel() const override;
+    int getMaxZoomLevel() const override;
 
 private:
     // Data
@@ -107,8 +108,6 @@ private:
     void drawDataOverlays();
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
-
-    void drawAirport(const xdata::Airport &airport);
 
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
     float cosDegrees(int angleDegrees) const;

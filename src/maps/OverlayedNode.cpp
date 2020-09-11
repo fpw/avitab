@@ -22,25 +22,19 @@
 
 namespace maps {
 
-IOverlayHelper *OverlayedNode::overlayHelper;
-std::shared_ptr<img::Image> OverlayedNode::mapImage;
-
-OverlayedNode::OverlayedNode() {
+OverlayedNode::OverlayedNode(OverlayHelper helper):
+    overlayHelper(helper)
+{
 }
 
-void OverlayedNode::setHelpers(IOverlayHelper *helper, std::shared_ptr<img::Image> image) {
-    overlayHelper = helper;
-    mapImage = image;
-}
-
-std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(const xdata::NavNode &node) {
+std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper helper, const xdata::NavNode &node) {
     auto fix = dynamic_cast<const xdata::Fix *>(&node);
     if (fix) {
-        return OverlayedFix::getInstanceIfVisible(*fix);
+        return OverlayedFix::getInstanceIfVisible(helper, *fix);
     }
     auto airport = dynamic_cast<const xdata::Airport *>(&node);
     if (airport) {
-        return OverlayedAirport::getInstanceIfVisible(airport);
+        return OverlayedAirport::getInstanceIfVisible(helper, airport);
     }
     return NULL;
 }

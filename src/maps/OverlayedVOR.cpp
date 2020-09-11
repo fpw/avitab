@@ -21,13 +21,14 @@
 
 namespace maps {
 
-OverlayedVOR::OverlayedVOR(const xdata::Fix *fix):
-    OverlayedFix(fix) {
+OverlayedVOR::OverlayedVOR(OverlayHelper helper, const xdata::Fix *fix):
+    OverlayedFix(helper, fix)
+{
 }
 
-std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(const xdata::Fix &fix) {
-    if (fix.getVOR() && overlayHelper->getOverlayConfig().drawVORs && overlayHelper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
-        return std::make_shared<OverlayedVOR>(&fix);
+std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+    if (fix.getVOR() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
+        return std::make_shared<OverlayedVOR>(helper, &fix);
     } else {
         return NULL;
     }
@@ -38,10 +39,11 @@ void OverlayedVOR::drawGraphics() {
     double r = 8;
 
     if (fix->getDME()) {
-        OverlayedDME::drawGraphicsStatic(fix, px, py);
+        OverlayedDME::drawGraphicsStatic(overlayHelper, fix, px, py);
     }
 
     if (fix->getVOR()) {
+        auto mapImage = overlayHelper->getMapImage();
         mapImage->drawLine(px - r / 20, py - r / 20, px + r / 20, py + r / 20, img::COLOR_ICAO_VOR_DME);
         mapImage->drawLine(px - r / 20, py + r / 20, px + r / 20, py - r / 20, img::COLOR_ICAO_VOR_DME);
         mapImage->drawLine(px + r / 2, py - r, px + r, py, img::COLOR_ICAO_VOR_DME);
@@ -84,9 +86,10 @@ void OverlayedVOR::drawGraphics() {
 void OverlayedVOR::drawText(bool detailed) {
     std::string type = fix->getDME() ? "VOR/DME" : "DME";
     if (detailed) {
-        auto freqString = fix->getVOR()->getFrequency().getFrequencyString(false).c_str();
-        drawNavTextBox(type, fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
+        auto freqString = fix->getVOR()->getFrequency().getFrequencyString(false);
+        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
     } else {
+        auto mapImage = overlayHelper->getMapImage();
         mapImage->drawText(fix->getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }

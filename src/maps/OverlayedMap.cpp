@@ -65,8 +65,6 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         cosTable[angle] = std::cos(angle * M_PI / 180);
     }
 
-    OverlayedNode::setHelpers(this, mapImage);
-
     dbg = false;
 }
 
@@ -81,7 +79,6 @@ void OverlayedMap::loadOverlayIcons(const std::string& path) {
     } catch (const std::exception &e) {
         logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
     }
-    OverlayedNDB::createNDBIcon();
 }
 
 void OverlayedMap::setNavWorld(std::shared_ptr<xdata::World> world) {
@@ -296,8 +293,8 @@ void OverlayedMap::drawDataOverlays() {
     // Gather list of visible OverlayedNodes, instancing those that are visible
     std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
     std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
-    navWorld->visitNodes(upLeft, downRight, [&overlayedAerodromes, &overlayedFixes] (const xdata::NavNode &node) {
-        auto overlayedNode = OverlayedNode::getInstanceIfVisible(node);
+    navWorld->visitNodes(upLeft, downRight, [this, &overlayedAerodromes, &overlayedFixes] (const xdata::NavNode &node) {
+        auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
         if (overlayedNode) {
             if (dynamic_cast<const xdata::Airport *>(&node)) {
                 overlayedAerodromes.push_back(overlayedNode);
@@ -487,6 +484,10 @@ void OverlayedMap::setCalibrationPoint2(double lat, double lon) {
 
 int OverlayedMap::getCalibrationStep() const {
     return calibrationStep;
+}
+
+std::shared_ptr<img::Image> OverlayedMap::getMapImage() {
+    return mapImage;
 }
 
 

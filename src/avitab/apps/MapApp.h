@@ -60,7 +60,7 @@ private:
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::Stitcher> mapStitcher;
-    std::unique_ptr<maps::OverlayedMap> map;
+    std::shared_ptr<maps::OverlayedMap> map;
 
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;

@@ -25,18 +25,18 @@ namespace maps {
 class OverlayedNDB : public OverlayedFix {
 
 public:
-    static void createNDBIcon();
+    static std::shared_ptr<OverlayedNDB> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
 
-    static std::shared_ptr<OverlayedNDB> getInstanceIfVisible(const xdata::Fix &fix);
-
-    OverlayedNDB(const xdata::Fix *m_fix);
+    OverlayedNDB(OverlayHelper helper, const xdata::Fix *m_fix);
 
     void drawGraphics();
+
     void drawText(bool detailed);
 
 private:
     static img::Image ndbIcon;
     static int radius;
+    static void createNDBIcon();
 };
 
 } /* namespace maps */
