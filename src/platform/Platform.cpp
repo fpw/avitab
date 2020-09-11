@@ -214,7 +214,7 @@ std::string getLocalTime(const std::string &format) {
 
 #ifdef _WIN32
 std::string getClipboardContent() {
-    if (!OpenClipboard(NULL)) {
+    if (!OpenClipboard(nullptr)) {
         return "No clipboard access";
     }
 

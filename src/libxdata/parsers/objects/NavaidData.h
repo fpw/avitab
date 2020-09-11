@@ -88,11 +88,11 @@ struct NavaidData {
      * For 3:       Direction of 0 radial in true degrees
      * For 4, 5:    XP-NAV810-Spec.pdf - Bearing in true degrees
      * For 4, 5:    XP-NAV1150-Spec.pdf - Bearing in true degrees prefixed by magnetic * 360
-     * For 6:       Bearing prefixed by angle * 100,000, e.g. 325123.456 -> GS 3.25°, heading 123.456
+     * For 6:       Bearing prefixed by angle * 100,000, e.g. 325123.456 -> GS 3.25Â°, heading 123.456
      * For 7, 8, 9: Bearing in true degrees
      * For 12, 13:  DME bias in NM
      * For 14:      Approach course in true degrees
-     * For 15, 16:  Approach course in true degrees prefixed by glidepath angle, e.g. 325123.456 -> GP 3.25°, heading 123.456
+     * For 15, 16:  Approach course in true degrees prefixed by glidepath angle, e.g. 325123.456 -> GP 3.25Â°, heading 123.456
      */
     double bearing = std::numeric_limits<double>::quiet_NaN();
 

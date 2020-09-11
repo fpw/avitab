@@ -29,7 +29,7 @@ std::shared_ptr<OverlayedWaypoint> OverlayedWaypoint::getInstanceIfVisible(Overl
     if (helper->getOverlayConfig().drawWaypoints && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedWaypoint>(helper, &fix);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

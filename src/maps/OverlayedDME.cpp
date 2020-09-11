@@ -29,7 +29,7 @@ std::shared_ptr<OverlayedDME> OverlayedDME::getInstanceIfVisible(OverlayHelper h
     if (fix.getDME() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedDME>(helper, &fix);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

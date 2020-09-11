@@ -43,7 +43,7 @@ bool OverlayedFix::isDMEOnly(const xdata::Fix &fix) {
 
 std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
     if (helper->getMapWidthNM() > SHOW_NAVAIDS_AT_MAPWIDTHNM) {
-        return NULL;
+        return nullptr;
     }
 
     if (fix.getNDB()) {

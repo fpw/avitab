@@ -66,8 +66,8 @@ int Morse::getLength(const char c) const {
     // Return length of a morse char in units of dots, where dot=1, dash=3, interval between=1
     std::string code = getCode(c);
     int length = code.length() - 1; // Number of Intervals
-    for (char const &c: code) {
-        length += ((c == '.') ? 1 : 3);
+    for (char const &s: code) {
+        length += ((s == '.') ? 1 : 3);
     }
     return length;
 }

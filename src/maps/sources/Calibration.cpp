@@ -89,7 +89,7 @@ void Calibration::calculateCalibration() {
     auto xy2 = mercator(regLat2, regLon2);
 
     double deltaLon = xy1.second - xy2.second;
-    double deltaLat = xy1.first - xy2.first;;
+    double deltaLat = xy1.first - xy2.first;
 
     double deltaX = regX1 - regX2;
     double deltaY = regY1 - regY2;

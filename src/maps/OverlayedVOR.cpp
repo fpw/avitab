@@ -30,7 +30,7 @@ std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(OverlayHelper h
     if (fix.getVOR() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedVOR>(helper, &fix);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

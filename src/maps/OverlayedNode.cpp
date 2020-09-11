@@ -36,7 +36,7 @@ std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper
     if (airport) {
         return OverlayedAirport::getInstanceIfVisible(helper, airport);
     }
-    return NULL;
+    return nullptr;
 }
 
 } /* namespace maps */

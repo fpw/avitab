@@ -36,7 +36,7 @@ std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(OverlayHelper h
     if (fix.getNDB() && helper->getOverlayConfig().drawNDBs && helper->isLocVisibleWithMargin(fix.getLocation(), radius)) {
         return std::make_shared<OverlayedNDB>(helper, &fix);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

@@ -28,7 +28,7 @@ OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::
 
 std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
     if (!fix.getILSLocalizer() || !helper->getOverlayConfig().drawILSs) {
-        return NULL;
+        return nullptr;
     }
 
     int px, py, lx, ly, cx, cy, rx, ry;
@@ -44,7 +44,7 @@ std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisib
     if (helper->isAreaVisible(xmin, ymin, xmax, ymax)) {
         return std::make_shared<OverlayedILSLocalizer>(helper, &fix);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
