@@ -346,7 +346,6 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
                 return;
             }
 
-
             auto chart = listTab.charts.at(index);
 
             TabPage newTab;
@@ -354,7 +353,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
             newTab.page->setShowScrollbar(false);
             auto newPage = newTab.page;
 
-            newTab.window = std::make_shared<Window>(newTab.page, chart->getName());
+            newTab.window = std::make_shared<Window>(newTab.page, chart->getIndex());
             newTab.window->setDimensions(newTab.page->getContentWidth(), newTab.page->getHeight() + 30);
             newTab.window->alignInTopLeft();
             newTab.window->setOnClose([this, newPage] {

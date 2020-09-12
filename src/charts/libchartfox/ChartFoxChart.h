@@ -27,7 +27,7 @@ namespace chartfox {
 
 class ChartFoxChart: public apis::Chart {
 public:
-    ChartFoxChart(const nlohmann::json &json, const std::string &icao);
+    ChartFoxChart(const nlohmann::json &json, const std::string &icao, size_t idx);
 
     virtual std::string getICAO() const override;
     virtual std::string getIndex() const override;
@@ -42,6 +42,7 @@ public:
     void attachPDF(const std::vector<uint8_t> &data);
 private:
     std::string icao;
+    size_t index;
     apis::ChartCategory category;
     std::string identifier;
     std::string url;

@@ -24,8 +24,9 @@
 
 namespace chartfox {
 
-ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao):
-    icao(icao)
+ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao, size_t idx):
+    icao(icao),
+    index(idx)
 {
     auto typeCode = json.at("type_code").get<int>();
     switch (typeCode) {
@@ -64,7 +65,7 @@ std::string ChartFoxChart::getICAO() const {
 }
 
 std::string ChartFoxChart::getIndex() const {
-    return std::to_string(static_cast<int>(category));
+    return std::to_string(static_cast<int>(category)) + "-" + std::to_string(index);
 }
 
 apis::ChartCategory ChartFoxChart::getCategory() const {

@@ -57,9 +57,10 @@ std::vector<std::shared_ptr<apis::Chart>> ChartFoxAPI::getChartsFor(const std::s
 
         nlohmann::json chartData = nlohmann::json::parse(jsonList);
         for (auto chartGroup: chartData.at("charts")) {
+            size_t idx = 1;
             for (auto chartJson: chartGroup.at("charts")) {
                 try {
-                    auto chart = std::make_shared<ChartFoxChart>(chartJson, icao);
+                    auto chart = std::make_shared<ChartFoxChart>(chartJson, icao, idx++);
                     charts.push_back(chart);
                 } catch (const std::exception &e) {
                     logger::verbose("Ignoring chart: %s", e.what());
