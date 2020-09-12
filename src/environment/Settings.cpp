@@ -37,7 +37,11 @@ Settings::Settings(const std::string &settingsFile)
 
 Settings::~Settings()
 {
-    save();
+    try {
+        save();
+    } catch (...) {
+        // can't rescue the process at this point
+    }
 }
 
 template<>
@@ -49,28 +53,26 @@ bool Settings::getGeneralSetting(const std::string &id) {
 
 template<>
 int Settings::getGeneralSetting(const std::string &id) {
-    json::json_pointer jp("/general/" + id);
-    int b = database->value(jp, 0);
-    return b;
+    return getSetting("/general/" + id, 0);
 }
 
 template<>
 void Settings::setGeneralSetting(const std::string &id, const bool value) {
-    json::json_pointer jp("/general/" + id);
-    (*database)[jp] = value;
+    setSetting("/general/" + id, value);
 }
 
-template<>
-bool Settings::getOverlaySetting(const std::string &id) {
-    json::json_pointer jp("/overlay/" + id);
-    bool b = database->value(jp, false);
-    return b;
+std::shared_ptr<maps::OverlayConfig> Settings::getOverlayConfig() {
+    return overlayConfig;
 }
 
-template<>
-void Settings::setOverlaySetting(const std::string &id, const bool value) {
-    json::json_pointer jp("/overlay/" + id);
-    (*database)[jp] = value;
+template<typename T>
+T Settings::getSetting(const std::string &ptr, T def) {
+    return database->value(json::json_pointer(ptr), def);
+}
+
+template<typename T>
+void Settings::setSetting(const std::string &id, const T value) {
+    (*database)[json::json_pointer(id)] = value;
 }
 
 void Settings::init() {
@@ -89,6 +91,33 @@ void Settings::load() {
     for (const auto &i : filedata.items()) {
         (*database)[i.key()] = i.value();
     }
+
+    loadOverlayConfig();
+}
+
+void Settings::loadOverlayConfig() {
+    overlayConfig = std::make_shared<maps::OverlayConfig>();
+    overlayConfig->drawMyAircraft = getSetting("/overlay/my_aircraft", true);
+    overlayConfig->drawOtherAircraft = getSetting("/overlay/other_aircraft", true);
+    overlayConfig->drawAirports = getSetting("/overlay/airports", false);
+    overlayConfig->drawAirstrips = getSetting("/overlay/airstrips", false);
+    overlayConfig->drawHeliportsSeaports = getSetting("/overlay/heliports_seaports", false);
+    overlayConfig->drawVORs = getSetting("/overlay/VORs", false);
+    overlayConfig->drawNDBs = getSetting("/overlay/NDBs", false);
+    overlayConfig->drawILSs = getSetting("/overlay/ILSs", false);
+    overlayConfig->drawWaypoints = getSetting("/overlay/waypoints", false);
+}
+
+void Settings::saveOverlayConfig() {
+    setSetting("/overlay/my_aircraft", overlayConfig->drawMyAircraft);
+    setSetting("/overlay/other_aircraft", overlayConfig->drawOtherAircraft);
+    setSetting("/overlay/airports", overlayConfig->drawAirports);
+    setSetting("/overlay/airstrips", overlayConfig->drawAirstrips);
+    setSetting("/overlay/heliports_seaports", overlayConfig->drawHeliportsSeaports);
+    setSetting("/overlay/VORs", overlayConfig->drawVORs);
+    setSetting("/overlay/NDBs", overlayConfig->drawNDBs);
+    setSetting("/overlay/ILSs", overlayConfig->drawILSs);
+    setSetting("/overlay/waypoints", overlayConfig->drawWaypoints);
 }
 
 void Settings::upgrade() {
@@ -106,6 +135,7 @@ void Settings::upgrade() {
 
 void Settings::save() {
     try {
+        saveOverlayConfig();
         fs::ofstream fout(fs::u8path(filePath));
         fout << std::setw(4) << *database;
     } catch (const std::exception &e) {

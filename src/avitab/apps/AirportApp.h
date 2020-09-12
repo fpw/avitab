@@ -60,6 +60,7 @@ private:
         std::shared_ptr<img::Stitcher> mapStitcher;
         std::shared_ptr<maps::OverlayedMap> map;
         std::shared_ptr<PixMap> pixMap;
+        std::shared_ptr<maps::OverlayConfig> overlays;
 
         int panPosX = 0, panPosY = 0;
     };

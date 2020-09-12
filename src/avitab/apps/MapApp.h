@@ -56,6 +56,7 @@ private:
         NAVIGRAPH_LOW,
     };
 
+    std::shared_ptr<maps::OverlayConfig> overlayConf;
     std::unique_ptr<FileChooser> fileChooser;
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;

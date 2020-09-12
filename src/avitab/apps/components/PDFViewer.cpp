@@ -26,6 +26,8 @@ PDFViewer::PDFViewer(FuncsPtr appFuncs):
     updateTimer(std::bind(&PDFViewer::onTimer, this), 200),
     pixMap(std::make_unique<PixMap>(window))
 {
+    overlays = std::make_shared<maps::OverlayConfig>();
+
     window->hideScrollbars();
     window->setOnClose([this] () { exit(); });
 
@@ -77,7 +79,7 @@ void PDFViewer::loadCurrentFile() {
     stitcher = std::make_shared<img::Stitcher>(rasterImage, source);
     stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
-    map = std::make_shared<maps::OverlayedMap>(stitcher, api().getSettings());
+    map = std::make_shared<maps::OverlayedMap>(stitcher, overlays);
     map->loadOverlayIcons(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { pixMap->invalidate(); });
     map->updateImage();

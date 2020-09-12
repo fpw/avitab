@@ -25,17 +25,16 @@
 #include "src/libimg/TTFStamper.h"
 #include "src/libxdata/world/models/navaids/Morse.h"
 #include "src/environment/Environment.h"
-#include "src/environment/Settings.h"
 #include "OverlayHelper.h"
 #include "OverlayConfig.h"
 
 namespace maps {
 
-class OverlayedMap: public IOverlayHelper, private std::enable_shared_from_this<OverlayedMap> {
+class OverlayedMap: public std::enable_shared_from_this<OverlayedMap>, public IOverlayHelper {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
 
-    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<avitab::Settings> settings);
+    OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays);
     void loadOverlayIcons(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
@@ -57,8 +56,6 @@ public:
     void setCalibrationPoint2(double lat, double lon);
     int getCalibrationStep() const;
 
-    void setOverlayConfig(const OverlayConfig &conf);
-
     // Call periodically to refresh tiles that were pending
     void doWork();
 
@@ -68,7 +65,7 @@ public:
     void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const override;
     double getMapWidthNM() const override;
     int getNumAerodromesVisible() const override;
-    OverlayConfig getOverlayConfig() const override;
+    OverlayConfig &getOverlayConfig() const override;
     bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const override;
     bool isVisibleWithMargin(int x, int y, int marginPixels) const override;
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const override;
@@ -88,8 +85,7 @@ private:
     float cosTable[360];
 
     // Overlays
-    OverlayConfig overlayConfig;
-    std::shared_ptr<avitab::Settings> savedSettings;
+    std::shared_ptr<OverlayConfig> overlayConfig;
     std::shared_ptr<xdata::World> navWorld;
     std::vector<avitab::Location> planeLocations;
     img::Image planeIcon;

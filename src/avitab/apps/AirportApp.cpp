@@ -395,6 +395,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     TabPage &tab = findPage(page);
 
     tab.label->setVisible(false);
+    tab.overlays = std::make_shared<maps::OverlayConfig>();
 
     tab.window->addSymbol(Widget::Symbol::MINUS, [this, page] {
         TabPage &tab = findPage(page);
@@ -418,10 +419,8 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     tab.nightModeButton->setToggleState(nightMode);
     tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
         TabPage &tab = findPage(page);
-        auto conf = tab.map->getOverlayConfig();
-        conf.drawMyAircraft = !conf.drawMyAircraft;
-        tab.map->setOverlayConfig(conf);
-        tab.aircraftButton->setToggleState(conf.drawMyAircraft);
+        tab.overlays->drawMyAircraft = !tab.overlays->drawMyAircraft;
+        tab.aircraftButton->setToggleState(tab.overlays->drawMyAircraft);
     });
 
     tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
@@ -434,7 +433,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
 
     tab.mapSource = tab.chart->createTileSource(nightMode);
     tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
-    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, api().getSettings());
+    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, tab.overlays);
     tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
     tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
     tab.map->setNavWorld(api().getNavWorld());

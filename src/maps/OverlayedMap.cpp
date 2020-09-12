@@ -20,15 +20,14 @@
 #include <cmath>
 #include "OverlayedMap.h"
 #include "OverlayedNode.h"
-#include "OverlayedNDB.h"
 #include "src/Logger.h"
 
 namespace maps {
 
-OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<avitab::Settings> settings):
+OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays):
     mapImage(stitchedMap->getPreRotatedImage()),
     tileSource(stitchedMap->getTileSource()),
-    savedSettings(settings),
+    overlayConfig(overlays),
     copyrightStamp("Inconsolata.ttf"),
     stitcher(stitchedMap)
 {
@@ -49,16 +48,6 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
             onOverlaysDrawn();
         }
     });
-
-    overlayConfig.drawMyAircraft = savedSettings->getOverlaySetting<bool>("my_aircraft");
-    overlayConfig.drawOtherAircraft = savedSettings->getOverlaySetting<bool>("other_aircraft");
-    overlayConfig.drawAirports = savedSettings->getOverlaySetting<bool>("airports");
-    overlayConfig.drawAirstrips = savedSettings->getOverlaySetting<bool>("airstrips");
-    overlayConfig.drawHeliportsSeaports = savedSettings->getOverlaySetting<bool>("heliports_seaports");
-    overlayConfig.drawVORs = savedSettings->getOverlaySetting<bool>("VORs");
-    overlayConfig.drawNDBs = savedSettings->getOverlaySetting<bool>("NDBs");
-    overlayConfig.drawILSs = savedSettings->getOverlaySetting<bool>("ILSs");
-    overlayConfig.drawWaypoints = savedSettings->getOverlaySetting<bool>("waypoints");
 
     for (int angle = 0; angle < 360; angle++) {
         sinTable[angle] = std::sin(angle * M_PI / 180);
@@ -157,24 +146,6 @@ void OverlayedMap::doWork() {
     stitcher->doWork();
 }
 
-void OverlayedMap::setOverlayConfig(const OverlayConfig& conf) {
-    savedSettings->setOverlaySetting<bool>("my_aircraft", conf.drawMyAircraft);
-    savedSettings->setOverlaySetting<bool>("other_aircraft", conf.drawOtherAircraft);
-    savedSettings->setOverlaySetting<bool>("airports", conf.drawAirports);
-    savedSettings->setOverlaySetting<bool>("airstrips", conf.drawAirstrips);
-    savedSettings->setOverlaySetting<bool>("heliports_seaports", conf.drawHeliportsSeaports);
-    savedSettings->setOverlaySetting<bool>("VORs", conf.drawVORs);
-    savedSettings->setOverlaySetting<bool>("NDBs", conf.drawNDBs);
-    savedSettings->setOverlaySetting<bool>("ILSs", conf.drawILSs);
-    savedSettings->setOverlaySetting<bool>("waypoints", conf.drawWaypoints);
-    overlayConfig = conf;
-    updateImage();
-}
-
-OverlayConfig OverlayedMap::getOverlayConfig() const {
-    return overlayConfig;
-}
-
 void OverlayedMap::drawOverlays() {
     if ((mapImage->getWidth() == 0) || (mapImage->getHeight() == 0)) {
         return;
@@ -188,7 +159,7 @@ void OverlayedMap::drawOverlays() {
 }
 
 void OverlayedMap::drawAircraftOverlay() {
-    if (!overlayConfig.drawMyAircraft || planeLocations.empty()) {
+    if (!overlayConfig->drawMyAircraft || planeLocations.empty()) {
         return;
     }
 
@@ -202,7 +173,7 @@ void OverlayedMap::drawAircraftOverlay() {
 }
 
 void OverlayedMap::drawOtherAircraftOverlay() {
-    if (!overlayConfig.drawOtherAircraft || (planeLocations.size() < 2)) {
+    if (!overlayConfig->drawOtherAircraft || (planeLocations.size() < 2)) {
         return;
     }
 
@@ -263,8 +234,8 @@ void OverlayedMap::drawDataOverlays() {
     if (!navWorld) {
         return;
     }
-    if (!overlayConfig.drawAirports && !overlayConfig.drawAirstrips && !overlayConfig.drawHeliportsSeaports &&
-        !overlayConfig.drawVORs && !overlayConfig.drawNDBs && !overlayConfig.drawILSs && !overlayConfig.drawWaypoints) {
+    if (!overlayConfig->drawAirports && !overlayConfig->drawAirstrips && !overlayConfig->drawHeliportsSeaports &&
+        !overlayConfig->drawVORs && !overlayConfig->drawNDBs && !overlayConfig->drawILSs && !overlayConfig->drawWaypoints) {
         return;
     }
 
@@ -488,6 +459,10 @@ int OverlayedMap::getCalibrationStep() const {
 
 std::shared_ptr<img::Image> OverlayedMap::getMapImage() {
     return mapImage;
+}
+
+OverlayConfig &OverlayedMap::getOverlayConfig() const {
+    return *overlayConfig;
 }
 
 

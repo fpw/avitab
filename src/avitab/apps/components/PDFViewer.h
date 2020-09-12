@@ -41,6 +41,7 @@ public:
     void showDirectory(const std::string &dirPath, const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
     void onMouseWheel(int dir, int x, int y) override;
 private:
+    std::shared_ptr<maps::OverlayConfig> overlays;
     std::shared_ptr<Window> window;
     Timer updateTimer;
 

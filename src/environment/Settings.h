@@ -19,6 +19,8 @@
 #define SRC_ENVIRONMENT_SETTINGS_H_
 
 #include <nlohmann/json_fwd.hpp>
+#include <memory>
+#include "src/maps/OverlayConfig.h"
 
 namespace avitab {
 
@@ -32,10 +34,7 @@ public:
     template<typename T>
     void setGeneralSetting(const std::string &id, const T value);
 
-    template<typename T>
-    T getOverlaySetting(const std::string &id);
-    template<typename T>
-    void setOverlaySetting(const std::string &id, const T value);
+    std::shared_ptr<maps::OverlayConfig> getOverlayConfig();
 
 private:
     void init();
@@ -46,6 +45,16 @@ private:
 private:
     const std::string filePath;
     std::shared_ptr<nlohmann::json> database;
+    std::shared_ptr<maps::OverlayConfig> overlayConfig;
+
+    void loadOverlayConfig();
+    void saveOverlayConfig();
+
+    template<typename T>
+    T getSetting(const std::string &ptr, T def);
+
+    template<typename T>
+    void setSetting(const std::string &id, const T value);
 };
 
 } /* namespace avitab */
