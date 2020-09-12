@@ -39,6 +39,7 @@ public:
     using ChartsList = std::vector<std::shared_ptr<apis::Chart>>;
 
     NavigraphAPI(const std::string &cacheDirectory);
+    virtual ~NavigraphAPI() = default;
 
     bool init();
 

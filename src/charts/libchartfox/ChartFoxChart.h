@@ -28,6 +28,7 @@ namespace chartfox {
 class ChartFoxChart: public apis::Chart {
 public:
     ChartFoxChart(const nlohmann::json &json, const std::string &icao, size_t idx);
+    virtual ~ChartFoxChart() = default;
 
     virtual std::string getICAO() const override;
     virtual std::string getIndex() const override;

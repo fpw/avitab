@@ -23,7 +23,6 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libxdata/world/World.h"
 #include "src/libimg/TTFStamper.h"
-#include "src/libxdata/world/models/navaids/Morse.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
 #include "OverlayConfig.h"
@@ -93,7 +92,6 @@ private:
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
     bool dbg;
-    xdata::Morse morse;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;

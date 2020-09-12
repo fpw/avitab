@@ -35,6 +35,7 @@ struct ChartGEOReference {
 class NavigraphChart: public apis::Chart {
 public:
     NavigraphChart(const nlohmann::json &json);
+    virtual ~NavigraphChart() = default;
 
     virtual std::string getICAO() const override;
     virtual std::string getIndex() const override;

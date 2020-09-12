@@ -183,7 +183,7 @@ void ProvidersApp::resetChartFoxLayout() {
     chartFoxDonateButton->alignBelow(chartFoxCheckbox);
     chartFoxDonateButton->setCallback([this] (const Button &) {
         auto call = api().getChartService()->getChartFoxDonationLink();
-        call->andThen([this] (std::future<std::string> urlFuture) {
+        call->andThen([] (std::future<std::string> urlFuture) {
             try {
                 auto url = urlFuture.get();
                 platform::openBrowser(url);

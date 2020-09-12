@@ -29,6 +29,7 @@ public:
     static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(OverlayHelper helper, const xdata::Airport *airport);
 
     OverlayedAirport(OverlayHelper helper, const xdata::Airport *airport);
+    virtual ~OverlayedAirport() = default;
 
     void drawGraphics();
     void drawText(bool detailed);
