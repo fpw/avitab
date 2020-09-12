@@ -24,6 +24,18 @@
 
 namespace chartfox {
 
+/*
+    type_codes from API docs:
+    0 - Unknown / General
+    1 - Textual Data
+    2 - Ground Layout
+    6 - SID
+    7 - STAR
+    8 - Approach
+    9 - Transition
+    99 - Pilot Briefing
+*/
+
 ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao, size_t idx):
     icao(icao),
     index(idx)

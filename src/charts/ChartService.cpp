@@ -30,7 +30,6 @@ ChartService::ChartService(const std::string &cachePath) {
     apiThread = std::make_unique<std::thread>(&ChartService::workLoop, this);
 
     setUseNavigraph(true);
-    setUseChartFox(true);
 }
 
 void ChartService::setUseNavigraph(bool use) {
@@ -45,12 +44,8 @@ std::shared_ptr<navigraph::NavigraphAPI> ChartService::getNavigraph() {
     return navigraph;
 }
 
-std::shared_ptr<APICall<bool>> ChartService::init() {
+std::shared_ptr<APICall<bool>> ChartService::loginNavigraph() {
     auto call = std::make_shared<APICall<bool>>([this] {
-        if (useChartFox) {
-            chartfox->test();
-        }
-
         if (useNavigraph) {
             navigraph->init();
         }
@@ -63,12 +58,14 @@ std::shared_ptr<APICall<bool>> ChartService::init() {
 std::shared_ptr<APICall<ChartService::ChartList>> ChartService::getChartsFor(const std::string &icao) {
     auto call = std::make_shared<APICall<ChartList>>([this, icao] {
         ChartList res;
-        if (useChartFox) {
-            auto charts = chartfox->getChartsFor(icao);
-            res.insert(res.end(), charts.begin(), charts.end());
-        }
+
         if (useNavigraph && navigraph->hasChartsFor(icao)) {
             auto charts = navigraph->getChartsFor(icao);
+            res.insert(res.end(), charts.begin(), charts.end());
+        }
+
+        if (useChartFox) {
+            auto charts = chartfox->getChartsFor(icao);
             res.insert(res.end(), charts.begin(), charts.end());
         }
         return res;
@@ -90,6 +87,14 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
         }
 
         return chart;
+    });
+
+    return call;
+}
+
+std::shared_ptr<APICall<std::string>> ChartService::getChartFoxDonationLink() {
+    auto call = std::make_shared<APICall<std::string>>([this] {
+        return chartfox->getDonationLink();
     });
 
     return call;

@@ -10,5 +10,5 @@ target_sources(avitab_common PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/AirportApp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RouteApp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/MapApp.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/NavigraphApp.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ProvidersApp.cpp
 )

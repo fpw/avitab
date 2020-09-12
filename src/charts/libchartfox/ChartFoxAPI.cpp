@@ -25,18 +25,6 @@
 
 namespace chartfox {
 
-/*
-    type_codes:
-    0 - Unknown / General
-    1 - Textual Data
-    2 - Ground Layout
-    6 - SID
-    7 - STAR
-    8 - Approach
-    9 - Transition
-    99 - Pilot Briefing
-*/
-
 ChartFoxAPI::ChartFoxAPI() {
     apis::Crypto crypto;
     apiKey = crypto.aesDecrypt(CHARTFOX_CLIENT_SECRET, "Please do not decrypt the client secret, this would lead to AviTab losing the ChartFox key.");
@@ -45,6 +33,12 @@ ChartFoxAPI::ChartFoxAPI() {
 
 bool ChartFoxAPI::isSupported() {
     return strlen(CHARTFOX_CLIENT_SECRET) > 0;
+}
+
+std::string ChartFoxAPI::getDonationLink() {
+    auto resJson = restClient.get(urlFor("/link/donation", true), cancelToken);
+    nlohmann::json data = nlohmann::json::parse(resJson);
+    return data.at("link");
 }
 
 std::vector<std::shared_ptr<apis::Chart>> ChartFoxAPI::getChartsFor(const std::string &icao) {
@@ -78,11 +72,6 @@ void ChartFoxAPI::loadChart(std::shared_ptr<ChartFoxChart> chart) {
     auto url = chart->getURL();
     auto pdfData = restClient.getBinary(url, cancelToken);
     chart->attachPDF(pdfData);
-}
-
-bool ChartFoxAPI::test() {
-    restClient.get(urlFor("/test", true), cancelToken);
-    return true;
 }
 
 std::string ChartFoxAPI::urlFor(const std::string &path, bool withToken) {

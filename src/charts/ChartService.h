@@ -41,9 +41,10 @@ public:
     void stop();
 
     // asynchronous calls
-    std::shared_ptr<APICall<bool>> init();
+    std::shared_ptr<APICall<bool>> loginNavigraph();
     std::shared_ptr<APICall<ChartList>> getChartsFor(const std::string &icao);
     std::shared_ptr<APICall<std::shared_ptr<Chart>>> loadChart(std::shared_ptr<Chart> chart);
+    std::shared_ptr<APICall<std::string>> getChartFoxDonationLink();
 
     // state
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph();

@@ -33,9 +33,9 @@ public:
 
     bool isSupported();
 
-    bool test();
     std::vector<std::shared_ptr<apis::Chart>> getChartsFor(const std::string &icao);
     void loadChart(std::shared_ptr<ChartFoxChart> chart);
+    std::string getDonationLink();
 
 private:
     bool cancelToken = false;
