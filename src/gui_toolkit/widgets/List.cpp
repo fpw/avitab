@@ -24,6 +24,7 @@ List::List(WidgetPtr parent):
 {
     lv_obj_t *lst = lv_list_create(parentObj(), nullptr);
     lv_obj_set_user_data(lst, this);
+    lv_list_set_anim_time(lst, 0);
     setObj(lst);
 }
 

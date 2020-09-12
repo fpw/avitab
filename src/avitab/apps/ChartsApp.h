@@ -20,23 +20,78 @@
 
 #include <memory>
 #include <vector>
+#include <regex>
 #include "src/platform/Platform.h"
 #include "App.h"
+#include "src/gui_toolkit/widgets/TabGroup.h"
+#include "src/gui_toolkit/widgets/Page.h"
+#include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/List.h"
+#include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/Timer.h"
+#include "src/libimg/Image.h"
+#include "src/libimg/stitcher/Stitcher.h"
+#include "src/maps/OverlayedMap.h"
+#include "src/maps/sources/PDFSource.h"
 
 namespace avitab {
 
 class ChartsApp: public App {
 public:
     ChartsApp(FuncsPtr appFuncs);
-    void show() override;
     void onMouseWheel(int dir, int x, int y) override;
 private:
-    std::string currentPath;
-    std::shared_ptr<App> childApp;
+    Timer updateTimer;
 
-    void showFileSelect();
-    void onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex);
-    void onSelectionClosed();
+    void resetLayout();
+
+    std::shared_ptr<TabGroup> tabs;
+
+    std::shared_ptr<Page> browsePage;
+    std::shared_ptr<Window> browseWindow;
+    std::shared_ptr<List> list;
+    std::string currentPath;
+    std::vector<platform::DirEntry> currentEntries;
+    std::regex filter;
+    std::shared_ptr<maps::OverlayConfig> overlays;
+
+    void createBrowseTab();
+    void showDirectory(const std::string &path);
+    void setFilterRegex(const std::string regex);
+    void filterEntries();
+    void sortEntries();
+    void showCurrentEntries();
+    void upOneDirectory();
+    void onDown();
+    void onUp();
+    void onSelect(int data);
+
+    struct PdfPage {
+        std::string path;
+        std::shared_ptr<Page> page;
+        std::shared_ptr<Window> window;
+        std::shared_ptr<img::Image> rasterImage;
+        std::shared_ptr<PixMap> pixMap;
+        std::shared_ptr<maps::PDFSource> source;
+        std::shared_ptr<img::Stitcher> stitcher;
+        std::shared_ptr<maps::OverlayedMap> map;
+        int panStartX = 0, panStartY = 0;
+    };
+    std::vector<PdfPage> pages;
+
+    void createPdfTab(const std::string &pdfPath);
+    void removeTab(std::shared_ptr<Page> page);
+    void setupCallbacks(PdfPage& tab);
+    void loadFile(PdfPage& tab, const std::string &pdfPath);
+    void setTitle(PdfPage& tab);
+    PdfPage* getActivePdfPage();
+    void onNextPage();
+    void onPrevPage();
+    void onPlus();
+    void onMinus();
+    void onRotate();
+    void onPan(int x, int y, bool start, bool end);
+    bool onTimer();
 };
 
 } /* namespace avitab */
