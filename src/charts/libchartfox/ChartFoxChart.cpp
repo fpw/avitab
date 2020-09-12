@@ -67,6 +67,15 @@ ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao
     auto urlJ = json.at("url");
     if (!urlJ.is_null()) {
         url = urlJ;
+        size_t i = 0;
+        while (true) {
+            i = url.find(" ", i);
+            if (i == std::string::npos) {
+                break;
+            }
+            url.replace(i, 1, "%20");
+            i += 3;
+        }
     } else {
         throw std::runtime_error("No chart URL");
     }
