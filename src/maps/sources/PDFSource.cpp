@@ -109,7 +109,7 @@ std::string PDFSource::getUniqueTileName(int page, int x, int y, int zoom) {
 }
 
 std::unique_ptr<img::Image> PDFSource::loadTileImage(int page, int x, int y, int zoom) {
-    return rasterizer.loadTile(page, x, y, zoom);
+    return rasterizer.loadTile(page, x, y, zoom, nightMode);
 }
 
 void PDFSource::cancelPendingLoads() {
@@ -176,6 +176,10 @@ void PDFSource::loadCalibration() {
                      std::istreambuf_iterator<char>());
 
     calibration.fromString(jsonStr);
+}
+
+void PDFSource::setNightMode(bool night) {
+    nightMode = night;
 }
 
 } /* namespace maps */

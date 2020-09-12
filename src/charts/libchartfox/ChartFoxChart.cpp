@@ -77,7 +77,9 @@ std::string ChartFoxChart::getICAO() const {
 }
 
 std::string ChartFoxChart::getIndex() const {
-    return std::to_string(static_cast<int>(category)) + "-" + std::to_string(index);
+    return std::string("CF-") +
+           std::to_string(static_cast<int>(category)) + "-" +
+           std::to_string(index);
 }
 
 apis::ChartCategory ChartFoxChart::getCategory() const {
@@ -105,10 +107,18 @@ std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode)
         throw std::runtime_error("Chart not loaded");
     }
 
-    return std::make_shared<maps::PDFSource>(pdfData);
+    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData);
+    pdfSrc->setNightMode(nightMode);
+    return pdfSrc;
 }
 
 void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
+    auto pdfSrc = std::dynamic_pointer_cast<maps::PDFSource>(src);
+    if (!pdfSrc) {
+        return;
+    }
+
+    pdfSrc->setNightMode(nightMode);
 }
 
 } // namespace chartfox

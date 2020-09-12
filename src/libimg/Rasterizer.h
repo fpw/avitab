@@ -35,7 +35,7 @@ public:
     int getTileSize();
     int getPageWidth(int page, int zoom);
     int getPageHeight(int page, int zoom);
-    std::unique_ptr<Image> loadTile(int page, int x, int y, int zoom);
+    std::unique_ptr<Image> loadTile(int page, int x, int y, int zoom, bool nightMode);
 
     int getPageCount() const;
 

@@ -121,7 +121,7 @@ int Rasterizer::getPageCount() const {
     return totalPages;
 }
 
-std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom) {
+std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom, bool nightMode) {
     loadPage(page);
 
     if (logLoadTimes) {
@@ -175,6 +175,9 @@ std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom) {
         fz_lineto(ctx, path, currentPageWidth, 0);
         fz_closepath(ctx, path);
         float white = 1.0f;
+        if (nightMode) {
+            white = 0.6f;
+        }
         fz_fill_path(ctx, dev, path, 0, fz_identity, fz_device_gray(ctx), &white, 1.0f, fz_default_color_params);
         fz_drop_path(ctx, path);
 
