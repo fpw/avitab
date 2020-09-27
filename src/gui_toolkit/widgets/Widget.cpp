@@ -187,32 +187,38 @@ void Widget::setClickHandler(ClickHandler handler) {
 }
 
 const void* Widget::symbolToLVSymbol(Symbol symbol) {
+    const char *res = nullptr;
     switch (symbol) {
-    case Symbol::NONE:      return nullptr;
-    case Symbol::CLOSE:     return LV_SYMBOL_CLOSE;
-    case Symbol::SETTINGS:  return LV_SYMBOL_SETTINGS;
-    case Symbol::LIST:      return LV_SYMBOL_LIST;
-    case Symbol::LEFT:      return LV_SYMBOL_LEFT;
-    case Symbol::RIGHT:     return LV_SYMBOL_RIGHT;
-    case Symbol::UP:        return LV_SYMBOL_UP;
-    case Symbol::DOWN:      return LV_SYMBOL_DOWN;
-    case Symbol::ROTATE:    return LV_SYMBOL_LOOP;
-    case Symbol::REFRESH:   return LV_SYMBOL_REFRESH;
-    case Symbol::PREV:      return LV_SYMBOL_PREV;
-    case Symbol::NEXT:      return LV_SYMBOL_NEXT;
-    case Symbol::PAUSE:     return LV_SYMBOL_PAUSE;
-    case Symbol::PLUS:      return LV_SYMBOL_PLUS;
-    case Symbol::MINUS:     return LV_SYMBOL_MINUS;
-    case Symbol::FILE:      return LV_SYMBOL_FILE;
-    case Symbol::DIRECTORY: return LV_SYMBOL_DIRECTORY;
-    case Symbol::HOME:      return LV_SYMBOL_HOME;
-    case Symbol::COPY:      return LV_SYMBOL_COPY;
-    case Symbol::GPS:       return LV_SYMBOL_GPS;
-    case Symbol::EDIT:      return LV_SYMBOL_EDIT;
-    case Symbol::KEYBOARD:  return LV_SYMBOL_KEYBOARD;
-    case Symbol::IMAGE:     return LV_SYMBOL_IMAGE;
-    default:                return nullptr;
+    case Symbol::NONE:      res = nullptr; break;
+    case Symbol::CLOSE:     res = LV_SYMBOL_CLOSE; break;
+    case Symbol::SETTINGS:  res = LV_SYMBOL_SETTINGS; break;
+    case Symbol::LIST:      res = LV_SYMBOL_LIST; break;
+    case Symbol::LEFT:      res = LV_SYMBOL_LEFT; break;
+    case Symbol::RIGHT:     res = LV_SYMBOL_RIGHT; break;
+    case Symbol::UP:        res = LV_SYMBOL_UP; break;
+    case Symbol::DOWN:      res = LV_SYMBOL_DOWN; break;
+    case Symbol::ROTATE:    res = LV_SYMBOL_LOOP; break;
+    case Symbol::REFRESH:   res = LV_SYMBOL_REFRESH; break;
+    case Symbol::PREV:      res = LV_SYMBOL_PREV; break;
+    case Symbol::NEXT:      res = LV_SYMBOL_NEXT; break;
+    case Symbol::PAUSE:     res = LV_SYMBOL_PAUSE; break;
+    case Symbol::PLUS:      res = LV_SYMBOL_PLUS; break;
+    case Symbol::MINUS:     res = LV_SYMBOL_MINUS; break;
+    case Symbol::FILE:      res = LV_SYMBOL_FILE; break;
+    case Symbol::DIRECTORY: res = LV_SYMBOL_DIRECTORY; break;
+    case Symbol::HOME:      res = LV_SYMBOL_HOME; break;
+    case Symbol::COPY:      res = LV_SYMBOL_COPY; break;
+    case Symbol::GPS:       res = LV_SYMBOL_GPS; break;
+    case Symbol::EDIT:      res = LV_SYMBOL_EDIT; break;
+    case Symbol::KEYBOARD:  res = LV_SYMBOL_KEYBOARD; break;
+    case Symbol::IMAGE:     res = LV_SYMBOL_IMAGE; break;
+    default:                res = nullptr;
     }
+
+    if (res) {
+        lv_img_cache_invalidate_src(res);
+    }
+    return res;
 }
 
 void Widget::setManagedObj(lv_obj_t* obj) {

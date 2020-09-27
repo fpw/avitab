@@ -29,6 +29,7 @@ namespace avitab {
 
 XPlaneEnvironment::XPlaneEnvironment() {
     XPLMDebugString("AviTab version " AVITAB_VERSION_STR "\n");
+    logger::info("AviTab version " AVITAB_VERSION_STR);
 
     // Called by the X-Plane thread via StartPlugin
     pluginPath = getPluginPath();
@@ -382,8 +383,8 @@ XPlaneEnvironment::~XPlaneEnvironment() {
     XPLMUnregisterDataAccessor(brightnessRef);
     XPLMUnregisterDataAccessor(isInMenuRef);
 
-    logger::verbose("~XPlaneEnvironment");
     destroyMenu();
+    logger::verbose("~XPlaneEnvironment");
 }
 
 void XPlaneEnvironment::reloadAircraftPath() {

@@ -36,6 +36,57 @@ XPlaneGUIDriver::XPlaneGUIDriver():
     clickX("sim/graphics/view/click_3d_x_pixels", -1),
     clickY("sim/graphics/view/click_3d_y_pixels", -1)
 {
+    panelLeftRef = XPLMRegisterDataAccessor("avitab/panel_left", xplmType_Int, true,
+            [] (void *ref) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                return us->panelLeft;
+            },
+            [] (void *ref, int newVal) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                us->panelLeft = newVal;
+            },
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+            this, this
+            );
+
+    panelWidthRef = XPLMRegisterDataAccessor("avitab/panel_width", xplmType_Int, true,
+            [] (void *ref) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                return us->panelWidth;
+            },
+            [] (void *ref, int newVal) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                us->panelWidth = newVal;
+            },
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+            this, this
+            );
+
+    panelBottomRef = XPLMRegisterDataAccessor("avitab/panel_bottom", xplmType_Int, true,
+            [] (void *ref) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                return us->panelBottom;
+            },
+            [] (void *ref, int newVal) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                us->panelBottom = newVal;
+            },
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+            this, this
+            );
+
+    panelHeightRef = XPLMRegisterDataAccessor("avitab/panel_height", xplmType_Int, true,
+            [] (void *ref) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                return us->panelHeight;
+            },
+            [] (void *ref, int newVal) {
+                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
+                us->panelHeight = newVal;
+            },
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+            this, this
+            );
 }
 
 void XPlaneGUIDriver::init(int width, int height) {
@@ -200,18 +251,6 @@ void XPlaneGUIDriver::createPanel(int left, int bottom, int width, int height, b
     panelWidth = width;
     panelHeight = height;
 
-    float ourRatio = (float) this->height() / this->width();
-
-    if (panelWidth * ourRatio <= panelHeight) {
-        int newPanelHeight = panelWidth * ourRatio;
-        panelBottom += (panelHeight - newPanelHeight) / 2;
-        panelHeight = newPanelHeight;
-    } else {
-        int newPanelWidth = panelHeight / ourRatio;
-        panelLeft += (panelWidth - newPanelWidth) / 2;
-        panelWidth = newPanelWidth;
-    }
-
     setupVRCapture();
     XPLMRegisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
     hasPanel = true;
@@ -271,19 +310,21 @@ void XPlaneGUIDriver::onDraw() {
     float b = *brightness;
     glColor3f(b, b, b);
 
-    correctRatio(left, top, right, bottom);
+    correctRatio(left, top, right, bottom, false);
     renderWindowTexture(left, top, right, bottom);
 }
 
 void XPlaneGUIDriver::onDrawPanel() {
-    int left = panelLeft;
-    int top = panelBottom  + panelHeight;
-    int right = panelLeft + panelWidth;
-    int bottom = panelBottom;
-
     if (*panelEnabled == 0) {
         return;
     }
+
+    int left = panelLeft;
+    int top = panelBottom + panelHeight;
+    int right = panelLeft + panelWidth;
+    int bottom = panelBottom;
+
+    correctRatio(left, top, right, bottom, true);
 
     if (*panelPowered == 0) {
         XPLMSetGraphicsState(0, 0, 0, 0, 0, 0, 0);
@@ -332,20 +373,29 @@ void XPlaneGUIDriver::redrawTexture() {
     }
 }
 
-void XPlaneGUIDriver::correctRatio(int left, int top, int& right, int& bottom) {
-    int xWinWidth = right - left;
-    int xWinHeight = top - bottom;
+void XPlaneGUIDriver::correctRatio(int &left, int &top, int& right, int& bottom, bool center) {
+    int curWidth = right - left;
+    int curHeight = top - bottom;
 
     float ourRatio = (float) height() / width();
 
-    if (xWinWidth * ourRatio <= xWinHeight) {
-        xWinHeight = xWinWidth * ourRatio;
+    if (curWidth * ourRatio <= curHeight) {
+        int newHeight = curWidth * ourRatio;
+        if (center) {
+            bottom += (curHeight - newHeight) / 2;
+            top = bottom + newHeight;
+        } else {
+            bottom = top - newHeight;
+        }
     } else {
-        xWinWidth = xWinHeight / ourRatio;
+        int newWidth = curHeight / ourRatio;
+        if (center) {
+            left += (curWidth - newWidth) / 2;
+            right = left + newWidth;
+        } else {
+            right = left + newWidth;
+        }
     }
-
-    right = left + xWinWidth;
-    bottom = top - xWinHeight;
 }
 
 void XPlaneGUIDriver::renderWindowTexture(int left, int top, int right, int bottom) {
@@ -379,7 +429,7 @@ bool XPlaneGUIDriver::boxelToPixel(int bx, int by, int& px, int& py) {
     int bLeft, bTop, bRight, bBottom;
     XPLMGetWindowGeometry(window, &bLeft, &bTop, &bRight, &bBottom);
 
-    correctRatio(bLeft, bTop, bRight, bBottom);
+    correctRatio(bLeft, bTop, bRight, bBottom, false);
 
     if (bLeft == bRight || bTop == bBottom) {
         px = -1;
@@ -472,11 +522,17 @@ bool XPlaneGUIDriver::onClickCapture(int x, int y, XPLMMouseStatus status) {
         return false;
     }
 
+    int left = panelLeft;
+    int top = panelBottom + panelHeight;
+    int right = panelLeft + panelWidth;
+    int bottom = panelBottom;
+    correctRatio(left, top, right, bottom, true);
+
     float tx = clickX;
     float ty = clickY;
 
     bool isInWindow = false;
-    if (tx >= panelLeft && tx < panelLeft + panelWidth && ty >= panelBottom && ty < panelBottom + panelHeight) {
+    if (tx >= left && tx < right && ty >= bottom && ty < top) {
         isInWindow = true;
     }
 
@@ -497,8 +553,8 @@ bool XPlaneGUIDriver::onClickCapture(int x, int y, XPLMMouseStatus status) {
     }
 
     if (isInWindow) {
-        mouseX = (tx - panelLeft) / panelWidth * width();
-        mouseY = (panelBottom + panelHeight - ty) / panelHeight * height();
+        mouseX = (tx - left) / (right - left) * width();
+        mouseY = (top - ty) / (top - bottom) * height();
         return true;
     }
 
@@ -514,19 +570,25 @@ bool XPlaneGUIDriver::onMouseWheelCapture(int x, int y, int wheel, int clicks) {
         return false;
     }
 
+    int left = panelLeft;
+    int top = panelBottom  + panelHeight;
+    int right = panelLeft + panelWidth;
+    int bottom = panelBottom;
+    correctRatio(left, top, right, bottom, true);
+
     int guiX, guiY;
 
     guiX = (float) clickX;
     guiY = (float) clickY;
 
     bool isInWindow = false;
-    if (guiX >= panelLeft && guiX < panelLeft + panelWidth && guiY >= panelBottom && guiY < panelBottom + panelHeight) {
+    if (guiX >= left && guiX < right && guiY >= bottom && guiY < top) {
         isInWindow = true;
     }
 
     if (isInWindow) {
-        mouseX = (guiX - panelLeft) / panelWidth * width();
-        mouseY = (panelBottom + panelHeight - guiY) / panelHeight * height();
+        mouseX = (guiX - left) / (right - left) * width();
+        mouseY = (top - guiY) / (top - bottom) * height();
         mouseWheel = clicks;
         return true;
     }
@@ -578,6 +640,11 @@ XPlaneGUIDriver::~XPlaneGUIDriver() {
 
     XPLMUnregisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
     XPLMUnregisterKeySniffer(onKeyPress, 0, this);
+
+    XPLMUnregisterDataAccessor(panelLeftRef);
+    XPLMUnregisterDataAccessor(panelWidthRef);
+    XPLMUnregisterDataAccessor(panelBottomRef);
+    XPLMUnregisterDataAccessor(panelHeightRef);
 
     if (captureWindow) {
         XPLMDestroyWindow(captureWindow);

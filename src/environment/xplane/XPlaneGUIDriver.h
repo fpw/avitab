@@ -20,6 +20,7 @@
 
 #include <XPLM/XPLMGraphics.h>
 #include <XPLM/XPLMDisplay.h>
+#include <XPLM/XPLMDataAccess.h>
 #include <atomic>
 #include <mutex>
 #include <memory>
@@ -67,7 +68,8 @@ private:
     std::atomic_int mouseWheel {0};
     std::mutex drawMutex;
     bool needsRedraw = false;
-    float panelLeft = 0, panelBottom = 0, panelWidth = 0, panelHeight = 0;
+    XPLMDataRef panelLeftRef{}, panelBottomRef{}, panelWidthRef{}, panelHeightRef{};
+    int panelLeft = 0, panelBottom = 0, panelWidth = 0, panelHeight = 0;
     std::vector<int> vrTriggerIndices;
     bool mouseDownFromTrigger = false;
     bool hasPanel = false;
@@ -76,7 +78,7 @@ private:
     void onDrawPanel();
     void redrawTexture();
     void renderWindowTexture(int left, int top, int right, int bottom);
-    void correctRatio(int left, int top, int &right, int &bottom);
+    void correctRatio(int &left, int &top, int &right, int &bottom, bool center);
     bool onClick(int x, int y, XPLMMouseStatus status);
     bool onRightClick(int x, int y, XPLMMouseStatus status);
     XPLMCursorStatus getCursor(int x, int y);
