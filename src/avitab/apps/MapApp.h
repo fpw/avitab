@@ -72,6 +72,7 @@ private:
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
     std::shared_ptr<Checkbox> vorCheckbox, ndbCheckbox, ilsCheckbox, waypointCheckbox;
+    std::shared_ptr<Checkbox> poiCheckbox, vrpCheckbox, obsCheckbox;
 
     std::unique_ptr<MessageBox> messageBox;
     std::shared_ptr<TextArea> coordsField;

@@ -47,6 +47,7 @@ private:
     void loadNavaids();
     void loadAirways();
     void loadProcedures();
+    void loadUserFixes();
     void loadMetar();
     void loadCustomScenery(const AirportLoader& loader);
 };

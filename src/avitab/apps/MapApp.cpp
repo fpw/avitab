@@ -288,6 +288,9 @@ void MapApp::resetWidgets() {
     heliseaportCheckbox.reset();
     myAircraftCheckbox.reset();
     otherAircraftCheckbox.reset();
+    poiCheckbox.reset();
+    vrpCheckbox.reset();
+    obsCheckbox.reset();
     overlaysContainer.reset();
 }
 
@@ -373,6 +376,23 @@ void MapApp::showOverlaySettings() {
     waypointCheckbox->setChecked(overlayConf->drawWaypoints);
     waypointCheckbox->alignRightOf(ilsCheckbox);
     waypointCheckbox->setCallback([this] (bool checked) { overlayConf->drawWaypoints = checked; });
+
+    if (api().getNavWorld()->hasUserFixes()) {
+        poiCheckbox = std::make_shared<Checkbox>(overlaysContainer, "POI");
+        poiCheckbox->setChecked(overlayConf->drawPOIs);
+        poiCheckbox->alignBelow(vorCheckbox);
+        poiCheckbox->setCallback([this] (bool checked) { overlayConf->drawPOIs = checked; });
+
+        vrpCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VRP");
+        vrpCheckbox->setChecked(overlayConf->drawVRPs);
+        vrpCheckbox->alignRightOf(poiCheckbox);
+        vrpCheckbox->setCallback([this] (bool checked) { overlayConf->drawVRPs = checked; });
+
+        obsCheckbox = std::make_shared<Checkbox>(overlaysContainer, "OBS");
+        obsCheckbox->setChecked(overlayConf->drawObstacles);
+        obsCheckbox->alignRightOf(vrpCheckbox);
+        obsCheckbox->setCallback([this] (bool checked) { overlayConf->drawObstacles = checked; });
+    }
 }
 
 void MapApp::onRedrawNeeded() {

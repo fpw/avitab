@@ -62,6 +62,10 @@ void Fix::attachVOR(std::shared_ptr<VOR> vorInfo) {
     vor = vorInfo;
 }
 
+void Fix::attachUserFix(std::shared_ptr<UserFix> userInfo) {
+    userFix = userInfo;
+}
+
 std::shared_ptr<NDB> Fix::getNDB() const {
     return ndb;
 }
@@ -76,6 +80,10 @@ std::shared_ptr<VOR> Fix::getVOR() const {
 
 std::shared_ptr<ILSLocalizer> Fix::getILSLocalizer() const {
     return ilsLoc;
+}
+
+std::shared_ptr<UserFix> Fix::getUserFix() const {
+    return userFix;
 }
 
 } /* namespace xdata */

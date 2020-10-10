@@ -56,6 +56,8 @@ public:
     void registerNavNodes();
     void visitNodes(const Location &upLeft, const Location &lowRight, NodeAcceptor f);
 
+    bool hasUserFixes() const;
+
 private:
     std::atomic_bool loadCancelled { false };
 
@@ -71,6 +73,8 @@ private:
 
     // To search by location
     std::map<std::pair<int, int>, std::vector<std::shared_ptr<NavNode>>> allNodes;
+
+    bool userFixesLoaded = false;
 };
 
 

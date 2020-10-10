@@ -15,26 +15,36 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OVERLAY_CONFIG_H_
-#define SRC_MAPS_OVERLAY_CONFIG_H_
+#include "UserFix.h"
 
-namespace maps {
+namespace xdata {
 
-struct OverlayConfig {
-    bool drawMyAircraft = true;
-    bool drawOtherAircraft = true;
-    bool drawAirports = false;
-    bool drawAirstrips = false;
-    bool drawHeliportsSeaports = false;
-    bool drawVORs = false;
-    bool drawNDBs = false;
-    bool drawILSs = false;
-    bool drawWaypoints = false;
-    bool drawPOIs = false;
-    bool drawVRPs = false;
-    bool drawObstacles = false;
-};
+UserFix::UserFix()
+{
+}
 
-} /* namespace maps */
+void UserFix::setType(UserFix::Type type) {
+    this->type = type;
+}
 
-#endif /* SRC_MAPS_OVERLAY_CONFIG_H_ */
+void UserFix::setName(std::string name) {
+    this->name = name;
+}
+
+void UserFix::setElevation(int elevation) {
+    this->elevation = elevation;
+}
+
+UserFix::Type UserFix::getType() const {
+    return type;
+}
+
+std::string UserFix::getName() const {
+    return name;
+}
+
+int UserFix::getElevation() const {
+    return elevation;
+}
+
+} /* namespace xdata */

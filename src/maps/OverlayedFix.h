@@ -42,6 +42,8 @@ protected:
     int px;
     int py;
 
+    static const int TEXT_SIZE = 10;
+
 private:
     static xdata::Morse morse;
 

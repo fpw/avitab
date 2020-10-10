@@ -23,6 +23,7 @@
 #include "OverlayedDME.h"
 #include "OverlayedILSLocalizer.h"
 #include "OverlayedWaypoint.h"
+#include "OverlayedUserFix.h"
 
 namespace maps {
 
@@ -54,6 +55,8 @@ std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper h
         return OverlayedDME::getInstanceIfVisible(helper, fix);
     } else if (fix.getILSLocalizer()) {
         return OverlayedILSLocalizer::getInstanceIfVisible(helper, fix);
+    } else if (fix.getUserFix()) {
+        return OverlayedUserFix::getInstanceIfVisible(helper, fix);
     } else {
         return OverlayedWaypoint::getInstanceIfVisible(helper, fix);
     }
@@ -62,7 +65,6 @@ std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper h
 void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color) {
     auto mapImage = helper->getMapImage();
     // x, y is top left corner of rectangular border. If type is not required, pass in as ""
-    const int TEXT_SIZE = 10;
     const int MORSE_SIZE = 2;
     const int XBORDER = 2;
     // If type is required, id and freq text and bottom of rectangular border drop by half text height

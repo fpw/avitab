@@ -11,4 +11,5 @@ target_sources(avitab_common PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/OverlayedDME.cpp
     ${CMAKE_CURRENT_LIST_DIR}/OverlayedILSLocalizer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/OverlayedWaypoint.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/OverlayedUserFix.cpp
 )

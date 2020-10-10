@@ -38,6 +38,7 @@ public:
     std::string restOfLine();
     std::string parseWord();
     std::string nextDelimitedWord(char delim);
+    std::string nextCSVValue();
     int parseInt();
     double parseDouble();
     void skip(char c);

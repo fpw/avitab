@@ -37,6 +37,10 @@ bool World::shouldCancelLoading() const {
     return loadCancelled;
 }
 
+bool World::hasUserFixes() const {
+    return userFixesLoaded;
+}
+
 std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
     std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
@@ -127,6 +131,9 @@ std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, Airwa
 void World::addFix(std::shared_ptr<Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
+    if (fix->getUserFix()) {
+        this->userFixesLoaded = true;
+    }
 }
 
 void World::registerNavNodes() {

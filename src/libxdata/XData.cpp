@@ -24,6 +24,7 @@
 #include "src/libxdata/world/loaders/AirwayLoader.h"
 #include "src/libxdata/world/loaders/CIFPLoader.h"
 #include "src/libxdata/world/loaders/MetarLoader.h"
+#include "src/libxdata/world/loaders/UserFixLoader.h"
 #include "src/libxdata/parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
@@ -84,6 +85,8 @@ void XData::load() {
     loadAirways();
     logger::verbose("Loading CIFP...");
     loadProcedures();
+    logger::verbose("Loading user fixes...");
+    loadUserFixes();
     auto duration = std::chrono::steady_clock::now() - startAt;
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
@@ -158,6 +161,18 @@ void XData::loadMetar() {
     } catch (const std::exception &e) {
         // metar is optional, so only log
         logger::warn("Error parsing METAR: %s", e.what());
+    }
+}
+
+void XData::loadUserFixes() {
+    try {
+        UserFixLoader loader(world);
+        std::string csvFile = xplaneRoot + "Custom Data/user_fix.csv";
+        loader.load(csvFile);
+        logger::info("Loaded %s", csvFile.c_str());
+    } catch (const std::exception &e) {
+        // User fixes are optional, so could be no CSV file or parse error
+        logger::warn("Unable to parse user fixes: %s", e.what());
     }
 }
 

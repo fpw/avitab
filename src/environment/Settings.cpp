@@ -106,6 +106,9 @@ void Settings::loadOverlayConfig() {
     overlayConfig->drawNDBs = getSetting("/overlay/NDBs", false);
     overlayConfig->drawILSs = getSetting("/overlay/ILSs", false);
     overlayConfig->drawWaypoints = getSetting("/overlay/waypoints", false);
+    overlayConfig->drawPOIs = getSetting("/overlay/POIs", false);
+    overlayConfig->drawVRPs = getSetting("/overlay/VRPs", false);
+    overlayConfig->drawObstacles = getSetting("/overlay/obstacles", false);
 }
 
 void Settings::saveOverlayConfig() {
@@ -118,6 +121,9 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/NDBs", overlayConfig->drawNDBs);
     setSetting("/overlay/ILSs", overlayConfig->drawILSs);
     setSetting("/overlay/waypoints", overlayConfig->drawWaypoints);
+    setSetting("/overlay/POIs", overlayConfig->drawPOIs);
+    setSetting("/overlay/VRPs", overlayConfig->drawVRPs);
+    setSetting("/overlay/obstacles", overlayConfig->drawObstacles);
 }
 
 void Settings::upgrade() {
