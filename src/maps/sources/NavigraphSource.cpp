@@ -27,6 +27,7 @@ NavigraphSource::NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, b
     dayMode(dayMode),
     highRoutes(highRoutes)
 {
+    downloader.setHideURLs(true);
     downloader.setCookies(navigraph->getSignedCookies());
 }
 

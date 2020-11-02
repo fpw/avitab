@@ -42,8 +42,16 @@ void Downloader::setCookies(const std::map<std::string, std::string> &cookies) {
     }
 }
 
+void Downloader::setHideURLs(bool hide) {
+    hideURLs = hide;
+}
+
 std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) {
-    logger::verbose("Downloading '%s'", url.c_str());
+    if (!hideURLs) {
+        logger::verbose("Downloading '%s'", url.c_str());
+    } else {
+        logger::verbose("Downloading...");
+    }
 
     std::vector<uint8_t> downloadBuf;
 
