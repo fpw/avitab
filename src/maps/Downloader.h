@@ -18,6 +18,7 @@
 #ifndef SRC_MAPS_DOWNLOADER_H_
 #define SRC_MAPS_DOWNLOADER_H_
 
+#include <map>
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -28,6 +29,7 @@ namespace maps {
 class Downloader {
 public:
     Downloader();
+    void setCookies(const std::map<std::string, std::string> &cks);
     std::vector<uint8_t> download(const std::string &url, bool &cancel);
     ~Downloader();
 private:

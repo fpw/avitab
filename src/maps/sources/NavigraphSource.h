@@ -20,12 +20,13 @@
 
 #include "src/libimg/stitcher/TileSource.h"
 #include "src/maps/Downloader.h"
+#include "src/charts/libnavigraph/NavigraphAPI.h"
 
 namespace maps {
 
 class NavigraphSource: public img::TileSource {
 public:
-    NavigraphSource(const std::string &key, bool dayMode, bool highRoutes);
+    NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, bool highRoutes);
 
     // Basic information
     int getMinZoomLevel() override;
@@ -52,7 +53,7 @@ public:
 
     std::string getCopyrightInfo() override;
 private:
-    std::string key;
+    std::shared_ptr<navigraph::NavigraphAPI> navigraph;
     bool dayMode, highRoutes;
     bool cancelToken = false;
     Downloader downloader;

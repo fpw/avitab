@@ -52,6 +52,7 @@ bool NavigraphAPI::init() {
     }
     loadAirports();
     loadCycle();
+    loadCookie();
     stamper.setSize(20);
     stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
     return demoMode;
@@ -154,6 +155,15 @@ void NavigraphAPI::loadCycle() {
     cycleId = cycleJson.at("id");
 }
 
+void NavigraphAPI::loadCookie() {
+    auto cookieData = oidc->get("https://charts.api.navigraph.com/1/signed_cookies");
+    signedCookies.clear();
+    nlohmann::json cookieJson = nlohmann::json::parse(cookieData);
+    for (auto &[key, val]: cookieJson.items()) {
+        signedCookies.insert(std::make_pair(key, val.get<std::string>()));
+    }
+}
+
 bool NavigraphAPI::hasChartsSubscription() {
     std::string reply;
     try {
@@ -216,6 +226,10 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
     stamper.applyStamp(*img, 270);
 
     return img;
+}
+
+const std::map<std::string, std::string> &NavigraphAPI::getSignedCookies() const {
+    return signedCookies;
 }
 
 } /* namespace navigraph */

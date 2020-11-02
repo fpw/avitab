@@ -31,6 +31,17 @@ Downloader::Downloader() {
     }
 }
 
+void Downloader::setCookies(const std::map<std::string, std::string> &cookies) {
+    if (!cookies.empty()) {
+        std::stringstream ckStream;
+        for (auto &it: cookies) {
+            ckStream << it.first << "=" << it.second << "; ";
+        }
+        std::string cks = ckStream.str();
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cks.c_str());
+    }
+}
+
 std::vector<uint8_t> Downloader::download(const std::string& url, bool &cancel) {
     logger::verbose("Downloading '%s'", url.c_str());
 

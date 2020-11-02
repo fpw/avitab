@@ -115,27 +115,6 @@ void MapApp::createSettingsLayout() {
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
-#if 0
-    if (api().getNavigraph()->isSupported() && false) {
-        naviLowButton = std::make_shared<Button>(settingsContainer, "Navigraph L");
-        naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
-        naviLowButton->setFit(false, true);
-        naviLowButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-        naviLowButton->alignBelow(mercatorButton, 10);
-        auto naviLowLabel = std::make_shared<Label>(settingsContainer, "Navigraph low enroute charts");
-        naviLowLabel->alignRightOf(naviLowButton, 10);
-        naviLowLabel->setManaged();
-
-        naviHighButton = std::make_shared<Button>(settingsContainer, "Navigraph H");
-        naviHighButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_HIGH); });
-        naviHighButton->setFit(false, true);
-        naviHighButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-        naviHighButton->alignBelow(naviLowButton, 10);
-        auto naviHighLabel = std::make_shared<Label>(settingsContainer, "Navigraph high enroute charts");
-        naviHighLabel->alignRightOf(naviHighButton, 10);
-        naviHighLabel->setManaged();
-    }
-#endif
 }
 
 void MapApp::setMapSource(MapSource style) {
@@ -249,10 +228,8 @@ void MapApp::selectEPSG() {
 }
 
 void MapApp::selectNavigraph(bool highEnroute) {
-#if 0
-    auto source = std::make_shared<maps::NavigraphSource>(api().getNavigraph()->getEnrouteKey(), true, highEnroute);
+    auto source = std::make_shared<maps::NavigraphSource>(api().getChartService()->getNavigraph(), false, highEnroute);
     setTileSource(source);
-#endif
 }
 
 void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
@@ -304,6 +281,26 @@ void MapApp::resume() {
 }
 
 void MapApp::onSettingsButton() {
+    if (!api().getChartService()->getNavigraph()->getEnrouteKey().empty() && !naviLowButton) {
+        naviLowButton = std::make_shared<Button>(settingsContainer, "Navigraph L");
+        naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
+        naviLowButton->setFit(false, true);
+        naviLowButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviLowButton->alignBelow(mercatorButton, 10);
+        auto naviLowLabel = std::make_shared<Label>(settingsContainer, "Navigraph low enroute charts");
+        naviLowLabel->alignRightOf(naviLowButton, 10);
+        naviLowLabel->setManaged();
+
+        naviHighButton = std::make_shared<Button>(settingsContainer, "Navigraph H");
+        naviHighButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_HIGH); });
+        naviHighButton->setFit(false, true);
+        naviHighButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviHighButton->alignBelow(naviLowButton, 10);
+        auto naviHighLabel = std::make_shared<Label>(settingsContainer, "Navigraph high enroute charts");
+        naviHighLabel->alignRightOf(naviHighButton, 10);
+        naviHighLabel->setManaged();
+    }
+
     settingsContainer->setVisible(!settingsContainer->isVisible());
 }
 

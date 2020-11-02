@@ -22,11 +22,12 @@
 
 namespace maps {
 
-NavigraphSource::NavigraphSource(const std::string& key, bool dayMode, bool highRoutes):
-    key(key),
+NavigraphSource::NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, bool highRoutes):
+    navigraph(api),
     dayMode(dayMode),
     highRoutes(highRoutes)
 {
+    downloader.setCookies(navigraph->getSignedCookies());
 }
 
 int NavigraphSource::getMinZoomLevel() {
@@ -140,6 +141,8 @@ std::string NavigraphSource::getUniqueTileName(int page, int x, int y, int zoom)
 }
 
 std::unique_ptr<img::Image> NavigraphSource::loadTileImage(int page, int x, int y, int zoom) {
+    auto key = navigraph->getEnrouteKey();
+
     cancelToken = false;
     std::string path = getUniqueTileName(page, x, y, zoom);
     auto data = downloader.download("https://enroute.charts.api.navigraph.com/" + key + path, cancelToken);
@@ -157,7 +160,7 @@ void NavigraphSource::resumeLoading() {
 }
 
 std::string NavigraphSource::getCopyrightInfo() {
-    return "Map Data (c) Navigraph";
+    return "(c) Navigraph | Jeppesen - Not for Navigational Use";
 }
 
 } /* namespace maps */
