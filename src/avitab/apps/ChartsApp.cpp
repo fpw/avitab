@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "ChartsApp.h"
+#include "src/Logger.h"
 
 namespace avitab {
 
@@ -131,7 +132,6 @@ void ChartsApp::upOneDirectory() {
     showDirectory(upOne);
 }
 
-
 void ChartsApp::createPdfTab(const std::string &pdfPath) {
     for (auto tabPage: pages) {
         if (tabPage.path == pdfPath) {
@@ -166,7 +166,11 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     });
     setupCallbacks(tab);
 
-    loadFile(tab, pdfPath);
+    try {
+        loadFile(tab, pdfPath);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load file: %s", e.what());
+    }
 
     pages.push_back(tab);
     tabs->showTab(page);
@@ -280,7 +284,7 @@ void ChartsApp::onRotate() {
 
 bool ChartsApp::onTimer() {
     PdfPage *tab = getActivePdfPage();
-    if (tab) {
+    if (tab && tab->map) {
         tab->map->doWork();
     }
     return true;
