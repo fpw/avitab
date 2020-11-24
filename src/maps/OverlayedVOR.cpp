@@ -84,7 +84,7 @@ void OverlayedVOR::drawGraphics() {
 }
 
 void OverlayedVOR::drawText(bool detailed) {
-    std::string type = fix->getDME() ? "VOR/DME" : "DME";
+    std::string type = fix->getDME() ? "VOR/DME" : "VOR";
     if (detailed) {
         auto freqString = fix->getVOR()->getFrequency().getFrequencyString(false);
         drawNavTextBox(overlayHelper, type, fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
