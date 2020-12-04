@@ -61,6 +61,16 @@ void Settings::setGeneralSetting(const std::string &id, const bool value) {
     setSetting("/general/" + id, value);
 }
 
+template<>
+void Settings::setGeneralSetting(const std::string &id, const std::string value) {
+    setSetting("/general/" + id, value);
+}
+
+template<>
+std::string Settings::getGeneralSetting(const std::string &id) {
+    return getSetting("/general/" + id, std::string(""));
+}
+
 std::shared_ptr<maps::OverlayConfig> Settings::getOverlayConfig() {
     return overlayConfig;
 }
@@ -106,6 +116,8 @@ void Settings::loadOverlayConfig() {
     overlayConfig->drawNDBs = getSetting("/overlay/NDBs", false);
     overlayConfig->drawILSs = getSetting("/overlay/ILSs", false);
     overlayConfig->drawWaypoints = getSetting("/overlay/waypoints", false);
+    overlayConfig->drawPOIs = getSetting("/overlay/POIs", false);
+    overlayConfig->drawVRPs = getSetting("/overlay/VRPs", false);
 }
 
 void Settings::saveOverlayConfig() {
@@ -118,6 +130,8 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/NDBs", overlayConfig->drawNDBs);
     setSetting("/overlay/ILSs", overlayConfig->drawILSs);
     setSetting("/overlay/waypoints", overlayConfig->drawWaypoints);
+    setSetting("/overlay/POIs", overlayConfig->drawPOIs);
+    setSetting("/overlay/VRPs", overlayConfig->drawVRPs);
 }
 
 void Settings::upgrade() {

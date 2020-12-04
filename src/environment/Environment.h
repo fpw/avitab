@@ -81,6 +81,7 @@ public:
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
+    virtual void loadUserFixes(std::string filename) = 0;
     virtual void enableAndPowerPanel();
     virtual void setIsInMenu(bool menu);
     virtual AircraftID getActiveAircraftCount() = 0;
@@ -97,6 +98,8 @@ protected:
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
     virtual std::shared_ptr<xdata::XData> getNavData() = 0;
+    virtual void sendUserFixesFilenameToXData(std::string filename) = 0;
+
 private:
     std::shared_ptr<Config> config;
     std::shared_ptr<Settings> settings;

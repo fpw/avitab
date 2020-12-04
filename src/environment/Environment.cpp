@@ -39,6 +39,9 @@ void Environment::loadSettings() {
     std::string fname(getSettingsDir() + "/avitab.prf");
     logger::info("Settings file: %s", fname.c_str());
     settings = std::make_unique<Settings>(fname);
+
+    std::string userfixes_file = settings->getGeneralSetting<std::string>("userfixes_file");
+    sendUserFixesFilenameToXData(userfixes_file);
 }
 
 std::shared_ptr<Settings> Environment::getSettings() {

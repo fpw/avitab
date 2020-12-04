@@ -15,25 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OVERLAY_CONFIG_H_
-#define SRC_MAPS_OVERLAY_CONFIG_H_
+#ifndef SRC_LIBXDATA_PARSERS_USERFIXPARSER_H_
+#define SRC_LIBXDATA_PARSERS_USERFIXPARSER_H_
 
-namespace maps {
+#include <string>
+#include <functional>
+#include "src/libxdata/world/models/navaids/UserFix.h"
+#include "src/libxdata/parsers/objects/UserFixData.h"
+#include "BaseParser.h"
 
-struct OverlayConfig {
-    bool drawMyAircraft = true;
-    bool drawOtherAircraft = true;
-    bool drawAirports = false;
-    bool drawAirstrips = false;
-    bool drawHeliportsSeaports = false;
-    bool drawVORs = false;
-    bool drawNDBs = false;
-    bool drawILSs = false;
-    bool drawWaypoints = false;
-    bool drawPOIs = false;
-    bool drawVRPs = false;
+namespace xdata {
+
+class UserFixParser {
+public:
+    using Acceptor = std::function<void(const UserFixData &)>;
+
+    UserFixParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadUserFixes();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+    int lineNum;
+
+    void parseLine();
+    UserFix::Type parseType(std::string& typeString);
 };
 
-} /* namespace maps */
+} /* namespace xdata */
 
-#endif /* SRC_MAPS_OVERLAY_CONFIG_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_USERFIXPARSER_H_ */

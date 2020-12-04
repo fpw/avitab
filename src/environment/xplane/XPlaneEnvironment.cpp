@@ -257,6 +257,10 @@ std::string XPlaneEnvironment::getSettingsDir() {
     return xplanePrefsDir;
 }
 
+void XPlaneEnvironment::sendUserFixesFilenameToXData(std::string filename) {
+    xplaneData->setUserFixesFilename(filename);
+}
+
 std::string XPlaneEnvironment::getEarthTexturePath() {
     return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
@@ -363,6 +367,10 @@ std::shared_ptr<xdata::XData> XPlaneEnvironment::getNavData() {
 
 void XPlaneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
+}
+
+void XPlaneEnvironment::loadUserFixes(std::string filename) {
+    xplaneData->loadUserFixes(filename);
 }
 
 void XPlaneEnvironment::enableAndPowerPanel() {

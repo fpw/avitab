@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "FileChooser.h"
+#include <libgen.h>
 
 namespace avitab {
 
@@ -42,6 +43,13 @@ void FileChooser::setFilterRegex(const std::string &regex) {
 
 void FileChooser::setBaseDirectory(const std::string& path) {
     basePath = path;
+}
+
+void FileChooser::setBaseDirectoryFromFile(const std::string& file) {
+    char fileNonConst[256];
+    strncpy(fileNonConst, file.c_str(), sizeof(fileNonConst) - 1);
+    std::string dir(dirname(fileNonConst));
+    basePath = dir + "/";
 }
 
 void FileChooser::show(std::shared_ptr<Container> parent, const std::string &caption) {

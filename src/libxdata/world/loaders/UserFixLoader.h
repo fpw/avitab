@@ -15,25 +15,25 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OVERLAY_CONFIG_H_
-#define SRC_MAPS_OVERLAY_CONFIG_H_
+#ifndef SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
+#define SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
 
-namespace maps {
+#include <memory>
+#include "src/libxdata/parsers/UserFixParser.h"
+#include "src/libxdata/world/World.h"
 
-struct OverlayConfig {
-    bool drawMyAircraft = true;
-    bool drawOtherAircraft = true;
-    bool drawAirports = false;
-    bool drawAirstrips = false;
-    bool drawHeliportsSeaports = false;
-    bool drawVORs = false;
-    bool drawNDBs = false;
-    bool drawILSs = false;
-    bool drawWaypoints = false;
-    bool drawPOIs = false;
-    bool drawVRPs = false;
+namespace xdata {
+
+class UserFixLoader {
+public:
+    UserFixLoader(std::shared_ptr<World> worldPtr);
+    void load(const std::string &file);
+private:
+    std::shared_ptr<World> world;
+
+    void onUserFixLoaded(const UserFixData &navaid);
 };
 
-} /* namespace maps */
+} /* namespace xdata */
 
-#endif /* SRC_MAPS_OVERLAY_CONFIG_H_ */
+#endif /* SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_ */

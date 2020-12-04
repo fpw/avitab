@@ -235,7 +235,8 @@ void OverlayedMap::drawDataOverlays() {
         return;
     }
     if (!overlayConfig->drawAirports && !overlayConfig->drawAirstrips && !overlayConfig->drawHeliportsSeaports &&
-        !overlayConfig->drawVORs && !overlayConfig->drawNDBs && !overlayConfig->drawILSs && !overlayConfig->drawWaypoints) {
+        !overlayConfig->drawVORs && !overlayConfig->drawNDBs && !overlayConfig->drawILSs && !overlayConfig->drawWaypoints &&
+        !overlayConfig->drawPOIs && !overlayConfig->drawVRPs) {
         return;
     }
 

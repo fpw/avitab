@@ -6,4 +6,5 @@ target_sources(xdata PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/DME.cpp
     ${CMAKE_CURRENT_LIST_DIR}/VOR.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Morse.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/UserFix.cpp
 )

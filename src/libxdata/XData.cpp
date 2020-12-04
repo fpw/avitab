@@ -24,6 +24,7 @@
 #include "src/libxdata/world/loaders/AirwayLoader.h"
 #include "src/libxdata/world/loaders/CIFPLoader.h"
 #include "src/libxdata/world/loaders/MetarLoader.h"
+#include "src/libxdata/world/loaders/UserFixLoader.h"
 #include "src/libxdata/parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
@@ -68,6 +69,10 @@ void XData::discoverSceneries() {
     }
 }
 
+void XData::setUserFixesFilename(std::string filename) {
+    userFixesFilename = filename;
+}
+
 std::shared_ptr<World> XData::getWorld() {
     return world;
 }
@@ -84,6 +89,8 @@ void XData::load() {
     loadAirways();
     logger::verbose("Loading CIFP...");
     loadProcedures();
+    logger::verbose("Attempting to load user fixes...");
+    loadUserFixes();
     auto duration = std::chrono::steady_clock::now() - startAt;
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
@@ -158,6 +165,29 @@ void XData::loadMetar() {
     } catch (const std::exception &e) {
         // metar is optional, so only log
         logger::warn("Error parsing METAR: %s", e.what());
+    }
+}
+
+void XData::loadUserFixes() {
+    if (userFixesFilename == "") {
+        logger::info("No user fixes file specified");
+        return;
+    } else {
+        loadUserFixes(userFixesFilename);
+    }
+}
+
+void XData::loadUserFixes(std::string userFixesFilename) {
+    try {
+        UserFixLoader loader(world);
+        loader.load(userFixesFilename);
+        // Re-register all nodes, but shouldn't affect existing items, just adds new
+        world->registerNavNodes();
+        logger::info("Loaded %s", userFixesFilename.c_str());
+
+    } catch (const std::exception &e) {
+        // User fixes are optional, so could be no CSV file or parse error
+        logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());
     }
 }
 

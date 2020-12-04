@@ -109,6 +109,28 @@ std::string BaseParser::nextDelimitedWord(char delim) {
     return word.str();
 }
 
+std::string BaseParser::nextCSVValue() {
+    std::stringstream value;
+    lineStream >> std::noskipws; // Keep whitespace inside CSV values
+
+    bool inQuotes = false; // Ensure commas inside quoted fields are not separators
+    char c = '\0';
+
+    while (lineStream >> c) {
+        if (c == '"') {
+            inQuotes = !inQuotes;
+            continue;
+        }
+        if (c == ',' && !inQuotes) {
+            break;
+        }
+        value << c;
+    }
+
+    lineStream >> std::skipws;
+    return value.str();
+}
+
 double BaseParser::parseDouble() {
     skipWhiteSpace();
 

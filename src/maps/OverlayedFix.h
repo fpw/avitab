@@ -42,12 +42,15 @@ protected:
     int px;
     int py;
 
+    static const int TEXT_SIZE = 10;
+
 private:
     static xdata::Morse morse;
 
     static void drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color);
     static bool isDMEOnly(const xdata::Fix &fix);
     static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
+    static const int SHOW_USERFIXES_AT_MAPWIDTHNM = 500;
 };
 
 } /* namespace maps */

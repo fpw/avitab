@@ -314,6 +314,10 @@ void AviTab::reloadMetar() {
     logger::info("Done METAR");
 }
 
+void AviTab::loadUserFixes(std::string filename) {
+    env->loadUserFixes(filename);
+}
+
 std::shared_ptr<apis::ChartService> AviTab::getChartService() {
     return chartService;
 }

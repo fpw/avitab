@@ -105,6 +105,10 @@ std::string StandAloneEnvironment::getSettingsDir() {
     return ourPath;
 }
 
+void StandAloneEnvironment::sendUserFixesFilenameToXData(std::string filename) {
+    xplaneData->setUserFixesFilename(filename);
+}
+
 double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
     return 0;
 }
@@ -119,6 +123,10 @@ std::shared_ptr<xdata::XData> StandAloneEnvironment::getNavData() {
 
 void StandAloneEnvironment::reloadMetar() {
     xplaneData->reloadMetar();
+}
+
+void StandAloneEnvironment::loadUserFixes(std::string filename) {
+    xplaneData->loadUserFixes(filename);
 }
 
 AircraftID StandAloneEnvironment::getActiveAircraftCount() {

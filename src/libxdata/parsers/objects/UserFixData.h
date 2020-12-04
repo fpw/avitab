@@ -15,25 +15,23 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OVERLAY_CONFIG_H_
-#define SRC_MAPS_OVERLAY_CONFIG_H_
+#ifndef SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
+#define SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
 
-namespace maps {
+#include <string>
+#include <limits>
+#include "src/libxdata/world/models/navaids/UserFix.h"
 
-struct OverlayConfig {
-    bool drawMyAircraft = true;
-    bool drawOtherAircraft = true;
-    bool drawAirports = false;
-    bool drawAirstrips = false;
-    bool drawHeliportsSeaports = false;
-    bool drawVORs = false;
-    bool drawNDBs = false;
-    bool drawILSs = false;
-    bool drawWaypoints = false;
-    bool drawPOIs = false;
-    bool drawVRPs = false;
+namespace xdata {
+
+struct UserFixData {
+    UserFix::Type type = UserFix::Type::NONE;
+    std::string name;
+    std::string ident;
+    double latitude = std::numeric_limits<double>::quiet_NaN();
+    double longitude = std::numeric_limits<double>::quiet_NaN();
 };
 
-} /* namespace maps */
+} /* namespace xdata */
 
-#endif /* SRC_MAPS_OVERLAY_CONFIG_H_ */
+#endif /* SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_ */
