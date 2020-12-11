@@ -69,6 +69,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         Frequency ilsFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, desc);
         auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
         ils->setRunwayHeading(navaid.bearing);
+        ils->setRunwayHeadingMagnetic(navaid.bearingMagnetic);
         ils->setLocalizerOnly(navaid.type == NavaidData::Type::LOC);
         fix->attachILSLocalizer(ils);
 

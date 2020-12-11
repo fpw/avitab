@@ -18,6 +18,9 @@
 
 #include "OverlayedILSLocalizer.h"
 #include <cmath>
+#include <sstream>
+#include <iomanip>
+
 
 namespace maps {
 
@@ -72,7 +75,12 @@ void OverlayedILSLocalizer::drawText(bool detailed) {
     type = fix->getDME() ? type + "/DME" : type;
     if (detailed) {
         auto freqString = ils->getFrequency().getFrequencyString(false);
-        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color);
+        double headingMagnetic = ils->getRunwayHeadingMagnetic();
+        std::ostringstream str;
+        if (!std::isnan(headingMagnetic)) {
+            str << std::setfill('0') << std::setw(3) << int(std::floor(headingMagnetic + 0.5));
+        }
+        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color, str.str());
     } else {
         auto mapImage = overlayHelper->getMapImage();
         mapImage->drawText(fix->getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);

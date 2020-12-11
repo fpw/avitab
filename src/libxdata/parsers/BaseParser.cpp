@@ -42,10 +42,10 @@ std::string BaseParser::parseHeader() {
     getLine(line);
 
     std::istringstream lineStr(line);
-    int version;
+    char origin;
     std::string header;
 
-    lineStr >> version;
+    lineStr >> origin >> version;
     getline(lineStr, header);
     return header;
 }
@@ -187,6 +187,10 @@ std::istream& BaseParser::getLine(std::string& str) {
             str += static_cast<char>(c);
         }
     }
+}
+
+int BaseParser::getVersion() {
+    return version;
 }
 
 } /* namespace xdata */

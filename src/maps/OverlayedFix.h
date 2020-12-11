@@ -36,8 +36,8 @@ protected:
     OverlayedFix(OverlayHelper helper, const xdata::Fix *fix);
     virtual ~OverlayedFix() = default;
 
-    static void drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color);
-
+    static void drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color,
+                               const std::string &ilsHeadingMagnetic = "");
     const xdata::Fix *fix;
     int px;
     int py;
@@ -50,7 +50,7 @@ private:
     static void drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color);
     static bool isDMEOnly(const xdata::Fix &fix);
     static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
-    static const int SHOW_USERFIXES_AT_MAPWIDTHNM = 500;
+    static const int SHOW_USERFIXES_AT_MAPWIDTHNM = 1000;
 };
 
 } /* namespace maps */

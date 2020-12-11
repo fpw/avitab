@@ -28,8 +28,16 @@ void ILSLocalizer::setRunwayHeading(double heading) {
     runwayHeading = heading;
 }
 
+void ILSLocalizer::setRunwayHeadingMagnetic(double headingMagnetic) {
+    runwayHeadingMagnetic = headingMagnetic;
+}
+
 double ILSLocalizer::getRunwayHeading() const {
     return runwayHeading;
+}
+
+double ILSLocalizer::getRunwayHeadingMagnetic() const {
+    return runwayHeadingMagnetic;
 }
 
 void ILSLocalizer::setLocalizerOnly(bool localizerOnly) {

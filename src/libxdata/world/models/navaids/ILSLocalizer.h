@@ -26,11 +26,14 @@ class ILSLocalizer: public RadioNavaid {
 public:
     ILSLocalizer(Frequency frq, int range);
     void setRunwayHeading(double heading);
+    void setRunwayHeadingMagnetic(double heading);
     double getRunwayHeading() const;
+    double getRunwayHeadingMagnetic() const;
     void setLocalizerOnly(bool localizerOnly);
     bool isLocalizerOnly() const;
 private:
     double runwayHeading = 0;
+    double runwayHeadingMagnetic = 0;
     bool localizerOnly = false;
 };
 

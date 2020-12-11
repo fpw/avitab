@@ -44,10 +44,12 @@ public:
     void skip(char c);
 
     void skipWhiteSpace();
+    int getVersion();
 private:
     fs::ifstream stream;
     std::istringstream lineStream;
     std::istream &getLine(std::string &str);
+    int version;
 };
 
 } /* namespace xdata */

@@ -63,7 +63,7 @@ std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper h
     }
 }
 
-void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color) {
+void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color, const std::string &ilsHeadingMagnetic) {
     auto mapImage = helper->getMapImage();
     // x, y is top left corner of rectangular border. If type is not required, pass in as ""
     const int MORSE_SIZE = 2;
@@ -76,14 +76,17 @@ void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type,
         morseWidth = std::max(morseWidth, morse.getLength(c) * MORSE_SIZE);
     }
     int boxWidth = textWidth + morseWidth + (XBORDER * 4);
-    int boxHeight = (TEXT_SIZE * 2) + yo + 2;
+    int numLines = (ilsHeadingMagnetic == "") ? 2 : 3;
+    int boxHeight = (TEXT_SIZE * numLines) + yo + 2;
     int xTextCentre = x + textWidth / 2 + XBORDER + 1;
 
     mapImage->fillRectangle(x + 1, y + 1, x + boxWidth, y + boxHeight, img::COLOR_WHITE);
     mapImage->drawText(id, TEXT_SIZE, xTextCentre, y + yo + 1, color, 0, img::Align::CENTRE);
     mapImage->drawText(freq, TEXT_SIZE, xTextCentre, y + TEXT_SIZE + yo + 1, color, 0, img::Align::CENTRE);
     drawMorse(helper, x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
-
+    if (ilsHeadingMagnetic != "") {
+        mapImage->drawText(ilsHeadingMagnetic, TEXT_SIZE, x + (boxWidth / 2), y + (TEXT_SIZE * 2) + yo + 1, color, 0, img::Align::CENTRE);
+    }
     mapImage->drawRectangle(x, y, x + boxWidth, y + boxHeight, color);
     if (type != "") {
         mapImage->drawText(type, TEXT_SIZE, x + boxWidth / 2, y - yo + 1, color, img::COLOR_WHITE, img::Align::CENTRE);

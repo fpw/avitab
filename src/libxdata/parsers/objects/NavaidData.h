@@ -95,6 +95,7 @@ struct NavaidData {
      * For 15, 16:  Approach course in true degrees prefixed by glidepath angle, e.g. 325123.456 -> GP 3.25°, heading 123.456
      */
     double bearing = std::numeric_limits<double>::quiet_NaN();
+    double bearingMagnetic = std::numeric_limits<double>::quiet_NaN();
 
     /**
      * For 2, 3:    Unique in ICAO region
