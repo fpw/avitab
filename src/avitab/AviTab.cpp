@@ -121,6 +121,10 @@ void AviTab::onPlaneLoad() {
     });
 }
 
+void AviTab::onReceiveMessage() {
+    env->updatePlaneCount();
+}
+
 void AviTab::zoomIn() {
     // called from environment thread
     guiLib->executeLater([this] () {

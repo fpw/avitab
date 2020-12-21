@@ -61,6 +61,7 @@ public:
     void loadNavWorldInBackground();
     bool isNavWorldReady();
     virtual void onAircraftReload();
+    virtual void updatePlaneCount();
     virtual std::shared_ptr<LVGLToolkit> createGUIToolkit() = 0;
     virtual void createMenu(const std::string &name) = 0;
     virtual void addMenuEntry(const std::string &label, MenuCallback cb) = 0;

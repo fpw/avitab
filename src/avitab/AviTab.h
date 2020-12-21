@@ -41,6 +41,7 @@ public:
     void zoomOut();
     void stopApp();
     void onPlaneLoad();
+    void onReceiveMessage();
 
     // App API
     void setBrightness(float brightness) override;

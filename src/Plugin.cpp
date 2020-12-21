@@ -73,6 +73,9 @@ PLUGIN_API int XPluginEnable(void) {
 }
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID src, int msg, void *inParam) {
+    if (aviTab) {
+        aviTab->onReceiveMessage();
+    }
     if (msg == XPLM_MSG_PLANE_LOADED && inParam == 0) {
         if (aviTab) {
             aviTab->onPlaneLoad();

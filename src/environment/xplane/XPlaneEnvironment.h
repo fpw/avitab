@@ -44,6 +44,7 @@ public:
     void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
     void destroyCommands() override;
     void onAircraftReload() override;
+    void updatePlaneCount() override;
 
     // Can be called from any thread
     std::string getFontDirectory() override;
@@ -73,9 +74,7 @@ private:
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
-    std::vector<Location> prevLocations;
-    std::vector<int> noMovementCount;
-    const int NO_MOVEMENT_THRESHOLD = 100;
+    unsigned int otherAircraftCount;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
