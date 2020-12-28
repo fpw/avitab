@@ -111,4 +111,17 @@ void AppLauncher::onMouseWheel(int dir, int x, int y) {
     }
 }
 
+void AppLauncher::recentre() {
+    if (activeApp) {
+        activeApp->recentre();
+    }
+}
+
+void AppLauncher::pan(int x, int y) {
+    if (activeApp) {
+        activeApp->pan(x, y);
+    }
+}
+
+
 } /* namespace avitab */

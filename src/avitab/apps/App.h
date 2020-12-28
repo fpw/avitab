@@ -39,6 +39,8 @@ public:
     ContPtr getUIContainer();
     virtual void show();
     virtual void onMouseWheel(int dir, int x, int y);
+    virtual void recentre();
+    virtual void pan(int x, int y);
 
     virtual ~App() = default;
 protected:

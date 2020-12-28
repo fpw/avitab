@@ -60,6 +60,12 @@ void App::suspend() {
 void App::onMouseWheel(int dir, int x, int y) {
 }
 
+void App::recentre() {
+}
+
+void App::pan(int x, int y) {
+}
+
 void App::exit() {
     funcs->executeLater([this] () {
         if (onExit) {
