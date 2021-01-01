@@ -478,7 +478,13 @@ void AirportApp::redrawPage(std::shared_ptr<Page> page) {
 }
 
 void AirportApp::onMouseWheel(int dir, int x, int y) {
+    auto activeTabIndex = tabs->getActiveTab();
+
     for (auto &tab: pages) {
+        if (tabs->getTabIndex(tab.page) != activeTabIndex) {
+            continue;
+        }
+
         if (tab.map) {
             if (dir > 0) {
                 tab.map->zoomIn();
