@@ -408,6 +408,20 @@ void MapApp::onMouseWheel(int dir, int x, int y) {
     onTimer();
 }
 
+void MapApp::recentre() {
+    if (!trackPlane) {
+        onTrackButton();
+    }
+}
+
+void MapApp::pan(int x, int y) {
+    if (trackPlane) {
+        trackPlane = false;
+        trackButton->setToggleState(trackPlane);
+    }
+    map->pan(mapWidget->getWidth() * x / 100, mapWidget->getHeight() * y / 100);
+}
+
 void MapApp::onPlusButton() {
     map->zoomIn();
     onTimer();
