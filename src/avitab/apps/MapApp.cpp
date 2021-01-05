@@ -395,7 +395,7 @@ void MapApp::selectUserFixesFile() {
     resetWidgets();
     fileChooser = std::make_unique<FileChooser>(&api());
     std::string userfixes_file = savedSettings->getGeneralSetting<std::string>("userfixes_file");
-    if (userfixes_file == "") {
+    if ((userfixes_file == "") || !platform::fileExists(platform::getDirNameFromPath(userfixes_file))) {
         fileChooser->setBaseDirectory(api().getDataPath());
     } else {
         fileChooser->setBaseDirectoryFromFile(userfixes_file);
