@@ -271,12 +271,17 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
 
     updatePlaneCount();
     for (AircraftID i = 0; i <= otherAircraftCount; ++i) {
-        Location loc;
-        loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
-        loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
-        loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
-        loc.heading = dataCache.getLocationData(i, 3).floatValue;
-        activeAircraftLocations.push_back(loc);
+        try {
+            Location loc;
+            loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
+            loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
+            loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
+            loc.heading = dataCache.getLocationData(i, 3).floatValue;
+            activeAircraftLocations.push_back(loc);
+        } catch (const std::exception &e) {
+            // silently ignore to avoid flooding the log
+            // can fail with TCAS override, more than 19 AI aircraft
+        }
     }
 
     {
@@ -389,6 +394,9 @@ void XPlaneEnvironment::updatePlaneCount() {
     XPLMCountAircraft(&tmp1, &active, &tmp2);
     if (active > 0) {
         otherAircraftCount = active - 1;
+        if (otherAircraftCount > MAX_AI_AIRCRAFT) {
+            otherAircraftCount = MAX_AI_AIRCRAFT;
+        }
     } else {
         otherAircraftCount = 0;
     }
