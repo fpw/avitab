@@ -39,6 +39,11 @@ public:
     void toggleTablet();
     void zoomIn();
     void zoomOut();
+    void recentre();
+    void panLeft();
+    void panRight();
+    void panUp();
+    void panDown();
     void stopApp();
     void onPlaneLoad();
 

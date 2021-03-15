@@ -75,9 +75,6 @@ private:
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
-    std::vector<Location> prevLocations;
-    std::vector<int> noMovementCount;
-    const int NO_MOVEMENT_THRESHOLD = 100;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
@@ -103,6 +100,9 @@ private:
     static int handleCommand(XPLMCommandRef cmd, XPLMCommandPhase phase, void *ref);
     EnvData getData(const std::string &dataRef);
     void reloadAircraftPath();
+
+    unsigned int otherAircraftCount;
+    void updatePlaneCount();
 };
 
 } /* namespace avitab */

@@ -48,6 +48,11 @@ void AviTab::startApp() {
     env->createCommand("AviTab/toggle_tablet", "Toggle Tablet", [this] (CommandState s) { if (s == CommandState::START) toggleTablet(); });
     env->createCommand("AviTab/zoom_in", "Zoom In", [this] (CommandState s) { if (s == CommandState::START) zoomIn(); });
     env->createCommand("AviTab/zoom_out", "Zoom Out", [this] (CommandState s) { if (s == CommandState::START) zoomOut(); });
+    env->createCommand("AviTab/recentre", "Recentre", [this] (CommandState s) { if (s == CommandState::START) recentre(); });
+    env->createCommand("AviTab/pan_left", "Pan left", [this] (CommandState s) { if (s == CommandState::START) panLeft(); });
+    env->createCommand("AviTab/pan_right", "Pan right", [this] (CommandState s) { if (s == CommandState::START) panRight(); });
+    env->createCommand("AviTab/pan_up", "Pan up", [this] (CommandState s) { if (s == CommandState::START) panUp(); });
+    env->createCommand("AviTab/pan_down", "Pan down", [this] (CommandState s) { if (s == CommandState::START) panDown(); });
     env->createCommand("AviTab/Home", "Home Button",[this] (CommandState s) { if (s == CommandState::START) onHomeButton(); });
 
     // App commands
@@ -135,6 +140,51 @@ void AviTab::zoomOut() {
     guiLib->executeLater([this] () {
         if (appLauncher) {
             appLauncher->onMouseWheel(-1, 0, 0);
+        }
+    });
+}
+
+void AviTab::recentre() {
+    // called from environment thread
+    guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->recentre();
+        }
+    });
+}
+
+void AviTab::panLeft() {
+    // called from environment thread
+    guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->pan(-10, 0); // 10% leftwards
+        }
+    });
+}
+
+void AviTab::panRight() {
+    // called from environment thread
+    guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->pan(10, 0); // 10% rightwards
+        }
+    });
+}
+
+void AviTab::panUp() {
+    // called from environment thread
+    guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->pan(0, -10); // 10% upwards
+        }
+    });
+}
+
+void AviTab::panDown() {
+    // called from environment thread
+    guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->pan(0, 10); // 10% downwards
         }
     });
 }

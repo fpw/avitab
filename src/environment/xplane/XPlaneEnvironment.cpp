@@ -39,10 +39,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
     xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
 
-    for (size_t i = 0; i < MAX_AI_AIRCRAFT + 1; ++i) {
-        prevLocations.push_back(nullLocation);
-        noMovementCount.push_back(NO_MOVEMENT_THRESHOLD);
-    }
+    updatePlaneCount();
 
     panelEnabled = std::make_shared<int>(0);
     panelPowered = std::make_shared<int>(0);
@@ -276,27 +273,19 @@ void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
     std::vector<Location> activeAircraftLocations;
 
-    for (AircraftID i = 0; i <= MAX_AI_AIRCRAFT; ++i) {
-        Location loc;
-        loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
-        loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
-        loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
-        loc.heading = dataCache.getLocationData(i, 3).floatValue;
-        // only add user aircraft or ones that appear to be active
-        noMovementCount[i] += 1;
-        if ((i == 0) ||
-            ((loc.elevation > 0.0) &&
-                ((loc.latitude != prevLocations[i].latitude) ||
-                (loc.longitude != prevLocations[i].longitude) ||
-                (loc.heading != prevLocations[i].heading)))) {
-            noMovementCount[i] = 0;
-        }
-        if (noMovementCount[i] < NO_MOVEMENT_THRESHOLD) {
+    updatePlaneCount();
+    for (AircraftID i = 0; i <= otherAircraftCount; ++i) {
+        try {
+            Location loc;
+            loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
+            loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
+            loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
+            loc.heading = dataCache.getLocationData(i, 3).floatValue;
             activeAircraftLocations.push_back(loc);
-        } else {
-            noMovementCount[i] = NO_MOVEMENT_THRESHOLD;
+        } catch (const std::exception &e) {
+            // silently ignore to avoid flooding the log
+            // can fail with TCAS override, more than 19 AI aircraft
         }
-        prevLocations[i] = loc;
     }
 
     {
@@ -312,7 +301,7 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
 
 AircraftID XPlaneEnvironment::getActiveAircraftCount() {
     std::lock_guard<std::mutex> lock(stateMutex);
-    return aircraftLocations.size();
+    return (otherAircraftCount + 1);
 }
 
 Location XPlaneEnvironment::getAircraftLocation(AircraftID id) {
@@ -405,6 +394,20 @@ void XPlaneEnvironment::reloadAircraftPath() {
 
 void XPlaneEnvironment::onAircraftReload() {
     reloadAircraftPath();
+}
+
+void XPlaneEnvironment::updatePlaneCount() {
+    int tmp1, active;
+    XPLMPluginID tmp2;
+    XPLMCountAircraft(&tmp1, &active, &tmp2);
+    if (active > 0) {
+        otherAircraftCount = active - 1;
+        if (otherAircraftCount > MAX_AI_AIRCRAFT) {
+            otherAircraftCount = MAX_AI_AIRCRAFT;
+        }
+    } else {
+        otherAircraftCount = 0;
+    }
 }
 
 } /* namespace avitab */
