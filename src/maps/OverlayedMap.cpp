@@ -54,6 +54,10 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         cosTable[angle] = std::cos(angle * M_PI / 180);
     }
 
+    otherAircraftColors[RelativeHeight::below] = colorFromString(overlayConfig->colorOtherAircraftBelow, "GREEN", img::COLOR_DARK_GREEN);
+    otherAircraftColors[RelativeHeight::same] = colorFromString(overlayConfig->colorOtherAircraftSame, "BLACK", img::COLOR_BLACK);
+    otherAircraftColors[RelativeHeight::above] = colorFromString(overlayConfig->colorOtherAircraftAbove, "BLUE", img::COLOR_BLUE);
+
     dbg = false;
 }
 
@@ -182,7 +186,9 @@ void OverlayedMap::drawOtherAircraftOverlay() {
     for (size_t i = 1; i < planeLocations.size(); ++i) {
         bool isAbove = (planeLocations[i].elevation > (planeLocations[0].elevation + 30));
         bool isBelow = (planeLocations[i].elevation < (planeLocations[0].elevation - 30));
-        uint32_t color = (isAbove ? img::COLOR_BLUE : (isBelow ? img::COLOR_DARK_GREEN : img::COLOR_BLACK));
+        uint32_t color = (isAbove ? otherAircraftColors[RelativeHeight::above]
+                                  : (isBelow ? otherAircraftColors[RelativeHeight::below] 
+                                             : otherAircraftColors[RelativeHeight::same]));
         positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
         mapImage->drawCircle(px, py, 6, color);
         mapImage->drawCircle(px, py, 7, color);
@@ -464,6 +470,61 @@ std::shared_ptr<img::Image> OverlayedMap::getMapImage() {
 OverlayConfig &OverlayedMap::getOverlayConfig() const {
     return *overlayConfig;
 }
+
+inline static int hexval(const char c)
+{
+    if (isdigit(c)) {
+        return c - '0';
+    } else if ((c >= 'A') && (c <= 'F')) {
+        return 10 + c - 'A';
+    }
+    return -1;
+}
+
+uint32_t OverlayedMap::colorFromString(std::string& setting, const char *defName, uint32_t defCode)
+{
+    std::string cstr(setting);
+    for (auto i = cstr.begin(); i != cstr.end(); ++i) *i = toupper(*i);
+
+    setting = defName;
+
+    if (cstr == "BLACK") {
+        setting = "BLACK";
+        return img::COLOR_BLACK;
+    } else if (cstr == "WHITE") {
+        setting = "WHITE";
+        return img::COLOR_WHITE;
+    } else if (cstr == "RED") {
+        setting = "RED";
+        return img::COLOR_RED;
+    } else if (cstr == "BLUE") {
+        setting = "BLUE";
+        return img::COLOR_BLUE;
+    } else if (cstr == "YELLOW") {
+        setting = "YELLOW";
+        return img::COLOR_YELLOW;
+    } else if (cstr == "GREEN") {
+        setting = "GREEN";
+        return img::COLOR_DARK_GREEN;
+    } else if (cstr == "GREY") {
+        setting = "GREY";
+        return img::COLOR_DARK_GREY;
+    } else if ((cstr[0] == '#') && (cstr.size() == 7)) {
+        uint32_t c = 0;
+        for (auto i = cstr.begin() + 1; i != cstr.end(); ++i) {
+            int d = hexval(*i);
+            if (d < 0) {
+                return defCode;
+            }
+            c = (c << 4) | d;
+        }
+        setting = cstr;
+        return (0xFF000000 | c); // make opaque
+    }
+
+    return defCode;
+}
+
 
 
 } /* namespace maps */

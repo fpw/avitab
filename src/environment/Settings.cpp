@@ -99,6 +99,9 @@ void Settings::loadOverlayConfig() {
     overlayConfig = std::make_shared<maps::OverlayConfig>();
     overlayConfig->drawMyAircraft = getSetting("/overlay/my_aircraft", true);
     overlayConfig->drawOtherAircraft = getSetting("/overlay/other_aircraft", true);
+    overlayConfig->colorOtherAircraftBelow = getSetting("/overlay/colors/other_aircraft/below", std::string("GREEN"));
+    overlayConfig->colorOtherAircraftSame = getSetting("/overlay/colors/other_aircraft/same", std::string("BLACK"));
+    overlayConfig->colorOtherAircraftAbove = getSetting("/overlay/colors/other_aircraft/above", std::string("BLUE"));
     overlayConfig->drawAirports = getSetting("/overlay/airports", false);
     overlayConfig->drawAirstrips = getSetting("/overlay/airstrips", false);
     overlayConfig->drawHeliportsSeaports = getSetting("/overlay/heliports_seaports", false);
@@ -111,6 +114,9 @@ void Settings::loadOverlayConfig() {
 void Settings::saveOverlayConfig() {
     setSetting("/overlay/my_aircraft", overlayConfig->drawMyAircraft);
     setSetting("/overlay/other_aircraft", overlayConfig->drawOtherAircraft);
+    setSetting("/overlay/colors/other_aircraft/below", overlayConfig->colorOtherAircraftBelow);
+    setSetting("/overlay/colors/other_aircraft/same", overlayConfig->colorOtherAircraftSame);
+    setSetting("/overlay/colors/other_aircraft/above", overlayConfig->colorOtherAircraftAbove);
     setSetting("/overlay/airports", overlayConfig->drawAirports);
     setSetting("/overlay/airstrips", overlayConfig->drawAirstrips);
     setSetting("/overlay/heliports_seaports", overlayConfig->drawHeliportsSeaports);
