@@ -88,8 +88,8 @@ private:
     std::shared_ptr<xdata::World> navWorld;
     std::vector<avitab::Location> planeLocations;
     img::Image planeIcon;
-    enum RelativeHeight { below, same, above };
-    uint32_t otherAircraftColors[RelativeHeight::above + 1];
+    enum RelativeHeight { below, same, above, total };
+    uint32_t otherAircraftColors[RelativeHeight::total];
     img::Image ndbIcon;
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
