@@ -110,8 +110,6 @@ private:
     float sinDegrees(int angleDegrees) const;
     void polarToCartesian(float radius, float angleRadians, double& x, double& y);
 
-    uint32_t colorFromString(std::string& setting, const char *defName, uint32_t defCode);
-
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT = 200;
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 40;
 };

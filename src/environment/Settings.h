@@ -19,6 +19,7 @@
 #define SRC_ENVIRONMENT_SETTINGS_H_
 
 #include <nlohmann/json_fwd.hpp>
+#include <list>
 #include <memory>
 #include "src/maps/OverlayConfig.h"
 
@@ -55,6 +56,11 @@ private:
 
     template<typename T>
     void setSetting(const std::string &id, const T value);
+    
+    std::list<std::pair<const char *, uint32_t> > colorTable;
+    uint32_t colorStringToInt(std::string colString, const char* colDefault);
+    std::string colorIntToString(uint32_t color);
+    
 };
 
 } /* namespace avitab */
