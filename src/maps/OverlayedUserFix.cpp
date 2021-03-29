@@ -34,7 +34,7 @@ OverlayedUserFix::OverlayedUserFix(OverlayHelper helper, const xdata::Fix *fix):
 std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
     auto userFix = fix.getUserFix();
     if (!userFix) {
-        return NULL;
+        return nullptr;
     }
     auto cfg = helper->getOverlayConfig();
     auto type = userFix->getType();

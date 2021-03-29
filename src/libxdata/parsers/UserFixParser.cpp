@@ -89,9 +89,9 @@ void UserFixParser::parseLine() {
 }
 
 UserFix::Type UserFixParser::parseType(std::string& typeString) {
-    if ((typeString.compare("VRP") == 0) || (typeString.compare("11") == 0)) {
+    if ((typeString == "VRP") || (typeString == "11")) {
         return UserFix::Type::VRP;
-    } else if ((typeString.compare("POI") == 0) || (typeString.compare("8") == 0)) {
+    } else if ((typeString == "POI") || (typeString == "8")) {
         return UserFix::Type::POI;
     } else {
         return UserFix::Type::NONE;

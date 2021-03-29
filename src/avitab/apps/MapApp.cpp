@@ -20,6 +20,7 @@
 #include <cmath>
 #include "MapApp.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 #include "src/maps/sources/OpenTopoSource.h"
 #include "src/maps/sources/GeoTIFFSource.h"
 #include "src/maps/sources/PDFSource.h"
@@ -398,7 +399,8 @@ void MapApp::selectUserFixesFile() {
     if ((userfixes_file == "") || !platform::fileExists(platform::getDirNameFromPath(userfixes_file))) {
         fileChooser->setBaseDirectory(api().getDataPath());
     } else {
-        fileChooser->setBaseDirectoryFromFile(userfixes_file);
+        std::string dirName = platform::getDirNameFromPath(userfixes_file);
+        fileChooser->setBaseDirectory(dirName + "/");
     }
     fileChooser->setFilterRegex("\\.csv$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {

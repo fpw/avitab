@@ -42,7 +42,6 @@ public:
     void setSelectCallback(SelectCallback cb);
     void setFilterRegex(const std::string &regex);
     void setBaseDirectory(const std::string &path);
-    void setBaseDirectoryFromFile(const std::string& file);
     void setDirectorySelect(bool dirSel);
     void show(std::shared_ptr<Container> parent, const std::string &caption);
 private:
