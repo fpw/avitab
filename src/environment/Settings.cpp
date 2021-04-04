@@ -29,6 +29,14 @@ namespace avitab {
 Settings::Settings(const std::string &settingsFile)
 :   filePath(settingsFile)
 {
+    colorTable.push_back({"BLACK",  0xFF000000});
+    colorTable.push_back({"GREY",   0xFF303030});
+    colorTable.push_back({"WHITE",  0xFFFFFFFF});
+    colorTable.push_back({"RED",    0xFF800000});
+    colorTable.push_back({"BLUE",   0xFF0000A0});
+    colorTable.push_back({"GREEN",  0xFF008000});
+    colorTable.push_back({"YELLOW", 0xFF808000});
+    
     database = std::make_shared<json>();
     init();
     load();
@@ -106,6 +114,10 @@ void Settings::loadOverlayConfig() {
     overlayConfig->drawNDBs = getSetting("/overlay/NDBs", false);
     overlayConfig->drawILSs = getSetting("/overlay/ILSs", false);
     overlayConfig->drawWaypoints = getSetting("/overlay/waypoints", false);
+
+    overlayConfig->colorOtherAircraftBelow = colorStringToInt(getSetting("/overlay/colors/other_aircraft/below", std::string("GREEN")), "GREEN");
+    overlayConfig->colorOtherAircraftSame = colorStringToInt(getSetting("/overlay/colors/other_aircraft/same", std::string("BLACK")), "BLACK");
+    overlayConfig->colorOtherAircraftAbove = colorStringToInt(getSetting("/overlay/colors/other_aircraft/above", std::string("BLUE")), "BLUE");
 }
 
 void Settings::saveOverlayConfig() {
@@ -118,6 +130,10 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/NDBs", overlayConfig->drawNDBs);
     setSetting("/overlay/ILSs", overlayConfig->drawILSs);
     setSetting("/overlay/waypoints", overlayConfig->drawWaypoints);
+
+    setSetting("/overlay/colors/other_aircraft/below", colorIntToString(overlayConfig->colorOtherAircraftBelow));
+    setSetting("/overlay/colors/other_aircraft/same", colorIntToString(overlayConfig->colorOtherAircraftSame));
+    setSetting("/overlay/colors/other_aircraft/above", colorIntToString(overlayConfig->colorOtherAircraftAbove));
 }
 
 void Settings::upgrade() {
@@ -141,6 +157,52 @@ void Settings::save() {
     } catch (const std::exception &e) {
         LOG_ERROR("Could not save user settings to %s", filePath.c_str());
     }
+}
+
+uint32_t Settings::colorStringToInt(std::string colString, const char* colDefault)
+{
+    std::string cstr(colString);
+    for (auto i = cstr.begin(); i != cstr.end(); ++i) *i = toupper(*i);
+
+    for (auto i = colorTable.begin(); i != colorTable.end(); ++i) {
+        if (cstr == i->first) {
+            return i->second;
+        }
+    }
+    
+    if ((cstr[0] == '#') && (cstr.size() >= 7)) {
+        cstr.erase(0,1);
+        uint32_t c = 0;
+        size_t p = 0;
+        try {
+            long long l = std::stoll(cstr, &p, 16);
+            c = static_cast<uint32_t>(static_cast<unsigned long long>(l) & 0xFFFFFFFF);
+        } catch (...) {
+            p = 0;
+        }
+        if (p == 6) c |= 0xFF000000;// make color opaque if alpha-channel not defined
+        if (p) return c;
+    }
+    
+    cstr = colDefault;
+    for (auto i = colorTable.begin(); i != colorTable.end(); ++i) {
+        if (cstr == i->first) {
+            return i->second;
+        }
+    }
+    return 0xFFFFFFFF;
+}
+
+std::string Settings::colorIntToString(uint32_t color)
+{
+    for (auto i = colorTable.begin(); i != colorTable.end(); ++i) {
+        if (color == i->second) {
+            return std::string(i->first);
+        }
+    }
+    std::stringstream s;
+    s << "#" << std::setfill('0') << std::setw(8) << std::hex << color;
+    return s.str();
 }
 
 } /* namespace avitab */
