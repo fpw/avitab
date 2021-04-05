@@ -18,11 +18,16 @@
 #ifndef SRC_MAPS_OVERLAY_CONFIG_H_
 #define SRC_MAPS_OVERLAY_CONFIG_H_
 
+#include <string>
+
 namespace maps {
 
 struct OverlayConfig {
     bool drawMyAircraft = true;
     bool drawOtherAircraft = true;
+    uint32_t colorOtherAircraftBelow;
+    uint32_t colorOtherAircraftSame;
+    uint32_t colorOtherAircraftAbove;
     bool drawAirports = false;
     bool drawAirstrips = false;
     bool drawHeliportsSeaports = false;

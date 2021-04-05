@@ -54,6 +54,10 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
         cosTable[angle] = std::cos(angle * M_PI / 180);
     }
 
+    otherAircraftColors[RelativeHeight::below] = overlayConfig->colorOtherAircraftBelow;
+    otherAircraftColors[RelativeHeight::same] = overlayConfig->colorOtherAircraftSame;
+    otherAircraftColors[RelativeHeight::above] = overlayConfig->colorOtherAircraftAbove;
+
     dbg = false;
 }
 
@@ -182,7 +186,9 @@ void OverlayedMap::drawOtherAircraftOverlay() {
     for (size_t i = 1; i < planeLocations.size(); ++i) {
         bool isAbove = (planeLocations[i].elevation > (planeLocations[0].elevation + 30));
         bool isBelow = (planeLocations[i].elevation < (planeLocations[0].elevation - 30));
-        uint32_t color = (isAbove ? img::COLOR_BLUE : (isBelow ? img::COLOR_DARK_GREEN : img::COLOR_BLACK));
+        uint32_t color = (isAbove ? otherAircraftColors[RelativeHeight::above]
+                                  : (isBelow ? otherAircraftColors[RelativeHeight::below] 
+                                             : otherAircraftColors[RelativeHeight::same]));
         positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
         mapImage->drawCircle(px, py, 6, color);
         mapImage->drawCircle(px, py, 7, color);
@@ -465,6 +471,7 @@ std::shared_ptr<img::Image> OverlayedMap::getMapImage() {
 OverlayConfig &OverlayedMap::getOverlayConfig() const {
     return *overlayConfig;
 }
+
 
 
 } /* namespace maps */
