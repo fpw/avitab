@@ -48,6 +48,7 @@ void UserFixParser::parseLine() {
 
     std::string typeString = parser.nextCSVValue();
     if (parseType(typeString) == UserFix::Type::NONE) {
+        lineNum++;
         return;
     }
     UserFixData userFix {};
