@@ -242,7 +242,7 @@ void OverlayedMap::drawDataOverlays() {
     }
     if (!overlayConfig->drawAirports && !overlayConfig->drawAirstrips && !overlayConfig->drawHeliportsSeaports &&
         !overlayConfig->drawVORs && !overlayConfig->drawNDBs && !overlayConfig->drawILSs && !overlayConfig->drawWaypoints &&
-        !overlayConfig->drawPOIs && !overlayConfig->drawVRPs) {
+        !overlayConfig->drawPOIs && !overlayConfig->drawVRPs && !overlayConfig->drawMarkers) {
         return;
     }
 

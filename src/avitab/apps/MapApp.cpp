@@ -270,6 +270,7 @@ void MapApp::resetWidgets() {
     loadUserFixesButton.reset();
     poiCheckbox.reset();
     vrpCheckbox.reset();
+    markerCheckbox.reset();
     overlaysContainer.reset();
 }
 
@@ -389,6 +390,11 @@ void MapApp::showOverlaySettings() {
     vrpCheckbox->setChecked(overlayConf->drawVRPs);
     vrpCheckbox->alignRightOf(poiCheckbox);
     vrpCheckbox->setCallback([this] (bool checked) { overlayConf->drawVRPs = checked; });
+
+    markerCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Marker");
+    markerCheckbox->setChecked(overlayConf->drawMarkers);
+    markerCheckbox->alignRightOf(vrpCheckbox);
+    markerCheckbox->setCallback([this] (bool checked) { overlayConf->drawMarkers = checked; });
 
 }
 

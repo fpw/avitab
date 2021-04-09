@@ -35,23 +35,20 @@ public:
     void drawText(bool detailed);
 
 private:
-    void drawGraphicsPOI();
-    void drawGraphicsVRP();
-
-    void drawTextPOIVRP();
     void splitNameToLines();
 
-    static void createPOIVRPIcons();
+    static void createIcons();
 
     static img::Image POIIcon;
     static img::Image VRPIcon;
+    static img::Image MarkerIcon;
     static std::vector<std::string> textLines;
 
-    const static int POI_VRP_RADIUS = 6;
-    const static int POI_DIAG = POI_VRP_RADIUS * 0.7071;
+    const static int RADIUS = 6;
+    const static int DIAG = RADIUS * 0.7071;
     const static uint32_t POI_COLOR = 0xFF702060;
     const static uint32_t VRP_COLOR = 0xFF103070;
-    const static uint32_t OBS_COLOR = 0xFF103070;
+    const static uint32_t MARKER_COLOR = 0xFFFF1010;
 };
 
 } /* namespace maps */

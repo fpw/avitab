@@ -22,12 +22,13 @@ namespace maps {
 
 img::Image OverlayedUserFix::POIIcon;
 img::Image OverlayedUserFix::VRPIcon;
+img::Image OverlayedUserFix::MarkerIcon;
 std::vector<std::string> OverlayedUserFix::textLines;
 
 OverlayedUserFix::OverlayedUserFix(OverlayHelper helper, const xdata::Fix *fix):
     OverlayedFix(helper, fix){
     if (POIIcon.getHeight() == 0) {
-        createPOIVRPIcons();
+        createIcons();
     }
 }
 
@@ -39,7 +40,8 @@ std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(Overlay
     auto cfg = helper->getOverlayConfig();
     auto type = userFix->getType();
     bool drawUserFixes = (cfg.drawPOIs && (type == xdata::UserFix::Type::POI)) ||
-                         (cfg.drawVRPs && (type == xdata::UserFix::Type::VRP));
+                         (cfg.drawVRPs && (type == xdata::UserFix::Type::VRP)) ||
+                         (cfg.drawMarkers && (type == xdata::UserFix::Type::MARKER));
 
     if (drawUserFixes && helper->isLocVisibleWithMargin(fix.getLocation(), 100)) {
         return std::make_shared<OverlayedUserFix>(helper, &fix);
@@ -48,39 +50,41 @@ std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(Overlay
     }
 }
 
-void OverlayedUserFix::createPOIVRPIcons() {
-    int r = POI_VRP_RADIUS;
+void OverlayedUserFix::createIcons() {
+    int r = RADIUS;
+    int xc = r;
+    int yc = r;
 
     POIIcon.resize(r * 2 + 1, r * 2 + 1, 0);
-    POIIcon.fillCircle(r, r, r, img::COLOR_WHITE);
-    POIIcon.drawCircle(r, r, r, POI_COLOR);
-    POIIcon.drawLine(r - POI_DIAG, r - POI_DIAG, r + POI_DIAG, r + POI_DIAG, POI_COLOR);
-    POIIcon.drawLine(r + POI_DIAG, r - POI_DIAG, r - POI_DIAG, r + POI_DIAG, POI_COLOR);
+    POIIcon.fillCircle(xc, yc, r, img::COLOR_WHITE);
+    POIIcon.drawCircle(xc, yc, r, POI_COLOR);
+    // Draw an X
+    POIIcon.drawLine(xc - DIAG, yc - DIAG, xc + DIAG, yc + DIAG, POI_COLOR);
+    POIIcon.drawLine(xc + DIAG, yc - DIAG, xc - DIAG, yc + DIAG, POI_COLOR);
 
     VRPIcon.resize(r * 2 + 1, r * 2 + 1, 0);
-    VRPIcon.fillCircle(r, r, r, img::COLOR_WHITE);
-    VRPIcon.drawCircle(r, r, r, VRP_COLOR);
+    VRPIcon.fillCircle(xc, yc, r, img::COLOR_WHITE);
+    VRPIcon.drawCircle(xc, yc, r, VRP_COLOR);
+    // Draw a +
     VRPIcon.drawLine(0, r, 2 * r, r, VRP_COLOR);
     VRPIcon.drawLine(r, 0, r, 2 * r, VRP_COLOR);
+
+    MarkerIcon.resize(r * 2 + 1, r * 2 + 1, 0);
+    MarkerIcon.fillCircle(xc, yc, r, img::COLOR_WHITE);
+    MarkerIcon.drawCircle(xc, yc, r, MARKER_COLOR);
+    MarkerIcon.drawCircle(xc, yc, r / 2, MARKER_COLOR);
 }
 
 void OverlayedUserFix::drawGraphics() {
     auto type = fix->getUserFix()->getType();
+    auto mapImage = overlayHelper->getMapImage();
     if (type == xdata::UserFix::Type::POI) {
-        drawGraphicsPOI();
+        mapImage->blendImage0(POIIcon, px - RADIUS, py - RADIUS);
     } else if (type == xdata::UserFix::Type::VRP) {
-        drawGraphicsVRP();
+        mapImage->blendImage0(VRPIcon, px - RADIUS, py - RADIUS);
+    } else if (type == xdata::UserFix::Type::MARKER) {
+        mapImage->blendImage0(MarkerIcon, px - RADIUS, py - RADIUS);
     }
-}
-
-void OverlayedUserFix::drawGraphicsPOI() {
-    auto mapImage = overlayHelper->getMapImage();
-    mapImage->blendImage0(POIIcon, px - POI_VRP_RADIUS, py - POI_VRP_RADIUS);
-}
-
-void OverlayedUserFix::drawGraphicsVRP() {
-    auto mapImage = overlayHelper->getMapImage();
-    mapImage->blendImage0(VRPIcon, px - POI_VRP_RADIUS, py - POI_VRP_RADIUS);
 }
 
 void OverlayedUserFix::drawText(bool detailed) {
@@ -88,27 +92,37 @@ void OverlayedUserFix::drawText(bool detailed) {
         return;
     }
     auto type = fix->getUserFix()->getType();
-    if ((type == xdata::UserFix::Type::POI || type == xdata::UserFix::Type::VRP)) {
-        drawTextPOIVRP();
+    if ((type != xdata::UserFix::Type::POI && type != xdata::UserFix::Type::VRP
+      && type != xdata::UserFix::Type::MARKER)) {
+        return;
     }
-}
 
-void OverlayedUserFix::drawTextPOIVRP() {
     splitNameToLines();
+
     auto mapImage = overlayHelper->getMapImage();
     int textWidth = mapImage->getTextWidth(textLines[0], TEXT_SIZE);
     if (textLines.size() == 2) {
         textWidth = std::max(mapImage->getTextWidth(textLines[1], TEXT_SIZE), textWidth);
     }
-    int x = px + POI_DIAG + 1;
-    int y = py + POI_DIAG + 1;
+    int x = px + DIAG + 1;
+    int y = py + DIAG + 1;
     int yo = TEXT_SIZE / 2;
     int borderWidth = textWidth + 4;
     int borderHeight = (TEXT_SIZE * (textLines.size() + 0.5)) + 1;
     int xTextCentre = x + textWidth / 2 + 3;
-    auto type = fix->getUserFix()->getType();
-    std::string typeString = (type == xdata::UserFix::Type::POI) ? "POI" : "VRP";
-    uint32_t color = (type == xdata::UserFix::Type::POI) ? POI_COLOR : VRP_COLOR;
+
+    std::string typeString;
+    uint32_t color;
+    if (type == xdata::UserFix::Type::POI) {
+    	typeString = "POI";
+        color = POI_COLOR;
+    } else if (type == xdata::UserFix::Type::VRP) {
+    	typeString = "VRP";
+        color = VRP_COLOR;
+    } else if (type == xdata::UserFix::Type::MARKER) {
+    	typeString = "MRK";
+        color = MARKER_COLOR;
+    }
 
     mapImage->fillRectangle(x + 1, y + 1, x + borderWidth - 1, y + borderHeight - 1, img::COLOR_WHITE);
     mapImage->drawText(textLines[0], TEXT_SIZE, xTextCentre, y + yo, color, 0, img::Align::CENTRE);

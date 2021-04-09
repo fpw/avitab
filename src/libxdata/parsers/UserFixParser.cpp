@@ -93,6 +93,8 @@ UserFix::Type UserFixParser::parseType(std::string& typeString) {
         return UserFix::Type::VRP;
     } else if ((typeString == "POI") || (typeString == "8")) {
         return UserFix::Type::POI;
+    } else if ((typeString == "Marker") || (typeString == "9") || (typeString == "10")) {
+        return UserFix::Type::MARKER;
     } else {
         return UserFix::Type::NONE;
     }

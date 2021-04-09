@@ -75,7 +75,7 @@ private:
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
     std::shared_ptr<Checkbox> vorCheckbox, ndbCheckbox, ilsCheckbox, waypointCheckbox;
     std::shared_ptr<Button> loadUserFixesButton;
-    std::shared_ptr<Checkbox> poiCheckbox, vrpCheckbox;
+    std::shared_ptr<Checkbox> poiCheckbox, vrpCheckbox, markerCheckbox;
 
     std::unique_ptr<MessageBox> messageBox;
     std::shared_ptr<TextArea> coordsField;

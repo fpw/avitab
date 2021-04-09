@@ -28,7 +28,8 @@ public:
     enum class Type {
         NONE,
         VRP,
-        POI
+        POI,
+        MARKER
     };
 
     UserFix();

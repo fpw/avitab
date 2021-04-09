@@ -37,6 +37,7 @@ struct OverlayConfig {
     bool drawWaypoints = false;
     bool drawPOIs = false;
     bool drawVRPs = false;
+    bool drawMarkers = false;
 };
 
 } /* namespace maps */
