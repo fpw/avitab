@@ -122,6 +122,9 @@ void OverlayedUserFix::drawText(bool detailed) {
     } else if (type == xdata::UserFix::Type::MARKER) {
     	typeString = "MRK";
         color = MARKER_COLOR;
+    } else {
+    	typeString = "UNK";
+        color = MARKER_COLOR;
     }
 
     mapImage->fillRectangle(x + 1, y + 1, x + borderWidth - 1, y + borderHeight - 1, img::COLOR_WHITE);
