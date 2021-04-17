@@ -114,16 +114,16 @@ void OverlayedUserFix::drawText(bool detailed) {
     std::string typeString;
     uint32_t color;
     if (type == xdata::UserFix::Type::POI) {
-    	typeString = "POI";
+        typeString = "POI";
         color = POI_COLOR;
     } else if (type == xdata::UserFix::Type::VRP) {
-    	typeString = "VRP";
+        typeString = "VRP";
         color = VRP_COLOR;
     } else if (type == xdata::UserFix::Type::MARKER) {
-    	typeString = "MRK";
+        typeString = "MRK";
         color = MARKER_COLOR;
     } else {
-    	typeString = "UNK";
+        typeString = "UNK";
         color = MARKER_COLOR;
     }
 
