@@ -18,6 +18,9 @@
 
 #include "OverlayedILSLocalizer.h"
 #include <cmath>
+#include <sstream>
+#include <iomanip>
+
 
 namespace maps {
 
@@ -66,12 +69,18 @@ void OverlayedILSLocalizer::drawText(bool detailed) {
     }
     int lx, ly, cx, cy, rx, ry;
     getTailCoords(overlayHelper, fix, lx, ly, cx, cy, rx, ry);
-    int x =  (4 * px + cx) / 5;       // Draw NavTextBox 1/5 of the way from airport to end of tail
-    int y = ((4 * py + cy) / 5) - 20; // And up a bit
+    int x =  (px + 4 * cx) / 5;       // Draw NavTextBox 1/5 of the way from end of tail to airport
+    int y = ((py + 4 * cy) / 5) - 20; // And up a bit
     std::string type = ils->isLocalizerOnly() ? "LOC" : "ILS";
+    type = fix->getDME() ? type + "/DME" : type;
     if (detailed) {
         auto freqString = ils->getFrequency().getFrequencyString(false);
-        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color);
+        double headingMagnetic = ils->getRunwayHeadingMagnetic();
+        std::ostringstream str;
+        if (!std::isnan(headingMagnetic)) {
+            str << std::setfill('0') << std::setw(3) << int(std::floor(headingMagnetic + 0.5));
+        }
+        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color, str.str());
     } else {
         auto mapImage = overlayHelper->getMapImage();
         mapImage->drawText(fix->getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);

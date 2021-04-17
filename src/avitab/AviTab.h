@@ -60,6 +60,7 @@ public:
     std::shared_ptr<xdata::World> getNavWorld() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
+    void loadUserFixes(std::string filename) override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
     std::shared_ptr<apis::ChartService> getChartService() override;

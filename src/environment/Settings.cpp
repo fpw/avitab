@@ -69,6 +69,16 @@ void Settings::setGeneralSetting(const std::string &id, const bool value) {
     setSetting("/general/" + id, value);
 }
 
+template<>
+void Settings::setGeneralSetting(const std::string &id, const std::string value) {
+    setSetting("/general/" + id, value);
+}
+
+template<>
+std::string Settings::getGeneralSetting(const std::string &id) {
+    return getSetting("/general/" + id, std::string(""));
+}
+
 std::shared_ptr<maps::OverlayConfig> Settings::getOverlayConfig() {
     return overlayConfig;
 }
@@ -114,7 +124,9 @@ void Settings::loadOverlayConfig() {
     overlayConfig->drawNDBs = getSetting("/overlay/NDBs", false);
     overlayConfig->drawILSs = getSetting("/overlay/ILSs", false);
     overlayConfig->drawWaypoints = getSetting("/overlay/waypoints", false);
-
+    overlayConfig->drawPOIs = getSetting("/overlay/POIs", false);
+    overlayConfig->drawVRPs = getSetting("/overlay/VRPs", false);
+    overlayConfig->drawMarkers = getSetting("/overlay/markers", false);
     overlayConfig->colorOtherAircraftBelow = colorStringToInt(getSetting("/overlay/colors/other_aircraft/below", std::string("GREEN")), "GREEN");
     overlayConfig->colorOtherAircraftSame = colorStringToInt(getSetting("/overlay/colors/other_aircraft/same", std::string("BLACK")), "BLACK");
     overlayConfig->colorOtherAircraftAbove = colorStringToInt(getSetting("/overlay/colors/other_aircraft/above", std::string("BLUE")), "BLUE");
@@ -130,7 +142,9 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/NDBs", overlayConfig->drawNDBs);
     setSetting("/overlay/ILSs", overlayConfig->drawILSs);
     setSetting("/overlay/waypoints", overlayConfig->drawWaypoints);
-
+    setSetting("/overlay/POIs", overlayConfig->drawPOIs);
+    setSetting("/overlay/VRPs", overlayConfig->drawVRPs);
+    setSetting("/overlay/markers", overlayConfig->drawMarkers);
     setSetting("/overlay/colors/other_aircraft/below", colorIntToString(overlayConfig->colorOtherAircraftBelow));
     setSetting("/overlay/colors/other_aircraft/same", colorIntToString(overlayConfig->colorOtherAircraftSame));
     setSetting("/overlay/colors/other_aircraft/above", colorIntToString(overlayConfig->colorOtherAircraftAbove));

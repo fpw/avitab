@@ -20,6 +20,7 @@
 #include <cmath>
 #include "MapApp.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 #include "src/maps/sources/OpenTopoSource.h"
 #include "src/maps/sources/GeoTIFFSource.h"
 #include "src/maps/sources/PDFSource.h"
@@ -32,6 +33,7 @@ namespace avitab {
 MapApp::MapApp(FuncsPtr funcs):
     App(funcs),
     window(std::make_shared<Window>(getUIContainer(), "")),
+    savedSettings(funcs->getSettings()),
     updateTimer(std::bind(&MapApp::onTimer, this), 200)
 {
     overlayConf = api().getSettings()->getOverlayConfig();
@@ -265,6 +267,10 @@ void MapApp::resetWidgets() {
     heliseaportCheckbox.reset();
     myAircraftCheckbox.reset();
     otherAircraftCheckbox.reset();
+    loadUserFixesButton.reset();
+    poiCheckbox.reset();
+    vrpCheckbox.reset();
+    markerCheckbox.reset();
     overlaysContainer.reset();
 }
 
@@ -370,6 +376,61 @@ void MapApp::showOverlaySettings() {
     waypointCheckbox->setChecked(overlayConf->drawWaypoints);
     waypointCheckbox->alignRightOf(ilsCheckbox);
     waypointCheckbox->setCallback([this] (bool checked) { overlayConf->drawWaypoints = checked; });
+
+    loadUserFixesButton = std::make_shared<Button>(overlaysContainer, "Load");
+    loadUserFixesButton->alignBelow(vorCheckbox, 10);
+    loadUserFixesButton->setCallback([this] (const Button &) { selectUserFixesFile(); });
+
+    poiCheckbox = std::make_shared<Checkbox>(overlaysContainer, "POI");
+    poiCheckbox->setChecked(overlayConf->drawPOIs);
+    poiCheckbox->alignRightOf(loadUserFixesButton, 5);
+    poiCheckbox->setCallback([this] (bool checked) { overlayConf->drawPOIs = checked; });
+
+    vrpCheckbox = std::make_shared<Checkbox>(overlaysContainer, "VRP");
+    vrpCheckbox->setChecked(overlayConf->drawVRPs);
+    vrpCheckbox->alignRightOf(poiCheckbox);
+    vrpCheckbox->setCallback([this] (bool checked) { overlayConf->drawVRPs = checked; });
+
+    markerCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Marker");
+    markerCheckbox->setChecked(overlayConf->drawMarkers);
+    markerCheckbox->alignRightOf(vrpCheckbox);
+    markerCheckbox->setCallback([this] (bool checked) { overlayConf->drawMarkers = checked; });
+
+}
+
+void MapApp::selectUserFixesFile() {
+    resetWidgets();
+    fileChooser = std::make_unique<FileChooser>(&api());
+    std::string userfixes_file = savedSettings->getGeneralSetting<std::string>("userfixes_file");
+    if ((userfixes_file == "") || !platform::fileExists(platform::getDirNameFromPath(userfixes_file))) {
+        fileChooser->setBaseDirectory(api().getDataPath());
+    } else {
+        std::string dirName = platform::getDirNameFromPath(userfixes_file);
+        fileChooser->setBaseDirectory(dirName + "/");
+    }
+    fileChooser->setFilterRegex("\\.csv$");
+    fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
+        api().executeLater([this, selectedUTF8] () {
+            try {
+                api().loadUserFixes(selectedUTF8);
+                fileChooser.reset();
+                chooserContainer->setVisible(false);
+                showOverlaySettings();
+                savedSettings->setGeneralSetting<std::string>("userfixes_file", selectedUTF8);
+            } catch (const std::exception &e) {
+                logger::warn("Couldn't open user fix file '%s': %s", selectedUTF8.c_str(), e.what());
+            }
+        });
+    });
+    fileChooser->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            fileChooser.reset();
+            chooserContainer->setVisible(false);
+            showOverlaySettings();
+        });
+    });
+    fileChooser->show(chooserContainer, "Select a user fixes .csv file");
+    chooserContainer->setVisible(true);
 }
 
 void MapApp::onRedrawNeeded() {

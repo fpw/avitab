@@ -43,8 +43,17 @@ void NavaidLoader::load(const std::string& file) {
 }
 
 void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
+    bool new_dme = (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP);
+    bool new_vor = (navaid.type == NavaidData::Type::VOR);
+    bool new_ndb = (navaid.type == NavaidData::Type::NDB);
     auto fix = world->findFixByRegionAndID(navaid.icaoRegion, navaid.id);
-    if (!fix) {
+    bool dontPair = false;
+    if (fix) {
+        bool old_ndb = (bool)fix->getNDB();
+        bool old_vor_dme = fix->getVOR() || fix->getDME();
+        dontPair = ((new_vor || new_dme) && old_ndb) || (new_ndb && old_vor_dme);
+    }
+    if (!fix || dontPair) {
         Location location(navaid.latitude, navaid.longitude);
         auto region = world->findOrCreateRegion(navaid.icaoRegion);
         fix = std::make_shared<Fix>(region, navaid.id, location);
@@ -60,6 +69,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         Frequency ilsFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, desc);
         auto ils = std::make_shared<ILSLocalizer>(ilsFrq, navaid.range);
         ils->setRunwayHeading(navaid.bearing);
+        ils->setRunwayHeadingMagnetic(navaid.bearingMagnetic);
         ils->setLocalizerOnly(navaid.type == NavaidData::Type::LOC);
         fix->attachILSLocalizer(ils);
 
@@ -67,16 +77,16 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
         if (airport) {
             airport->attachILSData(rwy, fix);
         }
-    } else if (navaid.type == NavaidData::Type::NDB) {
+    } else if (new_ndb) {
         Frequency ndbFrq = Frequency(navaid.radio, 0, Frequency::Unit::KHZ, navaid.name);
         auto ndb = std::make_shared<NDB>(ndbFrq, navaid.range);
         fix->attachNDB(ndb);
-    } else if (navaid.type == NavaidData::Type::VOR) {
+    } else if (new_vor) {
         Frequency vorFrq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto vor = std::make_shared<VOR>(vorFrq, navaid.range);
         vor->setBearing(navaid.bearing);
         fix->attachVOR(vor);
-    } else if (navaid.type == NavaidData::Type::DME_SINGLE || navaid.type == NavaidData::Type::DME_COMP) {
+    } else if (new_dme) {
         Frequency dmeFreq = Frequency(navaid.radio, 2, Frequency::Unit::MHZ, navaid.name);
         auto dme = std::make_shared<DME>(dmeFreq, navaid.range);
         dme->setPaired(navaid.type == NavaidData::Type::DME_COMP);

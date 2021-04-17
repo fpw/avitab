@@ -74,10 +74,14 @@ private:
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
     std::shared_ptr<Checkbox> vorCheckbox, ndbCheckbox, ilsCheckbox, waypointCheckbox;
+    std::shared_ptr<Button> loadUserFixesButton;
+    std::shared_ptr<Checkbox> poiCheckbox, vrpCheckbox, markerCheckbox;
 
     std::unique_ptr<MessageBox> messageBox;
     std::shared_ptr<TextArea> coordsField;
     std::unique_ptr<Keyboard> keyboard;
+
+    std::shared_ptr<avitab::Settings> savedSettings;
 
     Timer updateTimer;
     bool trackPlane = true;
@@ -93,6 +97,7 @@ private:
     void selectMercator();
     void selectEPSG();
     void selectNavigraph(bool highEnroute);
+    void selectUserFixesFile();
 
     bool onTimer();
     void onRedrawNeeded();

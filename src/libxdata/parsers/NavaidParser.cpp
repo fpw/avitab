@@ -64,7 +64,11 @@ void NavaidParser::parseLine() {
     // Get true bearing taking account of XP-NAV1150-Spec.pdf format for ILS/LOC,
     // while remaining compatible with < 11.50
     if (nav.type == NavaidData::Type::ILS_LOC || nav.type == NavaidData::Type::LOC) {
-        nav.bearing = std::fmod(parser.parseDouble(), 360);
+        double bearings = parser.parseDouble();
+        nav.bearing = std::fmod(bearings, 360);
+        if (parser.getVersion() >= 1150) {
+            nav.bearingMagnetic = (bearings - nav.bearing) / 360;
+        }
     } else if (nav.type == NavaidData::Type::ILS_GS) {
         // ILS_GS angle/bearing unused by Avitab, but at least get the bearing correct
         nav.bearing = std::fmod(parser.parseDouble(), 100);

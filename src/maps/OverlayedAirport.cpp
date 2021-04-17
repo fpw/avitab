@@ -137,7 +137,7 @@ uint32_t OverlayedAirport::getAirportColor(const xdata::Airport *airport) {
 
 bool OverlayedAirport::isBlob() {
     return ((overlayHelper->getMapWidthNM() > DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM) &&
-    	    (overlayHelper->getNumAerodromesVisible() > DRAW_BLOB_RUNWAYS_NUM_AERODROMES_VISIBLE));
+            (overlayHelper->getNumAerodromesVisible() > DRAW_BLOB_RUNWAYS_NUM_AERODROMES_VISIBLE));
 }
 
 void OverlayedAirport::drawAirportBlob() {

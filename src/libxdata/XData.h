@@ -33,12 +33,15 @@ public:
     void load();
     void cancelLoading();
     void reloadMetar();
+    void loadUserFixes(std::string filename);
     std::shared_ptr<World> getWorld();
+    void setUserFixesFilename(std::string filename);
 private:
     std::string xplaneRoot;
     std::string navDataPath;
     std::shared_ptr<World> world;
     std::vector<std::string> customSceneries;
+    std::string userFixesFilename;
 
     std::string determineNavDataPath();
 
@@ -49,6 +52,8 @@ private:
     void loadProcedures();
     void loadMetar();
     void loadCustomScenery(const AirportLoader& loader);
+    void loadUserFixes();
+
 };
 
 } /* namespace xdata */

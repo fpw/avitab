@@ -51,6 +51,7 @@ public:
     virtual void onHomeButton() = 0;
     virtual std::shared_ptr<xdata::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
+    virtual void loadUserFixes(std::string filename) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;

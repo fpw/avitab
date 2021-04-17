@@ -44,11 +44,13 @@ public:
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
     std::string getSettingsDir() override;
+    void sendUserFixesFilenameToXData(std::string filename);
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<xdata::XData> getNavData() override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
+    void loadUserFixes(std::string filename) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;

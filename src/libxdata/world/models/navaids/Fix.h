@@ -27,6 +27,7 @@
 #include "DME.h"
 #include "VOR.h"
 #include "ILSLocalizer.h"
+#include "UserFix.h"
 
 namespace xdata {
 
@@ -43,11 +44,13 @@ public:
     void attachDME(std::shared_ptr<DME> dmeInfo);
     void attachVOR(std::shared_ptr<VOR> vorInfo);
     void attachILSLocalizer(std::shared_ptr<ILSLocalizer> ils);
+    void attachUserFix(std::shared_ptr<UserFix> userInfo);
 
     std::shared_ptr<NDB> getNDB() const;
     std::shared_ptr<DME> getDME() const;
     std::shared_ptr<VOR> getVOR() const;
     std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
+    std::shared_ptr<UserFix> getUserFix() const;
 
 private:
     std::shared_ptr<Region> region;
@@ -60,6 +63,7 @@ private:
     std::shared_ptr<DME> dme;
     std::shared_ptr<VOR> vor;
     std::shared_ptr<ILSLocalizer> ilsLoc;
+    std::shared_ptr<UserFix> userFix;
 };
 
 } /* namespace xdata */
