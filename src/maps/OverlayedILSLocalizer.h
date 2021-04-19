@@ -27,16 +27,27 @@ class OverlayedILSLocalizer : public OverlayedFix {
 public:
     static std::shared_ptr<OverlayedILSLocalizer> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
 
-    OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *m_fix,
+                          int lx, int ly, int cx, int cy, int rx, int ry);
 
     void drawGraphics();
     void drawText(bool detailed);
+    int getHotspotX();
+    int getHotspotY();
 
 private:
     static void getTailCoords(OverlayHelper helper, const xdata::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry);
     static void polarToCartesian(float radius, float angleDegrees, double& x, double& y);
 
     static const uint32_t color = img::COLOR_DARK_GREEN;
+    
+    int textLocationX = 0;
+    int textLocationY = 0;
+
+    // End of tail vertices
+    int lx, ly; // End of tail, left feather (as viewed from airport)
+    int cx, cy; // End of tail, centre indented
+    int rx, ry; // End of tail, right feather (as viewed from airport)
 };
 
 } /* namespace maps */

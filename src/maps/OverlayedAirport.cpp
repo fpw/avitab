@@ -40,6 +40,10 @@ std::shared_ptr<OverlayedAirport> OverlayedAirport::getInstanceIfVisible(Overlay
     }
 }
 
+std::string OverlayedAirport::getID() {
+    return airport->getID();
+}
+
 void OverlayedAirport::drawGraphics() {
     if (isBlob()) {
         drawAirportBlob();
@@ -67,7 +71,8 @@ void OverlayedAirport::drawGraphics() {
 }
 
 void OverlayedAirport::drawText(bool detailed) {
-    if (isBlob()) {
+    // Allow detailed text to be rendered for hotspots, even if just blob
+    if (isBlob() && !detailed) {
         return;
     }
     // Place text below southern airport boundary and below symbol
