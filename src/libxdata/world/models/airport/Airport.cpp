@@ -197,13 +197,16 @@ bool Airport::hasOnlyHeliports() const {
     return runways.empty() && !heliports.empty();
 }
 
-bool Airport::hasWaterRunway() const {
+bool Airport::hasOnlyWaterRunways() const {
+    bool foundWater = false;
     for (const auto &rwy: runways) {
-        if (rwy.second->getSurfaceType() == xdata::Runway::SurfaceType::WATER_RUNWAY) {
-            return true;
+        if (rwy.second->isWater()) {
+            foundWater = true;
+        } else {
+            return false;
         }
     }
-    return false;
+    return foundWater;
 }
 
 bool Airport::hasControlTower() const {

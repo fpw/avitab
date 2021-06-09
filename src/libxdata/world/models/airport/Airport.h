@@ -80,7 +80,7 @@ public:
     void addHeliport(std::shared_ptr<Heliport> port);
 
     bool hasOnlyHeliports() const;
-    bool hasWaterRunway() const;
+    bool hasOnlyWaterRunways() const;
     bool hasHardRunway() const;
     bool hasControlTower() const;
 

@@ -48,7 +48,7 @@ void OverlayedAirport::drawGraphics() {
     if (isBlob()) {
         drawAirportBlob();
     } else if (overlayHelper->getMapWidthNM() < DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM) {
-        if ((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT)) {
+        if (type == AerodromeType::HELIPORT) {
             drawAirportICAORing();
         } else {
             drawAirportGeographicRunways();
@@ -125,7 +125,7 @@ bool OverlayedAirport::isEnabled(OverlayHelper helper, const xdata::Airport *air
 }
 
 OverlayedAirport::AerodromeType OverlayedAirport::getAerodromeType(const xdata::Airport *airport) {
-    if (airport->hasWaterRunway()) {
+    if (airport->hasOnlyWaterRunways()) {
         return AerodromeType::SEAPORT;
     } else if (airport->hasOnlyHeliports()) {
         return AerodromeType::HELIPORT;
@@ -210,7 +210,7 @@ void OverlayedAirport::drawAirportICAORing() {
         mapImage->drawLine(px - 3, py - 5, px - 3, py + 5, color); // Left vertical
         mapImage->drawLine(px + 3, py - 5, px + 3, py + 5, color); // Right vertical
         mapImage->drawLine(px - 3, py    , px + 3, py    , color); // Horizonatal
-    } else if (airport->hasWaterRunway()) {
+    } else if (airport->hasOnlyWaterRunways()) {
         // Draw anchor
         mapImage->drawLine(  px - 3, py - 4, px + 3, py - 4, color); // Top
         mapImage->drawLine(  px    , py - 4, px    , py + 4, color); // Vertical
@@ -236,7 +236,8 @@ void OverlayedAirport::drawAirportGeographicRunways() {
             return;
         }
         float aspectRatio = rwyLength / (rwyWidth * 1.1);
-        uint32_t surfColor = (rwy1->hasHardSurface()) ? img::COLOR_DARK_GREY : img::COLOR_DARK_GREEN;
+        uint32_t surfColor = rwy1->hasHardSurface() ? img::COLOR_DARK_GREY :
+            rwy1->isWater() ? img::COLOR_ICAO_BLUE : img::COLOR_DARK_GREEN;
         int xo = (px1 - px2) / aspectRatio;
         int yo = (py1 - py2) / aspectRatio;
         auto mapImage = overlayHelper->getMapImage();
