@@ -249,14 +249,14 @@ void OverlayedMap::showHotspotDetailedText() {
     if (closestNodeToLastClicked) {
         closestNodeToLastClicked->drawText(true);
     }
-    if (closestNodeToPlane &&
-        (closestNodeToPlane->getID() != closestNodeToLastClicked->getID())) {
-        closestNodeToPlane->drawText(true);
-    }
     if (closestNodeToCentre &&
-        (closestNodeToCentre->getID() != closestNodeToLastClicked->getID()) &&
-        (closestNodeToCentre->getID() != closestNodeToPlane->getID())) {
+        (closestNodeToCentre->getID() != closestNodeToLastClicked->getID())) {
         closestNodeToCentre->drawText(true);
+    }
+    if (closestNodeToPlane && overlayConfig->drawMyAircraft &&
+        (closestNodeToPlane->getID() != closestNodeToLastClicked->getID()) &&
+        (closestNodeToPlane->getID() != closestNodeToCentre->getID())) {
+        closestNodeToPlane->drawText(true);
     }
 }
 
@@ -305,6 +305,9 @@ void OverlayedMap::drawDataOverlays() {
     int closestDistanceToLastClicked = std::numeric_limits<int>::max();
     int closestDistanceToPlane = std::numeric_limits<int>::max();
     int closestDistanceToCentre = std::numeric_limits<int>::max();
+    closestNodeToLastClicked.reset();
+    closestNodeToPlane.reset();
+    closestNodeToCentre.reset();
 
     // Gather list of visible OverlayedNodes, instancing those that are visible
     std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
