@@ -34,6 +34,8 @@ public:
 
     void drawGraphics();
     void drawText(bool detailed);
+    int getHotspotX();
+    int getHotspotY();
 
 private:
     static const int MARGIN = 60;

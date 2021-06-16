@@ -137,6 +137,17 @@ std::shared_ptr<TileSource> Stitcher::getTileSource() {
     return tileSource;
 }
 
+void Stitcher::convertSourceImageToRenderedCoords(int &x, int &y) {
+    int unrotatedCentreX = unrotatedImage->getWidth() / 2;
+    int unrotatedCentreY = unrotatedImage->getHeight() / 2;
+    int dstCentreX = dstImage->getWidth() / 2;
+    int dstCentreY = dstImage->getHeight() / 2;
+    int offsetX = unrotatedCentreX - dstCentreX;
+    int offsetY = unrotatedCentreY - dstCentreY;
+    x += offsetX;
+    y += offsetY;
+}
+
 void Stitcher::rotateRight() {
     rotAngle = (rotAngle + 90) % 360;
     updateImage();

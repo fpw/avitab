@@ -30,8 +30,9 @@ public:
     OverlayedNDB(OverlayHelper helper, const xdata::Fix *m_fix);
 
     void drawGraphics();
-
     void drawText(bool detailed);
+    int getHotspotX();
+    int getHotspotY();
 
 private:
     static img::Image ndbIcon;

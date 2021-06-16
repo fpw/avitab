@@ -57,6 +57,7 @@ public:
     std::shared_ptr<Image> getPreRotatedImage();
     std::shared_ptr<Image> getTargetImage();
     std::shared_ptr<TileSource> getTileSource();
+    void convertSourceImageToRenderedCoords(int &x, int &y);
 
 private:
     int page = 0;

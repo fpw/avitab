@@ -33,6 +33,14 @@ std::shared_ptr<OverlayedDME> OverlayedDME::getInstanceIfVisible(OverlayHelper h
     }
 }
 
+int OverlayedDME::getHotspotX() {
+    return px - 20;
+}
+
+int OverlayedDME::getHotspotY() {
+    return py - 20;
+}
+
 void OverlayedDME::drawGraphics() {
     drawGraphicsStatic(overlayHelper, fix, px, py);
 }
@@ -54,7 +62,8 @@ void OverlayedDME::drawText(bool detailed) {
         drawNavTextBox(overlayHelper, "DME", fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(fix->getID(), 12, getHotspotX(), getHotspotY(),
+            img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 

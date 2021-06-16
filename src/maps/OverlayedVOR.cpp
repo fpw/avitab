@@ -34,6 +34,14 @@ std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(OverlayHelper h
     }
 }
 
+int OverlayedVOR::getHotspotX() {
+    return px - 20;
+}
+
+int OverlayedVOR::getHotspotY() {
+    return py - 20;
+}
+
 void OverlayedVOR::drawGraphics() {
     auto vor = fix->getVOR();
     double r = 8;
@@ -90,7 +98,8 @@ void OverlayedVOR::drawText(bool detailed) {
         drawNavTextBox(overlayHelper, type, fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, px - 20, py - 20, img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(fix->getID(), 12, getHotspotX(), getHotspotY(),
+            img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 

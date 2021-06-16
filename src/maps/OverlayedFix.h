@@ -31,6 +31,7 @@ public:
 
     virtual void drawGraphics() = 0;
     virtual void drawText(bool detailed) = 0;
+    virtual std::string getID();
 
 protected:
     OverlayedFix(OverlayHelper helper, const xdata::Fix *fix);
@@ -39,8 +40,6 @@ protected:
     static void drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color,
                                const std::string &ilsHeadingMagnetic = "");
     const xdata::Fix *fix;
-    int px;
-    int py;
 
     static const int TEXT_SIZE = 10;
 

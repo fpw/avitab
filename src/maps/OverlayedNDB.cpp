@@ -59,6 +59,14 @@ void OverlayedNDB::createNDBIcon() {
     radius = ndbIcon.getWidth() / 2;
 }
 
+int OverlayedNDB::getHotspotX() {
+    return px + radius + 5;
+}
+
+int OverlayedNDB::getHotspotY() {
+    return py - radius - 5;
+}
+
 void OverlayedNDB::drawGraphics() {
     auto mapImage = overlayHelper->getMapImage();
     mapImage->blendImage0(ndbIcon, px - radius, py - radius);
@@ -70,7 +78,8 @@ void OverlayedNDB::drawText(bool detailed) {
         drawNavTextBox(overlayHelper, "", fix->getID(), freqString, px + radius, py - radius - 10, img::COLOR_ICAO_MAGENTA);
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, px + radius + 5, py - radius - 5, img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(fix->getID(), 12, getHotspotX(), getHotspotY(),
+            img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 

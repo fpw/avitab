@@ -33,11 +33,16 @@ public:
 
     virtual void drawGraphics() = 0;
     virtual void drawText(bool detailed) = 0;
-
+    virtual int getDistanceFromHotspot(int x, int y);
+    virtual int getHotspotX();
+    virtual int getHotspotY();
+    virtual std::string getID() = 0;
 protected:
     OverlayedNode(OverlayHelper helper);
 
     OverlayHelper overlayHelper;
+    int px = 0;
+    int py = 0;
 };
 
 } /* namespace maps */

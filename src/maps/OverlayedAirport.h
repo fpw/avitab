@@ -33,6 +33,7 @@ public:
 
     void drawGraphics();
     void drawText(bool detailed);
+    virtual std::string getID();
 
 private:
 
@@ -46,8 +47,6 @@ private:
     const xdata::Airport *airport;
     AerodromeType type = AerodromeType::AIRPORT;
     uint32_t color = 0;
-    int px = 0;
-    int py = 0;
 
     static bool isVisible(OverlayHelper helper, const xdata::Airport *airport);
     static bool isEnabled(OverlayHelper helper, const xdata::Airport *airport);

@@ -39,5 +39,18 @@ std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper
     return nullptr;
 }
 
+int OverlayedNode::getDistanceFromHotspot(int x, int y) {
+    // Taxicab distance ok for use-case, instead of more compute intensive full pythagoras
+    return std::abs(getHotspotX() - x) + std::abs(getHotspotY() - y);
+}
+
+int OverlayedNode::getHotspotX() {
+    return px;    
+}
+
+int OverlayedNode::getHotspotY() {
+    return py;    
+}
+
 } /* namespace maps */
 

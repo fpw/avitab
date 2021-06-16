@@ -108,4 +108,8 @@ bool xdata::Runway::hasHardSurface() const{
             (surfaceType == SurfaceType::TRANSPARENT_SURFACE));
 }
 
+bool xdata::Runway::isWater() const{
+    return (surfaceType == SurfaceType::WATER_RUNWAY);
+}
+
 } /* namespace xdata */

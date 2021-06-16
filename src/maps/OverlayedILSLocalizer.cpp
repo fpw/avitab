@@ -24,9 +24,15 @@
 
 namespace maps {
 
-OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *fix):
-    OverlayedFix(helper, fix)
+OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *fix,
+        int lx, int ly, int cx, int cy, int rx, int ry):
+    OverlayedFix(helper, fix),
+    lx(lx), ly(ly),
+    cx(cx), cy(cy),
+    rx(rx), ry(ry)
 {
+    textLocationX =  (px + 4 * cx) / 5;       // Draw NavTextBox 1/5 of the way from end of tail to airport
+    textLocationY = ((py + 4 * cy) / 5) - 20; // And up a bit
 }
 
 std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
@@ -45,16 +51,22 @@ std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisib
     int ymax = std::max(py, (int)std::max(ly, ry));
 
     if (helper->isAreaVisible(xmin, ymin, xmax, ymax)) {
-        return std::make_shared<OverlayedILSLocalizer>(helper, &fix);
+        return std::make_shared<OverlayedILSLocalizer>(helper, &fix, lx, ly, cx, cy, rx, ry);
     } else {
         return nullptr;
     }
 }
 
+int OverlayedILSLocalizer::getHotspotX() {
+    return textLocationX;
+}
+
+int OverlayedILSLocalizer::getHotspotY() {
+    return textLocationY;
+}
+
 void OverlayedILSLocalizer::drawGraphics() {
     auto mapImage = overlayHelper->getMapImage();
-    int cx, cy, lx, ly, rx, ry;
-    getTailCoords(overlayHelper, fix, lx, ly, cx, cy, rx, ry);
     mapImage->drawLineAA(px, py, lx, ly, color);
     mapImage->drawLineAA(px, py, cx, cy, color);
     mapImage->drawLineAA(px, py, rx, ry, color);
@@ -67,10 +79,6 @@ void OverlayedILSLocalizer::drawText(bool detailed) {
     if (!ils) {
         return;
     }
-    int lx, ly, cx, cy, rx, ry;
-    getTailCoords(overlayHelper, fix, lx, ly, cx, cy, rx, ry);
-    int x =  (px + 4 * cx) / 5;       // Draw NavTextBox 1/5 of the way from end of tail to airport
-    int y = ((py + 4 * cy) / 5) - 20; // And up a bit
     std::string type = ils->isLocalizerOnly() ? "LOC" : "ILS";
     type = fix->getDME() ? type + "/DME" : type;
     if (detailed) {
@@ -80,10 +88,12 @@ void OverlayedILSLocalizer::drawText(bool detailed) {
         if (!std::isnan(headingMagnetic)) {
             str << std::setfill('0') << std::setw(3) << int(std::floor(headingMagnetic + 0.5));
         }
-        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, x, y, color, str.str());
+        drawNavTextBox(overlayHelper, type, fix->getID(), freqString, textLocationX, textLocationY,
+                       color, str.str());
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, x, y, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(fix->getID(), 12, textLocationX, textLocationY,
+                           color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 

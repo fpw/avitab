@@ -454,7 +454,7 @@ void MapApp::onMapPan(int x, int y, bool start, bool end) {
     } else if (!end) {
         int panVecX = panPosX - x;
         int panVecY = panPosY - y;
-        map->pan(panVecX, panVecY);
+        map->pan(panVecX, panVecY, x, y);
     }
     panPosX = x;
     panPosY = y;

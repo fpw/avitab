@@ -63,6 +63,9 @@ std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper h
     }
 }
 
+std::string OverlayedFix::getID() {
+    return fix->getID();
+}
 void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color, const std::string &ilsHeadingMagnetic) {
     auto mapImage = helper->getMapImage();
     // x, y is top left corner of rectangular border. If type is not required, pass in as ""
