@@ -41,6 +41,7 @@ public:
     // Query and load tile information
     int getPageCount() override;
     bool isTileValid(int page, int x, int y, int zoom) override;
+    std::string getTileHost();
     std::string getUniqueTileName(int page, int x, int y, int zoom) override;
     std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) override;
 
@@ -51,6 +52,8 @@ public:
     std::string getCopyrightInfo() override;
 private:
     bool cancelToken = false;
+    uint8_t hostIndex = 0;
+    std::string hosts = ("abc");
     Downloader downloader;
 };
 

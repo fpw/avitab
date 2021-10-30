@@ -115,8 +115,12 @@ std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) 
         throw std::runtime_error("Invalid coordinates");
     }
 
+    if (++hostIndex == hosts.length()) {
+        hostIndex = 0;
+    }
+
     std::ostringstream nameStream;
-    nameStream << "a.tile.opentopomap.org/";
+    nameStream << hosts[hostIndex] << ".tile.opentopomap.org/";
     nameStream << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }
