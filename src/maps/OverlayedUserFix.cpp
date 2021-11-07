@@ -17,6 +17,7 @@
  */
 
 #include "OverlayedUserFix.h"
+#include <cstdlib>
 
 namespace maps {
 
@@ -149,7 +150,7 @@ void OverlayedUserFix::splitNameToLines() {
         std::size_t splitPos = 0;
         std::size_t centre = full_text.size() / 2;
         while (pos != std::string::npos) {
-            if (abs(pos - centre) < abs(splitPos - centre)) {
+            if (abs((int) pos - (int) centre) < abs((int) splitPos - (int) centre)) {
                 splitPos = pos;
             }
             pos = full_text.find_first_of(" ,", pos + 1);

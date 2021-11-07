@@ -18,6 +18,7 @@
 
 #include <nlohmann/json.hpp>
 #include <iomanip>
+#include <sstream>
 #include "Settings.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -36,7 +37,7 @@ Settings::Settings(const std::string &settingsFile)
     colorTable.push_back({"BLUE",   0xFF0000A0});
     colorTable.push_back({"GREEN",  0xFF008000});
     colorTable.push_back({"YELLOW", 0xFF808000});
-    
+
     database = std::make_shared<json>();
     init();
     load();
@@ -183,7 +184,7 @@ uint32_t Settings::colorStringToInt(std::string colString, const char* colDefaul
             return i->second;
         }
     }
-    
+
     if ((cstr[0] == '#') && (cstr.size() >= 7)) {
         cstr.erase(0,1);
         uint32_t c = 0;
@@ -197,7 +198,7 @@ uint32_t Settings::colorStringToInt(std::string colString, const char* colDefaul
         if (p == 6) c |= 0xFF000000;// make color opaque if alpha-channel not defined
         if (p) return c;
     }
-    
+
     cstr = colDefault;
     for (auto i = colorTable.begin(); i != colorTable.end(); ++i) {
         if (cstr == i->first) {

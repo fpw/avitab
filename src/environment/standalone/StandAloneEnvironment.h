@@ -44,7 +44,7 @@ public:
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
     std::string getSettingsDir() override;
-    void sendUserFixesFilenameToXData(std::string filename);
+    void sendUserFixesFilenameToXData(std::string filename) override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<xdata::XData> getNavData() override;

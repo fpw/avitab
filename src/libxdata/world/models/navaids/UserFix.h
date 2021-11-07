@@ -43,7 +43,6 @@ public:
 private:
     UserFix::Type type = UserFix::Type::NONE;
     std::string name;
-    int elevation = 0;
 };
 
 } /* namespace xdata */
