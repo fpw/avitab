@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <cmath>
 #include "OverlayedMap.h"
-#include "OverlayedNode.h"
 #include "src/Logger.h"
 
 namespace maps {
@@ -128,7 +127,11 @@ void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
     pixelToPosition(mapImage->getWidth() / 2, mapImage->getHeight() / 2, latitude, longitude);
 }
 
-void OverlayedMap::pan(int dx, int dy) {
+void OverlayedMap::pan(int dx, int dy, int relx, int rely) {
+    if ((relx >= 0) && (rely >= 0)) {
+        stitcher->convertSourceImageToRenderedCoords(relx, rely);
+        pixelToPosition(relx, rely, lastLatClicked, lastLongClicked);
+    }
     stitcher->pan(dx, dy);
 }
 
@@ -236,6 +239,27 @@ void OverlayedMap::drawCalibrationOverlay() {
     mapImage->drawLine(centerX, centerY + r / 2, centerX, centerY - r / 2, color);
 }
 
+bool OverlayedMap::isHotspot(std::shared_ptr<OverlayedNode> node) {
+    return (node->getID() == closestNodeToLastClicked->getID()) ||
+           (node->getID() == closestNodeToPlane->getID()) ||
+           (node->getID() == closestNodeToCentre->getID());
+}
+
+void OverlayedMap::showHotspotDetailedText() {
+    if (closestNodeToLastClicked) {
+        closestNodeToLastClicked->drawText(true);
+    }
+    if (closestNodeToCentre &&
+        (closestNodeToCentre->getID() != closestNodeToLastClicked->getID())) {
+        closestNodeToCentre->drawText(true);
+    }
+    if (closestNodeToPlane && overlayConfig->drawMyAircraft &&
+        (closestNodeToPlane->getID() != closestNodeToLastClicked->getID()) &&
+        (closestNodeToPlane->getID() != closestNodeToCentre->getID())) {
+        closestNodeToPlane->drawText(true);
+    }
+}
+
 void OverlayedMap::drawDataOverlays() {
     if (!navWorld) {
         return;
@@ -268,16 +292,53 @@ void OverlayedMap::drawDataOverlays() {
     double nmPerPixel = metresPerPixel / 1852;
     mapWidthNM = nmPerPixel * mapImage->getWidth();
 
+    // Define last clicked, centre and plane positions for establishing hotspots
+    int lastXClicked, lastYClicked; // Last lat, long clicked, converted to x, y
+    positionToPixel(lastLatClicked, lastLongClicked, lastXClicked, lastYClicked);
+    int centreX = mapImage->getWidth() / 2;
+    int centreY = mapImage->getHeight() / 2;
+    int planeX = centreX;
+    int planeY = centreY;
+    if (!planeLocations.empty()) {
+        positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, planeX, planeY);
+    }
+    int closestDistanceToLastClicked = std::numeric_limits<int>::max();
+    int closestDistanceToPlane = std::numeric_limits<int>::max();
+    int closestDistanceToCentre = std::numeric_limits<int>::max();
+    closestNodeToLastClicked.reset();
+    closestNodeToPlane.reset();
+    closestNodeToCentre.reset();
+
     // Gather list of visible OverlayedNodes, instancing those that are visible
     std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
     std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
-    navWorld->visitNodes(upLeft, downRight, [this, &overlayedAerodromes, &overlayedFixes] (const xdata::NavNode &node) {
+    navWorld->visitNodes(upLeft, downRight, [this, &overlayedAerodromes, &overlayedFixes,
+                                             lastXClicked, lastYClicked, &closestDistanceToLastClicked,
+                                             planeX, planeY, &closestDistanceToPlane,
+                                             centreX, centreY, &closestDistanceToCentre]
+                                             (const xdata::NavNode &node) {
         auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
         if (overlayedNode) {
             if (dynamic_cast<const xdata::Airport *>(&node)) {
                 overlayedAerodromes.push_back(overlayedNode);
             } else if (dynamic_cast<const xdata::Fix *>(&node)) {
                 overlayedFixes.push_back(overlayedNode);
+            }
+            // Consider new node as candidate for hotspots
+            int distanceToLastClicked = overlayedNode->getDistanceFromHotspot(lastXClicked, lastYClicked);
+            if (distanceToLastClicked < closestDistanceToLastClicked) {
+                closestDistanceToLastClicked = distanceToLastClicked;
+                closestNodeToLastClicked = overlayedNode;
+            }
+            int distanceToPlane = overlayedNode->getDistanceFromHotspot(planeX, planeY);
+            if (distanceToPlane < closestDistanceToPlane) {
+                closestDistanceToPlane = distanceToPlane;
+                closestNodeToPlane = overlayedNode;
+            }
+            int distanceToCentre = overlayedNode->getDistanceFromHotspot(centreX, centreY);
+            if (distanceToCentre < closestDistanceToCentre) {
+                closestDistanceToCentre = distanceToCentre;
+                closestNodeToCentre = overlayedNode;
             }
         }
     });
@@ -286,7 +347,7 @@ void OverlayedMap::drawDataOverlays() {
     LOG_INFO(dbg, "%d aerodromes, %d fixes visible", numAerodromesVisible, overlayedFixes.size());
 
     // Render the list of visible OverlayedNodes:
-    // Fix graphics, aerodrome graphics, then fix text and aerodrome text.
+    // Fix graphics, aerodrome graphics, then fix text and aerodrome text, then hotspot text
     for (auto overlayedNode : overlayedFixes) {
         overlayedNode->drawGraphics();
     }
@@ -299,12 +360,18 @@ void OverlayedMap::drawDataOverlays() {
     if (numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT) {
         bool detailedText = numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT;
         for (auto overlayedNode : overlayedFixes) {
-            overlayedNode->drawText(detailedText);
+            if (!isHotspot(overlayedNode)) {
+                overlayedNode->drawText(detailedText);
+            }
         }
         for (auto overlayedNode : overlayedAerodromes) {
-            overlayedNode->drawText(detailedText);
+            if (!isHotspot(overlayedNode)) {
+                overlayedNode->drawText(detailedText);
+            }
         }
     }
+
+    showHotspotDetailedText();
 
     LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
         stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);

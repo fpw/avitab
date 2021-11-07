@@ -56,6 +56,7 @@ public:
     bool isRunway() const override;
     float getWidth() const;
     bool hasHardSurface() const;
+    bool isWater() const;
     SurfaceType getSurfaceType() const;
     const std::string getSurfaceTypeDescription() const;
     void attachILSData(std::weak_ptr<Fix> ils);

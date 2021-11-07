@@ -26,6 +26,7 @@
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
 #include "OverlayConfig.h"
+#include "OverlayedNode.h"
 
 namespace maps {
 
@@ -38,7 +39,7 @@ public:
     void setRedrawCallback(OverlaysDrawnCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
 
-    void pan(int dx, int dy);
+    void pan(int dx, int dy, int relx = -1, int rely = -1);
 
     void centerOnWorldPos(double latitude, double longitude);
     void centerOnPlane();
@@ -94,6 +95,12 @@ private:
     int calibrationStep = 0;
     img::TTFStamper copyrightStamp;
     bool dbg;
+    double lastLatClicked = 0;
+    double lastLongClicked = 0;
+
+    std::shared_ptr<OverlayedNode> closestNodeToLastClicked;
+    std::shared_ptr<OverlayedNode> closestNodeToPlane;
+    std::shared_ptr<OverlayedNode> closestNodeToCentre;
 
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;
@@ -109,6 +116,8 @@ private:
     float cosDegrees(int angleDegrees) const;
     float sinDegrees(int angleDegrees) const;
     void polarToCartesian(float radius, float angleRadians, double& x, double& y);
+    bool isHotspot(std::shared_ptr<OverlayedNode> node);
+    void showHotspotDetailedText();
 
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT = 200;
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 40;
