@@ -110,13 +110,19 @@ bool OpenTopoSource::isTileValid(int page, int x, int y, int zoom) {
     return true;
 }
 
-std::string OpenTopoSource::getTileHost() {
+std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) {
     if (++hostIndex == hosts.length()) {
         hostIndex = 0;
     }
 
     std::ostringstream nameStream;
-    nameStream << hosts[hostIndex] << ".tile.opentopomap.org";
+    if (randomHost) {
+        nameStream << hosts[hostIndex];
+    } else {
+        nameStream << *hosts.begin();
+    }
+    nameStream << ".tile.opentopomap.org/";
+    nameStream << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }
 
@@ -125,15 +131,13 @@ std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) 
         throw std::runtime_error("Invalid coordinates");
     }
 
-    std::ostringstream nameStream;
-    nameStream << getTileHost() << "/";
-    nameStream << zoom << "/" << x << "/" << y << ".png";
-    return nameStream.str();
+    // do not randomize host here so that caching works indepedent of host
+    return getTileURL(false, x, y, zoom);
 }
 
 std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
-    std::string path = getUniqueTileName(page, x, y, zoom);
+    std::string path = getTileURL(true, x, y, zoom);
     auto data = downloader.download("https://" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data, true);
