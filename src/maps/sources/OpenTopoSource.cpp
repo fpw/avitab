@@ -110,17 +110,23 @@ bool OpenTopoSource::isTileValid(int page, int x, int y, int zoom) {
     return true;
 }
 
-std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) {
-    if (!isTileValid(page, x, y, zoom)) {
-        throw std::runtime_error("Invalid coordinates");
-    }
-
+std::string OpenTopoSource::getTileHost() {
     if (++hostIndex == hosts.length()) {
         hostIndex = 0;
     }
 
     std::ostringstream nameStream;
-    nameStream << hosts[hostIndex] << ".tile.opentopomap.org/";
+    nameStream << hosts[hostIndex] << ".tile.opentopomap.org";
+    return nameStream.str();
+}
+
+std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) {
+    if (!isTileValid(page, x, y, zoom)) {
+        throw std::runtime_error("Invalid coordinates");
+    }
+
+    std::ostringstream nameStream;
+    nameStream << getTileHost() << "/";
     nameStream << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }

@@ -28,6 +28,7 @@ namespace crash {
 #else
 
 #include <set>
+#include <atomic>
 #include <thread>
 #include <windows.h>
 #include <DbgHelp.h>

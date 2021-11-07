@@ -53,7 +53,7 @@ public:
 private:
     bool cancelToken = false;
     uint8_t hostIndex = 0;
-    std::string hosts = ("abc");
+    std::string hosts = "abc";
     Downloader downloader;
 };
 
