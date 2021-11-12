@@ -34,6 +34,10 @@ void Runway::setWidth(float w) {
     this->width = w;
 }
 
+void Runway::setHeading(float b) {
+    this->heading = b;
+}
+
 void Runway::setLength(float l) {
     this->length = l;
 }
@@ -77,6 +81,10 @@ std::shared_ptr<Fix> Runway::getILSData() const {
 
 const Location &Runway::getLocation() const {
     return location;
+}
+
+float xdata::Runway::getHeading() const {
+    return heading;
 }
 
 float xdata::Runway::getLength() const {

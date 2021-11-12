@@ -213,32 +213,29 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
 
     std::stringstream str;
     str << std::fixed << std::setprecision(0);
-    double magneticVariation = std::numeric_limits<double>::quiet_NaN();
+    auto aptLoc = airport->getLocation();
+    auto magneticVariation = api().getMagneticVariation(aptLoc.latitude, aptLoc.longitude);
 
     str << "Runways (Length in X-Plane might differ from real length):\n";
     airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
         str << "  " + rwy->getID();
         auto ils = rwy->getILSData();
+        int rwHeading = (int)(rwy->getHeading() + magneticVariation + 0.5 + 360.0) % 360;
         if (ils) {
-            double heading = ils->getILSLocalizer()->getRunwayHeading();
-
-            if (std::isnan(magneticVariation)) {
-                xdata::Location rwyLoc = rwy->getLocation();
-                magneticVariation = api().getMagneticVariation(rwyLoc.latitude, rwyLoc.longitude);
-            }
-
-            heading += magneticVariation;
-
-            if (heading < 0) {
-                heading = 360 + heading;
-            }
+            int ilsHeading = (int)(ils->getILSLocalizer()->getRunwayHeading() + magneticVariation + 0.5 + 360.0) % 360;
 
             str << " " << ils->getILSLocalizer()->getFrequency().getDescription();
             str << " (ID " << ils->getID();
-            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString() << ")";
-            str << ", CRS " << heading << "° mag";
+            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
+            if (ilsHeading != rwHeading) {
+                str << ", CRS " << ilsHeading << "° mag";
+            }
+            str << ")";
         } else {
-            str << " without ILS";
+            str << " without ils";
+        }
+        if (!std::isnan(rwHeading)) {
+            str << ", CRS " << rwHeading << "° mag";
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {
