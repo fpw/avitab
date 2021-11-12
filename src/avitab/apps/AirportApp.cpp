@@ -319,6 +319,7 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
         tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, apis::ChartCategory::DEP)) + ")", -3);
         tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, apis::ChartCategory::APP)) + ")", -4);
         tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, apis::ChartCategory::REF)) + ")", -5);
+        tab.chartSelect->add("Other (" + std::to_string(countCharts(charts, apis::ChartCategory::OTHER)) + ")", 6);
     } else {
         tab.chartSelect->add("Back", Widget::Symbol::LEFT, -6);
         for (size_t i = 0; i < charts.size(); i++) {

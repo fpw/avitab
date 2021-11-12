@@ -30,6 +30,7 @@ enum class ChartCategory {
     DEP,
     ARR,
     APP,
+    OTHER,
 };
 
 class Chart {
