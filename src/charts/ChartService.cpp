@@ -22,9 +22,10 @@
 
 namespace apis {
 
-ChartService::ChartService(const std::string &cachePath) {
+ChartService::ChartService(const std::string &cachePath, const std::string &dataPath) {
     navigraph = std::make_shared<navigraph::NavigraphAPI>(cachePath);
     chartfox = std::make_shared<chartfox::ChartFoxAPI>();
+    localFile= std::make_shared<localfile::LocalFileAPI>(dataPath);
 
     keepAlive = true;
     apiThread = std::make_unique<std::thread>(&ChartService::workLoop, this);
@@ -68,6 +69,12 @@ std::shared_ptr<APICall<ChartService::ChartList>> ChartService::getChartsFor(con
             auto charts = chartfox->getChartsFor(icao);
             res.insert(res.end(), charts.begin(), charts.end());
         }
+
+        if (useLocalFile) {
+            auto charts = localFile->getChartsFor(icao);
+            res.insert(res.end(), charts.begin(), charts.end());
+        }
+
         return res;
     });
 
@@ -84,6 +91,11 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
         auto nvChart = std::dynamic_pointer_cast<navigraph::NavigraphChart>(chart);
         if (nvChart) {
             navigraph->loadChartImages(nvChart);
+        }
+
+        auto lfChart = std::dynamic_pointer_cast<localfile::LocalFileChart>(chart);
+        if (lfChart) {
+            localFile->loadChart(lfChart);
         }
 
         return chart;
