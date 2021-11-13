@@ -46,7 +46,8 @@ private:
 
     const static int RADIUS = 6;
     const static int DIAG = RADIUS * 0.7071;
-    const static uint32_t POI_COLOR = 0xFF702060;
+    const static uint32_t POI_TEXT_COLOR = 0xFF702060;
+    const static uint32_t POI_FILL_COLOR = 0xFFFFFF00;
     const static uint32_t VRP_COLOR = 0xFF103070;
     const static uint32_t MARKER_COLOR = 0xFFFF1010;
 };
