@@ -57,11 +57,11 @@ void OverlayedUserFix::createIcons() {
     int yc = r;
 
     POIIcon.resize(r * 2 + 1, r * 2 + 1, 0);
-    POIIcon.fillCircle(xc, yc, r, img::COLOR_WHITE);
-    POIIcon.drawCircle(xc, yc, r, POI_COLOR);
-    // Draw an X
-    POIIcon.drawLine(xc - DIAG, yc - DIAG, xc + DIAG, yc + DIAG, POI_COLOR);
-    POIIcon.drawLine(xc + DIAG, yc - DIAG, xc - DIAG, yc + DIAG, POI_COLOR);
+    POIIcon.fillCircle(xc, yc, r,   POI_FILL_COLOR);
+    POIIcon.fillCircle(xc, yc, r/2, POI_TEXT_COLOR);
+    POIIcon.drawCircle(xc, yc, r,   POI_TEXT_COLOR);
+    POIIcon.drawLine(0, r, 2 * r, r, POI_TEXT_COLOR);
+    POIIcon.drawLine(r, 0, r, 2 * r, POI_TEXT_COLOR);
 
     VRPIcon.resize(r * 2 + 1, r * 2 + 1, 0);
     VRPIcon.fillCircle(xc, yc, r, img::COLOR_WHITE);
@@ -116,7 +116,7 @@ void OverlayedUserFix::drawText(bool detailed) {
     uint32_t color;
     if (type == xdata::UserFix::Type::POI) {
         typeString = "POI";
-        color = POI_COLOR;
+        color = POI_TEXT_COLOR;
     } else if (type == xdata::UserFix::Type::VRP) {
         typeString = "VRP";
         color = VRP_COLOR;
