@@ -22,10 +22,10 @@
 
 namespace apis {
 
-ChartService::ChartService(const std::string &cachePath, const std::string &dataPath) {
-    navigraph = std::make_shared<navigraph::NavigraphAPI>(cachePath);
+ChartService::ChartService(const std::string &programPath) {
+    navigraph = std::make_shared<navigraph::NavigraphAPI>(programPath + "/Navigraph/");
     chartfox = std::make_shared<chartfox::ChartFoxAPI>();
-    localFile= std::make_shared<localfile::LocalFileAPI>(dataPath);
+    localFile= std::make_shared<localfile::LocalFileAPI>(programPath + "/charts/");
 
     keepAlive = true;
     apiThread = std::make_unique<std::thread>(&ChartService::workLoop, this);

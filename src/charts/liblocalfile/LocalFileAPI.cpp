@@ -26,11 +26,9 @@
 
 namespace localfile {
 
-LocalFileAPI::LocalFileAPI(const std::string dataPath) {
-    chartsPath = dataPath + "charts/";
-
-    // Only PDFs are supported
-    filter  = std::regex(".(pdf|png|jpeg|jpg|bmp)$", std::regex_constants::ECMAScript | std::regex_constants::icase);
+LocalFileAPI::LocalFileAPI(const std::string chartsPath) {
+    this->chartsPath = chartsPath;
+    this->filter  = std::regex(".(pdf|png|jpeg|jpg|bmp)$", std::regex_constants::ECMAScript | std::regex_constants::icase);
 }
 
 bool LocalFileAPI::isSupported() {

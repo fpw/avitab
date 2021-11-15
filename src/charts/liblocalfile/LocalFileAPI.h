@@ -28,7 +28,7 @@ namespace localfile {
 
 class LocalFileAPI {
 public:
-    LocalFileAPI(const std::string dataPath);
+    LocalFileAPI(const std::string chartsPath);
     ~LocalFileAPI();
 
     bool isSupported();

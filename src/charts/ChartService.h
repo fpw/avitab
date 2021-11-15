@@ -33,7 +33,7 @@ class ChartService {
 public:
     using ChartList = std::vector<std::shared_ptr<Chart>>;
 
-    ChartService(const std::string &cachePath, const std::string &dataPath);
+    ChartService(const std::string &programPath);
     ~ChartService();
 
     // synchronous calls
