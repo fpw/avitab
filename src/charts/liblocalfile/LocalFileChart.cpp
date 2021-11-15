@@ -17,8 +17,10 @@
  */
 
 #include <algorithm>
+#include <string>
 #include <stdexcept>
 #include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/ImageSource.h"
 #include "LocalFileChart.h"
 
 namespace localfile {
@@ -32,6 +34,9 @@ LocalFileChart::LocalFileChart(const std::string path, const std::string name, c
     std::replace(id.begin(), id.end(), '_', ' ');
     auto extPos = id.rfind('.');
     if (extPos != std::string::npos) {
+        auto ext = id.substr(extPos + 1);
+        this->isPdf = !ext.compare("pdf") || !ext.compare("PDF");
+
         id = id.substr(0, extPos);
     }
 
@@ -59,15 +64,15 @@ std::string LocalFileChart::getName() const {
 }
 
 bool LocalFileChart::isLoaded() const {
-    return !pdfData.empty();
+    return !fileData.empty();
 }
 
 std::string LocalFileChart::getPath() const {
     return path;
 }
 
-void LocalFileChart::attachPDF(const std::vector<uint8_t> &data) {
-    pdfData = data;
+void LocalFileChart::attachData(const std::vector<uint8_t> &data) {
+    fileData = data;
 }
 
 std::shared_ptr<img::TileSource> LocalFileChart::createTileSource(bool nightMode) {
@@ -75,9 +80,17 @@ std::shared_ptr<img::TileSource> LocalFileChart::createTileSource(bool nightMode
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData);
-    pdfSrc->setNightMode(nightMode);
-    return pdfSrc;
+    if (isPdf) {
+        auto pdfSrc = std::make_shared<maps::PDFSource>(fileData);
+        pdfSrc->setNightMode(nightMode);
+
+        return  pdfSrc;
+    } else {
+        auto img = std::make_shared<img::Image>();
+        img->loadEncodedData(fileData, false);
+
+        return std::make_shared<maps::ImageSource>(img);
+    }
 }
 
 void LocalFileChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {

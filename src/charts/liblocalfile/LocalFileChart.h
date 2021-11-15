@@ -39,14 +39,15 @@ public:
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
 
     std::string getPath() const;
-    void attachPDF(const std::vector<uint8_t> &data);
+    void attachData(const std::vector<uint8_t> &data);
 private:
     std::string icao;
     size_t index;
     apis::ChartCategory category;
     std::string identifier;
     std::string path;
-    std::vector<uint8_t> pdfData;
+    std::vector<uint8_t> fileData;
+    bool isPdf;
 };
 
 } // namespace localfile
