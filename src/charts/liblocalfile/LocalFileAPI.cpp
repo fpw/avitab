@@ -23,6 +23,7 @@
 #include "LocalFileAPI.h"
 #include "src/charts/Crypto.h"
 #include "src/platform/Platform.h"
+#include "src/Logger.h"
 
 namespace localfile {
 
@@ -38,20 +39,25 @@ bool LocalFileAPI::isSupported() {
 std::vector<std::shared_ptr<apis::Chart>> LocalFileAPI::getChartsFor(const std::string &icao) {
     std::vector<std::shared_ptr<apis::Chart>> charts;
     std::string path = chartsPath + icao + "/";
-    std::vector<platform::DirEntry> entries = platform::readDirectory(path);
-    size_t idx = 1;
 
-    std::sort(entries.begin(), entries.end(), [](const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
-        return a.utf8Name < b.utf8Name;
-    });
+    try {
+        std::vector<platform::DirEntry> entries = platform::readDirectory(path);
+        size_t idx = 1;
 
-    for (auto item: entries) {
-        if (item.isDirectory || !std::regex_search(item.utf8Name, filter)) {
-            continue;
+        std::sort(entries.begin(), entries.end(), [](const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
+            return a.utf8Name < b.utf8Name;
+        });
+
+        for (auto item: entries) {
+            if (item.isDirectory || !std::regex_search(item.utf8Name, filter)) {
+                continue;
+            }
+
+            auto chart = std::make_shared<LocalFileChart>(path, item.utf8Name, icao, idx++);
+            charts.push_back(chart);
         }
-
-        auto chart = std::make_shared<LocalFileChart>(path, item.utf8Name, icao, idx++);
-        charts.push_back(chart);
+    } catch (const std::exception &e) {
+        logger::verbose(e.what());
     }
 
     return charts;
