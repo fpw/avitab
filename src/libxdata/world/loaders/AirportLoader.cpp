@@ -102,12 +102,14 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     }
 
     for (auto &entry: port.runways) {
+        float heading = std::numeric_limits<float>::quiet_NaN();
         float length = std::numeric_limits<float>::quiet_NaN();
         if (entry.ends.size() == 2) {
             auto &end1 = entry.ends[0];
             auto &end2 = entry.ends[1];
             Location end1Loc(end1.latitude, end1.longitude);
             Location end2Loc(end2.latitude, end2.longitude);
+            heading = end1Loc.bearingTo(end2Loc);
             length = end1Loc.distanceTo(end2Loc) - end1.displace - end2.displace;
         } else {
             LOG_WARN("%s has runway with %d ends!", port.id.c_str(), entry.ends.size());
@@ -119,6 +121,9 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             rwy->setLocation(Location(end->latitude, end->longitude));
             rwy->setWidth(entry.width);
             rwy->setSurfaceType((Runway::SurfaceType) entry.surfaceType);
+            if (!std::isnan(heading)) {
+                rwy->setHeading(end == entry.ends.begin() ? heading : std::fmod(heading + 180.0, 360.0));
+            }
             if (!std::isnan(length)) {
                 rwy->setLength(length);
             }

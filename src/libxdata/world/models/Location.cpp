@@ -30,6 +30,19 @@ bool Location::isValid() const {
     return (!std::isnan(latitude) && !std::isnan(longitude));
 }
 
+double Location::bearingTo(const Location& other) const {
+    // using the haversine formula
+    double phi1 = latitude * M_PI / 180;
+    double phi2 = other.latitude * M_PI / 180;
+    double deltaLambda = (other.longitude - longitude) * M_PI / 180.0;
+
+    double y = std::sin(deltaLambda) * std::cos(phi2);
+    double x = std::cos(phi1) * std::sin(phi2) -
+               std::sin(phi1) * std::cos(phi2) * std::cos(deltaLambda);
+    double theta =std::atan2(y, x);
+    return std::fmod((theta * 180.0 / M_PI) + 360.0, 360.0);
+}
+
 double Location::distanceTo(const Location& other) const {
     // using the haversine formula
     double R = 6371000; // earth radius in meters

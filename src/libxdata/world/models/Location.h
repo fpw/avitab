@@ -31,6 +31,8 @@ struct Location {
 
     bool isValid() const;
 
+    double bearingTo(const Location &other) const;
+
     double distanceTo(const Location &other) const;
 };
 

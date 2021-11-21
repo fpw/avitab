@@ -46,9 +46,11 @@ public:
     Runway(const std::string &name);
     void rename(const std::string &newName);
     void setWidth(float w);
+    void setHeading(float b);
     void setLength(float l);
     void setLocation(const Location &loc);
     void setSurfaceType(SurfaceType surfaceType);
+    float getHeading() const; // can be NaN
     float getLength() const; // can be NaN
 
     const std::string &getID() const override;
@@ -67,6 +69,7 @@ private:
     std::string name;
     Location location;
     float width = std::numeric_limits<float>::quiet_NaN(); // meters
+    float heading = std::numeric_limits<float>::quiet_NaN(); // degrees
     float length = std::numeric_limits<float>::quiet_NaN(); // meters
     SurfaceType surfaceType;
 
