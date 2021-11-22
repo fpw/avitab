@@ -64,7 +64,7 @@ std::vector<std::shared_ptr<apis::Chart>> LocalFileAPI::getChartsFor(const std::
 }
 
 void LocalFileAPI::loadChart(std::shared_ptr<LocalFileChart> chart) {
-    std::ifstream instream(chart->getPath(), std::ios::in | std::ios::binary);
+    fs::ifstream instream(fs::u8path(chart->getPath()), std::ios::in | std::ios::binary);
     std::vector<uint8_t> fileData((std::istreambuf_iterator<char>(instream)), std::istreambuf_iterator<char>());
     chart->attachData(fileData);
 }
