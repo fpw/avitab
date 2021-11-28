@@ -19,6 +19,7 @@
 #include "OverlayedNode.h"
 #include "OverlayedFix.h"
 #include "OverlayedAirport.h"
+#include <typeinfo>
 
 namespace maps {
 
@@ -50,6 +51,13 @@ int OverlayedNode::getHotspotX() {
 
 int OverlayedNode::getHotspotY() {
     return py;    
+}
+
+bool OverlayedNode::isEqual(OverlayedNode & node) {
+   return (this->getID() == node.getID()) &&
+          (typeid(*this) == typeid(node)) &&
+          (this->px == node.px) &&
+          (this->py == node.py);
 }
 
 } /* namespace maps */

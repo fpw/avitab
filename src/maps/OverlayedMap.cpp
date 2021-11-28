@@ -240,9 +240,9 @@ void OverlayedMap::drawCalibrationOverlay() {
 }
 
 bool OverlayedMap::isHotspot(std::shared_ptr<OverlayedNode> node) {
-    return (node->getID() == closestNodeToLastClicked->getID()) ||
-           (node->getID() == closestNodeToPlane->getID()) ||
-           (node->getID() == closestNodeToCentre->getID());
+    return (node->isEqual(*closestNodeToLastClicked)) ||
+           (node->isEqual(*closestNodeToPlane)) ||
+           (node->isEqual(*closestNodeToCentre));
 }
 
 void OverlayedMap::showHotspotDetailedText() {
@@ -250,12 +250,12 @@ void OverlayedMap::showHotspotDetailedText() {
         closestNodeToLastClicked->drawText(true);
     }
     if (closestNodeToCentre &&
-        (closestNodeToCentre->getID() != closestNodeToLastClicked->getID())) {
+        (!closestNodeToCentre->isEqual(*closestNodeToLastClicked))) {
         closestNodeToCentre->drawText(true);
     }
     if (closestNodeToPlane && overlayConfig->drawMyAircraft &&
-        (closestNodeToPlane->getID() != closestNodeToLastClicked->getID()) &&
-        (closestNodeToPlane->getID() != closestNodeToCentre->getID())) {
+        (!closestNodeToPlane->isEqual(*closestNodeToLastClicked)) &&
+        (!closestNodeToPlane->isEqual(*closestNodeToCentre))) {
         closestNodeToPlane->drawText(true);
     }
 }

@@ -37,6 +37,7 @@ public:
     virtual int getHotspotX();
     virtual int getHotspotY();
     virtual std::string getID() = 0;
+    bool isEqual(OverlayedNode &node);
 protected:
     OverlayedNode(OverlayHelper helper);
 
