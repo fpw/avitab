@@ -72,9 +72,6 @@ void TTFStamper::setSize(float size) {
 }
 
 void TTFStamper::setText(const std::string& newText) {
-    if (newText == text) {
-        return;
-    }
     text = newText;
     width = calculateTextWidth();
     if (width == 0) {
