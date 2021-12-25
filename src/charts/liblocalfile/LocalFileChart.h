@@ -26,7 +26,7 @@ namespace localfile {
 
 class LocalFileChart: public apis::Chart {
 public:
-    LocalFileChart(const std::string path, const std::string name, const std::string &icao, size_t idx);
+    LocalFileChart(const std::string dir, const std::string name, const std::string &icao, size_t idx);
     virtual ~LocalFileChart() = default;
 
     virtual std::string getICAO() const override;
@@ -46,8 +46,6 @@ private:
     apis::ChartCategory category;
     std::string identifier;
     std::string path;
-    std::vector<uint8_t> fileData;
-    bool isPdf;
 };
 
 } // namespace localfile

@@ -29,7 +29,7 @@ namespace localfile {
 
 LocalFileAPI::LocalFileAPI(const std::string chartsPath) {
     this->chartsPath = chartsPath;
-    this->filter  = std::regex(".(pdf|png|jpeg|jpg|bmp)$", std::regex_constants::ECMAScript | std::regex_constants::icase);
+    this->filter = std::regex("\\.(pdf|png|jpeg|jpg|bmp)$", std::regex::icase);
 }
 
 bool LocalFileAPI::isSupported() {
@@ -40,11 +40,15 @@ std::vector<std::shared_ptr<apis::Chart>> LocalFileAPI::getChartsFor(const std::
     std::vector<std::shared_ptr<apis::Chart>> charts;
     std::string path = chartsPath + icao + "/";
 
+    if (!platform::fileExists(path)) {
+        return charts;
+    }
+
     try {
         std::vector<platform::DirEntry> entries = platform::readDirectory(path);
         size_t idx = 1;
 
-        std::sort(entries.begin(), entries.end(), [](const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
+        std::sort(entries.begin(), entries.end(), [] (const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
             return a.utf8Name < b.utf8Name;
         });
 
@@ -57,16 +61,14 @@ std::vector<std::shared_ptr<apis::Chart>> LocalFileAPI::getChartsFor(const std::
             charts.push_back(chart);
         }
     } catch (const std::exception &e) {
-        logger::verbose(e.what());
+        logger::verbose("Couldn't get local charts for %s: %s", icao.c_str(), e.what());
     }
 
     return charts;
 }
 
 void LocalFileAPI::loadChart(std::shared_ptr<LocalFileChart> chart) {
-    fs::ifstream instream(fs::u8path(chart->getPath()), std::ios::in | std::ios::binary);
-    std::vector<uint8_t> fileData((std::istreambuf_iterator<char>(instream)), std::istreambuf_iterator<char>());
-    chart->attachData(fileData);
+    // since the file is stored locally, we don't need to do any special loading
 }
 
 LocalFileAPI::~LocalFileAPI() {
