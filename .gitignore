@@ -36,6 +36,7 @@
 # Project specific ignores
 build
 build-third
+cmake-build-debug
 
 # Jetbrains IDE
 .idea/

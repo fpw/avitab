@@ -24,6 +24,7 @@
 #include "APICall.h"
 #include "Chart.h"
 #include "src/charts/libchartfox/ChartFoxAPI.h"
+#include "src/charts/liblocalfile/LocalFileAPI.h"
 #include "src/charts/libnavigraph/NavigraphAPI.h"
 
 namespace apis {
@@ -32,7 +33,7 @@ class ChartService {
 public:
     using ChartList = std::vector<std::shared_ptr<Chart>>;
 
-    ChartService(const std::string &cachePath);
+    ChartService(const std::string &programPath);
     ~ChartService();
 
     // synchronous calls
@@ -53,9 +54,11 @@ public:
 private:
     std::shared_ptr<navigraph::NavigraphAPI> navigraph;
     std::shared_ptr<chartfox::ChartFoxAPI> chartfox;
+    std::shared_ptr<localfile::LocalFileAPI> localFile;
 
     bool useNavigraph = false;
     bool useChartFox = false;
+    bool useLocalFile = true;
 
     std::mutex mutex;
     std::condition_variable workCondition;

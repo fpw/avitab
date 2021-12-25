@@ -316,8 +316,9 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
         tab.chartSelect->add("Departure (" + std::to_string(countCharts(charts, apis::ChartCategory::DEP)) + ")", -3);
         tab.chartSelect->add("Approach (" + std::to_string(countCharts(charts, apis::ChartCategory::APP)) + ")", -4);
         tab.chartSelect->add("Reference (" + std::to_string(countCharts(charts, apis::ChartCategory::REF)) + ")", -5);
+        tab.chartSelect->add("Other (" + std::to_string(countCharts(charts, apis::ChartCategory::OTHER)) + ")", -6);
     } else {
-        tab.chartSelect->add("Back", Widget::Symbol::LEFT, -6);
+        tab.chartSelect->add("Back", Widget::Symbol::LEFT, -7);
         for (size_t i = 0; i < charts.size(); i++) {
             if (charts[i]->getCategory() == tab.requestedList) {
                 tab.chartSelect->add(charts[i]->getIndex() + ": " + charts[i]->getName(), i);
@@ -337,7 +338,8 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
                 case -3: listTab.requestedList = apis::ChartCategory::DEP; break;
                 case -4: listTab.requestedList = apis::ChartCategory::APP; break;
                 case -5: listTab.requestedList = apis::ChartCategory::REF; break;
-                case -6: listTab.requestedList = apis::ChartCategory::ROOT; break;
+                case -6: listTab.requestedList = apis::ChartCategory::OTHER; break;
+                case -7: listTab.requestedList = apis::ChartCategory::ROOT; break;
                 }
                 onChartsLoaded(page, listTab.charts);
                 return;

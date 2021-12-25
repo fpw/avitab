@@ -77,7 +77,7 @@ void Rasterizer::loadMemory(const std::vector<uint8_t> &data) {
 }
 
 void Rasterizer::loadDocument() {
-    logger::info("Loading document in thread %d'", std::this_thread::get_id());
+    logger::info("Loading document in thread %d", std::this_thread::get_id());
 
     fz_try(ctx) {
         totalPages = fz_count_pages(ctx, doc);

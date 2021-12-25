@@ -35,7 +35,7 @@ AviTab::AviTab(std::shared_ptr<Environment> environment):
     if (env->getConfig()->getBool("/AviTab/loadNavData")) {
         env->loadNavWorldInBackground();
     }
-    chartService = std::make_shared<apis::ChartService>(env->getProgramPath() + "/Navigraph/");
+    chartService = std::make_shared<apis::ChartService>(env->getProgramPath());
     jsRuntime = std::make_shared<js::Runtime>();
     env->resumeEnvironmentJobs();
 }

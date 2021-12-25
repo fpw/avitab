@@ -15,36 +15,32 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef AVITAB_CHART_H
-#define AVITAB_CHART_H
+
+#ifndef AVITAB_LOCALFILEAPI_H
+#define AVITAB_LOCALFILEAPI_H
 
 #include <string>
-#include "src/libimg/stitcher/TileSource.h"
+#include <vector>
+#include <regex>
+#include "LocalFileChart.h"
 
-namespace apis {
+namespace localfile {
 
-enum class ChartCategory {
-    ROOT,
-    REF,
-    APT,
-    DEP,
-    ARR,
-    APP,
-    OTHER,
-};
-
-class Chart {
+class LocalFileAPI {
 public:
-    virtual std::string getICAO() const = 0;
-    virtual std::string getIndex() const = 0;
-    virtual ChartCategory getCategory() const = 0;
-    virtual std::string getName() const = 0;
+    LocalFileAPI(const std::string chartsPath);
+    ~LocalFileAPI();
 
-    virtual bool isLoaded() const = 0;
-    virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) = 0;
-    virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) = 0;
+    bool isSupported();
+
+    std::vector<std::shared_ptr<apis::Chart>> getChartsFor(const std::string &icao);
+    void loadChart(std::shared_ptr<LocalFileChart> chart);
+
+private:
+    std::string chartsPath;
+    std::regex filter;
 };
 
-} /* namespace navigraph */
+} // namespace localfile
 
-#endif //AVITAB_CHART_H
+#endif //AVITAB_LOCALFILEAPI_H
