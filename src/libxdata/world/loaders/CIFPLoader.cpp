@@ -43,21 +43,26 @@ void CIFPLoader::load(std::shared_ptr<Airport> airport, const std::string& file)
 
 void CIFPLoader::onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
     switch (procedure.type) {
-    case CIFPData::ProcedureType::SID: {
+    case CIFPData::ProcedureType::RUNWAY:
+        loadRunway(airport, procedure);
+    case CIFPData::ProcedureType::SID:
         loadSID(airport, procedure);
         break;
-    }
-    case CIFPData::ProcedureType::STAR: {
+    case CIFPData::ProcedureType::STAR:
         loadSTAR(airport, procedure);
         break;
-    }
-    case CIFPData::ProcedureType::APPROACH: {
+    case CIFPData::ProcedureType::APPROACH:
         loadApproach(airport, procedure);
         break;
-    }
     default:
         return;
     }
+}
+
+void CIFPLoader::loadRunway(std::shared_ptr<Airport> airport, const CIFPData& procedure) {
+    forEveryMatchingRunway(procedure.id, airport, [&procedure] (std::shared_ptr<Runway> rwy) {
+        rwy->setElevation(procedure.rwyInfo.elevation);
+    });
 }
 
 void CIFPLoader::loadSID(std::shared_ptr<Airport> airport, const CIFPData& procedure) {

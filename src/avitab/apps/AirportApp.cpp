@@ -216,10 +216,11 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     auto aptLoc = airport->getLocation();
     auto magneticVariation = api().getMagneticVariation(aptLoc.latitude, aptLoc.longitude);
 
-    str << "Runways (Length in X-Plane might differ from real length):\n";
+    str << "Runways:\n";
     airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
         str << "  " + rwy->getID();
         auto ils = rwy->getILSData();
+        auto elevation = rwy->getElevation();
         int rwHeading = (int)(rwy->getHeading() + magneticVariation + 0.5 + 360.0) % 360;
         if (ils) {
             int ilsHeading = (int)(ils->getILSLocalizer()->getRunwayHeading() + magneticVariation + 0.5 + 360.0) % 360;
@@ -236,6 +237,9 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         }
         if (!std::isnan(rwHeading)) {
             str << ", CRS " << rwHeading << "° mag";
+        }
+        if (!std::isnan(elevation)) {
+            str << ", " << (int) elevation << " ft MSL";
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {

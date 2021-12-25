@@ -48,6 +48,7 @@ private:
     void finishAndRestart();
 
     RecordType parseRecordType();
+    void parseRunway();
     void parseProcedure();
     void parseRunwayTransition();
     void parseCommonRoute();

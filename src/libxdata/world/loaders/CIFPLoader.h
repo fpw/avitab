@@ -34,6 +34,7 @@ private:
 
     void onProcedureLoaded(std::shared_ptr<Airport> airport, const CIFPData &procedure);
 
+    void loadRunway(std::shared_ptr<Airport> airport, const CIFPData &procedure);
     void loadSID(std::shared_ptr<Airport> airport, const CIFPData &procedure);
     void loadSTAR(std::shared_ptr<Airport> airport, const CIFPData &procedure);
     void loadApproach(std::shared_ptr<Airport> airport, const CIFPData &procedure);

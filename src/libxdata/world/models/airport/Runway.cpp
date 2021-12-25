@@ -42,6 +42,10 @@ void Runway::setLength(float l) {
     this->length = l;
 }
 
+void Runway::setElevation(float e) {
+    this->elevation = e;
+}
+
 void Runway::setLocation(const Location &loc) {
     this->location = loc;
 }
@@ -89,6 +93,10 @@ float xdata::Runway::getHeading() const {
 
 float xdata::Runway::getLength() const {
     return length;
+}
+
+float xdata::Runway::getElevation() const {
+    return elevation;
 }
 
 xdata::Runway::SurfaceType xdata::Runway::getSurfaceType() const{

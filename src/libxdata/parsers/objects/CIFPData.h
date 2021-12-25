@@ -88,7 +88,8 @@ struct CIFPData {
         NONE,
         SID,
         STAR,
-        APPROACH
+        APPROACH,
+        RUNWAY,
     };
 
     struct FixInRegion {
@@ -121,6 +122,12 @@ struct CIFPData {
         std::vector<FixInRegion> fixes;
     };
 
+    // For type = runway
+    struct RunwayInfo {
+        int elevation = 0;
+        int ilsCategory = 0;
+    };
+
     ProcedureType type = ProcedureType::NONE;
     std::string id;
 
@@ -129,6 +136,7 @@ struct CIFPData {
     std::map<std::string, EnrouteTransition> enrouteTransitions; // key is destination fix, e.g. "COREZ"
     std::map<std::string, ApproachTransition> approachTransitions; // key is approach name, e.g. "RAR25"
     std::vector<FixInRegion> approach;
+    RunwayInfo rwyInfo{};
 };
 
 } /* namespace xdata */

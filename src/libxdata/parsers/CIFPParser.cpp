@@ -48,6 +48,9 @@ void CIFPParser::parseLine() {
     case RecordType::APPROACH:
         parseProcedure();
         break;
+    case RecordType::RWY:
+        parseRunway();
+        break;
     default:
         // silently ignore other types for now
         return;
@@ -80,6 +83,26 @@ CIFPParser::RecordType CIFPParser::parseRecordType() {
     } else {
         return RecordType::UNKNOWN;
     }
+}
+
+void CIFPParser::parseRunway() {
+    finishAndRestart();
+
+    curData.type = CIFPData::ProcedureType::RUNWAY;
+    curData.id = parser.nextDelimitedWord(','); // runway identifier
+    parser.nextDelimitedWord(','); // gradient
+    parser.nextDelimitedWord(','); // ellipsoid height
+    auto elevationStr = parser.nextDelimitedWord(','); // landing threshold elevation
+    parser.nextDelimitedWord(','); // TCH value
+    parser.nextDelimitedWord(','); // localizer identifier
+    auto ilsCatStr = parser.nextDelimitedWord(','); // ILS category
+    parser.nextDelimitedWord(';'); // threshold crossing height
+    parser.nextDelimitedWord(','); // latitude
+    parser.nextDelimitedWord(','); // longitude
+    parser.nextDelimitedWord(';'); // displacement distance
+
+    curData.rwyInfo.elevation = std::strtoul(elevationStr.c_str(), nullptr, 10);
+    curData.rwyInfo.ilsCategory = std::strtoul(ilsCatStr.c_str(), nullptr, 10);
 }
 
 void CIFPParser::parseProcedure() {

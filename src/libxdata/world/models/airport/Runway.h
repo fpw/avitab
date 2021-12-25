@@ -50,8 +50,10 @@ public:
     void setLength(float l);
     void setLocation(const Location &loc);
     void setSurfaceType(SurfaceType surfaceType);
+    void setElevation(float elevation);
     float getHeading() const; // can be NaN
     float getLength() const; // can be NaN
+    float getElevation() const; // can be NaN
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
@@ -68,6 +70,7 @@ public:
 private:
     std::string name;
     Location location;
+    float elevation = std::numeric_limits<float>::quiet_NaN(); // feet MSL
     float width = std::numeric_limits<float>::quiet_NaN(); // meters
     float heading = std::numeric_limits<float>::quiet_NaN(); // degrees
     float length = std::numeric_limits<float>::quiet_NaN(); // meters
