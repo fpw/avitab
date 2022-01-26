@@ -78,15 +78,25 @@ void MapApp::createSettingsLayout() {
     openTopoButton = std::make_shared<Button>(settingsContainer, "OpenTopo");
     openTopoButton->setCallback([this] (const Button &) { setMapSource(MapSource::OPEN_TOPO); });
     auto openTopoLabel = std::make_shared<Label>(settingsContainer,
-            "Downloads map tiles on demand.\nMap Data (c) OpenStreetMap + SRTM\nMap Style (c) OpenTopoMap.org");
+            "Map Data (c) OpenStreetMap + SRTM\nMap Style (c) OpenTopoMap.org");
     openTopoLabel->alignRightOf(openTopoButton, 10);
     openTopoLabel->setManaged();
+
+    stamenButton = std::make_shared<Button>(settingsContainer, "Stamen");
+    stamenButton->setCallback([this] (const Button &) { setMapSource(MapSource::STAMEN_TERRAIN); });
+    stamenButton->setFit(false, true);
+    stamenButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    stamenButton->alignBelow(openTopoButton, 30);
+    auto stamenLabel = std::make_shared<Label>(settingsContainer,
+            "Map Data (c) OpenStreetMap\nEnglish map tiles by Stamen Design");
+    stamenLabel->alignRightOf(stamenButton, 10);
+    stamenLabel->setManaged();
 
     epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3857");
     epsgButton->setCallback([this] (const Button &) { setMapSource(MapSource::EPSG3857); });
     epsgButton->setFit(false, true);
     epsgButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    epsgButton->setPosition(openTopoButton->getX(), openTopoButton->getY() + openTopoLabel->getHeight());
+    epsgButton->alignBelow(stamenButton, 20);
     auto epsgLabel = std::make_shared<Label>(settingsContainer, "Uses slippy tiles that you downloaded.");
     epsgLabel->alignRightOf(epsgButton, 10);
     epsgLabel->setManaged();
@@ -124,7 +134,15 @@ void MapApp::setMapSource(MapSource style) {
 
     switch (style) {
     case MapSource::OPEN_TOPO:
-        newSource = std::make_shared<maps::OpenTopoSource>();
+        newSource = std::make_shared<maps::OpenTopoSource>(
+            ".tile.opentopomap.org/",
+            "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
+        setTileSource(newSource);
+        break;
+    case MapSource::STAMEN_TERRAIN:
+        newSource = std::make_shared<maps::OpenTopoSource>(
+            ".tile.stamen.com/terrain/",
+            "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.");
         setTileSource(newSource);
         break;
     case MapSource::XPLANE:

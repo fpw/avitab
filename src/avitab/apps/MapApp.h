@@ -50,6 +50,7 @@ public:
 private:
     enum class MapSource {
         OPEN_TOPO,
+        STAMEN_TERRAIN,
         XPLANE,
         MERCATOR,
         GEOTIFF,
@@ -69,7 +70,7 @@ private:
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
-    std::shared_ptr<Button> openTopoButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton;
+    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton;
     std::shared_ptr<Label> overlayLabel;
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
