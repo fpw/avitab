@@ -112,6 +112,7 @@ private:
     void startCalibration();
     double getCoordinate(const std::string &str);
     void processCalibrationPoint(int step);
+    bool handleNonNumericContent(std::string coords);
 };
 
 } /* namespace avitab */

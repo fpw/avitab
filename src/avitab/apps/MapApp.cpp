@@ -550,7 +550,7 @@ void MapApp::startCalibration() {
 
     keyboard = std::make_unique<Keyboard>(window, coordsField);
     keyboard->setNumericLayout();
-    keyboard->setDimensions(window->getContentWidth(), 80);
+    keyboard->setDimensions(window->getContentWidth(), 90);
     keyboard->alignInBottomCenter();
     keyboard->setOnOk([this] {
         api().executeLater([this] {
@@ -599,12 +599,8 @@ double MapApp::getCoordinate(const std::string &input) {
 void MapApp::processCalibrationPoint(int step) {
     std::string coords = coordsField->getText();
 
-    if (coords.empty()) {
-        // Populate coords text box with current plane position
-        std::stringstream ss;
-        Location aircraftLoc = api().getAircraftLocation(0);
-        ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
-        coordsField->setText(ss.str());
+    if (handleNonNumericContent(coords)) {
+        // Non-numeric content has been replaced by lat,long
         return;
     }
 
@@ -635,6 +631,46 @@ void MapApp::processCalibrationPoint(int step) {
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
     }
+}
+
+bool MapApp::handleNonNumericContent(std::string coords)  {
+    std::stringstream ss;
+    if (coords.empty()) {
+        // Populate empty coords text box with current plane lat,long
+        Location aircraftLoc = api().getAircraftLocation(0);
+        ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+
+    std::string coordsUpper = platform::upper(coords);
+
+    auto airport = api().getNavWorld()->findAirportByID(coordsUpper);
+    if (airport) {
+        // Replace airport ID in text box with lat,long
+        auto airportLoc = airport->getLocation();
+        ss << airportLoc.latitude << ", " << airportLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+
+    // Is is a text nav fix as "region,id" (e.g. "EG,TLA") ?
+    auto it = coordsUpper.find(',');
+    if (it == std::string::npos) {
+        return false;
+    }
+
+    std::string region(coordsUpper.begin(), coordsUpper.begin() + it);
+    std::string id(coordsUpper.begin() + it + 1, coordsUpper.end());
+    auto fix = api().getNavWorld()->findFixByRegionAndID(region, id);
+    if (fix) {
+        // Replace nav fix region,id in text box with lat,long
+        auto fixLoc = fix->getLocation();
+        ss << fixLoc.latitude << ", " << fixLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+    return false;
 }
 
 bool MapApp::onTimer() {
