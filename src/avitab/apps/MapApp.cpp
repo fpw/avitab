@@ -78,15 +78,25 @@ void MapApp::createSettingsLayout() {
     openTopoButton = std::make_shared<Button>(settingsContainer, "OpenTopo");
     openTopoButton->setCallback([this] (const Button &) { setMapSource(MapSource::OPEN_TOPO); });
     auto openTopoLabel = std::make_shared<Label>(settingsContainer,
-            "Downloads map tiles on demand.\nMap Data (c) OpenStreetMap + SRTM\nMap Style (c) OpenTopoMap.org");
+            "Map Data (c) OpenStreetMap + SRTM\nMap Style (c) OpenTopoMap.org");
     openTopoLabel->alignRightOf(openTopoButton, 10);
     openTopoLabel->setManaged();
+
+    stamenButton = std::make_shared<Button>(settingsContainer, "Stamen");
+    stamenButton->setCallback([this] (const Button &) { setMapSource(MapSource::STAMEN_TERRAIN); });
+    stamenButton->setFit(false, true);
+    stamenButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    stamenButton->alignBelow(openTopoButton, 30);
+    auto stamenLabel = std::make_shared<Label>(settingsContainer,
+            "Map Data (c) OpenStreetMap\nEnglish map tiles by Stamen Design");
+    stamenLabel->alignRightOf(stamenButton, 10);
+    stamenLabel->setManaged();
 
     epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3857");
     epsgButton->setCallback([this] (const Button &) { setMapSource(MapSource::EPSG3857); });
     epsgButton->setFit(false, true);
     epsgButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    epsgButton->setPosition(openTopoButton->getX(), openTopoButton->getY() + openTopoLabel->getHeight());
+    epsgButton->alignBelow(stamenButton, 20);
     auto epsgLabel = std::make_shared<Label>(settingsContainer, "Uses slippy tiles that you downloaded.");
     epsgLabel->alignRightOf(epsgButton, 10);
     epsgLabel->setManaged();
@@ -124,7 +134,15 @@ void MapApp::setMapSource(MapSource style) {
 
     switch (style) {
     case MapSource::OPEN_TOPO:
-        newSource = std::make_shared<maps::OpenTopoSource>();
+        newSource = std::make_shared<maps::OpenTopoSource>(
+            ".tile.opentopomap.org/",
+            "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
+        setTileSource(newSource);
+        break;
+    case MapSource::STAMEN_TERRAIN:
+        newSource = std::make_shared<maps::OpenTopoSource>(
+            ".tile.stamen.com/terrain/",
+            "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.");
         setTileSource(newSource);
         break;
     case MapSource::XPLANE:
@@ -532,7 +550,7 @@ void MapApp::startCalibration() {
 
     keyboard = std::make_unique<Keyboard>(window, coordsField);
     keyboard->setNumericLayout();
-    keyboard->setDimensions(window->getContentWidth(), 80);
+    keyboard->setDimensions(window->getContentWidth(), 90);
     keyboard->alignInBottomCenter();
     keyboard->setOnOk([this] {
         api().executeLater([this] {
@@ -581,12 +599,8 @@ double MapApp::getCoordinate(const std::string &input) {
 void MapApp::processCalibrationPoint(int step) {
     std::string coords = coordsField->getText();
 
-    if (coords.empty()) {
-        // Populate coords text box with current plane position
-        std::stringstream ss;
-        Location aircraftLoc = api().getAircraftLocation(0);
-        ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
-        coordsField->setText(ss.str());
+    if (handleNonNumericContent(coords)) {
+        // Non-numeric content has been replaced by lat,long
         return;
     }
 
@@ -617,6 +631,46 @@ void MapApp::processCalibrationPoint(int step) {
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
     }
+}
+
+bool MapApp::handleNonNumericContent(std::string coords)  {
+    std::stringstream ss;
+    if (coords.empty()) {
+        // Populate empty coords text box with current plane lat,long
+        Location aircraftLoc = api().getAircraftLocation(0);
+        ss << aircraftLoc.latitude << ", " << aircraftLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+
+    std::string coordsUpper = platform::upper(coords);
+
+    auto airport = api().getNavWorld()->findAirportByID(coordsUpper);
+    if (airport) {
+        // Replace airport ID in text box with lat,long
+        auto airportLoc = airport->getLocation();
+        ss << airportLoc.latitude << ", " << airportLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+
+    // Is is a text nav fix as "region,id" (e.g. "EG,TLA") ?
+    auto it = coordsUpper.find(',');
+    if (it == std::string::npos) {
+        return false;
+    }
+
+    std::string region(coordsUpper.begin(), coordsUpper.begin() + it);
+    std::string id(coordsUpper.begin() + it + 1, coordsUpper.end());
+    auto fix = api().getNavWorld()->findFixByRegionAndID(region, id);
+    if (fix) {
+        // Replace nav fix region,id in text box with lat,long
+        auto fixLoc = fix->getLocation();
+        ss << fixLoc.latitude << ", " << fixLoc.longitude;
+        coordsField->setText(ss.str());
+        return true;
+    }
+    return false;
 }
 
 bool MapApp::onTimer() {

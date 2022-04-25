@@ -22,6 +22,11 @@
 
 namespace maps {
 
+OpenTopoSource::OpenTopoSource(std::string tileServer, std::string copyrightInfo):
+    tileServer(tileServer),
+    copyrightInfo(copyrightInfo) {
+}
+
 int OpenTopoSource::getMinZoomLevel() {
     return 0;
 }
@@ -121,7 +126,7 @@ std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) 
     } else {
         nameStream << *hosts.begin();
     }
-    nameStream << ".tile.opentopomap.org/";
+    nameStream << tileServer;
     nameStream << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }
@@ -153,7 +158,7 @@ void OpenTopoSource::resumeLoading() {
 }
 
 std::string OpenTopoSource::getCopyrightInfo() {
-    return "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)";
+    return copyrightInfo;
 }
 
 } /* namespace maps */
