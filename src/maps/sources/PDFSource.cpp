@@ -158,6 +158,12 @@ img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
     return calibration.pixelsToWorld(normX, normY);
 }
 
+void PDFSource::rotate() {
+    rotateAngle = (rotateAngle + 90) % 360;
+    calibration.setPreRotate(rotateAngle);
+    rasterizer.setPreRotate(rotateAngle);
+}
+
 void PDFSource::storeCalibration() {
     std::string calFileName = utf8FileName + ".json";
     fs::ofstream jsonFile(fs::u8path(calFileName));
@@ -176,6 +182,8 @@ void PDFSource::loadCalibration() {
                      std::istreambuf_iterator<char>());
 
     calibration.fromString(jsonStr);
+    rotateAngle = calibration.getPreRotate();
+    rasterizer.setPreRotate(rotateAngle);
 }
 
 void PDFSource::setNightMode(bool night) {

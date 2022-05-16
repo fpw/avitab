@@ -106,14 +106,16 @@ int Rasterizer::getTileSize() {
 }
 
 int Rasterizer::getPageWidth(int page, int zoom) {
+    bool swapXY = (preRotateAngle % 180) == 90;
     auto &rect = pageRects.at(page);
-    int width = rect.x1 - rect.x0;
+    int width = swapXY ? rect.y1 - rect.y0 : rect.x1 - rect.x0;
     return width * zoomToScale(zoom);
 }
 
 int Rasterizer::getPageHeight(int page, int zoom) {
+    bool swapXY = (preRotateAngle % 180) == 90;
     auto &rect = pageRects.at(page);
-    int height = rect.y1 - rect.y0;
+    int height = swapXY ? rect.x1 - rect.x0 : rect.y1 - rect.y0;
     return height * zoomToScale(zoom);
 }
 
@@ -137,7 +139,6 @@ std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom, bo
     int outHeight = image->getHeight();
 
     float scale = zoomToScale(zoom);
-    fz_matrix scaleMatrix = fz_scale(scale, scale);
 
     fz_irect clipBox;
     clipBox.x0 = outStartX;
@@ -165,7 +166,36 @@ std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom, bo
 
         auto startAt = std::chrono::steady_clock::now();
 
-        dev = fz_new_draw_device_with_bbox(ctx, scaleMatrix, pix, &clipBox);
+        int translateX, translateY;
+        switch(preRotateAngle) {
+        case 0:
+            translateX = 0;
+            translateY = 0;
+            break;
+        case 90:
+            translateX = currentPageHeight * scale;
+            translateY = 0;
+            break;
+        case 180:
+            translateX = currentPageWidth * scale;
+            translateY = currentPageHeight * scale;
+            break;
+        case 270:
+            translateX = 0;
+            translateY = currentPageWidth * scale;
+            break;
+        default:
+            LOG_ERROR("Invalid preRotateAngle %d", preRotateAngle);
+            break;
+        }
+
+        fz_matrix scaleMatrix = fz_scale(scale, scale);
+        fz_matrix rotateMatrix = fz_rotate(preRotateAngle);
+        fz_matrix rotateAndScaleMatrix = fz_concat(scaleMatrix, rotateMatrix);
+        fz_matrix translateMatrix = fz_translate(translateX, translateY);
+        fz_matrix transformMatrix = fz_concat(rotateAndScaleMatrix, translateMatrix);
+
+        dev = fz_new_draw_device_with_bbox(ctx, transformMatrix, pix, &clipBox);
 
         // pre-fill page with white
         fz_path *path = fz_new_path(ctx);
@@ -238,6 +268,10 @@ void Rasterizer::freeCurrentPage() {
         fz_drop_display_list(ctx, currentPageList);
         currentPageList = nullptr;
     }
+}
+
+void Rasterizer::setPreRotate(int angle) {
+    preRotateAngle = angle;
 }
 
 Rasterizer::~Rasterizer() {

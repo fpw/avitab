@@ -28,6 +28,7 @@ class Calibration {
 public:
     void setPoint1(double x, double y, double lat, double lon);
     void setPoint2(double x, double y, double lat, double lon);
+    void setPreRotate(int angle);
 
     std::string toString();
     void fromString(const std::string &s);
@@ -36,9 +37,10 @@ public:
 
     img::Point<double> worldToPixels(double lon, double lat) const;
     img::Point<double> pixelsToWorld(double x, double y) const;
-
+    int getPreRotate();
 
 private:
+    int preRotate{};
     double regX1{}, regY1{}, regLat1{}, regLon1{};
     double regX2{}, regY2{}, regLat2{}, regLon2{};
     double leftLongitude{}, coverLon{};

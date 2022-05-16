@@ -36,6 +36,7 @@ public:
     int getPageWidth(int page, int zoom);
     int getPageHeight(int page, int zoom);
     std::unique_ptr<Image> loadTile(int page, int x, int y, int zoom, bool nightMode);
+    void setPreRotate(int angle);
 
     int getPageCount() const;
 
@@ -47,6 +48,7 @@ private:
     int tileSize = 1024;
     int totalPages = 0;
     int currentPageNum = 0;
+    int preRotateAngle = 0;
     fz_context *ctx {};
     fz_stream *stream{};
     fz_document *doc{};

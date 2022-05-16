@@ -43,11 +43,17 @@ void Calibration::setPoint2(double x, double y, double lat, double lon) {
     calculateCalibration();
 }
 
+void Calibration::setPreRotate(int angle) {
+    preRotate = angle;
+}
+
 std::string Calibration::toString() {
     nlohmann::json json;
 
     json["calibration"] =
                     {
+                        {"prerotate", preRotate},
+
                         {"x1", regX1},
                         {"y1", regY1},
                         {"longitude1", regLon1},
@@ -66,6 +72,8 @@ void Calibration::fromString(const std::string& s) {
     nlohmann::json json = nlohmann::json::parse(s);
 
     using j = nlohmann::json;
+
+    preRotate = json[j::json_pointer("/calibration/prerotate")];
 
     regLon1 = json[j::json_pointer("/calibration/longitude1")];
     regLat1 = json[j::json_pointer("/calibration/latitude1")];
@@ -144,6 +152,10 @@ img::Point<double> Calibration::pixelsToWorld(double x, double y) const {
     lat = invMercator(lat);
 
     return img::Point<double>{lon, lat};
+}
+
+int Calibration::getPreRotate() {
+    return preRotate;
 }
 
 } /* namespace maps */
