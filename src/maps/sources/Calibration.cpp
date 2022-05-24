@@ -73,7 +73,7 @@ void Calibration::fromString(const std::string& s) {
 
     using j = nlohmann::json;
 
-    preRotate = json[j::json_pointer("/calibration/prerotate")];
+    preRotate = json.value("/calibration/prerotate"_json_pointer, 0);
 
     regLon1 = json[j::json_pointer("/calibration/longitude1")];
     regLat1 = json[j::json_pointer("/calibration/latitude1")];
