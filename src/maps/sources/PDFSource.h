@@ -54,12 +54,14 @@ public:
     void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
 
     void setNightMode(bool night);
+    void rotate();
 
 private:
     std::string utf8FileName;
     img::Rasterizer rasterizer;
     Calibration calibration;
     bool nightMode = false;
+    int rotateAngle = 0;
 
     void storeCalibration();
     void loadCalibration();

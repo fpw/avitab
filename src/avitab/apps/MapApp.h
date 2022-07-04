@@ -69,6 +69,7 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<PixMap> mapWidget;
     std::shared_ptr<Button> trackButton;
+    std::shared_ptr<Button> rotateButton;
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
     std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton;
     std::shared_ptr<Label> overlayLabel;
@@ -109,6 +110,7 @@ private:
     void onPlusButton();
     void onMinusButton();
     void onTrackButton();
+    void onRotate();
     void startCalibration();
     double getCoordinate(const std::string &str);
     void processCalibrationPoint(int step);

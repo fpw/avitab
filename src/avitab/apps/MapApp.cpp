@@ -45,6 +45,8 @@ MapApp::MapApp(FuncsPtr funcs):
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&MapApp::onPlusButton, this));
     trackButton = window->addSymbol(Widget::Symbol::GPS, std::bind(&MapApp::onTrackButton, this));
     trackButton->setToggleState(trackPlane);
+    rotateButton = window->addSymbol(Widget::Symbol::ROTATE, std::bind(&MapApp::onRotate, this));
+    rotateButton->setVisible(false);
 
     mapImage = std::make_shared<img::Image>(window->getContentWidth(), window->getContentHeight(), img::COLOR_TRANSPARENT);
 
@@ -527,6 +529,11 @@ void MapApp::onTrackButton() {
     onTimer();
 }
 
+void MapApp::onRotate() {
+    tileSource->rotate();
+    mapStitcher->invalidateCache();
+}
+
 void MapApp::startCalibration() {
     messageBox = std::make_unique<avitab::MessageBox>(
             getUIContainer(),
@@ -537,6 +544,7 @@ void MapApp::startCalibration() {
     messageBox->addButton("Ok", [this] () {
         api().executeLater([this] () {
             messageBox.reset();
+            rotateButton->setVisible(true);
             if (map) {
                 map->beginCalibration();
             }
@@ -631,6 +639,7 @@ void MapApp::processCalibrationPoint(int step) {
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
     }
+    rotateButton->setVisible(false);
 }
 
 bool MapApp::handleNonNumericContent(std::string coords)  {
