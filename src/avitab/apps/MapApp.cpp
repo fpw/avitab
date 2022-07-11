@@ -644,6 +644,7 @@ void MapApp::processCalibrationPoint(int step) {
 
 bool MapApp::handleNonNumericContent(std::string coords)  {
     std::stringstream ss;
+    ss << std::setprecision(12);
     if (coords.empty()) {
         // Populate empty coords text box with current plane lat,long
         Location aircraftLoc = api().getAircraftLocation(0);
