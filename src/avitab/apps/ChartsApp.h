@@ -92,6 +92,8 @@ private:
     void onRotate();
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
+
+    const size_t MAX_CAPTION_LENGTH = 64;
 };
 
 } /* namespace avitab */

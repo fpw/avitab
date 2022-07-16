@@ -24,7 +24,7 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     App(appFuncs),
     updateTimer(std::bind(&ChartsApp::onTimer, this), 200)
 {
-    currentPath = api().getDataPath() + "charts/";
+    currentPath = platform::realPath(api().getDataPath() + "charts");
     overlays = std::make_shared<maps::OverlayConfig>();
 
     resetLayout();
@@ -41,7 +41,7 @@ void ChartsApp::resetLayout() {
 
 void ChartsApp::createBrowseTab() {
     browsePage = tabs->addTab(tabs, "Files");
-    browseWindow = std::make_shared<Window>(browsePage, "Files");
+    browseWindow = std::make_shared<Window>(browsePage, "Files in ...");
     browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
     browseWindow->centerInParent();
 
@@ -58,8 +58,14 @@ void ChartsApp::createBrowseTab() {
 }
 
 void ChartsApp::showDirectory(const std::string& path) {
-    currentPath = path;
-    currentEntries = platform::readDirectory(path);
+    currentPath = platform::realPath(path);
+    std::string caption(currentPath);
+    if (caption.size() > MAX_CAPTION_LENGTH) {
+        caption.erase(0,caption.size()-(MAX_CAPTION_LENGTH-2));
+        caption.insert(0,"...");
+    }
+    browseWindow->setCaption(caption);
+    currentEntries = platform::readDirectory(currentPath);
     filterEntries();
     sortEntries();
     showCurrentEntries();
@@ -121,14 +127,24 @@ void ChartsApp::onSelect(int data) {
 
     auto &entry = currentEntries.at(data);
     if (entry.isDirectory) {
-        showDirectory(currentPath + entry.utf8Name + "/");
+#ifdef _WIN32
+        // entries of the form "[?:]" represent a different Windows logical drive
+        // and are not appended to the current path
+        if ((entry.utf8Name.size() == 4) && (entry.utf8Name[0] == '[') && (entry.utf8Name[2] == ':') && (entry.utf8Name[3] == ']')) {
+            showDirectory(entry.utf8Name.substr(1,2) + "\\");
+        } else {
+            showDirectory(currentPath + "/" + entry.utf8Name);
+        }
+#else
+        showDirectory(currentPath + "/" + entry.utf8Name);
+#endif
     } else {
-        createPdfTab(currentPath + entry.utf8Name);
+        createPdfTab(currentPath + "/" + entry.utf8Name);
     }
 }
 
 void ChartsApp::upOneDirectory() {
-    std::string upOne = platform::realPath(currentPath +  "../") + "/";
+    std::string upOne = platform::realPath(currentPath +  "/..");
     showDirectory(upOne);
 }
 

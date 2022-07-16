@@ -161,6 +161,25 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
         entries.push_back(entry);
     }
 
+#ifdef _WIN32
+    if (utf8Path.size() <= 3) {
+        // To allow changing to different drives on Windows.
+        // If the path is a drive's top-level then add the logical drives to the entries
+        auto ldbitmap = GetLogicalDrives();
+        std::string drive("[A:]");    // brackets used for sorting/grouping and later identification
+        while (ldbitmap) {
+            if (ldbitmap & 0b1) {
+                DirEntry entry;
+                entry.utf8Name = drive;
+                entry.isDirectory = true;
+                entries.push_back(entry);
+            }
+            ldbitmap >>= 1;
+            ++drive[1];
+        }
+    }
+#endif
+
     return entries;
 }
 
