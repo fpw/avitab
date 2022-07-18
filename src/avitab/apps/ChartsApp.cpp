@@ -24,13 +24,13 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     App(appFuncs),
     updateTimer(std::bind(&ChartsApp::onTimer, this), 200)
 {
-    currentPath = api().getDataPath() + "charts/";
+    fsBrowser.goTo(api().getDataPath() + "charts");
     overlays = std::make_shared<maps::OverlayConfig>();
 
     resetLayout();
 
     setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
-    showDirectory(currentPath);
+    showDirectory();
 }
 
 void ChartsApp::resetLayout() {
@@ -41,7 +41,7 @@ void ChartsApp::resetLayout() {
 
 void ChartsApp::createBrowseTab() {
     browsePage = tabs->addTab(tabs, "Files");
-    browseWindow = std::make_shared<Window>(browsePage, "Files");
+    browseWindow = std::make_shared<Window>(browsePage, "Charts in:");
     browseWindow->setDimensions(browsePage->getContentWidth(), browsePage->getHeight());
     browseWindow->centerInParent();
 
@@ -57,42 +57,14 @@ void ChartsApp::createBrowseTab() {
     });
 }
 
-void ChartsApp::showDirectory(const std::string& path) {
-    currentPath = path;
-    currentEntries = platform::readDirectory(path);
-    filterEntries();
-    sortEntries();
+void ChartsApp::showDirectory() {
+    browseWindow->setCaption(std::string("Charts: ") + fsBrowser.rtrimmed(62));
+    currentEntries = fsBrowser.entries();
     showCurrentEntries();
 }
 
 void ChartsApp::setFilterRegex(const std::string ext) {
-    filter = std::regex(ext, std::regex_constants::ECMAScript | std::regex_constants::icase);
-}
-
-void ChartsApp::filterEntries() {
-    auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [this] (const auto &a) -> bool {
-        if (a.isDirectory) {
-            return false;
-        }
-        return !std::regex_search(a.utf8Name, filter);
-    });
-    currentEntries.erase(iter, std::end(currentEntries));
-}
-
-void ChartsApp::sortEntries() {
-    auto comparator = [] (const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
-        if (a.isDirectory && !b.isDirectory) {
-            return true;
-        }
-
-        if (!a.isDirectory && b.isDirectory) {
-            return false;
-        }
-
-        return a.utf8Name < b.utf8Name;
-    };
-
-    std::sort(begin(currentEntries), end(currentEntries), comparator);
+    fsBrowser.setFilter(ext);
 }
 
 void ChartsApp::showCurrentEntries() {
@@ -121,15 +93,16 @@ void ChartsApp::onSelect(int data) {
 
     auto &entry = currentEntries.at(data);
     if (entry.isDirectory) {
-        showDirectory(currentPath + entry.utf8Name + "/");
+        fsBrowser.goDown(entry.utf8Name);
+        showDirectory();
     } else {
-        createPdfTab(currentPath + entry.utf8Name);
+        createPdfTab(fsBrowser.path() + entry.utf8Name);
     }
 }
 
 void ChartsApp::upOneDirectory() {
-    std::string upOne = platform::realPath(currentPath +  "../") + "/";
-    showDirectory(upOne);
+    fsBrowser.goUp();
+    showDirectory();
 }
 
 void ChartsApp::createPdfTab(const std::string &pdfPath) {

@@ -143,17 +143,36 @@ std::string UTF8ToACP(const std::string& utf8) {
 #endif
 
 std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
-    auto path = fs::u8path(utf8Path);
     std::vector<DirEntry> entries;
 
+#ifdef _WIN32
+    // this fragment deals with a notional filesystem root directory which allows
+    // traversal to other drives
+    if (utf8Path.empty()) {
+        auto ldbitmap = GetLogicalDrives();
+        std::string drive("A:");
+        while (ldbitmap) {
+            if (ldbitmap & 0b1) {
+                if (GetDiskFreeSpaceExA(drive.c_str(), NULL, NULL, NULL)) {
+                    DirEntry entry;
+                    entry.utf8Name = drive;
+                    entry.isDirectory = true;
+                    entries.push_back(entry);
+                }
+            }
+            ldbitmap >>= 1;
+            ++drive[0];
+        }
+        return entries; // return list of drives only, no further enumeration
+    }
+#endif
+    auto path = fs::u8path(utf8Path);
     for (auto &e: fs::directory_iterator(path)) {
         std::string name = e.path().filename().string();
 
         if (name.empty() || name[0] == '.') {
             continue;
         }
-
-        std::string filePath = utf8Path + name;
 
         DirEntry entry;
         entry.utf8Name = name;
@@ -167,6 +186,21 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 std::string realPath(const std::string& utf8Path) {
     auto path = fs::u8path(utf8Path);
     return fs::canonical(path).string();
+}
+
+std::string parentPath(const std::string &utf8Path) {
+    auto path = fs::u8path(utf8Path);
+    auto here_clean = fs::canonical(path).string();
+#ifdef _WIN32
+    if (here_clean.back() == '\\') {    // drive root directory
+        return "";    // notional filesystem root containing all drives
+    }
+    auto parent = fs::u8path(here_clean + "\\..");
+    return fs::canonical(parent).string() + "\\";
+#else
+    auto parent = fs::u8path(here_clean + "/..");
+    return fs::canonical(parent).string() + "/";
+#endif
 }
 
 std::string getFileNameFromPath(const std::string& utf8Path) {
