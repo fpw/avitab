@@ -69,6 +69,7 @@ public:
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
+    void setZoomLevel(int zoom) override;
     std::shared_ptr<Settings> getSettings() override;
 
     ~AviTab();

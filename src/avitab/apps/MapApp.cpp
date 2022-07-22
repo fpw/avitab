@@ -486,11 +486,13 @@ void MapApp::onMapPan(int x, int y, bool start, bool end) {
 }
 
 void MapApp::onMouseWheel(int dir, int x, int y) {
+    int zoom;
     if (dir > 0) {
-        map->zoomIn();
+        zoom = map->zoomIn();
     } else {
-        map->zoomOut();
+        zoom = map->zoomOut();
     }
+    api().setZoomLevel(zoom);
     onTimer();
 }
 
@@ -509,12 +511,14 @@ void MapApp::pan(int x, int y) {
 }
 
 void MapApp::onPlusButton() {
-    map->zoomIn();
+    int zoom = map->zoomIn();
+    api().setZoomLevel(zoom);
     onTimer();
 }
 
 void MapApp::onMinusButton() {
-    map->zoomOut();
+    int zoom = map->zoomOut();
+    api().setZoomLevel(zoom);
     onTimer();
 }
 

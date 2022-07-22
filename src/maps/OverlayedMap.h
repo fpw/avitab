@@ -47,8 +47,8 @@ public:
     void getCenterLocation(double &latitude, double &longitude);
 
     void updateImage();
-    void zoomIn();
-    void zoomOut();
+    int zoomIn();
+    int zoomOut();
 
     bool isCalibrated() const;
     void beginCalibration();

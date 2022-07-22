@@ -54,14 +54,18 @@ public:
     void loadUserFixes(std::string filename) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
+    void setZoomLevel(int zoom) override {}
     float getLastFrameTime() override;
 
     virtual ~StandAloneEnvironment();
-private:
+
+protected:
     std::string ourPath, xplaneRootPath;
     std::shared_ptr<GlfwGUIDriver> driver;
     std::shared_ptr<xdata::XData> xplaneData;
     std::atomic<float> lastDrawTime{};
+
+private:
 
     std::string findXPlaneInstallationPath();
 };
