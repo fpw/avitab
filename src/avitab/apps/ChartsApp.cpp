@@ -174,6 +174,13 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
 
     pages.push_back(tab);
     tabs->showTab(page);
+
+    if (tab.stitcher->getPageCount() > 1) {
+        positionPage(tab, ALIGN_TOP, ALIGN_MIDDLE, FIT_WIDTH);
+    } else {
+        positionPage(tab, ALIGN_CENTRE, ALIGN_MIDDLE, FIT_ALL);
+    }
+
 }
 
 void ChartsApp::removeTab(std::shared_ptr<Page> page) {
@@ -248,16 +255,24 @@ void ChartsApp::onPan(int x, int y, bool start, bool end) {
 void ChartsApp::onNextPage() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->source) {
-        tab->stitcher->nextPage();
-        setTitle(*tab);
+        if (tab->stitcher->nextPage()) {
+            setTitle(*tab);
+            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+        } else {
+            positionPage(*tab, ALIGN_BOTTOM, ALIGN_MIDDLE);
+        }
     }
 }
 
 void ChartsApp::onPrevPage() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->source) {
-        tab->stitcher->prevPage();
-        setTitle(*tab);
+        if (tab->stitcher->prevPage()) {
+            setTitle(*tab);
+            positionPage(*tab, ALIGN_BOTTOM, ALIGN_MIDDLE);
+        } else {
+            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+        }
     }
 }
 
@@ -279,6 +294,11 @@ void ChartsApp::onRotate() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->stitcher) {
         tab->stitcher->rotateRight();
+        if (tab->stitcher->getPageCount() > 1) {
+            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+        } else {
+            positionPage(*tab, ALIGN_CENTRE, ALIGN_MIDDLE, FIT_ALL);
+        }
     }
 }
 
@@ -305,6 +325,50 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
             onDown();
         }
     }
+}
+
+void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za) {
+    auto doc = std::dynamic_pointer_cast<img::ChartTileSource>(tab.stitcher->getTileSource());
+    if (!doc) return;
+
+    img::Point<int> aperturexy{tab.pixMap->getWidth(), tab.pixMap->getHeight()};
+    auto angle = tab.stitcher->getRotation();
+
+    // set the required zoom
+    if (za != NO_CHANGE) {
+        // start with maximal zoom, and then zoom out until all criteria are met
+        int z  = doc->getMaxZoomLevel();
+        while (z > doc->getMinZoomLevel()) {
+            // iterative loop could be optimised to binary search
+            auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), z);
+            if ((angle == 90) || (angle == 270)) std::swap(pagexy.x, pagexy.y);
+            bool fitsWidth = (za == FIT_HEIGHT) ? true : (pagexy.x <= aperturexy.x);
+            bool fitsHeight = (za == FIT_WIDTH) ? true : (pagexy.y <= aperturexy.y);
+            if (fitsWidth && fitsHeight) break;
+            --z;
+        }
+        tab.stitcher->setZoomLevel(z);
+    }
+
+    // now adjust the tile centre to align as requested
+    auto zoomNow = tab.map->getZoomLevel();
+    auto tilexy = tab.stitcher->getTileSource()->getTileDimensions(zoomNow);
+    auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), zoomNow);
+    float cx = 0.0, cy = 0.0;
+    if (angle == 0) {
+        cx = (hp == ALIGN_LEFT) ? (aperturexy.x / 2) : ((hp == ALIGN_RIGHT) ? (pagexy.x - (aperturexy.x / 2)) : (pagexy.x / 2));
+        cy = (vp == ALIGN_TOP) ? (aperturexy.y / 2) : ((vp == ALIGN_BOTTOM) ? (pagexy.y - (aperturexy.y / 2)) : (pagexy.y / 2));
+    } else if (angle == 90) {
+        cx = (vp == ALIGN_TOP) ? (aperturexy.y / 2) : ((vp == ALIGN_BOTTOM) ? (pagexy.x - (aperturexy.y / 2)) : (pagexy.x / 2));
+        cy = (hp == ALIGN_LEFT) ? (pagexy.y - (aperturexy.x / 2)) : ((hp == ALIGN_RIGHT) ? (aperturexy.x / 2) : (pagexy.y / 2));
+    } else if (angle == 180) {
+        cx = (hp == ALIGN_LEFT) ? (pagexy.x - (aperturexy.x / 2)) : ((hp == ALIGN_RIGHT) ? (aperturexy.x / 2) : (pagexy.x / 2));
+        cy = (vp == ALIGN_TOP) ? (pagexy.y - (aperturexy.y / 2)) : ((vp == ALIGN_BOTTOM) ? (aperturexy.y / 2) : (pagexy.y / 2));
+    } else if (angle == 270) {
+        cx = (vp == ALIGN_TOP) ? (pagexy.x - (aperturexy.y / 2)) : ((vp == ALIGN_BOTTOM) ? (aperturexy.y / 2) : (pagexy.x / 2));
+        cy = (hp == ALIGN_LEFT) ? (aperturexy.x / 2) : ((hp == ALIGN_RIGHT) ? (pagexy.y - (aperturexy.x / 2)) : (pagexy.y / 2));
+    }
+    tab.stitcher->setCenter((float)cx / tilexy.x, (float)cy / tilexy.y);
 }
 
 } /* namespace avitab */

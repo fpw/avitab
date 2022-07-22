@@ -62,6 +62,12 @@ public:
     virtual ~TileSource() = default;
 };
 
+class ChartTileSource : public TileSource {
+public:
+    virtual Point<int> getPageDimensions(int page, int zoom) = 0;
+
+};
+
 }
 
 #endif /* SRC_LIBIMG_STITCHER_TILESOURCE_H_ */

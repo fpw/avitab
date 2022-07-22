@@ -27,7 +27,7 @@
 
 namespace maps {
 
-class PDFSource: public img::TileSource {
+class PDFSource: public img::ChartTileSource {
 public:
     PDFSource(const std::string &file);
     PDFSource(const std::vector<uint8_t> &pdfData);
@@ -52,6 +52,8 @@ public:
 
     void attachCalibration1(double x, double y, double lat, double lon, int zoom) override;
     void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
+
+    img::Point<int> getPageDimensions(int page, int zoom) override;
 
     void setNightMode(bool night);
     void rotate();

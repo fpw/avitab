@@ -168,4 +168,9 @@ img::Point<double> ImageSource::xyToWorld(double x, double y, int zoom) {
     return calibration.pixelsToWorld(normX, normY);
 }
 
+img::Point<int> ImageSource::getPageDimensions(int page, int zoom) {
+    auto scale = zoomToScale(zoom);
+    return img::Point<int>{(int)(scale * image->getWidth()), (int)(scale * image->getHeight())};
+}
+
 } /* namespace maps */

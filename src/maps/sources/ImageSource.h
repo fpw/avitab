@@ -26,7 +26,7 @@
 
 namespace maps {
 
-class ImageSource: public img::TileSource {
+class ImageSource: public img::ChartTileSource {
 public:
     ImageSource(std::shared_ptr<img::Image> image);
 
@@ -50,6 +50,8 @@ public:
     void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
+
+    img::Point<int> getPageDimensions(int page, int zoom) override;
 private:
     static constexpr const int TILE_SIZE = 256;
     std::shared_ptr<img::Image> image;
