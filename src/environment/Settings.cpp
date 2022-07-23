@@ -47,7 +47,7 @@ Settings::Settings(const std::string &settingsFile)
 Settings::~Settings()
 {
     try {
-        save();
+        saveAll();
     } catch (...) {
         // can't rescue the process at this point
     }
@@ -151,6 +151,14 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/colors/other_aircraft/above", colorIntToString(overlayConfig->colorOtherAircraftAbove));
 }
 
+void Settings::loadPdfReadingConfig(const std::string appName, PdfReadingConfig &config) {
+    config.mouseWheelScrollsMultiPage = getSetting("/" + appName + "/pdfreading/mousewheelscroll", false);
+}
+
+void Settings::savePdfReadingConfig(const std::string appName, PdfReadingConfig &config) {
+    setSetting("/" + appName + "/pdfreading/mousewheelscroll", config.mouseWheelScrollsMultiPage);
+}
+
 void Settings::upgrade() {
     // handle older json databases which have subsequently been updated
 #if 0 // example idea for this code
@@ -164,7 +172,7 @@ void Settings::upgrade() {
 #endif
 }
 
-void Settings::save() {
+void Settings::saveAll() {
     try {
         saveOverlayConfig();
         fs::ofstream fout(fs::u8path(filePath));
