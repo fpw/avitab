@@ -146,12 +146,16 @@ void LVGLToolkit::initInputDriver() {
     }
 }
 
-void LVGLToolkit::createNativeWindow(const std::string& title) {
-    driver->createWindow(title);
+void LVGLToolkit::createNativeWindow(const std::string& title, const WindowRect &rect) {
+    driver->createWindow(title, rect);
 }
 
 bool LVGLToolkit::hasNativeWindow() {
     return driver->hasWindow();
+}
+
+WindowRect LVGLToolkit::getNativeWindowRect() {
+    return driver->getWindowRect();
 }
 
 void LVGLToolkit::pauseNativeWindow() {

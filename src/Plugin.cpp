@@ -42,6 +42,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSignature, char *outDescript
         environment->loadConfig();
         logger::setStdOut(environment->getConfig()->getBool("/AviTab/logToStdOut"));
         logger::init(environment->getProgramPath());
+        logger::info("AviTab version " AVITAB_VERSION_STR);
         environment->loadSettings();
         strncpy(outDescription, "A tablet to help in VR.", 255);
     } catch (const std::exception &e) {
@@ -92,6 +93,7 @@ PLUGIN_API void XPluginDisable(void) {
 }
 
 PLUGIN_API void XPluginStop(void) {
+    logger::verbose("AviTab told to stop");
     try {
         if (environment) {
             if (aviTab) {
@@ -106,6 +108,7 @@ PLUGIN_API void XPluginStop(void) {
     }
 
     crash::unregisterHandler();
+    logger::verbose("AviTab unloaded");
 }
 
 #ifdef _WIN32

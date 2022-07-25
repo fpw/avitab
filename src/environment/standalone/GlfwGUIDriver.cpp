@@ -39,7 +39,7 @@ void GlfwGUIDriver::init(int width, int height) {
     GUIDriver::init(width, height);
 }
 
-void GlfwGUIDriver::createWindow(const std::string& title) {
+void GlfwGUIDriver::createWindow(const std::string& title, const WindowRect &rect) {
     int winWidth = width();
     int winHeight = height();
 

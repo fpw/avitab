@@ -35,7 +35,8 @@ public:
     XPlaneGUIDriver();
 
     void init(int width, int height) override;
-    void createWindow(const std::string &title) override;
+    void createWindow(const std::string &title, const WindowRect &rect) override;
+    WindowRect getWindowRect() override;
     bool hasWindow() override;
     void killWindow() override;
 
@@ -56,6 +57,7 @@ public:
 
     ~XPlaneGUIDriver();
 private:
+    WindowRect lastRect;
     std::shared_ptr<float> brightness;
     DataRef<bool> isVrEnabled;
     DataRef<float> clickX, clickY;

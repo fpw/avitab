@@ -28,6 +28,15 @@
 
 namespace avitab {
 
+struct WindowRect {
+    bool valid = false;
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
+    bool poppedOut = false;
+};
+
 class GUIDriver {
 public:
     using ResizeCallback = std::function<void(int, int)>;
@@ -36,9 +45,10 @@ public:
 
     void setResizeCallback(ResizeCallback cb);
 
-    virtual void createWindow(const std::string &title) = 0;
+    virtual void createWindow(const std::string &title, const WindowRect &rect) = 0;
     virtual bool hasWindow() = 0;
     virtual void killWindow() = 0;
+    virtual WindowRect getWindowRect();
 
     virtual void createPanel(int left, int bottom, int width, int height, bool captureClicks);
     virtual void hidePanel();

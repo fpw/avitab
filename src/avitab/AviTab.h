@@ -37,6 +37,7 @@ public:
     AviTab(std::shared_ptr<Environment> environment);
     void startApp();
     void toggleTablet();
+    void resetWindowPosition();
     void zoomIn();
     void zoomOut();
     void recentre();
@@ -85,6 +86,7 @@ private:
 
     std::shared_ptr<apis::ChartService> chartService;
     std::shared_ptr<js::Runtime> jsRuntime;
+    bool resetWindowRect = false;
 
     void createPanel();
     void createLayout();

@@ -139,7 +139,7 @@ void XPlaneGUIDriver::setupVRCapture() {
     }
 }
 
-void XPlaneGUIDriver::createWindow(const std::string &title) {
+void XPlaneGUIDriver::createWindow(const std::string &title, const WindowRect &rect) {
     if (hasWindow()) {
         killWindow();
     }
@@ -149,10 +149,17 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
 
     XPLMCreateWindow_t params;
     params.structSize = sizeof(params);
-    params.left = winLeft + 100;
-    params.right = winLeft + 100 + width();
-    params.top = winTop - 100;
-    params.bottom = winTop - 100 - height();
+    if (rect.valid && !rect.poppedOut && !isVrEnabled) {
+        params.left = rect.left;
+        params.top = rect.top;
+        params.right = rect.right;
+        params.bottom = rect.bottom;
+    } else {
+        params.left = winLeft + 100;
+        params.right = winLeft + 100 + width();
+        params.top = winTop - 100;
+        params.bottom = winTop - 100 - height();
+    }
     params.visible = 1;
     params.refcon = this;
     params.drawWindowFunc = [] (XPLMWindowID id, void *ref) {
@@ -187,11 +194,31 @@ void XPlaneGUIDriver::createWindow(const std::string &title) {
     }
     if (isVrEnabled) {
         XPLMSetWindowPositioningMode(window, xplm_WindowVR, -1);
+    } else if (rect.valid && rect.poppedOut) {
+        XPLMSetWindowPositioningMode(window, xplm_WindowPopOut, -1);
+        XPLMSetWindowGeometryOS(window, rect.left, rect.top, rect.right, rect.bottom);
     } else {
         XPLMSetWindowPositioningMode(window, xplm_WindowPositionFree, -1);
     }
 
     XPLMSetWindowTitle(window, title.c_str());
+}
+
+WindowRect XPlaneGUIDriver::getWindowRect() {
+    if (!window || !XPLMGetWindowIsVisible(window)) {
+        return lastRect;
+    }
+
+    WindowRect rect;
+    if (XPLMWindowIsPoppedOut(window)) {
+        XPLMGetWindowGeometryOS(window, &rect.left, &rect.top, &rect.right, &rect.bottom);
+        rect.poppedOut = true;
+    } else {
+        XPLMGetWindowGeometry(window, &rect.left, &rect.top, &rect.right, &rect.bottom);
+        rect.poppedOut = false;
+    }
+    rect.valid = true;
+    return rect;
 }
 
 void XPlaneGUIDriver::setPanelEnabledPtr(std::shared_ptr<int> panelEnabledPtr) {
@@ -301,6 +328,8 @@ void XPlaneGUIDriver::onDraw() {
 
     int left, top, right, bottom;
     XPLMGetWindowGeometry(window, &left, &top, &right, &bottom);
+
+    lastRect = getWindowRect();
 
     XPLMBindTexture2d(textureId, 0);
     redrawTexture();

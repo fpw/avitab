@@ -159,6 +159,26 @@ void Settings::savePdfReadingConfig(const std::string appName, PdfReadingConfig 
     setSetting("/" + appName + "/pdfreading/mousewheelscroll", config.mouseWheelScrollsMultiPage);
 }
 
+void Settings::saveWindowRect(const WindowRect &rect) {
+    setSetting("/window/top", rect.top);
+    setSetting("/window/left", rect.left);
+    setSetting("/window/right", rect.right);
+    setSetting("/window/bottom", rect.bottom);
+    setSetting("/window/popped", rect.poppedOut);
+    setSetting("/window/valid", rect.valid);
+}
+
+WindowRect Settings::getWindowRect() {
+    WindowRect rect;
+    rect.valid = getSetting("/window/valid", false);
+    rect.top = getSetting("/window/top", 0);
+    rect.left = getSetting("/window/left", 0);
+    rect.right = getSetting("/window/right", 0);
+    rect.bottom = getSetting("/window/bottom", 0);
+    rect.poppedOut = getSetting("/window/popped", false);
+    return rect;
+}
+
 void Settings::upgrade() {
     // handle older json databases which have subsequently been updated
 #if 0 // example idea for this code

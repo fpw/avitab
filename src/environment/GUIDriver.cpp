@@ -30,6 +30,10 @@ void GUIDriver::init(int width, int height) {
     buffer.resize(width * height);
 }
 
+WindowRect GUIDriver::getWindowRect() {
+    return {};
+}
+
 void GUIDriver::setResizeCallback(ResizeCallback cb) {
     onResize = cb;
 }

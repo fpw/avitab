@@ -37,11 +37,12 @@ public:
     LVGLToolkit(std::shared_ptr<GUIDriver> drv);
 
     void setMouseWheelCallback(MouseWheelCallback cb);
-    void createNativeWindow(const std::string &title);
+    void createNativeWindow(const std::string &title, const WindowRect &rect);
     void createPanel(int left, int bottom, int width, int height, bool captureClicks);
     void hidePanel();
     void pauseNativeWindow();
     bool hasNativeWindow();
+    WindowRect getNativeWindowRect();
     void signalStop();
     void destroyNativeWindow();
     void setBrightness(float b);

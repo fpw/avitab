@@ -21,6 +21,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <list>
 #include <memory>
+#include "src/environment/GUIDriver.h"
 #include "src/maps/OverlayConfig.h"
 
 namespace avitab {
@@ -43,6 +44,9 @@ public:
     void loadPdfReadingConfig(const std::string appName, PdfReadingConfig &config);
     void savePdfReadingConfig(const std::string appName, PdfReadingConfig &config);
 
+    void saveWindowRect(const WindowRect &rect);
+    WindowRect getWindowRect();
+
     void saveAll();
 
 private:
@@ -64,11 +68,11 @@ private:
 
     template<typename T>
     void setSetting(const std::string &id, const T value);
-    
+
     std::list<std::pair<const char *, uint32_t> > colorTable;
     uint32_t colorStringToInt(std::string colString, const char* colDefault);
     std::string colorIntToString(uint32_t color);
-    
+
 };
 
 } /* namespace avitab */

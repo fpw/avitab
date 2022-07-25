@@ -70,6 +70,7 @@ void AviTab::startApp() {
     env->createCommand("AviTab/wheel_down", "Wheel down", [this] (CommandState s) { if (s == CommandState::START) handleWheel(false); });
 
     env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
+    env->addMenuEntry("Reset Position", std::bind(&AviTab::resetWindowPosition, this));
 
     guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
         if (appLauncher) {
@@ -85,13 +86,33 @@ void AviTab::toggleTablet() {
     try {
         if (!guiLib->hasNativeWindow()) {
             logger::info("Showing tablet");
-            guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR);
+            // It's possible that the user closed the window with the close button.
+            // Since we don't get any callback for this, it's possible that we didn't store the last window coordinates yet.
+            // For that reason, the last known position is tried first.
+            auto rect = guiLib->getNativeWindowRect();
+            if (rect.valid && !resetWindowRect) {
+                env->getSettings()->saveWindowRect(rect);
+            } else {
+                rect = env->getSettings()->getWindowRect();
+            }
+            guiLib->createNativeWindow(std::string("Aviator's Tablet  ") + AVITAB_VERSION_STR, rect);
         } else {
             close();
         }
     } catch (const std::exception &e) {
         logger::error("Exception in onShowTablet: %s", e.what());
     }
+}
+
+void AviTab::resetWindowPosition() {
+    // runs in environment thread
+    env->getSettings()->saveWindowRect({});
+    if (guiLib->hasNativeWindow()) {
+        guiLib->pauseNativeWindow();
+    }
+    resetWindowRect = true;
+    toggleTablet();
+    resetWindowRect = false;
 }
 
 void AviTab::onPlaneLoad() {
@@ -407,6 +428,10 @@ void AviTab::stopApp() {
     // again. If the GUI is currently waiting on an environment
     // job to run, we would create a deadlock now. So for a proper
     // shutdown, we must do the following:
+
+    // remember the last window position
+    auto rect = env->getSettings()->getWindowRect();
+    env->getSettings()->saveWindowRect(rect);
 
     // Cancel the loading if it is still running
     env->cancelNavWorldLoading();
