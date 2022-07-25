@@ -49,6 +49,16 @@ void Window::hideScrollbars() {
     lv_win_set_sb_mode(obj(), LV_SB_MODE_OFF);
 }
 
+void Window::getHeaderArea(int &x1, int &y1, int &x2, int &y2) {
+    auto area = obj()->coords;
+    x1 = area.x1;
+    y1 = area.y1;
+    x2 = area.x2;
+    lv_win_ext_t * ext = reinterpret_cast<lv_win_ext_t *>(lv_obj_get_ext_attr(obj()));
+    auto h = lv_obj_get_height(ext->header);
+    y2 = area.y1 + h;
+}
+
 int Window::getContentWidth() {
     return lv_win_get_width(obj()) - 5;
 }
