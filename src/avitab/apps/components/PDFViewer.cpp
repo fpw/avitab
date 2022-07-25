@@ -88,8 +88,8 @@ void PDFViewer::onPan(int x, int y, bool start, bool end) {
 }
 
 void PDFViewer::setupCallbacks() {
-    window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNextFile, this));
-    window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrevFile, this));
+    // window->addSymbol(Widget::Symbol::NEXT, std::bind(&PDFViewer::onNextFile, this));
+    // window->addSymbol(Widget::Symbol::PREV, std::bind(&PDFViewer::onPrevFile, this));
     window->addSymbol(Widget::Symbol::MINUS, std::bind(&PDFViewer::onMinus, this));
     window->addSymbol(Widget::Symbol::PLUS, std::bind(&PDFViewer::onPlus, this));
     window->addSymbol(Widget::Symbol::RIGHT, std::bind(&PDFViewer::onNextPage, this));
