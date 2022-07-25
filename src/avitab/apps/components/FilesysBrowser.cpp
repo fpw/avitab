@@ -27,7 +27,7 @@ FilesystemBrowser::FilesystemBrowser(const std::string &path) {
             cwd = platform::realPath(platform::getProgramPath());
         }
     } catch (...) {
-        cwd = platform::fsRoot();
+        cwd = platform::FS_ROOT;
     }
 }
 
@@ -35,7 +35,7 @@ FilesystemBrowser::FilesystemBrowser() {
     try {
         cwd = platform::realPath(platform::getProgramPath());
     } catch (...) {
-        cwd = platform::fsRoot();
+        cwd = platform::FS_ROOT;
     }
 }
 
@@ -45,18 +45,18 @@ void FilesystemBrowser::goUp() {
         if (validate(up)) {
             cwd = up;
         } else {
-            cwd = platform::fsRoot();
+            cwd = platform::FS_ROOT;
         }
     } catch (...) {
         // if going up fails, go to the filesystem root!
-        cwd = platform::fsRoot();
+        cwd = platform::FS_ROOT;
     }
 }
 
 void FilesystemBrowser::goDown(const std::string &sdir) {
     try {
         std::string down;
-        if (cwd != platform::fsRoot()) {
+        if (cwd != platform::FS_ROOT) {
             down = platform::realPath(cwd + "/" + sdir);
         } else {
             down = platform::realPath(cwd + sdir + "/");
@@ -85,8 +85,8 @@ void FilesystemBrowser::setFilter(const std::string &regex) {
 }
 
 std::string FilesystemBrowser::path(bool addSeparator) {
-    if (addSeparator && (cwd.back() != platform::fsSep())) {
-        return cwd + platform::fsSep();
+    if (addSeparator && (cwd.back() != platform::FS_SEP)) {
+        return cwd + platform::FS_SEP;
     }
     return cwd;
 }
@@ -102,7 +102,7 @@ std::vector<platform::DirEntry> FilesystemBrowser::entries(bool applyFilter, boo
     items.clear();
     try {
         items = platform::readDirectory(cwd);
-        if (applyFilter) { 
+        if (applyFilter) {
             filterEntries();
         }
         if (sort) {

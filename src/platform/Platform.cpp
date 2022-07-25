@@ -148,7 +148,7 @@ std::vector<DirEntry> readDirectory(const std::string& utf8Path) {
 #ifdef _WIN32
     // this fragment deals with a notional filesystem root directory which allows
     // traversal to other drives
-    if (utf8Path.empty()) {
+    if (utf8Path == FS_ROOT) {
         auto ldbitmap = GetLogicalDrives();
         std::string drive("A:");
         while (ldbitmap) {
@@ -193,7 +193,7 @@ std::string parentPath(const std::string &utf8Path) {
     auto here_clean = fs::canonical(path).string();
 #ifdef _WIN32
     if (here_clean.back() == '\\') {    // drive root directory
-        return "";    // notional filesystem root containing all drives
+        return FS_ROOT;    // notional filesystem root containing all drives
     }
     auto parent = fs::u8path(here_clean + "\\..");
     return fs::canonical(parent).string() + "\\";
