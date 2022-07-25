@@ -26,7 +26,7 @@
 
 namespace maps {
 
-class ImageSource: public img::ChartTileSource {
+class ImageSource: public img::TileSource {
 public:
     ImageSource(std::shared_ptr<img::Image> image);
 
@@ -39,6 +39,7 @@ public:
     img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) override;
 
     int getPageCount() override;
+    img::Point<int> getPageDimensions(int page, int zoom) override;
     bool isTileValid(int page, int x, int y, int zoom) override;
     std::string getUniqueTileName(int page, int x, int y, int zoom) override;
     std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) override;
@@ -51,7 +52,6 @@ public:
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
-    img::Point<int> getPageDimensions(int page, int zoom) override;
 private:
     static constexpr const int TILE_SIZE = 256;
     std::shared_ptr<img::Image> image;

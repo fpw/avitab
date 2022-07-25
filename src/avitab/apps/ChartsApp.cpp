@@ -176,9 +176,9 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     tabs->showTab(page);
 
     if (tab.stitcher->getPageCount() > 1) {
-        positionPage(tab, ALIGN_TOP, ALIGN_MIDDLE, FIT_WIDTH);
+        positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
     } else {
-        positionPage(tab, ALIGN_CENTRE, ALIGN_MIDDLE, FIT_ALL);
+        positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
     }
 
 }
@@ -257,9 +257,9 @@ void ChartsApp::onNextPage() {
     if (tab && tab->source) {
         if (tab->stitcher->nextPage()) {
             setTitle(*tab);
-            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, ALIGN_BOTTOM, ALIGN_MIDDLE);
+            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
         }
     }
 }
@@ -269,9 +269,9 @@ void ChartsApp::onPrevPage() {
     if (tab && tab->source) {
         if (tab->stitcher->prevPage()) {
             setTitle(*tab);
-            positionPage(*tab, ALIGN_BOTTOM, ALIGN_MIDDLE);
+            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
         }
     }
 }
@@ -295,9 +295,9 @@ void ChartsApp::onRotate() {
     if (tab && tab->stitcher) {
         tab->stitcher->rotateRight();
         if (tab->stitcher->getPageCount() > 1) {
-            positionPage(*tab, ALIGN_TOP, ALIGN_MIDDLE);
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, ALIGN_CENTRE, ALIGN_MIDDLE, FIT_ALL);
+            positionPage(*tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
         }
     }
 }
@@ -328,22 +328,28 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
 }
 
 void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za) {
-    auto doc = std::dynamic_pointer_cast<img::ChartTileSource>(tab.stitcher->getTileSource());
-    if (!doc) return;
+    if (!tab.stitcher) {
+        return;
+    }
+
+    auto doc = tab.stitcher->getTileSource();
+    if (!doc) {
+        return;
+    }
 
     img::Point<int> aperturexy{tab.pixMap->getWidth(), tab.pixMap->getHeight()};
     auto angle = tab.stitcher->getRotation();
 
     // set the required zoom
-    if (za != NO_CHANGE) {
+    if (za != ZoomAdjust::None) {
         // start with maximal zoom, and then zoom out until all criteria are met
         int z  = doc->getMaxZoomLevel();
         while (z > doc->getMinZoomLevel()) {
             // iterative loop could be optimised to binary search
             auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), z);
             if ((angle == 90) || (angle == 270)) std::swap(pagexy.x, pagexy.y);
-            bool fitsWidth = (za == FIT_HEIGHT) ? true : (pagexy.x <= aperturexy.x);
-            bool fitsHeight = (za == FIT_WIDTH) ? true : (pagexy.y <= aperturexy.y);
+            bool fitsWidth = (za == ZoomAdjust::Height) ? true : (pagexy.x <= aperturexy.x);
+            bool fitsHeight = (za == ZoomAdjust::Width) ? true : (pagexy.y <= aperturexy.y);
             if (fitsWidth && fitsHeight) break;
             --z;
         }
@@ -352,23 +358,26 @@ void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPositi
 
     // now adjust the tile centre to align as requested
     auto zoomNow = tab.map->getZoomLevel();
-    auto tilexy = tab.stitcher->getTileSource()->getTileDimensions(zoomNow);
+    auto tilexy = doc->getTileDimensions(zoomNow);
     auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), zoomNow);
     float cx = 0.0, cy = 0.0;
     if (angle == 0) {
-        cx = (hp == ALIGN_LEFT) ? (aperturexy.x / 2) : ((hp == ALIGN_RIGHT) ? (pagexy.x - (aperturexy.x / 2)) : (pagexy.x / 2));
-        cy = (vp == ALIGN_TOP) ? (aperturexy.y / 2) : ((vp == ALIGN_BOTTOM) ? (pagexy.y - (aperturexy.y / 2)) : (pagexy.y / 2));
+        cx = (hp == HorizontalPosition::Left) ? (aperturexy.x / 2) : ((hp == HorizontalPosition::Right) ? (pagexy.x - (aperturexy.x / 2)) : (pagexy.x / 2));
+        cy = (vp == VerticalPosition::Top) ? (aperturexy.y / 2) : ((vp == VerticalPosition::Bottom) ? (pagexy.y - (aperturexy.y / 2)) : (pagexy.y / 2));
     } else if (angle == 90) {
-        cx = (vp == ALIGN_TOP) ? (aperturexy.y / 2) : ((vp == ALIGN_BOTTOM) ? (pagexy.x - (aperturexy.y / 2)) : (pagexy.x / 2));
-        cy = (hp == ALIGN_LEFT) ? (pagexy.y - (aperturexy.x / 2)) : ((hp == ALIGN_RIGHT) ? (aperturexy.x / 2) : (pagexy.y / 2));
+        cx = (vp == VerticalPosition::Top) ? (aperturexy.y / 2) : ((vp == VerticalPosition::Bottom) ? (pagexy.x - (aperturexy.y / 2)) : (pagexy.x / 2));
+        cy = (hp == HorizontalPosition::Left) ? (pagexy.y - (aperturexy.x / 2)) : ((hp == HorizontalPosition::Right) ? (aperturexy.x / 2) : (pagexy.y / 2));
     } else if (angle == 180) {
-        cx = (hp == ALIGN_LEFT) ? (pagexy.x - (aperturexy.x / 2)) : ((hp == ALIGN_RIGHT) ? (aperturexy.x / 2) : (pagexy.x / 2));
-        cy = (vp == ALIGN_TOP) ? (pagexy.y - (aperturexy.y / 2)) : ((vp == ALIGN_BOTTOM) ? (aperturexy.y / 2) : (pagexy.y / 2));
+        cx = (hp == HorizontalPosition::Left) ? (pagexy.x - (aperturexy.x / 2)) : ((hp == HorizontalPosition::Right) ? (aperturexy.x / 2) : (pagexy.x / 2));
+        cy = (vp == VerticalPosition::Top) ? (pagexy.y - (aperturexy.y / 2)) : ((vp == VerticalPosition::Bottom) ? (aperturexy.y / 2) : (pagexy.y / 2));
     } else if (angle == 270) {
-        cx = (vp == ALIGN_TOP) ? (pagexy.x - (aperturexy.y / 2)) : ((vp == ALIGN_BOTTOM) ? (aperturexy.y / 2) : (pagexy.x / 2));
-        cy = (hp == ALIGN_LEFT) ? (aperturexy.x / 2) : ((hp == ALIGN_RIGHT) ? (pagexy.y - (aperturexy.x / 2)) : (pagexy.y / 2));
+        cx = (vp == VerticalPosition::Top) ? (pagexy.x - (aperturexy.y / 2)) : ((vp == VerticalPosition::Bottom) ? (aperturexy.y / 2) : (pagexy.x / 2));
+        cy = (hp == HorizontalPosition::Left) ? (aperturexy.x / 2) : ((hp == HorizontalPosition::Right) ? (pagexy.y - (aperturexy.x / 2)) : (pagexy.y / 2));
     }
-    tab.stitcher->setCenter((float)cx / tilexy.x, (float)cy / tilexy.y);
+
+    if (tilexy.x != 0 && tilexy.y != 0) {
+        tab.stitcher->setCenter((float) cx / tilexy.x, (float) cy / tilexy.y);
+    }
 }
 
 } /* namespace avitab */

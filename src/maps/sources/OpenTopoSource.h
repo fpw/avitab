@@ -42,6 +42,7 @@ public:
 
     // Query and load tile information
     int getPageCount() override;
+    img::Point<int> getPageDimensions(int page, int zoom) override;
     bool isTileValid(int page, int x, int y, int zoom) override;
     std::string getTileURL(bool randomHost, int x, int y, int zoom);
     std::string getUniqueTileName(int page, int x, int y, int zoom) override;

@@ -46,6 +46,7 @@ public:
 
     // Query and load tile information
     virtual int getPageCount() = 0;
+    virtual Point<int> getPageDimensions(int page, int zoom) = 0;
     virtual bool isTileValid(int page, int x, int y, int zoom) = 0;
     virtual std::string getUniqueTileName(int page, int x, int y, int zoom) = 0;
     virtual std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) = 0;
@@ -60,12 +61,6 @@ public:
     virtual std::string getCopyrightInfo() { return ""; }
 
     virtual ~TileSource() = default;
-};
-
-class ChartTileSource : public TileSource {
-public:
-    virtual Point<int> getPageDimensions(int page, int zoom) = 0;
-
 };
 
 }

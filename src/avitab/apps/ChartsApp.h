@@ -93,10 +93,10 @@ private:
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
 
-    enum VerticalPosition { ALIGN_TOP, ALIGN_CENTRE, ALIGN_BOTTOM };
-    enum HorizontalPosition { ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT };
-    enum ZoomAdjust { NO_CHANGE, FIT_HEIGHT, FIT_WIDTH, FIT_ALL };
-    void positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = NO_CHANGE);
+    enum class VerticalPosition { Top, Centre, Bottom };
+    enum class HorizontalPosition { Left, Middle, Right };
+    enum class ZoomAdjust { None, Height, Width, All };
+    void positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = ZoomAdjust::None);
 };
 
 } /* namespace avitab */

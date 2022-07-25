@@ -99,6 +99,10 @@ int NavigraphSource::getPageCount() {
     return 1;
 }
 
+img::Point<int> NavigraphSource::getPageDimensions(int page, int zoom) {
+    return img::Point<int>{0, 0};
+}
+
 bool NavigraphSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
