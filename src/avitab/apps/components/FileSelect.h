@@ -20,34 +20,36 @@
 
 #include <functional>
 #include <string>
-#include <regex>
 #include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/platform/Platform.h"
+#include "FilesysBrowser.h"
 
 namespace avitab {
 
 class FileSelect: public App {
+    // dialog to allow choosing of file with name filtering
+    // currently used by PlaneManualApp only
 public:
     using SelectCallback = std::function<void(const std::vector<platform::DirEntry> &, size_t)>;
 
     FileSelect(FuncsPtr appFuncs);
+    void setPrefix(const std::string &prefix);
     void setSelectCallback(SelectCallback cb);
+    void setDirectory(const std::string &dir);
     void setFilterRegex(const std::string regex);
-    void showDirectory(const std::string &path);
+    void showDirectory();
     std::string getCurrentPath();
 private:
+    std::string captionPrefix;
     std::shared_ptr<Window> window;
     std::shared_ptr<List> list;
 
-    std::regex filter;
-    std::string currentPath;
+    FilesystemBrowser fsBrowser;
     std::vector<platform::DirEntry> currentEntries;
     SelectCallback selectCallback;
 
-    void filterEntries();
-    void sortEntries();
     void showCurrentEntries();
     void onDown();
     void onUp();

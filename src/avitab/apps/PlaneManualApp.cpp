@@ -82,28 +82,32 @@ void PlaneManualApp::showAircraftFolder() {
 
 void PlaneManualApp::showFileSelect() {
     auto fileSelect = startSubApp<FileSelect>();
+    fileSelect->setPrefix("Manual: ");
     fileSelect->setOnExit([this] () { exit(); });
     fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
         onSelect(entries, i);
     });
+    fileSelect->setDirectory(currentPath);
     fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
-    fileSelect->showDirectory(currentPath);
+    fileSelect->showDirectory();
     childApp = std::move(fileSelect);
 }
 
 void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
     currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
 
-    auto pdfApp = startSubApp<PDFViewer>();
-    pdfApp->showDirectory(currentPath, entries, chosenIndex);
-    pdfApp->setOnExit([this] () {
-        api().executeLater([this] {
-            onSelectionClosed();
+    if (!entries[chosenIndex].isDirectory) {
+        auto pdfApp = startSubApp<PDFViewer>();
+        pdfApp->showFile(currentPath + entries[chosenIndex].utf8Name);
+        pdfApp->setOnExit([this] () {
+            api().executeLater([this] {
+                onSelectionClosed();
+            });
         });
-    });
 
-    childApp = std::move(pdfApp);
-    childApp->show();
+        childApp = std::move(pdfApp);
+        childApp->show();
+    }
 }
 
 void PlaneManualApp::onMouseWheel(int dir, int x, int y) {

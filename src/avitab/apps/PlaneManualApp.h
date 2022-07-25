@@ -22,6 +22,7 @@
 #include "App.h"
 #include "src/platform/Platform.h"
 #include "src/gui_toolkit/widgets/MessageBox.h"
+#include "components/FilesysBrowser.h"
 
 namespace avitab {
 
@@ -34,6 +35,7 @@ private:
     std::string currentAircraft;
     std::shared_ptr<MessageBox> errorMsg;
     std::string currentPath;
+    FilesystemBrowser fsBrowser;
     std::shared_ptr<App> childApp;
 
     void showFileSelect();

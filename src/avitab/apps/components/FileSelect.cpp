@@ -22,6 +22,7 @@ namespace avitab {
 
 FileSelect::FileSelect(FuncsPtr appFuncs):
     App(appFuncs),
+    captionPrefix(),
     window(std::make_shared<Window>(getUIContainer(), "")),
     list(std::make_shared<List>(window))
 {
@@ -39,47 +40,26 @@ FileSelect::FileSelect(FuncsPtr appFuncs):
     });
 }
 
+void FileSelect::setPrefix(const std::string &prefix) {
+    captionPrefix = prefix;
+}
+
 void FileSelect::setSelectCallback(SelectCallback cb) {
     selectCallback = cb;
 }
 
+void FileSelect::setDirectory(const std::string &dir) {
+    fsBrowser.goTo(dir);
+}
+
 void FileSelect::setFilterRegex(const std::string ext) {
-    filter = std::regex(ext, std::regex_constants::ECMAScript | std::regex_constants::icase);
+    fsBrowser.setFilter(ext);
 }
 
-void FileSelect::showDirectory(const std::string& path) {
-    window->setCaption("Select a chart in: " + platform::getFileNameFromPath(path));
-    currentPath = path;
-    currentEntries = platform::readDirectory(path);
-    filterEntries();
-    sortEntries();
+void FileSelect::showDirectory() {
+    window->setCaption(captionPrefix + fsBrowser.rtrimmed(70 - captionPrefix.size()));
+    currentEntries = fsBrowser.entries();
     showCurrentEntries();
-}
-
-void FileSelect::filterEntries() {
-    auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [this] (const auto &a) -> bool {
-        if (a.isDirectory) {
-            return false;
-        }
-        return !std::regex_search(a.utf8Name, filter);
-    });
-    currentEntries.erase(iter, std::end(currentEntries));
-}
-
-void FileSelect::sortEntries() {
-    auto comparator = [] (const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
-        if (a.isDirectory && !b.isDirectory) {
-            return true;
-        }
-
-        if (!a.isDirectory && b.isDirectory) {
-            return false;
-        }
-
-        return a.utf8Name < b.utf8Name;
-    };
-
-    std::sort(begin(currentEntries), end(currentEntries), comparator);
 }
 
 void FileSelect::showCurrentEntries() {
@@ -108,7 +88,8 @@ void FileSelect::onSelect(int data) {
 
     auto &entry = currentEntries.at(data);
     if (entry.isDirectory) {
-        showDirectory(currentPath + entry.utf8Name + "/");
+        fsBrowser.goDown(entry.utf8Name);
+        showDirectory();
     } else {
         if (selectCallback) {
             selectCallback(currentEntries, data);
@@ -117,12 +98,12 @@ void FileSelect::onSelect(int data) {
 }
 
 void FileSelect::upOneDirectory() {
-    std::string upOne = platform::realPath(currentPath +  "../") + "/";
-    showDirectory(upOne);
+    fsBrowser.goUp();
+    showDirectory();
 }
 
 std::string FileSelect::getCurrentPath() {
-    return currentPath;
+    return fsBrowser.path();
 }
 
 } /* namespace avitab */

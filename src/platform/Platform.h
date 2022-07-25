@@ -86,8 +86,17 @@ int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt)
 constexpr size_t getMaxPathLen();
 std::string UTF8ToACP(const std::string &utf8);
 
+#ifdef _WIN32
+constexpr const char *FS_ROOT = "";
+constexpr const char FS_SEP = '\\';
+#else
+constexpr const char *FS_ROOT = "/";
+constexpr const char FS_SEP = '/';
+#endif
+
 std::string getProgramPath();
 std::vector<DirEntry> readDirectory(const std::string &utf8Path);
+std::string parentPath(const std::string &utf8Path);
 std::string realPath(const std::string &utf8Path);
 std::string getFileNameFromPath(const std::string &utf8Path);
 std::string getDirNameFromPath(const std::string &utf8Path);

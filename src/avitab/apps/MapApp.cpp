@@ -172,7 +172,7 @@ void MapApp::setMapSource(MapSource style) {
 }
 
 void MapApp::selectGeoTIFF() {
-    fileChooser = std::make_unique<FileChooser>(&api());
+    fileChooser = std::make_unique<FileChooser>(&api(), "GeoTIFF: ");
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/GeoTIFFs/");
     fileChooser->setFilterRegex("\\.(tif|tiff)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
@@ -193,12 +193,12 @@ void MapApp::selectGeoTIFF() {
             chooserContainer->setVisible(false);
         });
     });
-    fileChooser->show(chooserContainer, "Select a GeoTIFF");
+    fileChooser->show(chooserContainer);
     chooserContainer->setVisible(true);
 }
 
 void MapApp::selectMercator() {
-    fileChooser = std::make_unique<FileChooser>(&api());
+    fileChooser = std::make_unique<FileChooser>(&api(), "Mercator: ");
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/Mercator/");
     fileChooser->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
@@ -219,14 +219,13 @@ void MapApp::selectMercator() {
             chooserContainer->setVisible(false);
         });
     });
-    fileChooser->show(chooserContainer, "Select a Mercator map image");
+    fileChooser->show(chooserContainer);
     chooserContainer->setVisible(true);
 }
 
 void MapApp::selectEPSG() {
-    fileChooser = std::make_unique<FileChooser>(&api());
+    fileChooser = std::make_unique<FileChooser>(&api(), "EPSG: ", true);
     fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/EPSG-3857/");
-    fileChooser->setDirectorySelect(true);
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
             try {
@@ -245,7 +244,7 @@ void MapApp::selectEPSG() {
             chooserContainer->setVisible(false);
         });
     });
-    fileChooser->show(chooserContainer, "Select a SlippyTiles directory");
+    fileChooser->show(chooserContainer);
     chooserContainer->setVisible(true);
 }
 
@@ -420,7 +419,7 @@ void MapApp::showOverlaySettings() {
 
 void MapApp::selectUserFixesFile() {
     resetWidgets();
-    fileChooser = std::make_unique<FileChooser>(&api());
+    fileChooser = std::make_unique<FileChooser>(&api(), "Fixes: ");
     std::string userfixes_file = savedSettings->getGeneralSetting<std::string>("userfixes_file");
     if ((userfixes_file == "") || !platform::fileExists(platform::getDirNameFromPath(userfixes_file))) {
         fileChooser->setBaseDirectory(api().getDataPath());
@@ -449,7 +448,7 @@ void MapApp::selectUserFixesFile() {
             showOverlaySettings();
         });
     });
-    fileChooser->show(chooserContainer, "Select a user fixes .csv file");
+    fileChooser->show(chooserContainer);
     chooserContainer->setVisible(true);
 }
 

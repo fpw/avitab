@@ -40,6 +40,7 @@ public:
     img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) override;
 
     int getPageCount() override;
+    img::Point<int> getPageDimensions(int page, int zoom) override;
     bool isTileValid(int page, int x, int y, int zoom) override;
     std::string getUniqueTileName(int page, int x, int y, int zoom) override;
     std::unique_ptr<img::Image> loadTileImage(int page, int x, int y, int zoom) override;

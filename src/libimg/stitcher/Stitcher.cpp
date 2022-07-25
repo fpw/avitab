@@ -59,20 +59,24 @@ img::Point<double> Stitcher::getCenter() const {
     return img::Point<double>{centerX, centerY};
 }
 
-void Stitcher::nextPage() {
+bool Stitcher::nextPage() {
     if (page + 1 < tileSource->getPageCount()) {
         page++;
         tileCache.cancelPendingRequests();
         updateImage();
+        return true;
     }
+    return false;
 }
 
-void Stitcher::prevPage() {
+bool Stitcher::prevPage() {
     if (page > 0) {
         page--;
         tileCache.cancelPendingRequests();
         updateImage();
+        return true;
     }
+    return false;
 }
 
 int Stitcher::getPageCount() const {
@@ -146,6 +150,10 @@ void Stitcher::convertSourceImageToRenderedCoords(int &x, int &y) {
     int offsetY = unrotatedCentreY - dstCentreY;
     x += offsetX;
     y += offsetY;
+}
+
+int Stitcher::getRotation() const {
+    return rotAngle;
 }
 
 void Stitcher::rotateRight() {

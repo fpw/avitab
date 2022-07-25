@@ -20,7 +20,6 @@
 
 #include <memory>
 #include <vector>
-#include <regex>
 #include "src/platform/Platform.h"
 #include "App.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
@@ -36,6 +35,7 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/PDFSource.h"
+#include "components/FilesysBrowser.h"
 
 namespace avitab {
 
@@ -53,16 +53,13 @@ private:
     std::shared_ptr<Page> browsePage;
     std::shared_ptr<Window> browseWindow;
     std::shared_ptr<List> list;
-    std::string currentPath;
+    FilesystemBrowser fsBrowser;
     std::vector<platform::DirEntry> currentEntries;
-    std::regex filter;
     std::shared_ptr<maps::OverlayConfig> overlays;
 
     void createBrowseTab();
-    void showDirectory(const std::string &path);
+    void showDirectory();
     void setFilterRegex(const std::string regex);
-    void filterEntries();
-    void sortEntries();
     void showCurrentEntries();
     void upOneDirectory();
     void onSettingsToggle(bool forceClose = false);
@@ -99,12 +96,16 @@ private:
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
 
-
     Settings::PdfReadingConfig  settings;
     std::shared_ptr<Container> settingsContainer;
     std::shared_ptr<Label> settingsLabel;
     std::shared_ptr<Checkbox> mouseWheelScrollsCheckbox;
     void showAppSettings();
+
+    enum class VerticalPosition { Top, Centre, Bottom };
+    enum class HorizontalPosition { Left, Middle, Right };
+    enum class ZoomAdjust { None, Height, Width, All };
+    void positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = ZoomAdjust::None);
 };
 
 } /* namespace avitab */

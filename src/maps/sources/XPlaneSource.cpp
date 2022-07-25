@@ -70,6 +70,10 @@ int XPlaneSource::getPageCount() {
     return 1;
 }
 
+img::Point<int> XPlaneSource::getPageDimensions(int page, int zoom) {
+    return img::Point<int>{0, 0};
+}
+
 bool XPlaneSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;

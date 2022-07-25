@@ -138,6 +138,10 @@ void PDFSource::attachCalibration2(double x, double y, double lat, double lon, i
     }
 }
 
+img::Point<int> PDFSource::getPageDimensions(int page, int zoom) {
+    return img::Point<int>{rasterizer.getPageWidth(page, zoom), rasterizer.getPageHeight(page, zoom)};
+}
+
 img::Point<double> PDFSource::worldToXY(double lon, double lat, int zoom) {
     int tileSize = rasterizer.getTileSize();
 
