@@ -71,21 +71,23 @@ private:
         std::string path;
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
-        std::shared_ptr<img::Image> rasterImage;
         std::shared_ptr<PixMap> pixMap;
+        std::shared_ptr<img::Image> rasterImage;
         std::shared_ptr<maps::PDFSource> source;
         std::shared_ptr<img::Stitcher> stitcher;
         std::shared_ptr<maps::OverlayedMap> map;
         int panStartX = 0, panStartY = 0;
     };
-    std::vector<PdfPage> pages;
+
+    using PageInfo = std::shared_ptr<PdfPage>;
+    std::vector<PageInfo> pages;
 
     void createPdfTab(const std::string &pdfPath);
     void removeTab(std::shared_ptr<Page> page);
-    void setupCallbacks(PdfPage& tab);
-    void loadFile(PdfPage& tab, const std::string &pdfPath);
-    void setTitle(PdfPage& tab);
-    PdfPage* getActivePdfPage();
+    void setupCallbacks(PageInfo tab);
+    void loadFile(PageInfo tab, const std::string &pdfPath);
+    void setTitle(PageInfo tab);
+    PageInfo getActivePdfPage();
     void onNextPage();
     void onPrevPage();
     void onPlus();
@@ -105,7 +107,7 @@ private:
     enum class VerticalPosition { Top, Centre, Bottom };
     enum class HorizontalPosition { Left, Middle, Right };
     enum class ZoomAdjust { None, Height, Width, All };
-    void positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = ZoomAdjust::None);
+    void positionPage(PageInfo tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = ZoomAdjust::None);
 };
 
 } /* namespace avitab */

@@ -123,8 +123,8 @@ void ChartsApp::upOneDirectory() {
 
 void ChartsApp::createPdfTab(const std::string &pdfPath) {
     for (auto tabPage: pages) {
-        if (tabPage.path == pdfPath) {
-            tabs->setActiveTab(tabs->getTabIndex(tabPage.page));
+        if (tabPage->path == pdfPath) {
+            tabs->setActiveTab(tabs->getTabIndex(tabPage->page));
             return;
         }
     }
@@ -134,21 +134,21 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
         name = name.substr(0, 9) + "...";
     }
 
-    PdfPage tab;
-    tab.path = pdfPath;
-    tab.page = tabs->addTab(tabs, name);
-    tab.window = std::make_shared<Window>(tab.page, name);
-    tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
-    tab.window->alignInTopLeft();
+    PageInfo tab = std::make_shared<PdfPage>();
+    tab->path = pdfPath;
+    tab->page = tabs->addTab(tabs, name);
+    tab->window = std::make_shared<Window>(tab->page, name);
+    tab->window->setDimensions(tab->page->getContentWidth(), tab->page->getHeight());
+    tab->window->alignInTopLeft();
 
-    tab.pixMap = std::make_shared<PixMap>(tab.window);
-    tab.rasterImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getContentHeight(), img::COLOR_TRANSPARENT);
-    tab.pixMap->setClickable(true);
-    tab.pixMap->setClickHandler([this] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
-    tab.pixMap->draw(*tab.rasterImage);
+    tab->pixMap = std::make_shared<PixMap>(tab->window);
+    tab->rasterImage = std::make_shared<img::Image>(tab->window->getContentWidth(), tab->window->getContentHeight(), img::COLOR_TRANSPARENT);
+    tab->pixMap->setClickable(true);
+    tab->pixMap->setClickHandler([this] (int x, int y, bool pr, bool rel) { onPan(x, y, pr, rel); });
+    tab->pixMap->draw(*tab->rasterImage);
 
-    auto page = tab.page;
-    tab.window->setOnClose([this, page] {
+    auto page = tab->page;
+    tab->window->setOnClose([this, page] {
         api().executeLater([this, page] {
             if (settingsContainer) {
                 settingsContainer->setVisible(false);
@@ -166,19 +166,12 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
 
     pages.push_back(tab);
     tabs->showTab(page);
-
-    if (tab.stitcher && tab.stitcher->getPageCount() > 1) {
-        positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
-    } else {
-        positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
-    }
-
 }
 
 void ChartsApp::removeTab(std::shared_ptr<Page> page) {
     for (auto it = pages.begin(); it != pages.end(); ++it) {
-        if (it->page == page) {
-            size_t index = tabs->getTabIndex(it->page);
+        if ((*it)->page == page) {
+            size_t index = tabs->getTabIndex((*it)->page);
             pages.erase(it);
             tabs->removeTab(index);
             if (index > pages.size()) {
@@ -190,45 +183,53 @@ void ChartsApp::removeTab(std::shared_ptr<Page> page) {
     }
 }
 
-void ChartsApp::setupCallbacks(PdfPage& tab) {
-    tab.window->addSymbol(Widget::Symbol::SETTINGS, [this] () { onSettingsToggle(); });
-    tab.window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
-    tab.window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
-    tab.window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
-    tab.window->addSymbol(Widget::Symbol::LEFT, std::bind(&ChartsApp::onPrevPage, this));
-    tab.window->addSymbol(Widget::Symbol::ROTATE, std::bind(&ChartsApp::onRotate, this));
+void ChartsApp::setupCallbacks(PageInfo tab) {
+    tab->window->addSymbol(Widget::Symbol::SETTINGS, [this] () { onSettingsToggle(); });
+    tab->window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
+    tab->window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
+    tab->window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
+    tab->window->addSymbol(Widget::Symbol::LEFT, std::bind(&ChartsApp::onPrevPage, this));
+    tab->window->addSymbol(Widget::Symbol::ROTATE, std::bind(&ChartsApp::onRotate, this));
 }
 
-void ChartsApp::loadFile(PdfPage& tab, const std::string &pdfPath) {
-    tab.source = std::make_shared<maps::PDFSource>(pdfPath);
-    tab.stitcher = std::make_shared<img::Stitcher>(tab.rasterImage, tab.source);
-    tab.stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
+void ChartsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
+    tab->source = std::make_shared<maps::PDFSource>(pdfPath);
+    tab->stitcher = std::make_shared<img::Stitcher>(tab->rasterImage, tab->source);
+    tab->stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
-    tab.map = std::make_shared<maps::OverlayedMap>(tab.stitcher, overlays);
-    tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
-    tab.map->setRedrawCallback([tab] () { tab.pixMap->invalidate(); });
-    tab.map->updateImage();
+    tab->map = std::make_shared<maps::OverlayedMap>(tab->stitcher, overlays);
+    tab->map->loadOverlayIcons(api().getDataPath() + "icons/");
+
+    auto pixMap = tab->pixMap;
+    tab->map->setRedrawCallback([pixMap] () { if (pixMap) pixMap->invalidate(); });
+    tab->map->updateImage();
 
     setTitle(tab);
+
+    if (tab->stitcher->getPageCount() > 1) {
+        positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
+    } else {
+        positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
+    }
 }
 
-void ChartsApp::setTitle(PdfPage& tab) {
-    int page = tab.stitcher->getCurrentPage() + 1;
-    int pageCount = tab.stitcher->getPageCount();
-    tab.window->setCaption(std::string("Page ") + std::to_string(page) + " / " + std::to_string(pageCount));
+void ChartsApp::setTitle(PageInfo tab) {
+    int page = tab->stitcher->getCurrentPage() + 1;
+    int pageCount = tab->stitcher->getPageCount();
+    tab->window->setCaption(std::string("Page ") + std::to_string(page) + " / " + std::to_string(pageCount));
 }
 
-ChartsApp::PdfPage* ChartsApp::getActivePdfPage() {
+ChartsApp::PageInfo ChartsApp::getActivePdfPage() {
     size_t tabIndex = tabs->getActiveTab();
     if (tabIndex > 0) {
-        return &pages[tabIndex - 1];
+        return pages[tabIndex - 1];
     } else {
         return nullptr;
     }
 }
 
 void ChartsApp::onPan(int x, int y, bool start, bool end) {
-    PdfPage *tab = getActivePdfPage();
+    PageInfo tab = getActivePdfPage();
     if (tab) {
         if (start) {
             tab->panStartX = x;
@@ -246,71 +247,71 @@ void ChartsApp::onPan(int x, int y, bool start, bool end) {
 }
 
 void ChartsApp::onNextPage() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->source) {
         if (tab->stitcher->nextPage()) {
-            setTitle(*tab);
-            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+            setTitle(tab);
+            positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
+            positionPage(tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
         }
     }
 }
 
 void ChartsApp::onPrevPage() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->source) {
         if (tab->stitcher->prevPage()) {
-            setTitle(*tab);
-            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
+            setTitle(tab);
+            positionPage(tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+            positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle);
         }
     }
 }
 
 void ChartsApp::onPlus() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->map) {
         tab->map->zoomIn();
     }
 }
 
 void ChartsApp::onMinus() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->map) {
         tab->map->zoomOut();
     }
 }
 
 void ChartsApp::onScrollUp() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->map) {
         tab->stitcher->pan(0, -100);
     }
 }
 
 void ChartsApp::onScrollDown() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->map) {
         tab->stitcher->pan(0, 100);
     }
 }
 
 void ChartsApp::onRotate() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->stitcher) {
         tab->stitcher->rotateRight();
         if (tab->stitcher->getPageCount() > 1) {
-            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+            positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle);
         } else {
-            positionPage(*tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
+            positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
         }
     }
 }
 
 bool ChartsApp::onTimer() {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab && tab->map) {
         tab->map->doWork();
     }
@@ -318,7 +319,7 @@ bool ChartsApp::onTimer() {
 }
 
 void ChartsApp::onMouseWheel(int dir, int x, int y) {
-    PdfPage *tab = getActivePdfPage();
+    auto tab = getActivePdfPage();
     if (tab) {
         if (dir > 0) {
             if (settings.mouseWheelScrollsMultiPage) onScrollUp(); else onPlus();
@@ -352,18 +353,18 @@ void ChartsApp::showAppSettings() {
     mouseWheelScrollsCheckbox->setCallback([this] (bool checked) { settings.mouseWheelScrollsMultiPage = checked; });
 };
 
-void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za) {
-    if (!tab.stitcher) {
+void ChartsApp::positionPage(PageInfo tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za) {
+    if (!tab->stitcher) {
         return;
     }
 
-    auto doc = tab.stitcher->getTileSource();
+    auto doc = tab->stitcher->getTileSource();
     if (!doc) {
         return;
     }
 
-    img::Point<int> aperturexy{tab.pixMap->getWidth(), tab.pixMap->getHeight()};
-    auto angle = tab.stitcher->getRotation();
+    img::Point<int> aperturexy{tab->pixMap->getWidth(), tab->pixMap->getHeight()};
+    auto angle = tab->stitcher->getRotation();
 
     // set the required zoom
     if (za != ZoomAdjust::None) {
@@ -371,20 +372,20 @@ void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPositi
         int z  = doc->getMaxZoomLevel();
         while (z > doc->getMinZoomLevel()) {
             // iterative loop could be optimised to binary search
-            auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), z);
+            auto pagexy = doc->getPageDimensions(tab->stitcher->getCurrentPage(), z);
             if ((angle == 90) || (angle == 270)) std::swap(pagexy.x, pagexy.y);
             bool fitsWidth = (za == ZoomAdjust::Height) ? true : (pagexy.x <= aperturexy.x);
             bool fitsHeight = (za == ZoomAdjust::Width) ? true : (pagexy.y <= aperturexy.y);
             if (fitsWidth && fitsHeight) break;
             --z;
         }
-        tab.stitcher->setZoomLevel(z);
+        tab->stitcher->setZoomLevel(z);
     }
 
     // now adjust the tile centre to align as requested
-    auto zoomNow = tab.map->getZoomLevel();
+    auto zoomNow = tab->map->getZoomLevel();
     auto tilexy = doc->getTileDimensions(zoomNow);
-    auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), zoomNow);
+    auto pagexy = doc->getPageDimensions(tab->stitcher->getCurrentPage(), zoomNow);
     float cx = 0.0, cy = 0.0;
     if (angle == 0) {
         cx = (hp == HorizontalPosition::Left) ? (aperturexy.x / 2) : ((hp == HorizontalPosition::Right) ? (pagexy.x - (aperturexy.x / 2)) : (pagexy.x / 2));
@@ -401,7 +402,7 @@ void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPositi
     }
 
     if (tilexy.x != 0 && tilexy.y != 0) {
-        tab.stitcher->setCenter((float) cx / tilexy.x, (float) cy / tilexy.y);
+        tab->stitcher->setCenter((float) cx / tilexy.x, (float) cy / tilexy.y);
     }
 }
 
