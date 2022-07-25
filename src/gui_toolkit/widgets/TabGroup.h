@@ -25,7 +25,9 @@ namespace avitab {
 
 class TabGroup: public Widget {
 public:
+    using TabChangeCallback = std::function<void()>;
     TabGroup(WidgetPtr parent);
+    void setCallback(TabChangeCallback cb);
     std::shared_ptr<Page> addTab(WidgetPtr tabs, const std::string &title);
     size_t getTabIndex(WidgetPtr tab);
     void showTab(WidgetPtr tab);
@@ -35,6 +37,7 @@ public:
     void removeTab(size_t i);
     void clear();
 private:
+    TabChangeCallback callbackFunc;
 };
 
 } /* namespace avitab */

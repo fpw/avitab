@@ -28,6 +28,9 @@
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
+#include "src/gui_toolkit/widgets/Checkbox.h"
+#include "src/gui_toolkit/widgets/Container.h"
+#include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
@@ -62,6 +65,7 @@ private:
     void sortEntries();
     void showCurrentEntries();
     void upOneDirectory();
+    void onSettingsToggle(bool forceClose = false);
     void onDown();
     void onUp();
     void onSelect(int data);
@@ -89,9 +93,18 @@ private:
     void onPrevPage();
     void onPlus();
     void onMinus();
+    void onScrollUp();
+    void onScrollDown();
     void onRotate();
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
+
+
+    Settings::PdfReadingConfig  settings;
+    std::shared_ptr<Container> settingsContainer;
+    std::shared_ptr<Label> settingsLabel;
+    std::shared_ptr<Checkbox> mouseWheelScrollsCheckbox;
+    void showAppSettings();
 };
 
 } /* namespace avitab */
