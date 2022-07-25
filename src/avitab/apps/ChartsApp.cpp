@@ -321,10 +321,19 @@ bool ChartsApp::onTimer() {
 void ChartsApp::onMouseWheel(int dir, int x, int y) {
     auto tab = getActivePdfPage();
     if (tab) {
+        bool doScroll = settings.mouseWheelScrollsMultiPage && (tab->stitcher->getPageCount() > 1);
         if (dir > 0) {
-            if (settings.mouseWheelScrollsMultiPage) onScrollUp(); else onPlus();
+            if (doScroll) {
+                onScrollUp();
+            } else {
+                onPlus();
+            }
         } else if (dir < 0) {
-            if (settings.mouseWheelScrollsMultiPage) onScrollDown(); else onMinus();
+            if (doScroll) {
+                onScrollDown();
+             } else {
+                onMinus();
+             }
         }
     } else {  // on file select tab
         if (dir > 0) {
