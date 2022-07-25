@@ -24,6 +24,8 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
     App(appFuncs),
     updateTimer(std::bind(&ChartsApp::onTimer, this), 200)
 {
+    api().getSettings()->loadPdfReadingConfig("chartsapp", settings);
+
     currentPath = api().getDataPath() + "charts/";
     overlays = std::make_shared<maps::OverlayConfig>();
 
@@ -35,6 +37,9 @@ ChartsApp::ChartsApp(FuncsPtr appFuncs):
 
 void ChartsApp::resetLayout() {
     tabs = std::make_shared<TabGroup>(getUIContainer());
+    tabs->setCallback([this]() {
+        if (settingsContainer) settingsContainer->setVisible(false);
+    });
     tabs->centerInParent();
     createBrowseTab();
 }
@@ -105,6 +110,18 @@ void ChartsApp::showCurrentEntries() {
     }
 }
 
+void ChartsApp::onSettingsToggle(bool forceClose) {
+    if (!settingsContainer) {
+        showAppSettings();
+    }
+    bool show = forceClose ? false : !settingsContainer->isVisible();
+    if (!show) {
+        api().getSettings()->savePdfReadingConfig("chartsapp", settings);
+        api().getSettings()->saveAll();
+    }
+    settingsContainer->setVisible(show);
+}
+
 void ChartsApp::onDown() {
     list->scrollDown();
 }
@@ -161,6 +178,7 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     auto page = tab.page;
     tab.window->setOnClose([this, page] {
         api().executeLater([this, page] {
+            settingsContainer->setVisible(false);
             removeTab(page);
         });
     });
@@ -192,6 +210,7 @@ void ChartsApp::removeTab(std::shared_ptr<Page> page) {
 }
 
 void ChartsApp::setupCallbacks(PdfPage& tab) {
+    tab.window->addSymbol(Widget::Symbol::SETTINGS, [this] () { onSettingsToggle(); });
     tab.window->addSymbol(Widget::Symbol::MINUS, std::bind(&ChartsApp::onMinus, this));
     tab.window->addSymbol(Widget::Symbol::PLUS, std::bind(&ChartsApp::onPlus, this));
     tab.window->addSymbol(Widget::Symbol::RIGHT, std::bind(&ChartsApp::onNextPage, this));
@@ -275,6 +294,20 @@ void ChartsApp::onMinus() {
     }
 }
 
+void ChartsApp::onScrollUp() {
+    PdfPage *tab = getActivePdfPage();
+    if (tab && tab->map) {
+        tab->stitcher->pan(0, -100);
+    }
+}
+
+void ChartsApp::onScrollDown() {
+    PdfPage *tab = getActivePdfPage();
+    if (tab && tab->map) {
+        tab->stitcher->pan(0, 100);
+    }
+}
+
 void ChartsApp::onRotate() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->stitcher) {
@@ -294,9 +327,9 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
     PdfPage *tab = getActivePdfPage();
     if (tab) {
         if (dir > 0) {
-            onPlus();
+            if (settings.mouseWheelScrollsMultiPage) onScrollUp(); else onPlus();
         } else if (dir < 0) {
-            onMinus();
+            if (settings.mouseWheelScrollsMultiPage) onScrollDown(); else onMinus();
         }
     } else {  // on file select tab
         if (dir > 0) {
@@ -306,5 +339,23 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
         }
     }
 }
+
+void ChartsApp::showAppSettings() {
+    auto ui = getUIContainer();
+
+    settingsContainer = std::make_shared<Container>();
+    settingsContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
+    settingsContainer->centerInParent();
+    settingsContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
+    settingsContainer->setVisible(false);
+
+    settingsLabel = std::make_shared<Label>(settingsContainer, "Settings:");
+    settingsLabel->alignInTopLeft();
+
+    mouseWheelScrollsCheckbox = std::make_shared<Checkbox>(settingsContainer, "Mouse wheel scrolls in multi-page docs");
+    mouseWheelScrollsCheckbox->setChecked(settings.mouseWheelScrollsMultiPage);
+    mouseWheelScrollsCheckbox->alignBelow(settingsLabel);
+    mouseWheelScrollsCheckbox->setCallback([this] (bool checked) { settings.mouseWheelScrollsMultiPage = checked; });
+};
 
 } /* namespace avitab */

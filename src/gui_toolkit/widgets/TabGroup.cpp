@@ -30,6 +30,18 @@ TabGroup::TabGroup(WidgetPtr parent):
     setObj(tabs);
 }
 
+void TabGroup::setCallback(TabChangeCallback cb) {
+    callbackFunc = cb;
+    lv_obj_set_user_data(obj(), this);
+
+    lv_obj_set_event_cb(obj(), [] (lv_obj_t *obj, lv_event_t ev) {
+        if (ev == LV_EVENT_VALUE_CHANGED) {
+            TabGroup *me = reinterpret_cast<TabGroup *>(lv_obj_get_user_data(obj));
+            me->callbackFunc();
+        }
+    });
+}
+
 std::shared_ptr<Page> TabGroup::addTab(WidgetPtr tabs, const std::string &title) {
     lv_obj_t *page = lv_tabview_add_tab(obj(), title.c_str());
 
