@@ -147,6 +147,13 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
 
     pages.push_back(tab);
     tabs->showTab(page);
+
+    if (tab.stitcher->getPageCount() > 1) {
+        positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
+    } else {
+        positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
+    }
+
 }
 
 void ChartsApp::removeTab(std::shared_ptr<Page> page) {
@@ -221,16 +228,24 @@ void ChartsApp::onPan(int x, int y, bool start, bool end) {
 void ChartsApp::onNextPage() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->source) {
-        tab->stitcher->nextPage();
-        setTitle(*tab);
+        if (tab->stitcher->nextPage()) {
+            setTitle(*tab);
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+        } else {
+            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
+        }
     }
 }
 
 void ChartsApp::onPrevPage() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->source) {
-        tab->stitcher->prevPage();
-        setTitle(*tab);
+        if (tab->stitcher->prevPage()) {
+            setTitle(*tab);
+            positionPage(*tab, VerticalPosition::Bottom, HorizontalPosition::Middle);
+        } else {
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+        }
     }
 }
 
@@ -252,6 +267,11 @@ void ChartsApp::onRotate() {
     PdfPage *tab = getActivePdfPage();
     if (tab && tab->stitcher) {
         tab->stitcher->rotateRight();
+        if (tab->stitcher->getPageCount() > 1) {
+            positionPage(*tab, VerticalPosition::Top, HorizontalPosition::Middle);
+        } else {
+            positionPage(*tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
+        }
     }
 }
 
@@ -277,6 +297,59 @@ void ChartsApp::onMouseWheel(int dir, int x, int y) {
         } else if (dir < 0) {
             onDown();
         }
+    }
+}
+
+void ChartsApp::positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za) {
+    if (!tab.stitcher) {
+        return;
+    }
+
+    auto doc = tab.stitcher->getTileSource();
+    if (!doc) {
+        return;
+    }
+
+    img::Point<int> aperturexy{tab.pixMap->getWidth(), tab.pixMap->getHeight()};
+    auto angle = tab.stitcher->getRotation();
+
+    // set the required zoom
+    if (za != ZoomAdjust::None) {
+        // start with maximal zoom, and then zoom out until all criteria are met
+        int z  = doc->getMaxZoomLevel();
+        while (z > doc->getMinZoomLevel()) {
+            // iterative loop could be optimised to binary search
+            auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), z);
+            if ((angle == 90) || (angle == 270)) std::swap(pagexy.x, pagexy.y);
+            bool fitsWidth = (za == ZoomAdjust::Height) ? true : (pagexy.x <= aperturexy.x);
+            bool fitsHeight = (za == ZoomAdjust::Width) ? true : (pagexy.y <= aperturexy.y);
+            if (fitsWidth && fitsHeight) break;
+            --z;
+        }
+        tab.stitcher->setZoomLevel(z);
+    }
+
+    // now adjust the tile centre to align as requested
+    auto zoomNow = tab.map->getZoomLevel();
+    auto tilexy = doc->getTileDimensions(zoomNow);
+    auto pagexy = doc->getPageDimensions(tab.stitcher->getCurrentPage(), zoomNow);
+    float cx = 0.0, cy = 0.0;
+    if (angle == 0) {
+        cx = (hp == HorizontalPosition::Left) ? (aperturexy.x / 2) : ((hp == HorizontalPosition::Right) ? (pagexy.x - (aperturexy.x / 2)) : (pagexy.x / 2));
+        cy = (vp == VerticalPosition::Top) ? (aperturexy.y / 2) : ((vp == VerticalPosition::Bottom) ? (pagexy.y - (aperturexy.y / 2)) : (pagexy.y / 2));
+    } else if (angle == 90) {
+        cx = (vp == VerticalPosition::Top) ? (aperturexy.y / 2) : ((vp == VerticalPosition::Bottom) ? (pagexy.x - (aperturexy.y / 2)) : (pagexy.x / 2));
+        cy = (hp == HorizontalPosition::Left) ? (pagexy.y - (aperturexy.x / 2)) : ((hp == HorizontalPosition::Right) ? (aperturexy.x / 2) : (pagexy.y / 2));
+    } else if (angle == 180) {
+        cx = (hp == HorizontalPosition::Left) ? (pagexy.x - (aperturexy.x / 2)) : ((hp == HorizontalPosition::Right) ? (aperturexy.x / 2) : (pagexy.x / 2));
+        cy = (vp == VerticalPosition::Top) ? (pagexy.y - (aperturexy.y / 2)) : ((vp == VerticalPosition::Bottom) ? (aperturexy.y / 2) : (pagexy.y / 2));
+    } else if (angle == 270) {
+        cx = (vp == VerticalPosition::Top) ? (pagexy.x - (aperturexy.y / 2)) : ((vp == VerticalPosition::Bottom) ? (aperturexy.y / 2) : (pagexy.x / 2));
+        cy = (hp == HorizontalPosition::Left) ? (aperturexy.x / 2) : ((hp == HorizontalPosition::Right) ? (pagexy.y - (aperturexy.x / 2)) : (pagexy.y / 2));
+    }
+
+    if (tilexy.x != 0 && tilexy.y != 0) {
+        tab.stitcher->setCenter((float) cx / tilexy.x, (float) cy / tilexy.y);
     }
 }
 

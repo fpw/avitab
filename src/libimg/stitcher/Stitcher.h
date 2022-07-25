@@ -41,8 +41,8 @@ public:
 
     int getCurrentPage() const;
     int getPageCount() const;
-    void nextPage();
-    void prevPage();
+    bool nextPage();
+    bool prevPage();
 
     void pan(int dx, int dy);
     void setZoomLevel(int level);
@@ -52,6 +52,7 @@ public:
     void updateImage();
     void doWork();
 
+    int getRotation() const;
     void rotateRight();
 
     std::shared_ptr<Image> getPreRotatedImage();

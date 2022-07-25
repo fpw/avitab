@@ -89,6 +89,11 @@ private:
     void onRotate();
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
+
+    enum class VerticalPosition { Top, Centre, Bottom };
+    enum class HorizontalPosition { Left, Middle, Right };
+    enum class ZoomAdjust { None, Height, Width, All };
+    void positionPage(PdfPage &tab, VerticalPosition vp, HorizontalPosition hp, ZoomAdjust za = ZoomAdjust::None);
 };
 
 } /* namespace avitab */

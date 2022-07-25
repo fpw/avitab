@@ -90,6 +90,11 @@ int GeoTIFFSource::getPageCount() {
     return 1;
 }
 
+img::Point<int> GeoTIFFSource::getPageDimensions(int page, int zoom) {
+    auto scale = zoomToScale(zoom);
+    return img::Point<int>{(int)(scale * tiff.getFullWidth()), (int)(scale * tiff.getFullHeight())};
+}
+
 bool GeoTIFFSource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
