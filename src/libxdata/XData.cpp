@@ -111,7 +111,17 @@ void XData::loadAirports() {
     loadCustomScenery(loader);
 
     logger::verbose("Loading default apt.dat");
-    loader.load(xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat");
+
+    std::string x11Path = xplaneRoot + "Resources/default scenery/default apt dat/Earth nav data/apt.dat";
+    std::string x12Path = xplaneRoot + "Global Scenery/Global Airports/Earth nav data/apt.dat";
+
+    if (platform::fileExists(x11Path)) {
+        loader.load(x11Path);
+    } else if (platform::fileExists(x12Path)) {
+        loader.load(x12Path);
+    } else {
+        logger::error("Couldn't find apt.dat");
+    }
 }
 
 void XData::loadCustomScenery(const AirportLoader& loader) {
