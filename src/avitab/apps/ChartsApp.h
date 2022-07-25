@@ -20,7 +20,6 @@
 
 #include <memory>
 #include <vector>
-#include <regex>
 #include "src/platform/Platform.h"
 #include "App.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
@@ -33,6 +32,7 @@
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/PDFSource.h"
+#include "components/FilesysBrowser.h"
 
 namespace avitab {
 
@@ -50,16 +50,13 @@ private:
     std::shared_ptr<Page> browsePage;
     std::shared_ptr<Window> browseWindow;
     std::shared_ptr<List> list;
-    std::string currentPath;
+    FilesystemBrowser fsBrowser;
     std::vector<platform::DirEntry> currentEntries;
-    std::regex filter;
     std::shared_ptr<maps::OverlayConfig> overlays;
 
     void createBrowseTab();
-    void showDirectory(const std::string &path);
+    void showDirectory();
     void setFilterRegex(const std::string regex);
-    void filterEntries();
-    void sortEntries();
     void showCurrentEntries();
     void upOneDirectory();
     void onDown();

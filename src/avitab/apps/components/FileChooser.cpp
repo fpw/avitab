@@ -19,8 +19,10 @@
 
 namespace avitab {
 
-FileChooser::FileChooser(App::FuncsPtr appFunctions):
-    api(appFunctions)
+FileChooser::FileChooser(App::FuncsPtr appFunctions, const std::string &prefix, bool dirSelect):
+    api(appFunctions),
+    captionPrefix(prefix),
+    selectDirOnly(dirSelect)
 {
 }
 
@@ -32,20 +34,16 @@ void FileChooser::setSelectCallback(SelectCallback cb) {
     onSelect = cb;
 }
 
-void FileChooser::setDirectorySelect(bool dirSel) {
-    selectDirOnly = dirSel;
-}
-
 void FileChooser::setFilterRegex(const std::string &regex) {
-    filterRegex = std::regex(regex, std::regex_constants::ECMAScript | std::regex_constants::icase);
+    fsBrowser.setFilter(regex);
 }
 
 void FileChooser::setBaseDirectory(const std::string& path) {
-    basePath = path;
+    fsBrowser.goTo(path);
 }
 
-void FileChooser::show(std::shared_ptr<Container> parent, const std::string &caption) {
-    window = std::make_shared<Window>(parent, caption);
+void FileChooser::show(std::shared_ptr<Container> parent) {
+    window = std::make_shared<Window>(parent, "");
     window->addSymbol(Widget::Symbol::CLOSE, [this] () {
         if (onCancel) {
             onCancel();
@@ -59,45 +57,22 @@ void FileChooser::show(std::shared_ptr<Container> parent, const std::string &cap
             onListSelect(data);
         });
     });
-    showDirectory(basePath);
+    showDirectory();
 }
 
-void FileChooser::showDirectory(const std::string& path) {
-    basePath = path;
-    currentEntries = platform::readDirectory(basePath);
-    filterEntries();
-    sortEntries();
+void FileChooser::showDirectory() {
+    window->setCaption(captionPrefix + fsBrowser.rtrimmed(56 - captionPrefix.size()));
+    currentEntries = fsBrowser.entries();
+    if (selectDirOnly) removeFiles();
     showCurrentEntries();
 }
 
-void FileChooser::filterEntries() {
+void FileChooser::removeFiles() {
     auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [this] (const auto &a) -> bool {
-        if (a.isDirectory) {
-            // do _not_ remove sub directories
-            return false;
-        }
-        if (selectDirOnly && !a.isDirectory) {
-            return true;
-        }
-        return !std::regex_search(a.utf8Name, filterRegex);
+        return (!a.isDirectory);
     });
+
     currentEntries.erase(iter, std::end(currentEntries));
-}
-
-void FileChooser::sortEntries() {
-    auto comparator = [] (const platform::DirEntry &a, const platform::DirEntry &b) -> bool {
-        if (a.isDirectory && !b.isDirectory) {
-            return true;
-        }
-
-        if (!a.isDirectory && b.isDirectory) {
-            return false;
-        }
-
-        return a.utf8Name < b.utf8Name;
-    };
-
-    std::sort(begin(currentEntries), end(currentEntries), comparator);
 }
 
 void FileChooser::showCurrentEntries() {
@@ -121,21 +96,22 @@ void FileChooser::onListSelect(int data) {
 
     auto &entry = currentEntries.at(data);
     if (entry.isDirectory) {
+        fsBrowser.goDown(entry.utf8Name);
         if (selectDirOnly) {
-            onSelect(basePath + entry.utf8Name + "/");
+            onSelect(fsBrowser.path(false));
         } else {
-            showDirectory(basePath + entry.utf8Name + "/");
+            showDirectory();
         }
     } else {
         if (onSelect) {
-            onSelect(basePath + entry.utf8Name);
+            onSelect(fsBrowser.path() + entry.utf8Name);
         }
     }
 }
 
 void FileChooser::upOneDirectory() {
-    std::string upOne = platform::realPath(basePath +  "../") + "/";
-    showDirectory(upOne);
+    fsBrowser.goUp();
+    showDirectory();
 }
 
 } /* namespace avitab */

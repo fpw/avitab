@@ -22,44 +22,45 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <regex>
 #include "src/avitab/apps/App.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/platform/Platform.h"
 #include "src/gui_toolkit/widgets/Container.h"
+#include "FilesysBrowser.h"
 
 namespace avitab {
 
 class FileChooser {
+    // dialog to allow choosing of file with name filtering
+    // or choosing of directory (navigation not possible, is this intended?)
+    // currently used by MapApp only
 public:
     using CancelCallback = std::function<void(void)>;
     using SelectCallback = std::function<void(const std::string &)>;
 
-    FileChooser(App::FuncsPtr appFunctions);
+    FileChooser(App::FuncsPtr appFunctions, const std::string &prefix, bool dirSelect = false);
 
     void setCancelCallback(CancelCallback cb);
     void setSelectCallback(SelectCallback cb);
     void setFilterRegex(const std::string &regex);
     void setBaseDirectory(const std::string &path);
-    void setDirectorySelect(bool dirSel);
-    void show(std::shared_ptr<Container> parent, const std::string &caption);
+    void show(std::shared_ptr<Container> parent);
 private:
     App::FuncsPtr api{};
-    bool selectDirOnly = false;
+    const std::string captionPrefix;
+    const bool selectDirOnly;
     std::shared_ptr<Window> window;
     std::shared_ptr<List> list;
 
     CancelCallback onCancel;
     SelectCallback onSelect;
 
+    FilesystemBrowser fsBrowser;
     std::vector<platform::DirEntry> currentEntries;
-    std::string basePath;
-    std::regex filterRegex;
 
-    void showDirectory(const std::string &path);
-    void filterEntries();
-    void sortEntries();
+    void showDirectory();
+    void removeFiles();
     void showCurrentEntries();
     void onListSelect(int data);
     void upOneDirectory();
