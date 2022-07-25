@@ -167,7 +167,7 @@ void ChartsApp::createPdfTab(const std::string &pdfPath) {
     pages.push_back(tab);
     tabs->showTab(page);
 
-    if (tab.stitcher->getPageCount() > 1) {
+    if (tab.stitcher && tab.stitcher->getPageCount() > 1) {
         positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
     } else {
         positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
