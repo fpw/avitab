@@ -34,6 +34,7 @@ public:
     void setCaption(const std::string &title);
     void setOnClose(WindowCallback cb);
     void hideScrollbars();
+    void getHeaderArea(int &x1, int &y1, int &x2, int &y2);
     int getContentWidth();
     int getContentHeight();
     std::shared_ptr<Button> addSymbol(Symbol smb, WindowCallback cb);
