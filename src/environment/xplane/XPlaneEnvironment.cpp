@@ -172,7 +172,9 @@ void XPlaneEnvironment::createMenu(const std::string& name) {
     }
 
     subMenu = XPLMCreateMenu(name.c_str(), pluginMenu, subMenuIdx, [] (void *ctrl, void *cb) {
-        MenuCallback callback = *reinterpret_cast<MenuCallback *>(cb);
+        XPlaneEnvironment *us = (XPlaneEnvironment *) ctrl;
+        auto idx = reinterpret_cast<intptr_t>(cb);
+        MenuCallback callback = us->menuCallbacks[idx];
         if (callback) {
             callback();
         }
@@ -186,8 +188,8 @@ void XPlaneEnvironment::createMenu(const std::string& name) {
 
 void XPlaneEnvironment::addMenuEntry(const std::string& label, MenuCallback cb) {
     menuCallbacks.push_back(cb);
-    int idx = menuCallbacks.size() - 1;
-    XPLMAppendMenuItem(subMenu, label.c_str(), &menuCallbacks[idx], 0);
+    intptr_t idx = menuCallbacks.size() - 1;
+    XPLMAppendMenuItem(subMenu, label.c_str(), reinterpret_cast<void *>(idx), 0);
 }
 
 void XPlaneEnvironment::destroyMenu() {

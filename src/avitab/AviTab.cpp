@@ -69,8 +69,8 @@ void AviTab::startApp() {
     env->createCommand("AviTab/wheel_up", "Wheel up", [this] (CommandState s) { if (s == CommandState::START) handleWheel(true); });
     env->createCommand("AviTab/wheel_down", "Wheel down", [this] (CommandState s) { if (s == CommandState::START) handleWheel(false); });
 
-    env->addMenuEntry("Toggle Tablet", std::bind(&AviTab::toggleTablet, this));
-    env->addMenuEntry("Reset Position", std::bind(&AviTab::resetWindowPosition, this));
+    env->addMenuEntry("Toggle Tablet", [this] { toggleTablet(); });
+    env->addMenuEntry("Reset Position", [this] { resetWindowPosition(); });
 
     guiLib->setMouseWheelCallback([this] (int dir, int x, int y) {
         if (appLauncher) {
@@ -430,7 +430,7 @@ void AviTab::stopApp() {
     // shutdown, we must do the following:
 
     // remember the last window position
-    auto rect = env->getSettings()->getWindowRect();
+    auto rect = guiLib->getNativeWindowRect();
     env->getSettings()->saveWindowRect(rect);
 
     // Cancel the loading if it is still running
