@@ -57,13 +57,14 @@ public:
 
     ~XPlaneGUIDriver();
 private:
-    WindowRect lastRect;
+    WindowRect lastRect{};
     std::shared_ptr<float> brightness;
     DataRef<bool> isVrEnabled;
     DataRef<float> clickX, clickY;
     XPLMDataRef buttonRef{};
     std::shared_ptr<int> panelPowered, panelEnabled;
     int textureId = -1;
+    bool deferPop = false;
     XPLMWindowID window{}, captureWindow{};
     std::atomic_int mouseX {0}, mouseY {0};
     std::atomic_bool mousePressed {false};
