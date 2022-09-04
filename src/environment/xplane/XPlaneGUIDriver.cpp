@@ -26,6 +26,7 @@
 #endif
 #include <stdexcept>
 #include "XPlaneGUIDriver.h"
+#include "MonitorBoundsDecider.h"
 #include "src/Logger.h"
 
 namespace avitab {
@@ -144,8 +145,8 @@ void XPlaneGUIDriver::createWindow(const std::string &title, const WindowRect &r
         killWindow();
     }
 
-    int winLeft, winTop, winRight, winBot;
-    XPLMGetScreenBoundsGlobal(&winLeft, &winTop, &winRight, &winBot);
+    MonitorBoundsDecider boundsDecider;
+    auto &mainMonitor = boundsDecider.getMainDisplayBounds();
 
     XPLMCreateWindow_t params;
     params.structSize = sizeof(params);
@@ -155,10 +156,10 @@ void XPlaneGUIDriver::createWindow(const std::string &title, const WindowRect &r
         params.right = rect.right;
         params.bottom = rect.bottom;
     } else {
-        params.left = winLeft + 100;
-        params.right = winLeft + 100 + width();
-        params.top = winTop - 100;
-        params.bottom = winTop - 100 - height();
+        params.left = mainMonitor.left + 100;
+        params.right = mainMonitor.left + 100 + width();
+        params.top = mainMonitor.top - 100;
+        params.bottom = mainMonitor.top - 100 - height();
     }
     params.visible = 1;
     params.refcon = this;
@@ -188,20 +189,20 @@ void XPlaneGUIDriver::createWindow(const std::string &title, const WindowRect &r
     }
 
     window = XPLMCreateWindowEx(&params);
-
     if (!window) {
         throw std::runtime_error("Couldn't create window");
     }
+
+    deferPop = false;
+    XPLMSetWindowTitle(window, title.c_str());
     if (isVrEnabled) {
         XPLMSetWindowPositioningMode(window, xplm_WindowVR, -1);
     } else if (rect.valid && rect.poppedOut) {
-        XPLMSetWindowPositioningMode(window, xplm_WindowPopOut, -1);
-        XPLMSetWindowGeometryOS(window, rect.left, rect.top, rect.right, rect.bottom);
+        deferPop = true;
+        lastRect = rect;
     } else {
         XPLMSetWindowPositioningMode(window, xplm_WindowPositionFree, -1);
     }
-
-    XPLMSetWindowTitle(window, title.c_str());
 }
 
 WindowRect XPlaneGUIDriver::getWindowRect() {
@@ -324,6 +325,12 @@ void XPlaneGUIDriver::onDraw() {
     if (!window) {
         logger::warn("No window in onDraw");
         return;
+    }
+
+    if (deferPop) {
+        XPLMSetWindowPositioningMode(window, xplm_WindowPopOut, -1);
+        XPLMSetWindowGeometryOS(window, lastRect.left, lastRect.top, lastRect.right, lastRect.bottom);
+        deferPop = false;
     }
 
     int left, top, right, bottom;
