@@ -19,6 +19,7 @@
 #define SRC_AVITAB_APPS_PLANEMANUALAPP_H_
 
 #include "DocumentsApp.h"
+#include "src/gui_toolkit/widgets/MessageBox.h"
 
 namespace avitab {
 
@@ -26,7 +27,9 @@ class PlaneManualApp: public DocumentsApp {
 public:
     PlaneManualApp(FuncsPtr appFuncs);
 private:
-    std::string findStartDirectory();
+    bool findStartDirectory(std::string &startDir);
+    void ShowMessage();
+    std::shared_ptr<MessageBox> errorMsg;
 };
 
 } /* namespace avitab */

@@ -16,27 +16,61 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "PlaneManualApp.h"
+#include <utility>
 
 namespace avitab {
 
 PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
     DocumentsApp(appFuncs, "Manuals", "manualsapp", "\\.(pdf|png|jpg|jpeg|bmp)$")
 {
-    browseStartDirectory = findStartDirectory();
+    bool ok = findStartDirectory(browseStartDirectory);
     Run();
+    if (!ok) {
+        api().executeLater([this] () { ShowMessage(); });
+    }
+#if 0
+        if (!errorMsg) {
+            errorMsg = std::make_shared<MessageBox>(
+                    getUIContainer(),
+                    "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
+            errorMsg->addButton("Ok", [this] () {
+                api().executeLater([this] () {
+                    Run();
+                    errorMsg.reset();
+                });
+            });
+            errorMsg->centerInParent();
+        }
+#endif
 }
 
-std::string PlaneManualApp::findStartDirectory() {
-    auto basePath = api().getAirplanePath();
+bool PlaneManualApp::findStartDirectory(std::string &startDir) {
+    startDir = api().getAirplanePath();
 
-    const char *search[] = { "manual", "manuals", "documentation", "docs", 0 };
-    for (const char **d = search; *d != 0; ++d) {
-        if (platform::fileExists(basePath + *d)) {
-            return basePath + *d;
+    std::array<std::string, 6> subdirs = { "manuals", "docs", "handbook", "manual", "documentation", "doc" };
+    for (auto sd = subdirs.begin(); sd != subdirs.end(); ++sd) {
+        if (platform::fileExists(startDir + *sd)) {
+            startDir += *sd;
+            return true;
         }
     }
 
-    return basePath;
+    return false;
+}
+
+void PlaneManualApp::ShowMessage() {
+    if (!errorMsg) {
+        errorMsg = std::make_shared<MessageBox>(
+                getUIContainer(),
+                "It is recommended to put your aircraft's manuals into a dedicated folder inside your aircraft folder.\nAvitab looks for folders:\n'manuals' 'docs' 'handbook'.");
+        errorMsg->addButton("Ok", [this] () {
+            api().executeLater([this] () {
+                //Run();
+                errorMsg.reset();
+            });
+        });
+        errorMsg->centerInParent();
+    }
 }
 
 } /* namespace avitab */
