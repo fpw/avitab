@@ -16,109 +16,61 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "PlaneManualApp.h"
-#include "src/avitab/apps/components/FileSelect.h"
-#include "src/avitab/apps/components/PDFViewer.h"
-#include "src/platform/Platform.h"
-#include "src/Logger.h"
+#include <utility>
 
 namespace avitab {
 
 PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
-    App(appFuncs)
+    DocumentsApp(appFuncs, "Manuals", "manualsapp", "\\.(pdf|png|jpg|jpeg|bmp)$")
 {
-    showAircraftFolder();
+    bool ok = findStartDirectory(browseStartDirectory);
+    Run();
+    if (!ok) {
+        api().executeLater([this] () { ShowMessage(); });
+    }
+#if 0
+        if (!errorMsg) {
+            errorMsg = std::make_shared<MessageBox>(
+                    getUIContainer(),
+                    "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
+            errorMsg->addButton("Ok", [this] () {
+                api().executeLater([this] () {
+                    Run();
+                    errorMsg.reset();
+                });
+            });
+            errorMsg->centerInParent();
+        }
+#endif
 }
 
-void PlaneManualApp::show() {
-    auto aircraftPath = api().getAirplanePath();
-    if (aircraftPath != currentAircraft) {
-        errorMsg.reset();
-        childApp.reset();
-        showAircraftFolder();
-    }
+bool PlaneManualApp::findStartDirectory(std::string &startDir) {
+    startDir = api().getAirplanePath();
 
-    if (childApp) {
-        childApp->show();
-    } else {
-        App::show();
-    }
-}
-
-void PlaneManualApp::showAircraftFolder() {
-    currentAircraft = api().getAirplanePath();
-    bool showError = false;
-
-    if (platform::fileExists(currentAircraft + "manual/")) {
-        currentPath = currentAircraft + "manual/";
-    } else if (platform::fileExists(currentAircraft + "manuals/")) {
-        currentPath = currentAircraft + "manuals/";
-    } else if (platform::fileExists(currentAircraft + "documentation/")) {
-        currentPath = currentAircraft + "documentation/";
-    } else {
-        showError = true;
-        if (platform::fileExists(currentAircraft)) {
-            currentPath = currentAircraft;
-        } else {
-            currentPath = api().getDataPath();
+    std::array<std::string, 6> subdirs = { "manuals", "docs", "handbook", "manual", "documentation", "doc" };
+    for (auto sd = subdirs.begin(); sd != subdirs.end(); ++sd) {
+        if (platform::fileExists(startDir + *sd)) {
+            startDir += *sd;
+            return true;
         }
     }
 
-    if (showError && !errorMsg) {
+    return false;
+}
+
+void PlaneManualApp::ShowMessage() {
+    if (!errorMsg) {
         errorMsg = std::make_shared<MessageBox>(
                 getUIContainer(),
-                "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
+                "It is recommended to put your aircraft's manuals into a dedicated folder inside your aircraft folder.\nAvitab looks for folders:\n'manuals' 'docs' 'handbook'.");
         errorMsg->addButton("Ok", [this] () {
             api().executeLater([this] () {
-                showFileSelect();
-                childApp->show();
+                //Run();
                 errorMsg.reset();
             });
         });
         errorMsg->centerInParent();
-    } else {
-        showFileSelect();
     }
-}
-
-void PlaneManualApp::showFileSelect() {
-    auto fileSelect = startSubApp<FileSelect>();
-    fileSelect->setPrefix("Manual: ");
-    fileSelect->setOnExit([this] () { exit(); });
-    fileSelect->setSelectCallback([this] (const std::vector<platform::DirEntry> &entries, size_t i) {
-        onSelect(entries, i);
-    });
-    fileSelect->setDirectory(currentPath);
-    fileSelect->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
-    fileSelect->showDirectory();
-    childApp = std::move(fileSelect);
-}
-
-void PlaneManualApp::onSelect(const std::vector<platform::DirEntry> &entries, size_t chosenIndex) {
-    currentPath = std::dynamic_pointer_cast<FileSelect>(childApp)->getCurrentPath();
-
-    if (!entries[chosenIndex].isDirectory) {
-        auto pdfApp = startSubApp<PDFViewer>();
-        pdfApp->showFile(currentPath + entries[chosenIndex].utf8Name);
-        pdfApp->setOnExit([this] () {
-            api().executeLater([this] {
-                onSelectionClosed();
-            });
-        });
-
-        childApp = std::move(pdfApp);
-        childApp->show();
-    }
-}
-
-void PlaneManualApp::onMouseWheel(int dir, int x, int y) {
-    if (childApp) {
-        childApp->onMouseWheel(dir, x, y);
-    }
-}
-
-void PlaneManualApp::onSelectionClosed() {
-    showFileSelect();
-    childApp->show();
 }
 
 } /* namespace avitab */
