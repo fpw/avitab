@@ -166,7 +166,7 @@ std::unique_ptr<Image> Rasterizer::loadTile(int page, int x, int y, int zoom, bo
 
         auto startAt = std::chrono::steady_clock::now();
 
-        int translateX, translateY;
+        int translateX = 0, translateY = 0;
         switch(preRotateAngle) {
         case 0:
             translateX = 0;

@@ -217,7 +217,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     auto magneticVariation = api().getMagneticVariation(aptLoc.latitude, aptLoc.longitude);
 
     str << "Runways:\n";
-    airport->forEachRunway([this, &str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
+    airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
         str << "  " + rwy->getID();
         auto ils = rwy->getILSData();
         auto elevation = rwy->getElevation();

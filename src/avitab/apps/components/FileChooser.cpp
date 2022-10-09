@@ -68,7 +68,7 @@ void FileChooser::showDirectory() {
 }
 
 void FileChooser::removeFiles() {
-    auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [this] (const auto &a) -> bool {
+    auto iter = std::remove_if(std::begin(currentEntries), std::end(currentEntries), [] (const auto &a) -> bool {
         return (!a.isDirectory);
     });
 

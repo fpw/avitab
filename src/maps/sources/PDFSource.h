@@ -55,7 +55,7 @@ public:
     void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
 
     void setNightMode(bool night);
-    void rotate();
+    void rotate() override;
 
 private:
     std::string utf8FileName;

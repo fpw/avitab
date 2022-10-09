@@ -17,6 +17,7 @@
  */
 
 #include <XPLM/XPLMDisplay.h>
+#include <stddef.h>
 #include "MonitorBoundsDecider.h"
 
 // Code contributed by wuzzilicus: https://forums.x-plane.org/index.php?/forums/topic/270166-avitab-cant-open-tablet-if-second-monitor-is-set-to-full-screen-sim/
