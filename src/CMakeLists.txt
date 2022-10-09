@@ -111,20 +111,23 @@ if(WIN32)
         -static-libstdc++
         avitab_standalone
         avitab_common
-    ${PROJECT_SOURCE_DIR}/build-third/lib/libcurl.a
+        ${PROJECT_SOURCE_DIR}/build-third/lib/libcurl.a
         glfw3
         opengl32
         -Wl,--subsystem,windows
     )
 elseif(APPLE)
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(GLFW REQUIRED glfw3)
+    include_directories(${GLFW_INCLUDE_DIRS})
+    target_link_directories(AviTab-standalone PRIVATE ${GLFW_LIBRARY_DIRS})
+
     add_definitions(-DGL_SILENCE_DEPRECATION)
-    include_directories("/usr/local/include")
-    link_directories("/usr/local/lib")
     target_link_libraries(AviTab-standalone
         avitab_standalone
         avitab_common
+        ${GLFW_STATIC_LIBRARIES}
         "-framework OpenGL"
-        glfw
         curl
     )
 elseif(UNIX)

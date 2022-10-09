@@ -91,6 +91,7 @@ darwin*)
     brewInstall automake
     brewInstall libtool
     brewInstall glfw
+    brewInstall pkgconfig
   elif [ "$answer" == "2" ]; then
     echo "Please download it from: https://brew.sh/ and install it, then run this script again."
     exit
