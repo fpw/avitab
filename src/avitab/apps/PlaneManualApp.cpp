@@ -17,6 +17,7 @@
  */
 #include "PlaneManualApp.h"
 #include <utility>
+#include <array>
 
 namespace avitab {
 
