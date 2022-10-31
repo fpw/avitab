@@ -39,6 +39,7 @@ if [ ! -f $OUTDIR/include/XPLM/XPLMPlugin.h ]; then echo "Failed"; exit; fi
 echo "Building detex..."
 if [ ! -f $OUTDIR/lib/libdetex.a ]; then
     cd detex
+    patch -p1 -s -N < ../patches/detex.patch
     OPTCFLAGS=-fPIC make library
     make HEADER_FILE_INSTALL_DIR=$OUTDIR/include STATIC_LIB_DIR=$OUTDIR/lib install
     cd ..
@@ -48,7 +49,7 @@ if [ ! -f $OUTDIR/lib/libdetex.a ]; then echo "Failed"; exit; fi
 echo "Building mupdf..."
 if [ ! -f $OUTDIR/lib/libmupdf-third.a ]; then
     cd mupdf
-    patch -p1 -s -N < ../mupdf.diff
+    patch -p1 -s -N < ../patches/mupdf.patch
     XCFLAGS=-fPIC make HAVE_X11=no HAVE_GLUT=no prefix=$OUTDIR -j10 install
     cd thirdparty/libjpeg
     ./configure
