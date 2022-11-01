@@ -21,7 +21,7 @@ but all of this is available right inside your VR cockpit.
 
 ![](screenshots/charts.jpg)
 ![](screenshots/map.jpg)
-![](screenshots/airports.jpg)m
+![](screenshots/airports.jpg)
 
 More screenshots here: [Screenshots](screenshots/)
 
