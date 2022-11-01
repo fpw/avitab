@@ -21,7 +21,7 @@ but all of this is available right inside your VR cockpit.
 
 ![](screenshots/charts.jpg)
 ![](screenshots/map.jpg)
-![](screenshots/airports.jpg)
+![](screenshots/airports.jpg)m
 
 More screenshots here: [Screenshots](screenshots/)
 
@@ -55,6 +55,7 @@ charts there, including subdirectories.
   download and setup your environment with the needed dependencies.
   * Windows, Linux, and macOS are supported with their respective dependency managers.  If you do not have the
     proper dependency manager installed, the script will prompt you to install it before proceeding.
+  * X-Plane 12, Make sure you have downloaded the latest [X-Plane 4 Beta SDK](https://developer.x-plane.com/sdk/plugin-sdk-downloads). (Needed for running the plugin on Apple Silicon hardware.)
 * There is another script called `teardown.sh` that will delete the folders where the dependencies were
   placed to compile AviTab.
 
