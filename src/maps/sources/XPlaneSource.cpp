@@ -107,7 +107,7 @@ std::unique_ptr<img::Image> XPlaneSource::loadTileImage(int page, int x, int y, 
     }
 
     char name[32];
-    int max_len = sizeof name;
+    size_t max_len = sizeof name;
     std::snprintf(name, max_len, "%+03d%+04d.dds", -y * 10 + 80, x * 10 - 180);
     std::string path = baseDir + name;
 

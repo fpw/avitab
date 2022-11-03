@@ -278,7 +278,7 @@ std::string getClipboardContent() {
 
 std::string formatStringArgs(const std::string format, va_list list) {
     char buf[2048];
-    int max_len = sizeof buf;
+    size_t max_len = sizeof buf;
     vsnprintf(buf, max_len, format.c_str(), list);
     return buf;
 }
