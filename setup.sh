@@ -15,8 +15,8 @@ brewInstall() {
   brew install "$1"
 }
 
-standalone() {
-  # Move files from res/ to build/
+copyResources() {
+ # Move files from res/ to build/
   echo "Moving files..."
   if [ ! -f "$BUILD_FOLDER"/config.json ]; then
     cp -a "$(pwd)"/res/* "$BUILD_FOLDER"
@@ -29,13 +29,17 @@ standalone() {
   fi
 
   cd "$BUILD_FOLDER" || exit
+}
 
+standalone() {
   echo "Making AviTab-standalone..."
+  copyResources
   make AviTab-standalone
 }
 
 plugin() {
   echo "Making avitab_plugin..."
+  copyResources
   make avitab_plugin
 }
 
