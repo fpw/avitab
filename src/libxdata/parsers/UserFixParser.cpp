@@ -19,6 +19,7 @@
 #include "src/Logger.h"
 #include <iostream>
 #include <cmath>
+#include "strtod.h"
 
 namespace xdata {
 
@@ -69,9 +70,9 @@ void UserFixParser::parseLine() {
         }
 
         std::string latStr = parser.nextCSVValue();
-        userFix.latitude = std::stod(latStr);
+        userFix.latitude = xdata::locale_independent_strtod(latStr.c_str(), NULL);
         std::string lonStr = parser.nextCSVValue();
-        userFix.longitude = std::stod(lonStr);
+        userFix.longitude = xdata::locale_independent_strtod(lonStr.c_str(), NULL);
         if (std::isnan(userFix.latitude) || std::isnan(userFix.longitude)) {
             throw std::runtime_error("Bad values");
         }

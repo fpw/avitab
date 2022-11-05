@@ -27,6 +27,7 @@
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
 #include "src/maps/sources/NavigraphSource.h"
+#include "src/libxdata/parsers/strtod.h"
 
 namespace avitab {
 
@@ -582,7 +583,7 @@ double MapApp::getCoordinate(const std::string &input) {
 
     if (coordStr.find(" ") == std::string::npos) {
         // Parse decimal format
-        return std::stod(coordStr);
+        return xdata::locale_independent_strtod(coordStr.c_str(), NULL);
     } else {
         // Parse DMS format with space separator between D M and M S.
         // Also handles D M only with no seconds field.

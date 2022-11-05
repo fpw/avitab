@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <limits>
 #include "src/Logger.h"
+#include "strtod.h"
 
 namespace xdata {
 
@@ -138,7 +139,7 @@ double BaseParser::parseDouble() {
     lineStream >> doubleStr;
 
     try {
-        return std::stod(doubleStr);
+        return xdata::locale_independent_strtod(doubleStr.c_str(), NULL);
     } catch (...) {
         return std::numeric_limits<double>::quiet_NaN();
     }
