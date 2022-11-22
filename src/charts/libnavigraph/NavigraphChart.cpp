@@ -100,6 +100,7 @@ std::shared_ptr<img::TileSource> NavigraphChart::createTileSource(bool nightMode
             int h = img->getHeight();
             src->attachCalibration1(geoRef.x1 * w, geoRef.y1 * h, geoRef.lat1, geoRef.lon1, 0);
             src->attachCalibration2(geoRef.x2 * w, geoRef.y2 * h, geoRef.lat2, geoRef.lon2, 0);
+            src->attachCalibration3Angle(0);
         } catch (const std::exception &e) {
             logger::verbose("Invalid geo reference for chart: %s", e.what());
         }

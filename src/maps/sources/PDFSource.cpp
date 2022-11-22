@@ -63,6 +63,10 @@ bool PDFSource::supportsWorldCoords() {
     return calibration.hasCalibration();
 }
 
+std::string PDFSource::getCalibrationReport() {
+    return calibration.getReport();
+}
+
 img::Point<int> PDFSource::getTileDimensions(int zoom) {
     int tileSize = rasterizer.getTileSize();
     return img::Point<int>{tileSize, tileSize};
@@ -130,7 +134,25 @@ void PDFSource::attachCalibration2(double x, double y, double lat, double lon, i
     double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
     double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
     calibration.setPoint2(normX, normY, lat, lon);
+}
 
+void PDFSource::attachCalibration3Point(double x, double y, double lat, double lon, int zoom)
+{
+    int tileSize = rasterizer.getTileSize();
+    double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
+    double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
+    calibration.setPoint3(normX, normY, lat, lon);
+
+    try {
+        storeCalibration();
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't store calibration: %s", e.what());
+    }
+}
+
+void PDFSource::attachCalibration3Angle(double angle)
+{
+    calibration.setAngle(angle);
     try {
         storeCalibration();
     } catch (const std::exception &e) {
@@ -169,9 +191,18 @@ void PDFSource::rotate() {
 }
 
 void PDFSource::storeCalibration() {
-    std::string calFileName = utf8FileName + ".json";
-    fs::ofstream jsonFile(fs::u8path(calFileName));
-    jsonFile << calibration.toString();
+    static const bool SAVE_BAD_JSON = false; // true useful for debug
+    if (!calibration.hasCalibration() && !SAVE_BAD_JSON) {
+        // Don't save JSON
+        return;
+    }
+    try {
+        std::string calFileName = utf8FileName + ".json";
+        fs::ofstream jsonFile(fs::u8path(calFileName));
+        jsonFile << calibration.toString();
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't store calibration: %s", e.what());
+    }
 }
 
 void PDFSource::loadCalibration() {
@@ -179,19 +210,35 @@ void PDFSource::loadCalibration() {
     fs::ifstream jsonFile(fs::u8path(calFileName));
 
     if (jsonFile.fail()) {
-        return;
+        // Try reading a Google Earth KML file for calibration
+        std::string kmlFileName = utf8FileName + ".kml";
+        std::ifstream kmlFile(fs::u8path(kmlFileName));
+        if (kmlFile.fail()) {
+            logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
+            return;
+        }
+        logger::info("Loaded kml calibration file for %s", utf8FileName.c_str());
+        std::string kmlStr((std::istreambuf_iterator<char>(kmlFile)),
+                         std::istreambuf_iterator<char>());
+        calibration.fromKmlString(kmlStr);
+        storeCalibration();
+    } else {
+        logger::info("Loaded json calibration file for %s", utf8FileName.c_str());
+        std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
+                         std::istreambuf_iterator<char>());
+        calibration.fromJsonString(jsonStr);
     }
 
-    std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
-                     std::istreambuf_iterator<char>());
-
-    calibration.fromString(jsonStr);
     rotateAngle = calibration.getPreRotate();
     rasterizer.setPreRotate(rotateAngle);
 }
 
 void PDFSource::setNightMode(bool night) {
     nightMode = night;
+}
+
+double PDFSource::getNorthOffsetAngle() {
+   return calibration.getNorthOffset();
 }
 
 } /* namespace maps */

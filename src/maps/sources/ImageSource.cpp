@@ -82,6 +82,10 @@ void ImageSource::attachCalibration2(double x, double y, double lat, double lon,
     calibration.setPoint2(normX, normY, lat, lon);
 }
 
+void ImageSource::attachCalibration3Angle(double angle) {
+    calibration.setAngle(0);
+}
+
 img::Point<int> ImageSource::getTileDimensions(int zoom) {
     return img::Point<int>{TILE_SIZE, TILE_SIZE};
 }

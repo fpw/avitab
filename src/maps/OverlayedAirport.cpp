@@ -109,9 +109,16 @@ bool OverlayedAirport::isVisible(OverlayHelper helper, const xdata::Airport *air
     if (!locUpLeft.isValid() || !locDownRight.isValid()) {
         return true; // Not sure, assume visible, let later stages figure it out
     }
-    int xmin, ymin, xmax, ymax;
-    helper->positionToPixel(locUpLeft.latitude, locUpLeft.longitude, xmin, ymin);
-    helper->positionToPixel(locDownRight.latitude, locDownRight.longitude, xmax, ymax);
+    // Chart may be rotated, so xUpleft is not not necessarily xmin, ymin
+    int xUpLeft, yUpLeft, xUpRight, yUpRight, xDownLeft, yDownLeft, xDownRight, yDownRight;
+    helper->positionToPixel(locUpLeft.latitude, locUpLeft.longitude, xUpLeft, yUpLeft);
+    helper->positionToPixel(locUpLeft.latitude, locDownRight.longitude, xUpRight, yUpRight);
+    helper->positionToPixel(locDownRight.latitude, locDownRight.longitude, xDownRight, yDownRight);
+    helper->positionToPixel(locDownRight.latitude, locUpLeft.longitude, xDownLeft, yDownLeft);
+    int xmin = std::min(std::min(xUpLeft, xUpRight), std::min(xDownRight, xDownLeft));
+    int xmax = std::max(std::max(xUpLeft, xUpRight), std::max(xDownRight, xDownLeft));
+    int ymin = std::min(std::min(yUpLeft, yUpRight), std::min(yDownRight, yDownLeft));
+    int ymax = std::max(std::max(yUpLeft, yUpRight), std::max(yDownRight, yDownLeft));
     int margin = 100; // Enough for text to spread out
     return helper->isAreaVisible(xmin - margin, ymin - margin, xmax + margin, ymax + margin);
 }

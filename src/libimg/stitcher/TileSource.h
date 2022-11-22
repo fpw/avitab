@@ -39,6 +39,8 @@ public:
     virtual Point<int> getTileDimensions(int zoom) = 0;
     virtual bool supportsWorldCoords() = 0;
     virtual img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) = 0;
+    virtual std::string getCalibrationReport() {return "No calibration"; };
+    virtual double getNorthOffsetAngle() { return 0.0; };
 
     // Control the underlying loader
     virtual void cancelPendingLoads() = 0;
@@ -56,6 +58,8 @@ public:
     virtual Point<double> xyToWorld(double x, double y, int zoom) = 0;
     virtual void attachCalibration1(double x, double y, double lat, double lon, int zoom) {}
     virtual void attachCalibration2(double x, double y, double lat, double lon, int zoom) {}
+    virtual void attachCalibration3Point(double x, double y, double lat, double lon, int zoom) {}
+    virtual void attachCalibration3Angle(double angle) {}
     virtual void rotate() {}
 
     virtual std::string getCopyrightInfo() { return ""; }

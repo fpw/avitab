@@ -50,11 +50,14 @@ public:
     void zoomIn();
     void zoomOut();
 
-    bool isCalibrated();
+    bool isCalibrated() const;
     void beginCalibration();
     void setCalibrationPoint1(double lat, double lon);
     void setCalibrationPoint2(double lat, double lon);
+    void setCalibrationPoint3(double lat, double lon);
+    void setCalibrationAngle(double angle);
     int getCalibrationStep() const;
+    std::string getCalibrationReport() const;
 
     // Call periodically to refresh tiles that were pending
     void doWork();
@@ -72,6 +75,7 @@ public:
     void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const override;
     int getZoomLevel() const override;
     int getMaxZoomLevel() const override;
+    double getNorthOffset() const override;
 
 private:
     // Data
@@ -111,6 +115,7 @@ private:
     void drawDataOverlays();
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
+    void drawCompass();
 
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
     float cosDegrees(int angleDegrees) const;

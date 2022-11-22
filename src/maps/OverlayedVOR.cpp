@@ -67,6 +67,7 @@ void OverlayedVOR::drawGraphics() {
         const float BIG_TICK_SCALE = 0.84;
         const float SMALL_TICK_SCALE = 0.92;
         int bearing = (int)vor->getBearing();
+        bearing += overlayHelper->getNorthOffset();
         for (int deg = 0; deg <= 360; deg += 10) {
             double inner_x, inner_y, outer_x, outer_y;
             float tickScale = (deg%30 == 0) ? BIG_TICK_SCALE : SMALL_TICK_SCALE;
