@@ -46,7 +46,7 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
         break;
     }
 
-    std::string installFile = installFilePath + "/x-plane_install_11.txt";
+    std::string installFile = installFilePath + "/x-plane_install_12.txt";
     if (!platform::fileExists(installFile.c_str())) {
         return "";
     }
