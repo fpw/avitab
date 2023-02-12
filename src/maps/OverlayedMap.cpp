@@ -159,6 +159,9 @@ void OverlayedMap::drawOverlays() {
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
+        if (std::abs(std::round(getNorthOffset())) > 0.5) {
+            drawCompass();
+        }
         drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
@@ -380,10 +383,6 @@ void OverlayedMap::drawDataOverlays() {
         stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);
 
     drawScale(nmPerPixel);
-
-    if (std::abs(std::round(getNorthOffset())) > 0.5) {
-        drawCompass();
-    }
 }
 
 double OverlayedMap::getMapWidthNM() const {
