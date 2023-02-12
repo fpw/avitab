@@ -90,6 +90,7 @@ private:
     bool suspended = true;
 
     int panPosX = 0, panPosY = 0;
+    std::string mercatorDir;
 
     void createSettingsLayout();
     void showOverlaySettings();

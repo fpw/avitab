@@ -64,6 +64,7 @@ MapApp::MapApp(FuncsPtr funcs):
     chooserContainer->setVisible(false);
 
     setMapSource(MapSource::OPEN_TOPO);
+    mercatorDir = api().getDataPath() + "/MapTiles/Mercator/";
 
     mapWidget->draw(*mapImage);
     onTimer();
@@ -200,7 +201,7 @@ void MapApp::selectGeoTIFF() {
 
 void MapApp::selectMercator() {
     fileChooser = std::make_unique<FileChooser>(&api(), "Mercator: ");
-    fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/Mercator/");
+    fileChooser->setBaseDirectory(mercatorDir);
     fileChooser->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
@@ -212,6 +213,7 @@ void MapApp::selectMercator() {
                 if (savedSettings->getGeneralSetting<bool>("show_calibration_msg_on_load")) {
                     finalizeCalibration();
                 }
+                mercatorDir = platform::getDirNameFromPath(selectedUTF8);
             } catch (const std::exception &e) {
                 logger::warn("Couldn't open Mercator %s: %s", selectedUTF8.c_str(), e.what());
             }
