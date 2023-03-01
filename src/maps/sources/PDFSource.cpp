@@ -197,6 +197,7 @@ void PDFSource::storeCalibration() {
         return;
     }
     try {
+        calibration.setHash(platform::getFileSha256(utf8FileName));
         std::string calFileName = utf8FileName + ".json";
         fs::ofstream jsonFile(fs::u8path(calFileName));
         jsonFile << calibration.toString();

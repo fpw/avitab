@@ -32,6 +32,7 @@ public:
     void setPoint3(double x, double y, double lat, double lon);
     void setAngle(double angle);
     void setPreRotate(int angle);
+    void setHash(const std::string &s);
 
     std::string toString()const;
     void fromJsonString(const std::string &s);
@@ -50,6 +51,7 @@ private:
     double regX1{}, regY1{}, regLat1{}, regLon1{};
     double regX2{}, regY2{}, regLat2{}, regLon2{};
     double regX3{}, regY3{}, regLat3{}, regLon3{};
+    std::string regHash{};
     double northOffsetAngle{};
     bool isCalibrated = false;
     bool offsetAngleDefined = false;

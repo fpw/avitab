@@ -23,6 +23,10 @@
 
 namespace maps {
 
+void Calibration::setHash(const std::string &s) {
+    regHash = s;
+}
+
 void Calibration::setPoint1(double x, double y, double lat, double lon) {
     LOG_INFO(1,"%4.10f,%4.10f -> %4.10f,%4.10f", x, y, lat, lon);
     regX1 = x;
@@ -78,6 +82,7 @@ std::string Calibration::toString() const {
     if (offsetAngleDefined) {
         json["calibration"] =
                     {
+                        {"hash", regHash},
                         {"prerotate", preRotate},
 
                         {"x1", regX1},
@@ -95,6 +100,7 @@ std::string Calibration::toString() const {
     } else {
         json["calibration"] =
                     {
+                        {"hash", regHash},
                         {"prerotate", preRotate},
 
                         {"x1", regX1},
@@ -433,7 +439,7 @@ bool Calibration::checkTriangle() {
         LOG_ERROR("Recommended value is at least %f", RECOMMENDED_SMALLEST_ANGLE);
         LOG_ERROR("Best value is %f, for equilateral triangle", BEST_SMALLEST_ANGLE);
         if (offsetAngleDefined) {
-        	LOG_ERROR("Note that with 2 points and an angle, the triangle is defined after chart rotation to align north");
+            LOG_ERROR("Note that with 2 points and an angle, the triangle is defined after chart rotation to align north");
         }
         if (angle < MINIMUM_SMALLEST_ANGLE) {
             report = "Calibration failed. Triangle formed by reference points is too thin. See Avitab.log for further details";
