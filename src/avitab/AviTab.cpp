@@ -379,6 +379,11 @@ double AviTab::getMagneticVariation(double lat, double lon) {
     return env->getMagneticVariation(lat, lon);
 }
 
+std::string AviTab::getMETARForAirport(const std::string &icao) {
+    return env->getMETARForAirport(icao);
+}
+
+
 void AviTab::reloadMetar() {
     logger::info("Reloading METAR...");
     env->reloadMetar();

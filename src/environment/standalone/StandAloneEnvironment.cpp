@@ -113,6 +113,10 @@ double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
     return 0;
 }
 
+std::string StandAloneEnvironment::getMETARForAirport(const std::string &icao) {
+    return "METAR";
+}
+
 void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     registerEnvironmentCallback(cb);
 }

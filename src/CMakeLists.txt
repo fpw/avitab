@@ -5,7 +5,7 @@ add_library(avitab_common "${CMAKE_CURRENT_LIST_DIR}/Logger.cpp")
 add_library(avitab_xplane "")
 add_library(avitab_standalone "")
 
-add_definitions(-DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
+add_definitions(-DXPLM400=1 -DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)

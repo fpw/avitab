@@ -48,6 +48,7 @@ public:
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<xdata::XData> getNavData() override;
+    std::string getMETARForAirport(const std::string &icao) override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;

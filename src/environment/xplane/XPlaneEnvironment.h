@@ -55,6 +55,7 @@ public:
     std::shared_ptr<xdata::XData> getNavData() override;
     std::string getAirplanePath() override;
     double getMagneticVariation(double lat, double lon) override;
+    std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
     void enableAndPowerPanel() override;
@@ -79,6 +80,7 @@ private:
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
     std::string aircraftPath;
+    bool isXP12;
 
     // State
     std::mutex stateMutex;

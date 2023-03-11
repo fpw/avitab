@@ -77,6 +77,7 @@ public:
     virtual std::string getEarthTexturePath() = 0;
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
+    virtual std::string getMETARForAirport(const std::string &icao) = 0;
     std::shared_ptr<xdata::World> getNavWorld();
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();

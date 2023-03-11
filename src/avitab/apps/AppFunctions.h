@@ -53,6 +53,7 @@ public:
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
+    virtual std::string getMETARForAirport(const std::string &icao) = 0;
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;
     virtual std::shared_ptr<apis::ChartService> getChartService() = 0;

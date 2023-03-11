@@ -18,8 +18,10 @@
 #include <XPLM/XPLMPlugin.h>
 #include <XPLM/XPLMPlanes.h>
 #include <XPLM/XPLMScenery.h>
+#include <XPLM/XPLMWeather.h>
 #include <stdexcept>
 #include <chrono>
+#include <sstream>
 #include "XPlaneEnvironment.h"
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
@@ -37,6 +39,13 @@ XPlaneEnvironment::XPlaneEnvironment() {
 
     xplaneRootPath = getXPlanePath();
     xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
+
+    int xpVersion, xplmVersion;
+    XPLMHostApplicationID hostId;
+    XPLMGetVersions(&xpVersion, &xplmVersion, &hostId);
+    if (xplmVersion >= 400) {
+        isXP12 = true;
+    }
 
     updatePlaneCount();
 
@@ -349,6 +358,45 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
     logger::verbose("Time to get magnetic variation: %d millis",
             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
     return res;
+}
+
+std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
+    std::string metar, timestamp;
+    if (isXP12) {
+        std::promise<std::string> dataPromise;
+        auto futureData = dataPromise.get_future();
+
+        auto startAt = std::chrono::steady_clock::now();
+        runInEnvironment([icao, &dataPromise] () {
+            XPLMFixedString150_t buf;
+            XPLMGetMETARForAirport(icao.c_str(), &buf);
+            dataPromise.set_value(std::string(buf.buffer));
+        });
+
+        metar = futureData.get();
+        auto duration = std::chrono::steady_clock::now() - startAt;
+        logger::verbose("Time to get METAR: %d millis",
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    } else {
+        auto airport = xplaneData->getWorld()->findAirportByID(icao);
+        if (!airport) {
+            throw std::invalid_argument("No such airport");
+        }
+        timestamp = airport->getMetarTimestamp();
+        metar = airport->getMetarString();
+    }
+
+    if (metar.empty()) {
+        return "No weather information available";
+    }
+
+    std::stringstream str;
+    str << "Weather";
+    if (!timestamp.empty()) {
+        str << ", updated " << timestamp;
+    }
+    str << ":\n" << metar << "\n";
+    return str.str();
 }
 
 std::shared_ptr<xdata::XData> XPlaneEnvironment::getNavData() {

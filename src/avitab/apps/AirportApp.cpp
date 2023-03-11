@@ -252,21 +252,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
 }
 
 std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
-    const auto &timestamp = airport->getMetarTimestamp();
-    const auto &metar = airport->getMetarString();
-
-    if (metar.empty()) {
-        return "No weather information available";
-    }
-
-    std::stringstream str;
-    str << "Weather";
-    if (!timestamp.empty()) {
-        str << ", updated " << timestamp;
-    }
-    str << ":\n" << metar << "\n";
-    return str.str();
-
+    return api().getMETARForAirport(airport->getID());
 }
 
 AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {

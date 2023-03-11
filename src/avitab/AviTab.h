@@ -60,6 +60,7 @@ public:
     void onHomeButton() override;
     std::shared_ptr<xdata::World> getNavWorld() override;
     double getMagneticVariation(double lat, double lon) override;
+    std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
     void close() override;
