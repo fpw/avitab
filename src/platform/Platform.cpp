@@ -36,7 +36,6 @@
 #include <regex>
 #include <fstream>
 #include <algorithm>
-#include <mbedtls/rsa.h>
 #include "Platform.h"
 #include "src/Logger.h"
 
@@ -221,41 +220,6 @@ std::string getDirNameFromPath(const std::string& utf8Path) {
 bool fileExists(const std::string& utf8Path) {
     auto path = fs::u8path(utf8Path);
     return fs::exists(path);
-}
-
-std::string getFileSha256(const std::string &utf8Path) {
-    std::ifstream ifs (utf8Path, std::ios::in|std::ios::binary|std::ios::ate);
-    if (!ifs.is_open()) {
-        LOG_ERROR("Unable to open file '%s'", utf8Path.c_str());
-        return "No file !";
-    }
-
-    std::streampos size = ifs.tellg();
-    auto fileBytes = std::unique_ptr<char[]>(new char[size]);
-    ifs.seekg (0, std::ios::beg);
-    ifs.read (fileBytes.get(), size);
-    ifs.close();
-
-    return getSha256(fileBytes.get(), size);
-}
-
-std::string getSha256(const char * bytes, const int size) {
-    static const int DIGEST_SIZE = 32;
-    unsigned char digest[DIGEST_SIZE];
-    mbedtls_md_context_t ctx;
-    mbedtls_md_init(&ctx);
-    mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 0);
-    mbedtls_md_starts(&ctx);
-    mbedtls_md_update(&ctx, (const unsigned char *) bytes, size);
-    mbedtls_md_finish(&ctx, digest);
-    mbedtls_md_free(&ctx);
-
-    char digest_str[DIGEST_SIZE * 2 + 1];
-    for(int i = 0; i < DIGEST_SIZE; i++) {
-        sprintf(digest_str + i * 2, "%02x", digest[i]);
-    }
-
-    return std::string(digest_str);
 }
 
 void mkdir(const std::string& utf8Path) {

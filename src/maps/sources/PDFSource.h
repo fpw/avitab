@@ -24,6 +24,7 @@
 #include "Calibration.h"
 #include "src/libimg/stitcher/TileSource.h"
 #include "src/libimg/Rasterizer.h"
+#include "src/charts/Crypto.h"
 
 namespace maps {
 
@@ -67,6 +68,7 @@ private:
     Calibration calibration;
     bool nightMode = false;
     int rotateAngle = 0;
+    apis::Crypto crypto;
 
     void storeCalibration();
     void loadCalibration();

@@ -101,8 +101,6 @@ std::string realPath(const std::string &utf8Path);
 std::string getFileNameFromPath(const std::string &utf8Path);
 std::string getDirNameFromPath(const std::string &utf8Path);
 bool fileExists(const std::string &utf8Path);
-std::string getFileSha256(const std::string &utf8Path);
-std::string getSha256(const char *bytes, const int size);
 void mkdir(const std::string &utf8Path);
 void mkpath(const std::string &utf8Path);
 void removeFile(const std::string &utf8Path);
