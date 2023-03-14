@@ -21,7 +21,11 @@
 #include <mbedtls/md.h>
 #include <mbedtls/rsa.h>
 #include <stdexcept>
+#include <iomanip>
+#include <fstream>
+#include <memory>
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 #include "Crypto.h"
 
 namespace apis {
@@ -62,6 +66,15 @@ std::vector<uint8_t> Crypto::sha256(const std::string& in) {
     mbedtls_md(info, (uint8_t *) in.data(), in.size(), hash.data());
 
     return hash;
+}
+
+std::string Crypto::sha256String(const std::string& in) {
+    auto hash = sha256(in);
+    std::ostringstream buffer;
+    buffer << std::hex << std::setfill('0');
+    for(int i : hash)
+        buffer << std::setw(2) << i;
+    return buffer.str();
 }
 
 std::string Crypto::urlEncode(const std::string& in) {
@@ -186,6 +199,23 @@ std::string Crypto::aesDecrypt(const std::string& in, const std::string& key) {
     plain.push_back('\0');
 
     return std::string((char *) plain.data());
+}
+
+std::string Crypto::getFileSha256(const std::string &utf8Path) {
+    fs::ifstream ifs (utf8Path, std::ios::in|std::ios::binary|std::ios::ate);
+    if (!ifs.is_open()) {
+        LOG_ERROR("Unable to open file '%s'", utf8Path.c_str());
+        return "No file !";
+    }
+
+    std::streampos size = ifs.tellg();
+    auto fileBytes = std::unique_ptr<char[]>(new char[size]);
+    ifs.seekg (0, std::ios::beg);
+    ifs.read (fileBytes.get(), size);
+    ifs.close();
+
+    auto hash = sha256String(std::string(fileBytes.get(), size));
+    return hash;
 }
 
 Crypto::~Crypto() {

@@ -7,4 +7,5 @@ target_sources(avitab_common PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/NavigraphSource.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ImageSource.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Calibration.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/LinearEquation.cpp
 )

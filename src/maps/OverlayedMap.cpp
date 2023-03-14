@@ -159,6 +159,9 @@ void OverlayedMap::drawOverlays() {
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
+        if (std::abs(std::round(getNorthOffset())) > 0.5) {
+            drawCompass();
+        }
         drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
@@ -176,7 +179,7 @@ void OverlayedMap::drawAircraftOverlay() {
     px -= planeIcon.getWidth() / 2;
     py -= planeIcon.getHeight() / 2;
 
-    mapImage->blendImage(planeIcon, px, py, planeLocations[0].heading);
+    mapImage->blendImage(planeIcon, px, py, planeLocations[0].heading + getNorthOffset());
 }
 
 void OverlayedMap::drawOtherAircraftOverlay() {
@@ -196,9 +199,9 @@ void OverlayedMap::drawOtherAircraftOverlay() {
         mapImage->drawCircle(px, py, 6, color);
         mapImage->drawCircle(px, py, 7, color);
         double ax, ay, tx, ty, rx, ry;
-        fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading), ax, ay);
-        fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading), tx, ty);
-        fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading) + 90, rx, ry);
+        fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), ax, ay);
+        fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), tx, ty);
+        fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
         mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
         mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
         unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * xdata::M_TO_FT + 50.0) / 100.0;
@@ -225,6 +228,8 @@ void OverlayedMap::drawCalibrationOverlay() {
         color = img::COLOR_LIGHT_RED;
     } else if (calibrationStep == 2) {
         color = img::COLOR_BLUE;
+    } else {
+        color = img::COLOR_DARK_GREEN;
     }
     int centerX = mapImage->getWidth() / 2;
     int centerY = mapImage->getHeight() / 2;
@@ -282,7 +287,8 @@ void OverlayedMap::drawDataOverlays() {
 
     // Don't overlay anything if zoomed out to world view. Too much to draw.
     // And haversine formula used by distanceTo misbehaves in world views.
-    if ((deltaLon > 180) || (deltaLon < 0)) {
+    // We also don't handle things properly if the antimeridian is in area
+    if ((deltaLon > 180) || ((leftLon > 0) && (rightLon < 0))) {
         return;
     }
 
@@ -417,6 +423,19 @@ void OverlayedMap::drawScale(double nmPerPixel) {
     mapImage->drawText(text, 12, xtext, y, img::COLOR_BLACK, img::COLOR_TRANSPARENT_WHITE, img::Align::LEFT);
 }
 
+void OverlayedMap::drawCompass() {
+    int cx = stitcher->getTargetImage()->getWidth() - 30;
+    int cy = 210;
+    mapImage->drawCircle(cx, cy, 20, img::COLOR_RED);
+    double xt, yt, xm, ym, xp, yp;
+    fastPolarToCartesian(20, getNorthOffset(), xt, yt);
+    fastPolarToCartesian(5, getNorthOffset() + 90, xm, ym);
+    fastPolarToCartesian(5, getNorthOffset() - 90, xp, yp);
+    mapImage->drawLineAA(cx - xt, cy - yt, cx + xt, cy + yt, img::COLOR_RED);
+    mapImage->drawLineAA(cx + xt, cy + yt, cx + xp, cy + yp, img::COLOR_RED);
+    mapImage->drawLineAA(cx + xt, cy + yt, cx + xm, cy + ym, img::COLOR_RED);
+}
+
 void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py) const {
     int zoomLevel = stitcher->getZoomLevel();
     positionToPixel(lat, lon, px, py, zoomLevel);
@@ -502,8 +521,16 @@ int OverlayedMap::getMaxZoomLevel() const {
     return tileSource->getMaxZoomLevel();
 }
 
-bool OverlayedMap::isCalibrated() {
+double OverlayedMap::getNorthOffset() const {
+    return tileSource->getNorthOffsetAngle();
+}
+
+bool OverlayedMap::isCalibrated() const {
     return tileSource->supportsWorldCoords();
+}
+
+std::string OverlayedMap::getCalibrationReport() const {
+    return tileSource->getCalibrationReport();
 }
 
 void OverlayedMap::beginCalibration() {
@@ -523,6 +550,19 @@ void OverlayedMap::setCalibrationPoint2(double lat, double lon) {
     auto center = stitcher->getCenter();
     tileSource->attachCalibration2(center.x, center.y, lat, lon, stitcher->getZoomLevel());
 
+    calibrationStep = 3;
+    updateImage();
+}
+
+void OverlayedMap::setCalibrationPoint3(double lat, double lon) {
+    auto center = stitcher->getCenter();
+    tileSource->attachCalibration3Point(center.x, center.y, lat, lon, stitcher->getZoomLevel());
+    calibrationStep = 0;
+    updateImage();
+}
+
+void OverlayedMap::setCalibrationAngle(double angle) {
+    tileSource->attachCalibration3Angle(angle);
     calibrationStep = 0;
     updateImage();
 }

@@ -32,6 +32,7 @@ class Crypto {
 public:
     Crypto();
     std::vector<uint8_t> sha256(const std::string &in);
+    std::string sha256String(const std::string& in);
     std::vector<uint8_t> generateRandom(size_t len);
     std::string urlEncode(const std::string &in);
     std::string base64URLEncode(const std::vector<uint8_t> &in);
@@ -40,6 +41,7 @@ public:
     bool RSASHA256(const std::string &base64in, const std::string &sig, const std::string &n, const std::string &e);
     std::string aesEncrypt(const std::string &in, const std::string &key);
     std::string aesDecrypt(const std::string &in, const std::string &key);
+    std::string getFileSha256(const std::string &utf8Path);
     virtual ~Crypto();
 private:
     mbedtls_aes_context aesCtx {};

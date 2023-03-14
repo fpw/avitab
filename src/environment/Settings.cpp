@@ -96,7 +96,10 @@ void Settings::setSetting(const std::string &id, const T value) {
 
 void Settings::init() {
     // full init not required, just defaults that aren't zero/false/empty
-    *database = { { "general", { { "prefs_version", 1 }, { "show_fps", true } } }, { "overlay", { { "my_aircraft", true } } } };
+    *database = { { "general", { { "prefs_version", 1 },
+                                 { "show_calibration_msg_on_load", true },
+                                 { "show_fps", true } } },
+                  { "overlay", { { "my_aircraft", true } } } };
 }
 
 void Settings::load() {

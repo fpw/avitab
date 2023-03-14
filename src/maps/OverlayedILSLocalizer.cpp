@@ -111,6 +111,7 @@ void OverlayedILSLocalizer::getTailCoords(OverlayHelper helper, const xdata::Fix
         return;
     }
     double ilsHeading = std::fmod(ils->getRunwayHeading() + 180.0, 360);
+    ilsHeading += helper->getNorthOffset();
     double rangePixels = 0.0;
     if (helper->getMapWidthNM() != 0) {
         auto mapImage = helper->getMapImage();

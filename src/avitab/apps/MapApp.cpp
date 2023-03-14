@@ -64,6 +64,7 @@ MapApp::MapApp(FuncsPtr funcs):
     chooserContainer->setVisible(false);
 
     setMapSource(MapSource::OPEN_TOPO);
+    mercatorDir = api().getDataPath() + "/MapTiles/Mercator/";
 
     mapWidget->draw(*mapImage);
     onTimer();
@@ -200,7 +201,7 @@ void MapApp::selectGeoTIFF() {
 
 void MapApp::selectMercator() {
     fileChooser = std::make_unique<FileChooser>(&api(), "Mercator: ");
-    fileChooser->setBaseDirectory(api().getDataPath() + "/MapTiles/Mercator/");
+    fileChooser->setBaseDirectory(mercatorDir);
     fileChooser->setFilterRegex("\\.(pdf|png|jpg|jpeg|bmp)$");
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
@@ -209,6 +210,10 @@ void MapApp::selectMercator() {
                 setTileSource(pdfSource);
                 fileChooser.reset();
                 chooserContainer->setVisible(false);
+                if (savedSettings->getGeneralSetting<bool>("show_calibration_msg_on_load")) {
+                    finalizeCalibration();
+                }
+                mercatorDir = platform::getDirNameFromPath(selectedUTF8);
             } catch (const std::exception &e) {
                 logger::warn("Couldn't open Mercator %s: %s", selectedUTF8.c_str(), e.what());
             }
@@ -552,7 +557,7 @@ void MapApp::startCalibration() {
     });
     messageBox->centerInParent();
 
-    coordsField = std::make_shared<TextArea>(window, "1.234, -2 30 59.9");
+    coordsField = std::make_shared<TextArea>(window, "");
     coordsField->setDimensions(window->getContentWidth(), 40);
     coordsField->alignInTopLeft();
 
@@ -614,7 +619,16 @@ void MapApp::processCalibrationPoint(int step) {
 
     auto it = coords.find(',');
     if (it == std::string::npos) {
-        return;
+        if (step <= 2) {
+             LOG_INFO(1, "No ',' found, returning, step = %d", step);
+             return;
+        } else {
+             double angle = getCoordinate(coords);
+             LOG_INFO(1, "Found angle %f", angle);
+             map->setCalibrationAngle(angle);
+             finalizeCalibration();
+             return;
+        }
     }
 
     try {
@@ -626,19 +640,34 @@ void MapApp::processCalibrationPoint(int step) {
             LOG_ERROR("Out of bounds lat/lon in '%s'", coords.c_str());
             return;
         }
-        LOG_INFO(1, "From '%s', got %f, %f", coords.c_str(), lat, lon);
+        LOG_INFO(1, "From '%s', got %4.10f, %4.10f", coords.c_str(), lat, lon);
         if (step == 1) {
             map->setCalibrationPoint1(lat, lon);
             coordsField->setText("");
-        } else {
+        } else if (step == 2) {
             map->setCalibrationPoint2(lat, lon);
-            keyboard.reset();
-            coordsField.reset();
-            onTimer();
+            coordsField->setText("0");
+        } else {
+            map->setCalibrationPoint3(lat, lon);
+            finalizeCalibration();
         }
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
     }
+    rotateButton->setVisible(false);
+}
+
+void MapApp::finalizeCalibration() {
+    keyboard.reset();
+    coordsField.reset();
+    messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), map->getCalibrationReport());
+    messageBox->addButton("Ok", [this] () {
+        api().executeLater([this] () {
+            messageBox.reset();
+        });
+    });
+    messageBox->centerInParent();
+    onTimer();
     rotateButton->setVisible(false);
 }
 
@@ -661,6 +690,8 @@ bool MapApp::handleNonNumericContent(std::string coords)  {
         auto airportLoc = airport->getLocation();
         ss << airportLoc.latitude << ", " << airportLoc.longitude;
         coordsField->setText(ss.str());
+        LOG_INFO(1, "Replace airport %s with %4.10f, %4.10f",
+                    coordsUpper.c_str(), airportLoc.latitude, airportLoc.longitude);
         return true;
     }
 
@@ -678,6 +709,8 @@ bool MapApp::handleNonNumericContent(std::string coords)  {
         auto fixLoc = fix->getLocation();
         ss << fixLoc.latitude << ", " << fixLoc.longitude;
         coordsField->setText(ss.str());
+        LOG_INFO(1, "Replace nav fix %s with %4.10f, %4.10f",
+                    coordsUpper.c_str(), fixLoc.latitude, fixLoc.longitude);
         return true;
     }
     return false;
