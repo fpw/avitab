@@ -25,6 +25,7 @@
 #include <fstream>
 #include <memory>
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
 #include "Crypto.h"
 
 namespace apis {
@@ -201,7 +202,7 @@ std::string Crypto::aesDecrypt(const std::string& in, const std::string& key) {
 }
 
 std::string Crypto::getFileSha256(const std::string &utf8Path) {
-    std::ifstream ifs (utf8Path, std::ios::in|std::ios::binary|std::ios::ate);
+    fs::ifstream ifs (utf8Path, std::ios::in|std::ios::binary|std::ios::ate);
     if (!ifs.is_open()) {
         LOG_ERROR("Unable to open file '%s'", utf8Path.c_str());
         return "No file !";

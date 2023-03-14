@@ -213,7 +213,7 @@ void PDFSource::loadCalibration() {
     if (jsonFile.fail()) {
         // Try reading a Google Earth KML file for calibration
         std::string kmlFileName = utf8FileName + ".kml";
-        std::ifstream kmlFile(fs::u8path(kmlFileName));
+        fs::ifstream kmlFile(fs::u8path(kmlFileName));
         if (kmlFile.fail()) {
             logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
             return;
