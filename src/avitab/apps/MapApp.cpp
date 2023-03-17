@@ -206,7 +206,7 @@ void MapApp::selectMercator() {
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
             try {
-                auto pdfSource = std::make_shared<maps::PDFSource>(selectedUTF8);
+                auto pdfSource = std::make_shared<maps::PDFSource>(selectedUTF8, api().getChartService());
                 setTileSource(pdfSource);
                 fileChooser.reset();
                 chooserContainer->setVisible(false);

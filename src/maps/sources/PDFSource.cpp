@@ -23,9 +23,10 @@
 
 namespace maps {
 
-PDFSource::PDFSource(const std::string& file):
+PDFSource::PDFSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService):
     utf8FileName(file),
-    rasterizer(file)
+    rasterizer(file),
+    chartService(chartService)
 {
     try {
         loadCalibration();
@@ -207,27 +208,43 @@ void PDFSource::storeCalibration() {
 }
 
 void PDFSource::loadCalibration() {
+    // Try a co-located name-matched json file for calibration
     std::string calFileName = utf8FileName + ".json";
     fs::ifstream jsonFile(fs::u8path(calFileName));
 
-    if (jsonFile.fail()) {
-        // Try reading a Google Earth KML file for calibration
+    if (jsonFile.good()) {
+        logger::info("Loaded co-located json calibration file for %s", utf8FileName.c_str());
+        std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
+                             std::istreambuf_iterator<char>());
+        calibration.fromJsonString(jsonStr);
+    } else {
+        // Try a co-located name-matched Google Earth KML file for calibration
         std::string kmlFileName = utf8FileName + ".kml";
         fs::ifstream kmlFile(fs::u8path(kmlFileName));
-        if (kmlFile.fail()) {
-            logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
-            return;
+        if (kmlFile.good()) {
+            logger::info("Loaded co-located kml calibration file for %s", utf8FileName.c_str());
+            std::string kmlStr((std::istreambuf_iterator<char>(kmlFile)),
+                                std::istreambuf_iterator<char>());
+            calibration.fromKmlString(kmlStr);
+            // Store a json file for future use. Might need manual edit for preRotate
+            storeCalibration();
+        } else {
+            // Try finding a hash-matched json file. Doesn't need to be name-matched
+            if (!chartService) {
+                return;
+            }
+            std::string jsonFileName = chartService->getHashMappedJson(utf8FileName);
+            fs::ifstream hashedJsonFile(fs::u8path(jsonFileName));
+            if (hashedJsonFile.good()) {
+                logger::info("Loaded hash-mapped json calibration file for %s", utf8FileName.c_str());
+                std::string jsonStr((std::istreambuf_iterator<char>(hashedJsonFile)),
+                                     std::istreambuf_iterator<char>());
+                calibration.fromJsonString(jsonStr);
+            } else {
+                logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
+                return;
+            }
         }
-        logger::info("Loaded kml calibration file for %s", utf8FileName.c_str());
-        std::string kmlStr((std::istreambuf_iterator<char>(kmlFile)),
-                         std::istreambuf_iterator<char>());
-        calibration.fromKmlString(kmlStr);
-        storeCalibration();
-    } else {
-        logger::info("Loaded json calibration file for %s", utf8FileName.c_str());
-        std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
-                         std::istreambuf_iterator<char>());
-        calibration.fromJsonString(jsonStr);
     }
 
     rotateAngle = calibration.getPreRotate();

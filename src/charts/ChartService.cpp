@@ -19,6 +19,9 @@
 #include "ChartService.h"
 #include "src/platform/CrashHandler.h"
 #include "src/Logger.h"
+#include "src/platform/Platform.h"
+#include "src/charts/Crypto.h"
+#include <nlohmann/json.hpp>
 
 namespace apis {
 
@@ -29,6 +32,11 @@ ChartService::ChartService(const std::string &programPath) {
 
     keepAlive = true;
     apiThread = std::make_unique<std::thread>(&ChartService::workLoop, this);
+
+    std::string calibrationPath = programPath + "/MapTiles/Mercator/Calibration";
+    if (platform::fileExists(calibrationPath)) {
+        scanJsonFiles(calibrationPath);
+    }
 
     setUseNavigraph(true);
 }
@@ -169,6 +177,47 @@ void ChartService::stop() {
         }
         apiThread->join();
         apiThread.reset();
+    }
+}
+
+void ChartService::scanJsonFiles(std::string dir) {
+    auto items = platform::readDirectory(dir);
+    for (auto &entry: items) {
+        std::string fullPath = dir + "/" + entry.utf8Name;
+        if (entry.isDirectory) {
+            // Recurse
+            scanJsonFiles(fullPath);
+        } else if (entry.utf8Name.find(".json") != std::string::npos) {
+            fs::ifstream jsonFile(fs::u8path(fullPath));
+            if (jsonFile.fail()) {
+                continue;
+            }
+            std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
+                                 std::istreambuf_iterator<char>());
+            nlohmann::json json = nlohmann::json::parse(jsonStr);
+            std::string hash = json.value("/calibration/hash"_json_pointer, "");
+            if (hash.length() == 64) {
+                if (jsonFileHashes.count(hash) == 1) {
+                    logger::warn("Duplicate hash %s", hash.c_str());
+                    logger::warn(" %s", fullPath.c_str());
+                    logger::warn(" %s", jsonFileHashes[hash].c_str());
+                }
+                jsonFileHashes[hash] = fullPath;
+            }
+        }
+    }
+}
+
+std::string ChartService::getHashMappedJson(std::string utf8ChartFileName) const {
+    std::string hash = crypto.getFileSha256(utf8ChartFileName);
+    if (jsonFileHashes.count(hash) == 1) {
+        std::string calibrationFilename = jsonFileHashes.at(hash);
+        logger::info("Found hash-mapped calibration file for '%s'", utf8ChartFileName.c_str());
+        logger::info(" at '%s'", calibrationFilename.c_str());
+        logger::info(" with sha256 %s", hash.c_str());
+        return calibrationFilename;
+    } else {
+        return "";
     }
 }
 
