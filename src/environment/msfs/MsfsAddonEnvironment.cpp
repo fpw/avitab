@@ -31,11 +31,9 @@ namespace avitab {
 MsfsAddonEnvironment::MsfsAddonEnvironment()
 :   StandAloneEnvironment(),
     hSimConnect(NULL),
-    nextSimUpdate(0),
-    range(10)
+    nextSimUpdate(0)
 {
     resetLocations();
-    setZoomLevel(12);
 }
 
 MsfsAddonEnvironment::~MsfsAddonEnvironment()
@@ -67,35 +65,23 @@ void MsfsAddonEnvironment::eventLoop()
 
 AircraftID MsfsAddonEnvironment::getActiveAircraftCount()
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     return 1 + otherLocations.size();
 }
 
 Location MsfsAddonEnvironment::getAircraftLocation(AircraftID id)
 {
-    Location loc;
-
+    std::lock_guard<std::mutex> lock(stateMutex);
     if (id == 0) {
         return userLocation;
     } else {
         return otherLocations[id-1];
     }
-
-    return loc;
-}
-
-void MsfsAddonEnvironment::setZoomLevel(int zoom)
-{
-    // for zoom levels up to 8 request max range of 200km
-    // for zoom levels 9 and above, halve the range
-    range = 200000;
-    while (zoom > 8) {
-        range /= 2;
-        --zoom;
-    }
 }
 
 void MsfsAddonEnvironment::resetLocations()
 {
+    std::lock_guard<std::mutex> lock(stateMutex);
     userLocation.latitude = 0.0;
     userLocation.longitude = 0.0;
     userLocation.heading = 0.0;
@@ -122,7 +108,7 @@ void MsfsAddonEnvironment::tryConnectToMsfsSim()
         SimConnect_AddToDataDefinition(hSimConnect, LOCATION_DEFINITION, "Plane Heading Degrees True", "degrees");
 
         // Register for 1s updates about the user aircraft location
-		(void)SimConnect_RequestDataOnSimObject(hSimConnect, USER_AIRCRAFT_LOCATION, LOCATION_DEFINITION, SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD_SECOND);
+        (void)SimConnect_RequestDataOnSimObject(hSimConnect,USER_AIRCRAFT_LOCATION, LOCATION_DEFINITION, SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD_SECOND);
 
     } else {
         LOG_INFO(1, "Did not connect to MS Flight Simulator, hSimConnect = %p", hSimConnect);
@@ -133,7 +119,7 @@ void MsfsAddonEnvironment::tryConnectToMsfsSim()
 void MsfsAddonEnvironment::retrieveMsfsObjectData()
 {
     // Ask for updates about other aircraft locations - seems like this needs to be done every time an update is wanted
-    HRESULT hr = SimConnect_RequestDataOnSimObjectType(hSimConnect, OTHER_AIRCRAFT_LOCATIONS, LOCATION_DEFINITION, range, SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT);
+    HRESULT hr = SimConnect_RequestDataOnSimObjectType(hSimConnect, OTHER_AIRCRAFT_LOCATIONS, LOCATION_DEFINITION, REQUEST_DATA_RANGE, SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT);
     LOG_VERBOSE(MSFS_VERBOSE_LOGGING, "SimConnect_RequestDataOnSimObjectType() -> %ld", hr);
 
     while (1) {
@@ -192,6 +178,7 @@ void MsfsAddonEnvironment::updateAircraftLocation(SIMCONNECT_RECV_SIMOBJECT_DATA
     {
         LOG_VERBOSE(MSFS_VERBOSE_LOGGING, "Title=\"%s\", Lat=%f  Lon=%f  Alt=%f  Heading=%f",
                     pLoc->title, pLoc->latitude, pLoc->longitude, pLoc->altitude, pLoc->heading);
+        std::lock_guard<std::mutex> lock(stateMutex);
         if (isUserAircraft) {
             userLocation.latitude = pLoc->latitude;
             userLocation.longitude = pLoc->longitude;

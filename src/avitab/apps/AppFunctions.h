@@ -61,7 +61,6 @@ public:
     virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;
     virtual std::shared_ptr<Settings> getSettings() = 0;
-    virtual void setZoomLevel(int zoom) = 0;
     virtual ~AppFunctions() = default;
 };
 

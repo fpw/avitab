@@ -62,7 +62,6 @@ public:
     void setIsInMenu(bool menu) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
-    void setZoomLevel(int zoom) override {}
     float getLastFrameTime() override;
 
     ~XPlaneEnvironment();

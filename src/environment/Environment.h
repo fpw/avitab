@@ -87,7 +87,6 @@ public:
     virtual void setIsInMenu(bool menu);
     virtual AircraftID getActiveAircraftCount() = 0;
     virtual Location getAircraftLocation(AircraftID id) = 0;
-    virtual void setZoomLevel(int zoom) = 0;
     virtual float getLastFrameTime() = 0;
 
     virtual ~Environment() = default;

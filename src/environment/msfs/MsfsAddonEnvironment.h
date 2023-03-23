@@ -44,7 +44,6 @@ public:
 
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
-    void setZoomLevel(int zoom) override;
 
 private:
     void resetLocations();
@@ -59,8 +58,8 @@ private:
 private:
     HANDLE                  hSimConnect;
     ULONGLONG               nextSimUpdate;
-    DWORD                   range;
 
+    std::mutex              stateMutex;
     Location                userLocation;
     std::vector<Location>   otherLocations;
 
@@ -77,7 +76,7 @@ private:
         EVENT_SIM_STATE,
         EVENT_PAUSE_STATE,
     };
-
+    static const DWORD REQUEST_DATA_RANGE = 200000; // in metres = 108 nm
 };
 
 } /* namespace avitab */

@@ -135,16 +135,14 @@ void OverlayedMap::pan(int dx, int dy, int relx, int rely) {
     stitcher->pan(dx, dy);
 }
 
-int OverlayedMap::zoomIn() {
-    int zoomLevel = stitcher->getZoomLevel() +1;
-    stitcher->setZoomLevel(zoomLevel);
-    return zoomLevel;
+void OverlayedMap::zoomIn() {
+    int zoomLevel = stitcher->getZoomLevel();
+    stitcher->setZoomLevel(zoomLevel + 1);
 }
 
-int OverlayedMap::zoomOut() {
-    int zoomLevel = stitcher->getZoomLevel() -1;
-    stitcher->setZoomLevel(zoomLevel);
-    return zoomLevel;
+void OverlayedMap::zoomOut() {
+    int zoomLevel = stitcher->getZoomLevel();
+    stitcher->setZoomLevel(zoomLevel - 1);
 }
 
 void OverlayedMap::updateImage() {

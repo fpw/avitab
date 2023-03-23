@@ -414,11 +414,6 @@ std::shared_ptr<Settings> AviTab::getSettings() {
     return env->getSettings();
 }
 
-void AviTab::setZoomLevel(int zoom)
-{
-    env->setZoomLevel(zoom);
-}
-
 void AviTab::onHomeButton() {
     showAppLauncher();
 }
