@@ -25,12 +25,13 @@
 #include "src/libimg/stitcher/TileSource.h"
 #include "src/libimg/Rasterizer.h"
 #include "src/charts/Crypto.h"
+#include "src/charts/ChartService.h"
 
 namespace maps {
 
 class PDFSource: public img::TileSource {
 public:
-    PDFSource(const std::string &file);
+    PDFSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
     PDFSource(const std::vector<uint8_t> &pdfData);
 
     int getMinZoomLevel() override;
@@ -69,7 +70,7 @@ private:
     bool nightMode = false;
     int rotateAngle = 0;
     apis::Crypto crypto;
-
+    std::shared_ptr<apis::ChartService> chartService;
     void storeCalibration();
     void loadCalibration();
 };

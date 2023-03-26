@@ -54,7 +54,7 @@ std::vector<uint8_t> Crypto::generateRandom(size_t len) {
     return res;
 }
 
-std::vector<uint8_t> Crypto::sha256(const std::string& in) {
+std::vector<uint8_t> Crypto::sha256(const std::string& in) const {
     const mbedtls_md_info_t *info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     if (!info) {
         throw std::runtime_error("Couldn't find SHA256");
@@ -68,7 +68,7 @@ std::vector<uint8_t> Crypto::sha256(const std::string& in) {
     return hash;
 }
 
-std::string Crypto::sha256String(const std::string& in) {
+std::string Crypto::sha256String(const std::string& in) const {
     auto hash = sha256(in);
     std::ostringstream buffer;
     buffer << std::hex << std::setfill('0');
@@ -201,7 +201,7 @@ std::string Crypto::aesDecrypt(const std::string& in, const std::string& key) {
     return std::string((char *) plain.data());
 }
 
-std::string Crypto::getFileSha256(const std::string &utf8Path) {
+std::string Crypto::getFileSha256(const std::string &utf8Path) const {
     fs::ifstream ifs (utf8Path, std::ios::in|std::ios::binary|std::ios::ate);
     if (!ifs.is_open()) {
         LOG_ERROR("Unable to open file '%s'", utf8Path.c_str());

@@ -26,6 +26,7 @@
 #include "src/charts/libchartfox/ChartFoxAPI.h"
 #include "src/charts/liblocalfile/LocalFileAPI.h"
 #include "src/charts/libnavigraph/NavigraphAPI.h"
+#include "src/charts/Crypto.h"
 
 namespace apis {
 
@@ -51,6 +52,8 @@ public:
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph();
     void submitCall(std::shared_ptr<BaseCall> call);
 
+    std::string getHashMappedJson(std::string utf8ChartFileName) const;
+
 private:
     std::shared_ptr<navigraph::NavigraphAPI> navigraph;
     std::shared_ptr<chartfox::ChartFoxAPI> chartfox;
@@ -65,6 +68,11 @@ private:
     std::atomic_bool keepAlive { false };
     std::unique_ptr<std::thread> apiThread;
     std::vector<std::shared_ptr<BaseCall>> pendingCalls;
+
+    Crypto crypto;
+    std::map<std::string, std::string> jsonFileHashes;
+
+    void scanJsonFiles(std::string dir);
 
     bool hasWork();
     void workLoop();
