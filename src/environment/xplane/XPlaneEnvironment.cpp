@@ -45,6 +45,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
     XPLMGetVersions(&xpVersion, &xplmVersion, &hostId);
     if (xplmVersion >= 400) {
         isXP12 = true;
+        getMetar = (GetMetarPtr) XPLMFindSymbol("XPLMGetMETARForAirport");
     }
 
     updatePlaneCount();
@@ -367,9 +368,13 @@ std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
         auto futureData = dataPromise.get_future();
 
         auto startAt = std::chrono::steady_clock::now();
-        runInEnvironment([icao, &dataPromise] () {
+        runInEnvironment([this, icao, &dataPromise] () {
             XPLMFixedString150_t buf;
-            XPLMGetMETARForAirport(icao.c_str(), &buf);
+            if (getMetar) {
+                getMetar(icao.c_str(), &buf);
+            } else {
+                strcpy(buf.buffer, "XPLM Error");
+            }
             dataPromise.set_value(std::string(buf.buffer));
         });
 

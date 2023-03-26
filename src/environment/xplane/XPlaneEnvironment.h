@@ -66,6 +66,8 @@ public:
 
     ~XPlaneEnvironment();
 private:
+    using GetMetarPtr = void(*)(const char *id, XPLMFixedString150_t *outMETAR);
+
     struct RegisteredCommand {
         CommandCallback callback;
         bool inBefore;
@@ -73,6 +75,7 @@ private:
     };
 
     // Cached data
+    GetMetarPtr getMetar{};
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
     std::shared_ptr<xdata::XData> xplaneData;
