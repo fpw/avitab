@@ -98,6 +98,7 @@ void Settings::init() {
     // full init not required, just defaults that aren't zero/false/empty
     *database = { { "general", { { "prefs_version", 1 },
                                  { "show_calibration_msg_on_load", true },
+                                 { "show_overlays_in_airport_app", true },
                                  { "show_fps", true } } },
                   { "overlay", { { "my_aircraft", true } } } };
 }

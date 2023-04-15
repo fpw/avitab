@@ -215,16 +215,6 @@ void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
     } else {
         positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
     }
-
-    if (tab->source->supportsWorldCoords()) {
-        messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), "Chart is georeferenced");
-        messageBox->addButton("Ok", [this] () {
-            api().executeLater([this] () {
-                messageBox.reset();
-            });
-        });
-        messageBox->centerInParent();
-    }
 }
 
 void DocumentsApp::setTitle(PageInfo tab) {

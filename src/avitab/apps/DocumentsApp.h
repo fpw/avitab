@@ -30,7 +30,6 @@
 #include "src/gui_toolkit/widgets/Checkbox.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"
-#include "src/gui_toolkit/widgets/MessageBox.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
@@ -108,7 +107,6 @@ private:
     std::shared_ptr<Container> settingsContainer;
     std::shared_ptr<Label> settingsLabel;
     std::shared_ptr<Checkbox> mouseWheelScrollsCheckbox;
-    std::unique_ptr<MessageBox> messageBox;
     void showAppSettings();
 
     enum class VerticalPosition { Top, Centre, Bottom };
