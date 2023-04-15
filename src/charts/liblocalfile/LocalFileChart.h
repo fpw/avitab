@@ -37,6 +37,7 @@ public:
     virtual bool isLoaded() const override;
     virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
+    virtual void setCalibrationMetadata(std::string metadata);
 
     std::string getPath() const;
     void attachData(const std::vector<uint8_t> &data);
@@ -46,6 +47,7 @@ private:
     apis::ChartCategory category;
     std::string identifier;
     std::string path;
+    std::string calibrationMetadata = "";
 };
 
 } // namespace localfile

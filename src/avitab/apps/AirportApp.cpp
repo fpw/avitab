@@ -440,6 +440,16 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         });
     }
 
+    if (tab.mapSource->supportsWorldCoords()) {
+        messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), "Chart is georeferenced");
+        messageBox->addButton("Ok", [this] () {
+            api().executeLater([this] () {
+                messageBox.reset();
+            });
+        });
+        messageBox->centerInParent();
+    }
+
     onTimer();
 }
 

@@ -94,6 +94,11 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
         auto cfChart = std::dynamic_pointer_cast<chartfox::ChartFoxChart>(chart);
         if (cfChart) {
             chartfox->loadChart(cfChart);
+            auto pdfData = cfChart->getPdfData();
+            auto in = std::string((char *)pdfData.data(), pdfData.size());
+            auto hash = crypto.sha256String(in);
+            std::string calibrationMetadata = getCalibrationMetadataForHash(hash);
+            cfChart->setCalibrationMetadata(calibrationMetadata);
         }
 
         auto nvChart = std::dynamic_pointer_cast<navigraph::NavigraphChart>(chart);
@@ -104,6 +109,8 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
         auto lfChart = std::dynamic_pointer_cast<localfile::LocalFileChart>(chart);
         if (lfChart) {
             localFile->loadChart(lfChart);
+            std::string cm = getCalibrationMetadataForFile(lfChart->getPath());
+            lfChart->setCalibrationMetadata(cm);
         }
 
         return chart;
@@ -198,9 +205,9 @@ void ChartService::scanJsonFiles(std::string dir) {
             std::string hash = json.value("/calibration/hash"_json_pointer, "");
             if (hash.length() == 64) {
                 if (jsonFileHashes.count(hash) == 1) {
-                    logger::warn("Duplicate hash %s", hash.c_str());
-                    logger::warn(" %s", fullPath.c_str());
-                    logger::warn(" %s", jsonFileHashes[hash].c_str());
+                    LOG_INFO(0, "Duplicate hash %s", hash.c_str());
+                    LOG_INFO(0, " %s", fullPath.c_str());
+                    LOG_INFO(0, " %s", jsonFileHashes[hash].c_str());
                 }
                 jsonFileHashes[hash] = fullPath;
             }
@@ -208,17 +215,28 @@ void ChartService::scanJsonFiles(std::string dir) {
     }
 }
 
-std::string ChartService::getHashMappedJson(std::string utf8ChartFileName) const {
+std::string ChartService::getCalibrationMetadataForFile(std::string utf8ChartFileName) const {
     std::string hash = crypto.getFileSha256(utf8ChartFileName);
+    return getCalibrationMetadataForHash(hash);
+}
+
+std::string ChartService::getCalibrationMetadataForHash(std::string hash) const {
     if (jsonFileHashes.count(hash) == 1) {
         std::string calibrationFilename = jsonFileHashes.at(hash);
-        logger::info("Found hash-mapped calibration file for '%s'", utf8ChartFileName.c_str());
-        logger::info(" at '%s'", calibrationFilename.c_str());
-        logger::info(" with sha256 %s", hash.c_str());
-        return calibrationFilename;
-    } else {
-        return "";
+        fs::ifstream hashedJsonFile(fs::u8path(calibrationFilename));
+        if (hashedJsonFile.good()) {
+            std::string jsonStr((std::istreambuf_iterator<char>(hashedJsonFile)),
+                                 std::istreambuf_iterator<char>());
+            logger::info("Found hash-matched calibration file");
+            logger::info(" at '%s'", calibrationFilename.c_str());
+            logger::info(" with sha256 %s", hash.c_str());
+            return jsonStr;
+        }
     }
+
+    logger::info("No hash-matched calibration file for sha256");
+    logger::info(" %s", hash.c_str());
+    return "";
 }
 
 ChartService::~ChartService() {

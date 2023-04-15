@@ -45,6 +45,7 @@ public:
     virtual bool isLoaded() const override;
     virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
+    virtual void setCalibrationMetadata(std::string metadata) {}; // Ignore
 
     std::string getFileDay() const;
     std::string getFileNight() const;

@@ -29,15 +29,34 @@ PDFSource::PDFSource(const std::string& file, std::shared_ptr<apis::ChartService
     chartService(chartService)
 {
     try {
-        loadCalibration();
+        findAndLoadCalibration();
     } catch (const std::exception &e) {
         logger::info("No calibration: %s", e.what());
     }
 }
+PDFSource::PDFSource(const std::string& file, std::string calibrationMetadata):
+    utf8FileName(file),
+    rasterizer(file)
+{
+    loadProvidedCalibrationMetadata(calibrationMetadata);
+}
 
-PDFSource::PDFSource(const std::vector<uint8_t> &pdfData):
+PDFSource::PDFSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata):
     rasterizer(pdfData)
 {
+    loadProvidedCalibrationMetadata(calibrationMetadata);
+}
+
+void PDFSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata) {
+    if (calibrationMetadata != "") {
+        logger::info("Using hash-matched calibration metadata");
+        calibration.fromJsonString(calibrationMetadata);
+        rotateAngle = calibration.getPreRotate();
+        rasterizer.setPreRotate(rotateAngle);
+    } else {
+        logger::warn("No calibration metadata");
+    }
+
 }
 
 int PDFSource::getMinZoomLevel() {
@@ -207,7 +226,7 @@ void PDFSource::storeCalibration() {
     }
 }
 
-void PDFSource::loadCalibration() {
+void PDFSource::findAndLoadCalibration() {
     // Try a co-located name-matched json file for calibration
     std::string calFileName = utf8FileName + ".json";
     fs::ifstream jsonFile(fs::u8path(calFileName));
@@ -233,13 +252,10 @@ void PDFSource::loadCalibration() {
             if (!chartService) {
                 return;
             }
-            std::string jsonFileName = chartService->getHashMappedJson(utf8FileName);
-            fs::ifstream hashedJsonFile(fs::u8path(jsonFileName));
-            if (hashedJsonFile.good()) {
+            std::string calibrationMetadata = chartService->getCalibrationMetadataForFile(utf8FileName);
+            if (calibrationMetadata != "") {
                 logger::info("Loaded hash-mapped json calibration file for %s", utf8FileName.c_str());
-                std::string jsonStr((std::istreambuf_iterator<char>(hashedJsonFile)),
-                                     std::istreambuf_iterator<char>());
-                calibration.fromJsonString(jsonStr);
+                calibration.fromJsonString(calibrationMetadata);
             } else {
                 logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
                 return;

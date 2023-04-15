@@ -196,7 +196,8 @@ void DocumentsApp::setupCallbacks(PageInfo tab) {
 }
 
 void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
-    tab->source = std::make_shared<maps::PDFSource>(pdfPath);
+    std::string cm = api().getChartService()->getCalibrationMetadataForFile(pdfPath);
+    tab->source = std::make_shared<maps::PDFSource>(pdfPath, cm);
     tab->stitcher = std::make_shared<img::Stitcher>(tab->rasterImage, tab->source);
     tab->stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
@@ -213,6 +214,16 @@ void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
         positionPage(tab, VerticalPosition::Top, HorizontalPosition::Middle, ZoomAdjust::Width);
     } else {
         positionPage(tab, VerticalPosition::Centre, HorizontalPosition::Middle, ZoomAdjust::All);
+    }
+
+    if (tab->source->supportsWorldCoords()) {
+        messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), "Chart is georeferenced");
+        messageBox->addButton("Ok", [this] () {
+            api().executeLater([this] () {
+                messageBox.reset();
+            });
+        });
+        messageBox->centerInParent();
     }
 }
 

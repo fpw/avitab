@@ -63,6 +63,10 @@ bool LocalFileChart::isLoaded() const {
     return true;
 }
 
+void LocalFileChart::setCalibrationMetadata(std::string metadata) {
+    calibrationMetadata = metadata;
+}
+
 std::string LocalFileChart::getPath() const {
     return path;
 }
@@ -71,7 +75,7 @@ void LocalFileChart::attachData(const std::vector<uint8_t> &data) {
 }
 
 std::shared_ptr<img::TileSource> LocalFileChart::createTileSource(bool nightMode) {
-    auto pdfSrc = std::make_shared<maps::PDFSource>(path);
+    auto pdfSrc = std::make_shared<maps::PDFSource>(path, calibrationMetadata);
     pdfSrc->setNightMode(nightMode);
     return pdfSrc;
 }

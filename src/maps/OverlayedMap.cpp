@@ -43,6 +43,9 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
     stitcher->setPreRotateCallback([this] () { drawOverlays(); });
     stitcher->setRedrawCallback([this] () {
         copyrightStamp.applyStamp(*(stitcher->getTargetImage()), 0);
+        if (tileSource->isPDFSource() && tileSource->supportsWorldCoords()) {
+            drawCompass();
+        }
         if (onOverlaysDrawn) {
             onOverlaysDrawn();
         }
@@ -159,9 +162,6 @@ void OverlayedMap::drawOverlays() {
     }
     if (tileSource->supportsWorldCoords()) {
         drawDataOverlays();
-        if (std::abs(std::round(getNorthOffset())) > 0.5) {
-            drawCompass();
-        }
         drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
@@ -425,15 +425,17 @@ void OverlayedMap::drawScale(double nmPerPixel) {
 
 void OverlayedMap::drawCompass() {
     int cx = stitcher->getTargetImage()->getWidth() - 30;
-    int cy = 210;
-    mapImage->drawCircle(cx, cy, 20, img::COLOR_RED);
+    int cy = 30;
+    auto rotatedImage = stitcher->getTargetImage();
+    int compassDir = (stitcher->getRotation() + (int)getNorthOffset()) % 360;
+    rotatedImage->drawCircle(cx, cy, 20, img::COLOR_RED);
     double xt, yt, xm, ym, xp, yp;
-    fastPolarToCartesian(20, getNorthOffset(), xt, yt);
-    fastPolarToCartesian(5, getNorthOffset() + 90, xm, ym);
-    fastPolarToCartesian(5, getNorthOffset() - 90, xp, yp);
-    mapImage->drawLineAA(cx - xt, cy - yt, cx + xt, cy + yt, img::COLOR_RED);
-    mapImage->drawLineAA(cx + xt, cy + yt, cx + xp, cy + yp, img::COLOR_RED);
-    mapImage->drawLineAA(cx + xt, cy + yt, cx + xm, cy + ym, img::COLOR_RED);
+    fastPolarToCartesian(20, compassDir,      xt, yt);
+    fastPolarToCartesian( 5, compassDir + 90, xm, ym);
+    fastPolarToCartesian( 5, compassDir - 90, xp, yp);
+    rotatedImage->drawLineAA(cx - xt, cy - yt, cx + xt, cy + yt, img::COLOR_RED);
+    rotatedImage->drawLineAA(cx + xt, cy + yt, cx + xp, cy + yp, img::COLOR_RED);
+    rotatedImage->drawLineAA(cx + xt, cy + yt, cx + xm, cy + ym, img::COLOR_RED);
 }
 
 void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py) const {

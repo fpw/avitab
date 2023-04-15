@@ -211,7 +211,9 @@ void MapApp::selectMercator() {
                 fileChooser.reset();
                 chooserContainer->setVisible(false);
                 if (savedSettings->getGeneralSetting<bool>("show_calibration_msg_on_load")) {
-                    finalizeCalibration();
+                    finalizeCalibration(map->getCalibrationReport());
+                } else if (map->isCalibrated()) {
+                    finalizeCalibration("Chart is georeferenced");
                 }
                 mercatorDir = platform::getDirNameFromPath(selectedUTF8);
             } catch (const std::exception &e) {
@@ -626,7 +628,7 @@ void MapApp::processCalibrationPoint(int step) {
              double angle = getCoordinate(coords);
              LOG_INFO(1, "Found angle %f", angle);
              map->setCalibrationAngle(angle);
-             finalizeCalibration();
+             finalizeCalibration(map->getCalibrationReport());
              return;
         }
     }
@@ -649,7 +651,7 @@ void MapApp::processCalibrationPoint(int step) {
             coordsField->setText("0");
         } else {
             map->setCalibrationPoint3(lat, lon);
-            finalizeCalibration();
+            finalizeCalibration(map->getCalibrationReport());
         }
     } catch (const std::exception &e) {
         LOG_ERROR("Failed to parse '%s': %s", coords.c_str(), e.what());
@@ -657,10 +659,10 @@ void MapApp::processCalibrationPoint(int step) {
     rotateButton->setVisible(false);
 }
 
-void MapApp::finalizeCalibration() {
+void MapApp::finalizeCalibration(std::string msg) {
     keyboard.reset();
     coordsField.reset();
-    messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), map->getCalibrationReport());
+    messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), msg);
     messageBox->addButton("Ok", [this] () {
         api().executeLater([this] () {
             messageBox.reset();

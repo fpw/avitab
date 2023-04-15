@@ -111,12 +111,20 @@ void ChartFoxChart::attachPDF(const std::vector<uint8_t> &data) {
     pdfData = data;
 }
 
+std::vector<uint8_t> ChartFoxChart::getPdfData() {
+    return pdfData;
+}
+
+void ChartFoxChart::setCalibrationMetadata(std::string metadata) {
+    calibrationMetadata = metadata;
+}
+
 std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode) {
     if (!isLoaded()) {
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData);
+    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData, calibrationMetadata);
     pdfSrc->setNightMode(nightMode);
     return pdfSrc;
 }

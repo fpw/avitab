@@ -31,6 +31,7 @@
 #include "src/gui_toolkit/widgets/DropDownList.h"
 #include "src/gui_toolkit/widgets/List.h"
 #include "src/gui_toolkit/widgets/Window.h"
+#include "src/gui_toolkit/widgets/MessageBox.h"
 #include "src/gui_toolkit/Timer.h"
 #include "src/libimg/stitcher/TileSource.h"
 #include "src/maps/OverlayedMap.h"
@@ -76,6 +77,7 @@ private:
     std::shared_ptr<DropDownList> resultList;
     std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
+    std::unique_ptr<MessageBox> messageBox;
 
     void removeTab(std::shared_ptr<Page> page);
     void resetLayout();

@@ -38,9 +38,12 @@ public:
     virtual bool isLoaded() const override;
     virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
+    virtual void setCalibrationMetadata(std::string metadata);
 
     std::string getURL() const;
     void attachPDF(const std::vector<uint8_t> &data);
+    std::vector<uint8_t> getPdfData();
+
 private:
     std::string icao;
     size_t index;
@@ -48,6 +51,7 @@ private:
     std::string identifier;
     std::string url;
     std::vector<uint8_t> pdfData;
+    std::string calibrationMetadata = "";
 };
 
 } // namespace chartfox
