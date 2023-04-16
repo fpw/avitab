@@ -41,6 +41,7 @@ public:
     virtual img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) = 0;
     virtual std::string getCalibrationReport() {return "No calibration"; };
     virtual double getNorthOffsetAngle() { return 0.0; };
+    virtual bool isPDFSource() { return false; };
 
     // Control the underlying loader
     virtual void cancelPendingLoads() = 0;

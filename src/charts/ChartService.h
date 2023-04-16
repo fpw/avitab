@@ -52,7 +52,8 @@ public:
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph();
     void submitCall(std::shared_ptr<BaseCall> call);
 
-    std::string getHashMappedJson(std::string utf8ChartFileName) const;
+    std::string getCalibrationMetadataForFile(std::string utf8ChartFileName) const;
+    std::string getCalibrationMetadataForHash(std::string hash) const;
 
 private:
     std::shared_ptr<navigraph::NavigraphAPI> navigraph;

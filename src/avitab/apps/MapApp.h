@@ -115,7 +115,7 @@ private:
     void startCalibration();
     double getCoordinate(const std::string &str);
     void processCalibrationPoint(int step);
-    void finalizeCalibration();
+    void finalizeCalibration(std::string msg);
     bool handleNonNumericContent(std::string coords);
 };
 

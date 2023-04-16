@@ -32,7 +32,8 @@ namespace maps {
 class PDFSource: public img::TileSource {
 public:
     PDFSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
-    PDFSource(const std::vector<uint8_t> &pdfData);
+    PDFSource(const std::string& file, std::string calibrationMetadata);
+    PDFSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata);
 
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
@@ -62,6 +63,7 @@ public:
     void setNightMode(bool night);
     void rotate() override;
     double getNorthOffsetAngle() override;
+    bool isPDFSource() override { return true; };
 
 private:
     std::string utf8FileName;
@@ -71,8 +73,10 @@ private:
     int rotateAngle = 0;
     apis::Crypto crypto;
     std::shared_ptr<apis::ChartService> chartService;
+
+    void loadProvidedCalibrationMetadata(std::string calibrationMetadata);
     void storeCalibration();
-    void loadCalibration();
+    void findAndLoadCalibration();
 };
 
 } /* namespace maps */

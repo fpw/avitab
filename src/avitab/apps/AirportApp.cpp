@@ -383,8 +383,11 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     TabPage &tab = findPage(page);
 
     tab.label->setVisible(false);
-    tab.overlays = std::make_shared<maps::OverlayConfig>();
-
+    if (api().getSettings()->getGeneralSetting<bool>("show_overlays_in_airport_app")) {
+        tab.overlays = api().getSettings()->getOverlayConfig();
+    } else {
+        tab.overlays = std::make_shared<maps::OverlayConfig>();
+    }
     tab.window->addSymbol(Widget::Symbol::MINUS, [this, page] {
         TabPage &tab = findPage(page);
         tab.map->zoomOut();
@@ -438,6 +441,16 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
             TabPage &tab = findPage(page);
             tab.mapStitcher->prevPage();
         });
+    }
+
+    if (tab.mapSource->supportsWorldCoords()) {
+        messageBox = std::make_unique<avitab::MessageBox>(getUIContainer(), "Chart is georeferenced");
+        messageBox->addButton("Ok", [this] () {
+            api().executeLater([this] () {
+                messageBox.reset();
+            });
+        });
+        messageBox->centerInParent();
     }
 
     onTimer();
