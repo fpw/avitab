@@ -48,11 +48,10 @@ bool NavigraphAPI::hasLoggedInBefore() const {
 
 bool NavigraphAPI::init() {
     if (hasChartsSubscription()) {
+        signedCookies = oidc->getCookies();
         demoMode = false;
     }
     loadAirports();
-    loadCycle();
-    loadCookie();
     stamper.setSize(20);
     stamper.setText("Chart linked to Navigraph account \"" + oidc->getAccountName() + "\"");
     return demoMode;
@@ -130,6 +129,10 @@ bool NavigraphAPI::isInDemoMode() const {
     return demoMode;
 }
 
+bool NavigraphAPI::canUseTiles() const {
+    return !demoMode;
+}
+
 void NavigraphAPI::loadAirports() {
     long timestamp = oidc->getTimestamp("https://charts.api.navigraph.com/1/airports");
 
@@ -147,21 +150,6 @@ void NavigraphAPI::loadAirports() {
     fs::ifstream jsonStream(fs::u8path(airportFileName));
     airportJson = std::make_shared<nlohmann::json>();
     jsonStream >> *airportJson;
-}
-
-void NavigraphAPI::loadCycle() {
-    auto cycleData = oidc->get("https://charts.api.navigraph.com/1/cycles/current");
-    nlohmann::json cycleJson = nlohmann::json::parse(cycleData);
-    cycleId = cycleJson.at("id");
-}
-
-void NavigraphAPI::loadCookie() {
-    auto cookieData = oidc->get("https://charts.api.navigraph.com/1/signed_cookies");
-    signedCookies.clear();
-    nlohmann::json cookieJson = nlohmann::json::parse(cookieData);
-    for (auto &[key, val]: cookieJson.items()) {
-        signedCookies.insert(std::make_pair(key, val.get<std::string>()));
-    }
 }
 
 bool NavigraphAPI::hasChartsSubscription() {
@@ -206,10 +194,6 @@ bool NavigraphAPI::canAccess(const std::string& icao) {
     } else {
         return true;
     }
-}
-
-std::string NavigraphAPI::getEnrouteKey() {
-    return cycleId;
 }
 
 std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {

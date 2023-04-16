@@ -26,7 +26,6 @@
 #include "src/maps/sources/PDFSource.h"
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
-#include "src/maps/sources/NavigraphSource.h"
 #include "src/libxdata/parsers/strtod.h"
 
 namespace avitab {
@@ -163,10 +162,16 @@ void MapApp::setMapSource(MapSource style) {
         selectEPSG();
         break;
     case MapSource::NAVIGRAPH_HIGH:
-        selectNavigraph(true);
+        selectNavigraph(maps::NavigraphMapType::IFR_HIGH);
         break;
     case MapSource::NAVIGRAPH_LOW:
-        selectNavigraph(false);
+        selectNavigraph(maps::NavigraphMapType::IFR_LOW);
+        break;
+    case MapSource::NAVIGRAPH_VFR:
+        selectNavigraph(maps::NavigraphMapType::VFR);
+        break;
+    case MapSource::NAVIGRAPH_WORLD:
+        selectNavigraph(maps::NavigraphMapType::WORLD);
         break;
     }
 
@@ -256,8 +261,8 @@ void MapApp::selectEPSG() {
     chooserContainer->setVisible(true);
 }
 
-void MapApp::selectNavigraph(bool highEnroute) {
-    auto source = std::make_shared<maps::NavigraphSource>(api().getChartService()->getNavigraph(), false, highEnroute);
+void MapApp::selectNavigraph(maps::NavigraphMapType type) {
+    auto source = std::make_shared<maps::NavigraphSource>(api().getChartService()->getNavigraph(), false, type);
     setTileSource(source);
 }
 
@@ -314,24 +319,34 @@ void MapApp::resume() {
 }
 
 void MapApp::onSettingsButton() {
-    if (!api().getChartService()->getNavigraph()->getEnrouteKey().empty() && !naviLowButton) {
-        naviLowButton = std::make_shared<Button>(settingsContainer, "Navigraph L");
+    if (api().getChartService()->getNavigraph()->canUseTiles() && !naviLowButton) {
+        naviLowButton = std::make_shared<Button>(settingsContainer, "IFR Low");
         naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
         naviLowButton->setFit(false, true);
         naviLowButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
         naviLowButton->alignBelow(mercatorButton, 10);
-        auto naviLowLabel = std::make_shared<Label>(settingsContainer, "Navigraph low enroute charts");
-        naviLowLabel->alignRightOf(naviLowButton, 10);
-        naviLowLabel->setManaged();
 
-        naviHighButton = std::make_shared<Button>(settingsContainer, "Navigraph H");
+        naviHighButton = std::make_shared<Button>(settingsContainer, "IFR High");
         naviHighButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_HIGH); });
         naviHighButton->setFit(false, true);
         naviHighButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-        naviHighButton->alignBelow(naviLowButton, 10);
-        auto naviHighLabel = std::make_shared<Label>(settingsContainer, "Navigraph high enroute charts");
-        naviHighLabel->alignRightOf(naviHighButton, 10);
-        naviHighLabel->setManaged();
+        naviHighButton->alignRightOf(naviLowButton, 10);
+
+        naviVFRButton = std::make_shared<Button>(settingsContainer, "VFR");
+        naviVFRButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_VFR); });
+        naviVFRButton->setFit(false, true);
+        naviVFRButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviVFRButton->alignRightOf(naviHighButton, 10);
+
+        naviWorldButton = std::make_shared<Button>(settingsContainer, "World");
+        naviWorldButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_WORLD); });
+        naviWorldButton->setFit(false, true);
+        naviWorldButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviWorldButton->alignRightOf(naviVFRButton, 10);
+
+        auto naviLabel = std::make_shared<Label>(settingsContainer, "Navigraph maps");
+        naviLabel->alignRightOf(naviWorldButton, 10);
+        naviLabel->setManaged();
     }
 
     settingsContainer->setVisible(!settingsContainer->isVisible());

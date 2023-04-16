@@ -77,7 +77,6 @@ private:
     std::shared_ptr<DropDownList> resultList;
     std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
-    std::unique_ptr<MessageBox> messageBox;
 
     void removeTab(std::shared_ptr<Page> page);
     void resetLayout();

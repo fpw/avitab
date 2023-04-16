@@ -36,6 +36,7 @@
 #include "src/libimg/stitcher/TileSource.h"
 #include "src/libimg/Image.h"
 #include "src/maps/OverlayedMap.h"
+#include "src/maps/sources/NavigraphSource.h"
 
 namespace avitab {
 
@@ -57,6 +58,8 @@ private:
         EPSG3857,
         NAVIGRAPH_HIGH,
         NAVIGRAPH_LOW,
+        NAVIGRAPH_VFR,
+        NAVIGRAPH_WORLD,
     };
 
     std::shared_ptr<maps::OverlayConfig> overlayConf;
@@ -71,7 +74,7 @@ private:
     std::shared_ptr<Button> trackButton;
     std::shared_ptr<Button> rotateButton;
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
-    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton;
+    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton;
     std::shared_ptr<Label> overlayLabel;
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
@@ -99,7 +102,7 @@ private:
     void selectGeoTIFF();
     void selectMercator();
     void selectEPSG();
-    void selectNavigraph(bool highEnroute);
+    void selectNavigraph(maps::NavigraphMapType type);
     void selectUserFixesFile();
 
     bool onTimer();

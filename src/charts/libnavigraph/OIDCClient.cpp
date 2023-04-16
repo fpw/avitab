@@ -71,7 +71,7 @@ bool OIDCClient::relogin() {
     }
 
     try {
-        handleToken(reply);
+        handleToken(reply, restClient.getCookies());
     } catch (const std::exception &e) {
         logger::error("Relogin failed: %s", e.what());
         return false;
@@ -90,7 +90,7 @@ std::string OIDCClient::startAuth(AuthCallback cb) {
     nonce = crypto.base64URLEncode(crypto.generateRandom(8));
 
     url << "https://identity.api.navigraph.com/connect/authorize";
-    url << "?scope=" << crypto.urlEncode("openid userinfo charts offline_access");
+    url << "?scope=" << crypto.urlEncode("openid userinfo charts tiles offline_access");
     url << "&response_type=" << crypto.urlEncode("code id_token");
     url << "&client_id=" << crypto.urlEncode(clientId.c_str());
     url << "&redirect_uri=" << crypto.urlEncode(std::string("http://127.0.0.1:") + std::to_string(authPort));
@@ -148,23 +148,28 @@ void OIDCClient::onAuthReply(const std::map<std::string, std::string> &authInfo)
 
     restClient.setBasicAuth(crypto.base64BasicAuthEncode(clientId, clientSecret));
     std::string reply = restClient.post("https://identity.api.navigraph.com/connect/token", replyFields, cancelToken);
-    handleToken(reply);
+    handleToken(reply, restClient.getCookies());
 
     server.stop();
     onAuth();
 }
 
-void OIDCClient::handleToken(const std::string& inputJson) {
+void OIDCClient::handleToken(const std::string& inputJson, const std::map<std::string, std::string> &cookies) {
     // could be called from either thread
 
     nlohmann::json data = nlohmann::json::parse(inputJson);
     idToken = data.at("id_token");
     accessToken = data.at("access_token");
     refreshToken = data.at("refresh_token");
+    cookieJar = cookies;
 
     logger::verbose("Checking phase 2 token");
     loadIDToken(false);
     storeTokens();
+}
+
+std::map<std::string, std::string> OIDCClient::getCookies() const {
+    return cookieJar;
 }
 
 void OIDCClient::loadIDToken(bool checkNonce) {

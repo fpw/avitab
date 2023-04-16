@@ -48,6 +48,7 @@ public:
     void cancelAuth();
 
     std::string getAccountName() const;
+    std::map<std::string, std::string> getCookies() const;
 
     std::string get(const std::string &url);
     std::vector<uint8_t> getBinary(const std::string &url);
@@ -75,12 +76,13 @@ private:
     // state
     AuthCallback onAuth;
     std::string accessToken, idToken, refreshToken;
+    std::map<std::string, std::string> cookieJar;
 
     bool cancelToken = false;
 
     bool relogin();
     void onAuthReply(const std::map<std::string, std::string> &authInfo);
-    void handleToken(const std::string &inputJson);
+    void handleToken(const std::string &inputJson, const std::map<std::string, std::string> &cookies);
     void loadIDToken(bool checkNonce);
     void tryWithRelogin(std::function<void()> f);
 

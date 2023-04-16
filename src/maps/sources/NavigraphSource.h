@@ -24,9 +24,16 @@
 
 namespace maps {
 
+enum class NavigraphMapType {
+    IFR_LOW,
+    IFR_HIGH,
+    VFR,
+    WORLD,
+};
+
 class NavigraphSource: public img::TileSource {
 public:
-    NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, bool highRoutes);
+    NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, NavigraphMapType type);
 
     // Basic information
     int getMinZoomLevel() override;
@@ -55,7 +62,8 @@ public:
     std::string getCopyrightInfo() override;
 private:
     std::shared_ptr<navigraph::NavigraphAPI> navigraph;
-    bool dayMode, highRoutes;
+    bool dayMode;
+    NavigraphMapType type;
     bool cancelToken = false;
     Downloader downloader;
 };

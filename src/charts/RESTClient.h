@@ -51,8 +51,11 @@ public:
     std::string post(const std::string &url, const std::map<std::string, std::string> fields, bool &cancel);
     std::string getRedirect(const std::string &url, bool &cancel);
     long head(const std::string &Turl, bool &cancel);
+
+    std::map<std::string, std::string> getCookies() const;
 private:
     std::vector<uint8_t> downloadBuf;
+    std::map<std::string, std::string> cookieJar;
     std::string referrer;
     std::string bearer;
     std::string basicAuth;

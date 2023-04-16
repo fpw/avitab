@@ -15,17 +15,17 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "NavigraphSource.h"
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include "NavigraphSource.h"
 
 namespace maps {
 
-NavigraphSource::NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, bool highRoutes):
+NavigraphSource::NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, bool dayMode, NavigraphMapType type):
     navigraph(api),
     dayMode(dayMode),
-    highRoutes(highRoutes)
+    type(type)
 {
     downloader.setHideURLs(true);
     downloader.setCookies(navigraph->getSignedCookies());
@@ -36,7 +36,7 @@ int NavigraphSource::getMinZoomLevel() {
 }
 
 int NavigraphSource::getMaxZoomLevel() {
-    return 11;
+    return 18;
 }
 
 int NavigraphSource::getInitialZoomLevel() {
@@ -129,28 +129,35 @@ std::string NavigraphSource::getUniqueTileName(int page, int x, int y, int zoom)
     }
 
     std::ostringstream nameStream;
-    if (highRoutes) {
-        nameStream << "/h";
-    } else {
-        nameStream << "/l";
+    switch (type) {
+        case NavigraphMapType::IFR_HIGH:
+            nameStream << "/ifr.hi";
+            break;
+        case NavigraphMapType::IFR_LOW:
+            nameStream << "/ifr.lo";
+            break;
+        case NavigraphMapType::VFR:
+            nameStream << "/vfr";
+            break;
+        case NavigraphMapType::WORLD:
+            nameStream << "/world";
+            break;
     }
 
     if (dayMode) {
-        nameStream << "d-1x/";
+        nameStream << ".day";
     } else {
-        nameStream << "n-1x/";
+        nameStream << ".night";
     }
 
-    nameStream << zoom << "/" << x << "/" << ((1 << zoom) - 1 - y) << ".png";
+    nameStream << "/" << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }
 
 std::unique_ptr<img::Image> NavigraphSource::loadTileImage(int page, int x, int y, int zoom) {
-    auto key = navigraph->getEnrouteKey();
-
     cancelToken = false;
     std::string path = getUniqueTileName(page, x, y, zoom);
-    auto data = downloader.download("https://enroute.charts.api.navigraph.com/" + key + path, cancelToken);
+    auto data = downloader.download("https://enroute-bitmap.charts.api-v2.navigraph.com/styles" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data, false);
     return image;

@@ -48,8 +48,8 @@ public:
     std::string startAuthentication(std::function<void()> onAuth);
     void cancelAuth();
     bool isInDemoMode() const;
+    bool canUseTiles() const;
     bool hasChartsFor(const std::string &icao);
-    std::string getEnrouteKey();
     void logout();
 
     ChartsList getChartsFor(const std::string &icao);
@@ -61,7 +61,6 @@ private:
     std::string cacheDirectory;
     std::shared_ptr<OIDCClient> oidc;
     std::shared_ptr<nlohmann::json> airportJson;
-    std::string cycleId;
     img::TTFStamper stamper;
     bool demoMode = true;
 
@@ -69,8 +68,6 @@ private:
     std::map<std::string, std::string> signedCookies;
 
     void loadAirports();
-    void loadCycle();
-    void loadCookie();
     bool hasChartsSubscription();
     bool canAccess(const std::string &icao);
     std::shared_ptr<img::Image> getChartImageFromURL(const std::string &url);

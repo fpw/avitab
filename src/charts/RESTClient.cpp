@@ -120,6 +120,7 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     std::string fieldStr = toPOSTString(fields);
 
     CURL *curl = createCURL(url, cancel);
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
     curl_slist *list = nullptr;
     if (!bearer.empty()) {
@@ -156,6 +157,36 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
         }
     }
 
+    curl_slist *cookies = NULL;
+    curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+    // parse cookies according to https://everything.curl.dev/libcurl-http/cookies#cookie-file-format
+    if (cookies) {
+        curl_slist *cursor = cookies;
+        while (cursor) {
+            std::string cookie{cursor->data};
+            std::string fieldStr;
+            std::string name, value;
+            cookie += '\t';
+            int field = 0;
+            for (auto &c: cookie) {
+                if (c == '\t') {
+                    if (field == 5) {
+                        name = fieldStr;
+                    } else if (field == 6) {
+                        value = fieldStr;
+                    }
+                    field++;
+                    fieldStr = "";
+                    continue;
+                }
+                fieldStr += c;
+            }
+            cookieJar.insert(std::make_pair(name, value));
+            cursor = cursor->next;
+        }
+        curl_slist_free_all(cookies);
+    }
+
     long httpStatus = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
     std::string content = std::string((char *) downloadBuf.data(), downloadBuf.size());
@@ -167,6 +198,10 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     curl_easy_cleanup(curl);
 
     return content;
+}
+
+std::map<std::string, std::string> RESTClient::getCookies() const {
+    return cookieJar;
 }
 
 std::string RESTClient::getRedirect(const std::string& url, bool& cancel) {
