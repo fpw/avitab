@@ -19,7 +19,6 @@
 #define SRC_MAPS_SOURCES_NAVIGRAPHSOURCE_H_
 
 #include "src/libimg/stitcher/TileSource.h"
-#include "src/maps/Downloader.h"
 #include "src/charts/libnavigraph/NavigraphAPI.h"
 
 namespace maps {
@@ -65,7 +64,6 @@ private:
     bool dayMode;
     NavigraphMapType type;
     bool cancelToken = false;
-    Downloader downloader;
 };
 
 } /* namespace maps */

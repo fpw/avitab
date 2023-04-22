@@ -32,6 +32,7 @@ class HTTPException: public std::exception {
 public:
     static constexpr const int NO_CONTENT = 204;
     static constexpr const int UNAUTHORIZED = 401;
+    static constexpr const int FORBIDDEN = 403;
 
     explicit HTTPException(int status);
     const char *what() const noexcept override;
@@ -43,6 +44,7 @@ private:
 
 class RESTClient {
 public:
+    void setVerbose(bool verbose);
     void setReferrer(const std::string &ref);
     void setBasicAuth(const std::string &basic);
     void setBearer(const std::string &token);
@@ -54,6 +56,7 @@ public:
 
     std::map<std::string, std::string> getCookies() const;
 private:
+    bool verbose = true;
     std::vector<uint8_t> downloadBuf;
     std::map<std::string, std::string> cookieJar;
     std::string referrer;

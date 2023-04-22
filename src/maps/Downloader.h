@@ -30,7 +30,6 @@ class Downloader {
 public:
     Downloader();
     void setHideURLs(bool hide);
-    void setCookies(const std::map<std::string, std::string> &cks);
     std::vector<uint8_t> download(const std::string &url, bool &cancel);
     ~Downloader();
 private:

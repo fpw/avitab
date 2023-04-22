@@ -168,10 +168,6 @@ void OIDCClient::handleToken(const std::string& inputJson, const std::map<std::s
     storeTokens();
 }
 
-std::map<std::string, std::string> OIDCClient::getCookies() const {
-    return cookieJar;
-}
-
 void OIDCClient::loadIDToken(bool checkNonce) {
     auto i1 = idToken.find('.');
     std::string header = idToken.substr(0, i1);
@@ -239,12 +235,16 @@ std::string OIDCClient::get(const std::string& url) {
     return res;
 }
 
-std::vector<uint8_t> OIDCClient::getBinary(const std::string& url) {
+std::vector<uint8_t> OIDCClient::getBinary(const std::string& url, bool &cancel) {
     std::vector<uint8_t> res;
-    tryWithRelogin([this, &res, &url] () {
-        res = restClient.getBinary(url, cancelToken);
+    tryWithRelogin([this, &cancel, &res, &url] () {
+        res = restClient.getBinary(url, cancel);
     });
     return res;
+}
+
+std::vector<uint8_t> OIDCClient::getBinary(const std::string& url) {
+    return getBinary(url, cancelToken);
 }
 
 long OIDCClient::getTimestamp(const std::string& url) {
@@ -268,7 +268,7 @@ void OIDCClient::tryWithRelogin(std::function<void()> f) {
         restClient.setBearer(accessToken);
         f();
     } catch (const apis::HTTPException &e) {
-        if (e.getStatusCode() == apis::HTTPException::UNAUTHORIZED) {
+        if (e.getStatusCode() == apis::HTTPException::UNAUTHORIZED || e.getStatusCode() == apis::HTTPException::FORBIDDEN) {
             logger::info("Access token expired, trying refresh_token");
             if (relogin()) {
                 restClient.setBearer(accessToken);

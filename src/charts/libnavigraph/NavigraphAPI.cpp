@@ -48,7 +48,6 @@ bool NavigraphAPI::hasLoggedInBefore() const {
 
 bool NavigraphAPI::init() {
     if (hasChartsSubscription()) {
-        signedCookies = oidc->getCookies();
         demoMode = false;
     }
     loadAirports();
@@ -106,7 +105,7 @@ std::shared_ptr<apis::Chart> NavigraphAPI::loadChartImages(std::shared_ptr<Navig
 
     auto imgDay = getChartImageFromURL(airportUrl + chart->getFileDay());
     auto imgNight = getChartImageFromURL(airportUrl + chart->getFileNight());
-    chart->attachImages(imgDay, imgNight);
+    chart->attachImages(std::move(imgDay), std::move(imgNight));
 
     return chart;
 }
@@ -196,13 +195,12 @@ bool NavigraphAPI::canAccess(const std::string& icao) {
     }
 }
 
-std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {
-    std::string signedUrl = oidc->get(url);
+std::unique_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string &url) {
+    auto signedUrl = oidc->get(url);
     std::vector<uint8_t> pngData = oidc->getBinary(signedUrl);
-    auto img = std::make_shared<img::Image>();
-    logger::verbose("Decoding PNG image");
+    auto img = std::make_unique<img::Image>();
     img->loadEncodedData(pngData, false);
-    logger::verbose("PNG decoded, %dx%d px", img->getWidth(), img->getHeight());
+    logger::verbose("Chart decoded, %dx%d px", img->getWidth(), img->getHeight());
     if (img->getWidth()  == 0 || img->getHeight() == 0) {
         throw std::runtime_error("Invalid chart image");
     }
@@ -212,8 +210,11 @@ std::shared_ptr<img::Image> NavigraphAPI::getChartImageFromURL(const std::string
     return img;
 }
 
-const std::map<std::string, std::string> &NavigraphAPI::getSignedCookies() const {
-    return signedCookies;
+std::unique_ptr<img::Image> NavigraphAPI::getTileFromURL(const std::string &url, bool &cancel) {
+    auto img = std::make_unique<img::Image>();
+    std::vector<uint8_t> pngData = oidc->getBinary(url, cancel);
+    img->loadEncodedData(pngData, false);
+    return img;
 }
 
 } /* namespace navigraph */

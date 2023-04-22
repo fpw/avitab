@@ -27,8 +27,6 @@ NavigraphSource::NavigraphSource(std::shared_ptr<navigraph::NavigraphAPI> api, b
     dayMode(dayMode),
     type(type)
 {
-    downloader.setHideURLs(true);
-    downloader.setCookies(navigraph->getSignedCookies());
 }
 
 int NavigraphSource::getMinZoomLevel() {
@@ -36,7 +34,7 @@ int NavigraphSource::getMinZoomLevel() {
 }
 
 int NavigraphSource::getMaxZoomLevel() {
-    return 18;
+    return 20;
 }
 
 int NavigraphSource::getInitialZoomLevel() {
@@ -52,7 +50,7 @@ img::Point<double> NavigraphSource::suggestInitialCenter(int page) {
 }
 
 img::Point<int> NavigraphSource::getTileDimensions(int zoom) {
-    return img::Point<int>{256, 256};
+    return img::Point<int>{512, 512};
 }
 
 img::Point<double> NavigraphSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
@@ -150,16 +148,14 @@ std::string NavigraphSource::getUniqueTileName(int page, int x, int y, int zoom)
         nameStream << ".night";
     }
 
-    nameStream << "/" << zoom << "/" << x << "/" << y << ".png";
+    nameStream << "/" << zoom << "/" << x << "/" << y << "@2x.png";
     return nameStream.str();
 }
 
 std::unique_ptr<img::Image> NavigraphSource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
     std::string path = getUniqueTileName(page, x, y, zoom);
-    auto data = downloader.download("https://enroute-bitmap.charts.api-v2.navigraph.com/styles" + path, cancelToken);
-    auto image = std::make_unique<img::Image>();
-    image->loadEncodedData(data, false);
+    auto image = navigraph->getTileFromURL("https://enroute-bitmap.charts.api-v2.navigraph.com/styles" + path, cancelToken);
     return image;
 }
 

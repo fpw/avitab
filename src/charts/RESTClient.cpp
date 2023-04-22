@@ -37,6 +37,10 @@ int HTTPException::getStatusCode() const {
     return status;
 }
 
+void RESTClient::setVerbose(bool verbose) {
+    this->verbose = verbose;
+}
+
 void RESTClient::setBearer(const std::string& token) {
     bearer = token;
     basicAuth = "";
@@ -59,9 +63,9 @@ std::string RESTClient::get(const std::string& url, bool &cancel) {
 std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel) {
     auto it = url.find('?');
     if (it != std::string::npos) {
-        logger::verbose("GET '%s'", url.substr(0, it).c_str());
+        LOG_VERBOSE(verbose, "GET '%s'", url.substr(0, it).c_str());
     } else {
-        logger::verbose("GET '%s'", url.c_str());
+        LOG_VERBOSE(verbose, "GET '%s'", url.c_str());
     }
 
     CURL *curl = createCURL(url, cancel);
@@ -91,11 +95,11 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     if (code != CURLE_OK) {
         if (code == CURLE_ABORTED_BY_CALLBACK) {
             curl_easy_cleanup(curl);
-            logger::verbose("HTTP request: Cancelled");
+            logger::info("HTTP request: Cancelled");
             throw std::out_of_range("Cancelled");
         } else {
             curl_easy_cleanup(curl);
-            logger::verbose("HTTP request: Error %s", curl_easy_strerror(code));
+            logger::warn("HTTP request: Error %s", curl_easy_strerror(code));
             throw std::runtime_error(std::string("GET_BIN error: ") + curl_easy_strerror(code));
         }
     }
@@ -104,18 +108,18 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
     if (httpStatus != 200) {
         curl_easy_cleanup(curl);
-        logger::verbose("HTTP request: Status %d", httpStatus);
+        logger::warn("HTTP request: Status %d", httpStatus);
         throw HTTPException(httpStatus);
     }
 
     curl_easy_cleanup(curl);
-    logger::verbose("HTTP request: Done, %d bytes", downloadBuf.size());
+    LOG_VERBOSE(verbose, "HTTP request: Done, %d bytes", downloadBuf.size());
 
     return downloadBuf;
 }
 
 std::string RESTClient::post(const std::string& url, const std::map<std::string, std::string> fields, bool& cancel) {
-    logger::verbose("POST '%s'", url.c_str());
+    LOG_VERBOSE(verbose, "POST '%s'", url.c_str());
 
     std::string fieldStr = toPOSTString(fields);
 
@@ -205,7 +209,7 @@ std::map<std::string, std::string> RESTClient::getCookies() const {
 }
 
 std::string RESTClient::getRedirect(const std::string& url, bool& cancel) {
-    logger::verbose("GET_REDIRECT '%s'", url.c_str());
+    LOG_VERBOSE(verbose, "GET_REDIRECT '%s'", url.c_str());
 
     CURL *curl = createCURL(url, cancel);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
@@ -237,9 +241,9 @@ std::string RESTClient::getRedirect(const std::string& url, bool& cancel) {
 long RESTClient::head(const std::string& url, bool& cancel) {
     auto it = url.find('?');
     if (it != std::string::npos) {
-        logger::verbose("HEAD '%s'", url.substr(0, it).c_str());
+        LOG_VERBOSE(verbose, "HEAD '%s'", url.substr(0, it).c_str());
     } else {
-        logger::verbose("HEAD '%s'", url.c_str());
+        LOG_VERBOSE(verbose, "HEAD '%s'", url.c_str());
     }
 
     CURL *curl = createCURL(url, cancel);
@@ -280,6 +284,15 @@ CURL* RESTClient::createCURL(const std::string &url, bool &cancel) {
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cancel);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &downloadBuf);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, onData);
+
+    if (!cookieJar.empty()) {
+        std::stringstream ckStream;
+        for (auto &it: cookieJar) {
+            ckStream << it.first << "=" << it.second << "; ";
+        }
+        std::string cks = ckStream.str();
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cks.c_str());
+    }
 
     return curl;
 }

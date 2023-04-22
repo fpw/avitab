@@ -31,17 +31,6 @@ Downloader::Downloader() {
     }
 }
 
-void Downloader::setCookies(const std::map<std::string, std::string> &cookies) {
-    if (!cookies.empty()) {
-        std::stringstream ckStream;
-        for (auto &it: cookies) {
-            ckStream << it.first << "=" << it.second << "; ";
-        }
-        std::string cks = ckStream.str();
-        curl_easy_setopt(curl, CURLOPT_COOKIE, cks.c_str());
-    }
-}
-
 void Downloader::setHideURLs(bool hide) {
     hideURLs = hide;
 }

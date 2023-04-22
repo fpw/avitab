@@ -48,10 +48,10 @@ public:
     void cancelAuth();
 
     std::string getAccountName() const;
-    std::map<std::string, std::string> getCookies() const;
 
     std::string get(const std::string &url);
     std::vector<uint8_t> getBinary(const std::string &url);
+    std::vector<uint8_t> getBinary(const std::string &url, bool &cancel);
     long getTimestamp(const std::string &url);
 
     void logout();

@@ -54,8 +54,7 @@ public:
 
     ChartsList getChartsFor(const std::string &icao);
     std::shared_ptr<apis::Chart> loadChartImages(std::shared_ptr<NavigraphChart> chart);
-
-    const std::map<std::string, std::string> &getSignedCookies() const;
+    std::unique_ptr<img::Image> getTileFromURL(const std::string &url, bool &cancel);
 
 private:
     std::string cacheDirectory;
@@ -65,12 +64,11 @@ private:
     bool demoMode = true;
 
     std::multimap<std::string, std::shared_ptr<NavigraphChart>> charts;
-    std::map<std::string, std::string> signedCookies;
 
     void loadAirports();
     bool hasChartsSubscription();
     bool canAccess(const std::string &icao);
-    std::shared_ptr<img::Image> getChartImageFromURL(const std::string &url);
+    std::unique_ptr<img::Image> getChartImageFromURL(const std::string &url);
 };
 
 } /* namespace navigraph */
