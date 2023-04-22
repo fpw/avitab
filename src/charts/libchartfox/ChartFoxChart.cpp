@@ -54,12 +54,10 @@ ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao
 
     auto id = json.at("identifier");
     auto name = json.at("name");
-    if (!id.is_null() && !name.is_null()) {
-        identifier = std::string(id) + " " + std::string(name);
+    if (!name.is_null()) {
+        identifier = name;
     } else if (!id.is_null()) {
         identifier = id;
-    } else if (!name.is_null()) {
-        identifier = name;
     } else {
         throw std::runtime_error("No chart name");
     }
