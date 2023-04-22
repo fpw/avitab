@@ -262,8 +262,26 @@ void MapApp::selectEPSG() {
 }
 
 void MapApp::selectNavigraph(maps::NavigraphMapType type) {
+    bool reCenter = false;
+    double lat, lon;
+    int zoom = 0;
+
+    if (!trackPlane && map && map->isCalibrated()) {
+        reCenter = true;
+        map->getCenterLocation(lat, lon);
+        zoom = map->getZoomLevel();
+    }
+
     auto source = std::make_shared<maps::NavigraphSource>(api().getChartService()->getNavigraph(), false, type);
     setTileSource(source);
+
+    if (reCenter) {
+        trackPlane = false;
+        if (zoom >= source->getMinZoomLevel() && zoom <= source->getMaxZoomLevel()) {
+            mapStitcher->setZoomLevel(zoom);
+        }
+        map->centerOnWorldPos(lat, lon);
+    }
 }
 
 void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
