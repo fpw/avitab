@@ -53,15 +53,15 @@ ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao
     }
 
     auto id = json.at("identifier");
-    if (!id.is_null()) {
+    auto name = json.at("name");
+    if (!id.is_null() && !name.is_null()) {
+        identifier = std::string(id) + " " + std::string(name);
+    } else if (!id.is_null()) {
         identifier = id;
+    } else if (!name.is_null()) {
+        identifier = name;
     } else {
-        auto desc = json.at("name");
-        if (!desc.is_null()) {
-            identifier = desc;
-        } else {
-            throw std::runtime_error("No chart name");
-        }
+        throw std::runtime_error("No chart name");
     }
 
     auto urlJ = json.at("url");
