@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <fstream>
 #include <memory>
+#include <sstream>
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 #include "Crypto.h"
