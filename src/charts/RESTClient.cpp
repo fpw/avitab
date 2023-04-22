@@ -185,7 +185,7 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
                 }
                 fieldStr += c;
             }
-            cookieJar.insert(std::make_pair(name, value));
+            cookieJar[name] = value;
             cursor = cursor->next;
         }
         curl_slist_free_all(cookies);
