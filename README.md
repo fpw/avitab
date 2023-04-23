@@ -1,8 +1,8 @@
 # AviTab - The Aviator's Tablet
 
-AviTab is a plugin for the [X-Plane](http://www.x-plane.com/) flight simulator.
+AviTab is a plugin for the [X-Plane](http://www.x-plane.com/) flight simulator(11.20+).
 It displays a tablet like computer with a few apps in the cockpit. It is mainly
-used for flying in virtual reality.
+used for flying in virtual reality but is also very handy in windowed mode, with integrations such as the zibo, it truly enhances your experience flying when you have a fully functioning EFB in your cockpit.
 
 ![](screenshots/launcher.jpg)
 
