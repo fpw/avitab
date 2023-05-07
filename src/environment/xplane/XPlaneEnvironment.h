@@ -83,7 +83,6 @@ private:
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
     std::string aircraftPath;
-    bool isXP12;
 
     // State
     std::mutex stateMutex;

@@ -44,8 +44,9 @@ XPlaneEnvironment::XPlaneEnvironment() {
     XPLMHostApplicationID hostId;
     XPLMGetVersions(&xpVersion, &xplmVersion, &hostId);
     if (xplmVersion >= 400) {
-        isXP12 = true;
         getMetar = (GetMetarPtr) XPLMFindSymbol("XPLMGetMETARForAirport");
+    } else {
+        getMetar = nullptr;
     }
 
     updatePlaneCount();
@@ -363,18 +364,14 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
 
 std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
     std::string metar, timestamp;
-    if (isXP12) {
+    if (getMetar) {
         std::promise<std::string> dataPromise;
         auto futureData = dataPromise.get_future();
 
         auto startAt = std::chrono::steady_clock::now();
         runInEnvironment([this, icao, &dataPromise] () {
             XPLMFixedString150_t buf;
-            if (getMetar) {
-                getMetar(icao.c_str(), &buf);
-            } else {
-                strcpy(buf.buffer, "XPLM Error");
-            }
+            getMetar(icao.c_str(), &buf);
             dataPromise.set_value(std::string(buf.buffer));
         });
 
