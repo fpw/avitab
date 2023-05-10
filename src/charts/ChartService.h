@@ -50,6 +50,7 @@ public:
 
     // state
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph();
+    std::shared_ptr<chartfox::ChartFoxAPI> getChartfox();
     void submitCall(std::shared_ptr<BaseCall> call);
 
     std::string getCalibrationMetadataForFile(std::string utf8ChartFileName) const;
