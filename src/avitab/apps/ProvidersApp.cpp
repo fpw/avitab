@@ -27,20 +27,24 @@ ProvidersApp::ProvidersApp(FuncsPtr appFuncs):
     tabs = std::make_shared<TabGroup>(getUIContainer());
     tabs->centerInParent();
 
-    navigraphPage = tabs->addTab(tabs, "Navigraph");
-    windowNavigraph = std::make_shared<Window>(navigraphPage, "Navigraph");
-    windowNavigraph->setOnClose([this] () { exit(); });
-    resetNavigraphLayout();
+    if (api().getChartService()->getNavigraph()->isSupported()) {
+        navigraphPage = tabs->addTab(tabs, "Navigraph");
+        windowNavigraph = std::make_shared<Window>(navigraphPage, "Navigraph");
+        windowNavigraph->setOnClose([this] () { exit(); });
+        resetNavigraphLayout();
 
-    auto navigraph = api().getChartService()->getNavigraph();
-    if (navigraph->hasLoggedInBefore()) {
-        onNavigraphLogin();
+        auto navigraph = api().getChartService()->getNavigraph();
+        if (navigraph->hasLoggedInBefore()) {
+            onNavigraphLogin();
+        }
     }
 
-    chartFoxPage = tabs->addTab(tabs, "ChartFox");
-    windowChartFox = std::make_shared<Window>(chartFoxPage, "ChartFox");
-    windowChartFox->setOnClose([this] () { exit(); });
-    resetChartFoxLayout();
+    if (api().getChartService()->getChartfox()->isSupported()) {
+        chartFoxPage = tabs->addTab(tabs, "ChartFox");
+        windowChartFox = std::make_shared<Window>(chartFoxPage, "ChartFox");
+        windowChartFox->setOnClose([this] () { exit(); });
+        resetChartFoxLayout();
+    }
 }
 
 void ProvidersApp::resetNavigraphLayout() {

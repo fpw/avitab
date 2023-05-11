@@ -53,6 +53,10 @@ std::shared_ptr<navigraph::NavigraphAPI> ChartService::getNavigraph() {
     return navigraph;
 }
 
+std::shared_ptr<chartfox::ChartFoxAPI> ChartService::getChartfox() {
+    return chartfox;
+}
+
 std::shared_ptr<APICall<bool>> ChartService::loginNavigraph() {
     auto call = std::make_shared<APICall<bool>>([this] {
         if (useNavigraph) {
