@@ -382,7 +382,6 @@ void AirportApp::onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartSer
 void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     TabPage &tab = findPage(page);
 
-    tab.label->setVisible(false);
     if (api().getSettings()->getGeneralSetting<bool>("show_overlays_in_airport_app")) {
         tab.overlays = api().getSettings()->getOverlayConfig();
     } else {
@@ -390,57 +389,73 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     }
     tab.window->addSymbol(Widget::Symbol::MINUS, [this, page] {
         TabPage &tab = findPage(page);
-        tab.map->zoomOut();
+        if (tab.map) {
+            tab.map->zoomOut();
+        }
     });
     tab.window->addSymbol(Widget::Symbol::PLUS, [this, page] {
         TabPage &tab = findPage(page);
-        tab.map->zoomIn();
+        if (tab.map) {
+            tab.map->zoomIn();
+        }
     });
     tab.window->addSymbol(Widget::Symbol::ROTATE, [this, page] {
         TabPage &tab = findPage(page);
-        tab.mapStitcher->rotateRight();
+        if (tab.map) {
+            tab.mapStitcher->rotateRight();
+        }
     });
     tab.nightModeButton = tab.window->addSymbol(Widget::Symbol::IMAGE, [this, page] () {
         TabPage &tab = findPage(page);
-        nightMode = !nightMode;
-        tab.nightModeButton->setToggleState(nightMode);
-        tab.chart->changeNightMode(tab.mapSource, nightMode);
-        tab.mapStitcher->invalidateCache();
+        if (tab.map) {
+            nightMode = !nightMode;
+            tab.nightModeButton->setToggleState(nightMode);
+            tab.chart->changeNightMode(tab.mapSource, nightMode);
+            tab.mapStitcher->invalidateCache();
+        }
     });
     tab.nightModeButton->setToggleState(nightMode);
     tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
         TabPage &tab = findPage(page);
-        tab.overlays->drawMyAircraft = !tab.overlays->drawMyAircraft;
-        tab.aircraftButton->setToggleState(tab.overlays->drawMyAircraft);
+        if (tab.map) {
+            tab.overlays->drawMyAircraft = !tab.overlays->drawMyAircraft;
+            tab.aircraftButton->setToggleState(tab.overlays->drawMyAircraft);
+        }
     });
 
-    tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
-    tab.pixMap = std::make_shared<PixMap>(tab.window);
-    tab.pixMap->draw(*tab.mapImage);
-    tab.pixMap->setClickable(true);
-    tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
-    tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - padHeight);
-    tab.pixMap->centerInParent();
+    try {
+        tab.mapImage = std::make_shared<img::Image>(tab.window->getContentWidth(), tab.window->getHeight(), 0);
+        tab.pixMap = std::make_shared<PixMap>(tab.window);
+        tab.pixMap->draw(*tab.mapImage);
+        tab.pixMap->setClickable(true);
+        tab.pixMap->setClickHandler([this, page] (int x, int y, bool pr, bool rel) { onMapPan(page, x, y, pr, rel); });
+        tab.pixMap->setDimensions(tab.window->getContentWidth(), tab.window->getHeight() - padHeight);
+        tab.pixMap->centerInParent();
 
-    tab.mapSource = tab.chart->createTileSource(nightMode);
-    tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
-    tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, tab.overlays);
-    tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
-    tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
-    tab.map->setNavWorld(api().getNavWorld());
+        tab.mapSource = tab.chart->createTileSource(nightMode);
+        tab.mapStitcher = std::make_shared<img::Stitcher>(tab.mapImage, tab.mapSource);
+        tab.map = std::make_shared<maps::OverlayedMap>(tab.mapStitcher, tab.overlays);
+        tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
+        tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
+        tab.map->setNavWorld(api().getNavWorld());
 
-    tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawMyAircraft);
+        tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawMyAircraft);
 
-    if (tab.mapSource->getPageCount() > 1) {
-        tab.window->addSymbol(Widget::Symbol::RIGHT, [this, page] {
-            TabPage &tab = findPage(page);
-            tab.mapStitcher->nextPage();
-        });
+        if (tab.mapSource->getPageCount() > 1) {
+            tab.window->addSymbol(Widget::Symbol::RIGHT, [this, page] {
+                TabPage &tab = findPage(page);
+                tab.mapStitcher->nextPage();
+            });
 
-        tab.window->addSymbol(Widget::Symbol::LEFT, [this, page] {
-            TabPage &tab = findPage(page);
-            tab.mapStitcher->prevPage();
-        });
+            tab.window->addSymbol(Widget::Symbol::LEFT, [this, page] {
+                TabPage &tab = findPage(page);
+                tab.mapStitcher->prevPage();
+            });
+        }
+        tab.label->setVisible(false);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load chart: %s", e.what());
+        tab.label->setText(e.what());
     }
 
     onTimer();
