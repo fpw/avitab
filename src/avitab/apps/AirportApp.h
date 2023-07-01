@@ -48,7 +48,7 @@ private:
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
-        std::shared_ptr<Button> aircraftButton, nightModeButton;
+        std::shared_ptr<Button> trackButton, nightModeButton;
         std::shared_ptr<xdata::Airport> airport;
 
         apis::ChartCategory requestedList = apis::ChartCategory::ROOT;
@@ -64,6 +64,7 @@ private:
         std::shared_ptr<maps::OverlayConfig> overlays;
 
         int panPosX = 0, panPosY = 0;
+        bool trackPlane = true;
     };
     std::vector<TabPage> pages;
     bool nightMode = false;

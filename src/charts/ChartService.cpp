@@ -36,6 +36,10 @@ ChartService::ChartService(const std::string &programPath) {
     std::string calibrationPath = programPath + "/MapTiles/Mercator/Calibration";
     if (platform::fileExists(calibrationPath)) {
         scanJsonFiles(calibrationPath);
+        logger::info(" Found %d calibration files", jsonFileHashes.size());
+    } else {
+        logger::info("Calibration folder does not exist at:");
+        logger::info(" %s", calibrationPath.c_str());
     }
 
     setUseNavigraph(true);
