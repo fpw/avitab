@@ -415,11 +415,11 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         }
     });
     tab.nightModeButton->setToggleState(nightMode);
-    tab.aircraftButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
+    tab.trackButton = tab.window->addSymbol(Widget::Symbol::GPS, [this, page] {
         TabPage &tab = findPage(page);
         if (tab.map) {
-            tab.overlays->drawMyAircraft = !tab.overlays->drawMyAircraft;
-            tab.aircraftButton->setToggleState(tab.overlays->drawMyAircraft);
+            tab.trackPlane = !tab.trackPlane;
+            tab.trackButton->setToggleState(tab.trackPlane);
         }
     });
 
@@ -439,7 +439,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
         tab.map->setNavWorld(api().getNavWorld());
 
-        tab.aircraftButton->setToggleState(tab.map->getOverlayConfig().drawMyAircraft);
+        tab.trackButton->setToggleState(tab.trackPlane);
 
         if (tab.mapSource->getPageCount() > 1) {
             tab.window->addSymbol(Widget::Symbol::RIGHT, [this, page] {
@@ -465,7 +465,10 @@ void AirportApp::onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, 
     TabPage &tab = findPage(page);
 
     if (start) {
-        // trackPlane = false;
+        if (tab.trackPlane) {
+            tab.trackPlane = false;
+            tab.trackButton->setToggleState(tab.trackPlane);
+        }
     } else if (!end) {
         int panVecX = tab.panPosX - x;
         int panVecY = tab.panPosY - y;
@@ -516,6 +519,9 @@ bool AirportApp::onTimer() {
             std::vector<avitab::Location> loc;
             loc.push_back(api().getAircraftLocation(0));
             tab.map->setPlaneLocations(loc);
+            if (tab.trackPlane) {
+                tab.map->centerOnPlane();
+            }
             tab.map->doWork();
         }
     }
