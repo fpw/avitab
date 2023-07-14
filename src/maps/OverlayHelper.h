@@ -21,7 +21,7 @@
 #include <memory>
 #include "OverlayConfig.h"
 #include "src/libimg/Image.h"
-#include "src/libxdata/world/models/Location.h"
+#include "src/world/models/Location.h"
 
 namespace maps {
 
@@ -33,7 +33,7 @@ public:
     virtual double getMapWidthNM() const = 0;
     virtual int getNumAerodromesVisible() const = 0;
     virtual OverlayConfig &getOverlayConfig() const = 0;
-    virtual bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const = 0;
+    virtual bool isLocVisibleWithMargin(const world::Location &loc, int margin) const = 0;
     virtual bool isVisibleWithMargin(int x, int y, int margin) const = 0;
     virtual bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const = 0;
     virtual void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const = 0;

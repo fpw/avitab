@@ -20,7 +20,7 @@
 
 #include <string>
 #include <functional>
-#include "src/libxdata/world/models/navaids/UserFix.h"
+#include "src/world/models/navaids/UserFix.h"
 #include "src/libxdata/parsers/objects/UserFixData.h"
 #include "BaseParser.h"
 
@@ -41,7 +41,7 @@ private:
     int lineNum;
 
     void parseLine();
-    UserFix::Type parseType(std::string& typeString);
+    world::UserFix::Type parseType(std::string& typeString);
 };
 
 } /* namespace xdata */

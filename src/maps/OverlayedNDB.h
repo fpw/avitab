@@ -25,9 +25,9 @@ namespace maps {
 class OverlayedNDB : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedNDB> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedNDB> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
-    OverlayedNDB(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedNDB(OverlayHelper helper, const world::Fix *m_fix);
 
     void drawGraphics();
     void drawText(bool detailed);

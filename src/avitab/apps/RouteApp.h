@@ -49,9 +49,9 @@ private:
     std::shared_ptr<Button> nextButton, cancelButton;
     std::shared_ptr<Checkbox> checkBox;
 
-    xdata::AirwayLevel airwayLevel = xdata::AirwayLevel::UPPER;
-    std::shared_ptr<xdata::Airport> departureAirport, arrivalAirport;
-    std::shared_ptr<xdata::Fix> departureFix, arrivalFix;
+    world::AirwayLevel airwayLevel = world::AirwayLevel::UPPER;
+    std::shared_ptr<world::Airport> departureAirport, arrivalAirport;
+    std::shared_ptr<world::Fix> departureFix, arrivalFix;
     std::shared_ptr<xdata::Route> route;
 
     void showDeparturePage();

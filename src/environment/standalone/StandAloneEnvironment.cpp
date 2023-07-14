@@ -121,7 +121,7 @@ void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
     registerEnvironmentCallback(cb);
 }
 
-std::shared_ptr<xdata::XData> StandAloneEnvironment::getNavData() {
+std::shared_ptr<world::Manager> StandAloneEnvironment::getWorldManager() {
     return xplaneData;
 }
 

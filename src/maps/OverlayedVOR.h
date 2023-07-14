@@ -25,9 +25,9 @@ namespace maps {
 class OverlayedVOR : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedVOR> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedVOR> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
-    OverlayedVOR(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedVOR(OverlayHelper helper, const world::Fix *m_fix);
 
     void drawGraphics();
     void drawText(bool detailed);

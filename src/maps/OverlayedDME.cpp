@@ -20,12 +20,12 @@
 
 namespace maps {
 
-OverlayedDME::OverlayedDME(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedDME::OverlayedDME(OverlayHelper helper, const world::Fix *fix):
     OverlayedFix(helper, fix)
 {
 }
 
-std::shared_ptr<OverlayedDME> OverlayedDME::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedDME> OverlayedDME::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     if (fix.getDME() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedDME>(helper, &fix);
     } else {
@@ -45,7 +45,7 @@ void OverlayedDME::drawGraphics() {
     drawGraphicsStatic(overlayHelper, fix, px, py);
 }
 
-void OverlayedDME::drawGraphicsStatic(OverlayHelper helper, const xdata::Fix *fix, int px, int py) {
+void OverlayedDME::drawGraphicsStatic(OverlayHelper helper, const world::Fix *fix, int px, int py) {
     double r = 8;
     if (fix->getDME()) {
         auto mapImage = helper->getMapImage();

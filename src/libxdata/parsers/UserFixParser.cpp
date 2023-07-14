@@ -48,7 +48,7 @@ void UserFixParser::parseLine() {
     // See online manual for Little Nav Map, and Manual in Plan G install folder for further info
 
     std::string typeString = parser.nextCSVValue();
-    if (parseType(typeString) == UserFix::Type::NONE) {
+    if (parseType(typeString) == world::UserFix::Type::NONE) {
         lineNum++;
         return;
     }
@@ -90,15 +90,15 @@ void UserFixParser::parseLine() {
     lineNum++;
 }
 
-UserFix::Type UserFixParser::parseType(std::string& typeString) {
+world::UserFix::Type UserFixParser::parseType(std::string& typeString) {
     if ((typeString == "VRP") || (typeString == "11")) {
-        return UserFix::Type::VRP;
+        return world::UserFix::Type::VRP;
     } else if ((typeString == "POI") || (typeString == "8")) {
-        return UserFix::Type::POI;
+        return world::UserFix::Type::POI;
     } else if ((typeString == "Marker") || (typeString == "9") || (typeString == "10")) {
-        return UserFix::Type::MARKER;
+        return world::UserFix::Type::MARKER;
     } else {
-        return UserFix::Type::NONE;
+        return world::UserFix::Type::NONE;
     }
 }
 

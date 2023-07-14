@@ -24,7 +24,7 @@
 
 namespace maps {
 
-OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *fix,
+OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const world::Fix *fix,
         int lx, int ly, int cx, int cy, int rx, int ry):
     OverlayedFix(helper, fix),
     lx(lx), ly(ly),
@@ -35,7 +35,7 @@ OverlayedILSLocalizer::OverlayedILSLocalizer(OverlayHelper helper, const xdata::
     textLocationY = ((py + 4 * cy) / 5) - 20; // And up a bit
 }
 
-std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedILSLocalizer> OverlayedILSLocalizer::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     if (!fix.getILSLocalizer() || !helper->getOverlayConfig().drawILSs) {
         return nullptr;
     }
@@ -102,7 +102,7 @@ void OverlayedILSLocalizer::polarToCartesian(float radius, float angleDegrees, d
     y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
 }
 
-void OverlayedILSLocalizer::getTailCoords(OverlayHelper helper, const xdata::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry) {
+void OverlayedILSLocalizer::getTailCoords(OverlayHelper helper, const world::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry) {
     auto &loc = fix->getLocation();
     int px, py;
     helper->positionToPixel(loc.latitude, loc.longitude, px, py);

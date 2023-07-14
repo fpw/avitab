@@ -18,11 +18,11 @@
 #include <limits>
 #include "Route.h"
 #include "src/Logger.h"
-#include "src/libxdata/world/models/airport/Airport.h"
+#include "src/world/models/airport/Airport.h"
 
 namespace xdata {
 
-Route::Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest):
+Route::Route(std::shared_ptr<world::NavNode> start, std::shared_ptr<world::NavNode> dest):
     startNode(start),
     destNode(dest)
 {
@@ -31,15 +31,15 @@ Route::Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest):
     });
 }
 
-void Route::setAirwayLevel(AirwayLevel level) {
+void Route::setAirwayLevel(world::AirwayLevel level) {
     airwayLevel = level;
 }
 
-std::shared_ptr<NavNode> Route::getStart() const {
+std::shared_ptr<world::NavNode> Route::getStart() const {
     return startNode;
 }
 
-std::shared_ptr<NavNode> Route::getDestination() const {
+std::shared_ptr<world::NavNode> Route::getDestination() const {
     return destNode;
 }
 
@@ -69,8 +69,8 @@ void Route::iterateRoute(RouteIterator f) const {
 void Route::iterateRouteShort(RouteIterator f) const {
     f(nullptr, startNode);
 
-    std::shared_ptr<NavEdge> currentEdge = nullptr;
-    std::shared_ptr<NavNode> prevNode = startNode;
+    std::shared_ptr<world::NavEdge> currentEdge = nullptr;
+    std::shared_ptr<world::NavNode> prevNode = startNode;
 
     for (auto &entry: waypoints) {
         if (!currentEdge) {
@@ -95,7 +95,7 @@ double Route::getDirectDistance() const {
 double Route::getRouteDistance() const {
     double distance = 0;
 
-    std::shared_ptr<NavNode> prevNode = startNode;
+    std::shared_ptr<world::NavNode> prevNode = startNode;
 
     for (auto &entry: waypoints) {
         distance += prevNode->getLocation().distanceTo(entry.to->getLocation());

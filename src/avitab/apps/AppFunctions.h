@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
-#include "src/libxdata/world/World.h"
+#include "src/world/World.h"
 #include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 
@@ -49,7 +49,7 @@ public:
     virtual std::shared_ptr<Container> createGUIContainer() = 0;
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
     virtual void onHomeButton() = 0;
-    virtual std::shared_ptr<xdata::World> getNavWorld() = 0;
+    virtual std::shared_ptr<world::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;

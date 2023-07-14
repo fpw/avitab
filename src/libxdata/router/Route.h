@@ -21,21 +21,21 @@
 #include <memory>
 #include <functional>
 #include "RouteFinder.h"
-#include "src/libxdata/world/graph/NavEdge.h"
-#include "src/libxdata/world/models/Airway.h"
+#include "src/world/graph/NavEdge.h"
+#include "src/world/models/Airway.h"
 
 namespace xdata {
 
 class Route {
 public:
-    using RouteIterator = std::function<void (const std::shared_ptr<NavEdge>, const std::shared_ptr<NavNode>)>;
+    using RouteIterator = std::function<void (const std::shared_ptr<world::NavEdge>, const std::shared_ptr<world::NavNode>)>;
 
-    Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest);
+    Route(std::shared_ptr<world::NavNode> start, std::shared_ptr<world::NavNode> dest);
 
-    void setAirwayLevel(AirwayLevel level);
+    void setAirwayLevel(world::AirwayLevel level);
 
-    std::shared_ptr<NavNode> getStart() const;
-    std::shared_ptr<NavNode> getDestination() const;
+    std::shared_ptr<world::NavNode> getStart() const;
+    std::shared_ptr<world::NavNode> getDestination() const;
 
     void find();
     void iterateRoute(RouteIterator f) const;
@@ -46,8 +46,8 @@ public:
 
 private:
     RouteFinder router;
-    std::shared_ptr<NavNode> startNode, destNode;
-    AirwayLevel airwayLevel = AirwayLevel::LOWER;
+    std::shared_ptr<world::NavNode> startNode, destNode;
+    world::AirwayLevel airwayLevel = world::AirwayLevel::LOWER;
     std::vector<RouteFinder::RouteDirection> waypoints;
 
     bool checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const;

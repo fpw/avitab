@@ -52,7 +52,7 @@ public:
     void sendUserFixesFilenameToXData(std::string filename) override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
-    std::shared_ptr<xdata::XData> getNavData() override;
+    std::shared_ptr<world::Manager> getWorldManager() override;
     std::string getAirplanePath() override;
     double getMagneticVariation(double lat, double lon) override;
     std::string getMETARForAirport(const std::string &icao) override;
@@ -78,7 +78,7 @@ private:
     GetMetarPtr getMetar{};
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
-    std::shared_ptr<xdata::XData> xplaneData;
+    std::shared_ptr<world::Manager> xplaneData;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};

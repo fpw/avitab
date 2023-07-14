@@ -84,7 +84,7 @@ void AirportApp::onSearchEntered(const std::string& code) {
     } else if (airports.size() == 1) {
         onAirportSelected(airports.front());
         return;
-    } else if (airports.size() >= xdata::World::MAX_SEARCH_RESULTS) {
+    } else if (airports.size() >= world::World::MAX_SEARCH_RESULTS) {
         searchLabel->setText("Too many results, only showing first " + std::to_string(airports.size()));
     } else {
         searchLabel->setText("");
@@ -110,7 +110,7 @@ void AirportApp::onSearchEntered(const std::string& code) {
     });
 }
 
-void AirportApp::onAirportSelected(std::shared_ptr<xdata::Airport> airport) {
+void AirportApp::onAirportSelected(std::shared_ptr<world::Airport> airport) {
     for (auto tabPage: pages) {
         if (tabPage.airport == airport) {
             tabs->setActiveTab(tabs->getTabIndex(tabPage.page));
@@ -166,7 +166,7 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
     }
 }
 
-void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
 
     str << airport->getName() + ", elevation " + std::to_string(airport->getElevation()) + " ft AMSL\n";
@@ -184,20 +184,20 @@ void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Air
     tab.label->setVisible(true);
 }
 
-std::string AirportApp::toATCInfo(std::shared_ptr<xdata::Airport> airport) {
+std::string AirportApp::toATCInfo(std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
     str << "ATC Frequencies\n";
-    str << toATCString("    Recorded Messages", airport, xdata::Airport::ATCFrequency::RECORDED);
-    str << toATCString("    UniCom", airport, xdata::Airport::ATCFrequency::UNICOM);
-    str << toATCString("    Delivery", airport, xdata::Airport::ATCFrequency::CLD);
-    str << toATCString("    Ground", airport, xdata::Airport::ATCFrequency::GND);
-    str << toATCString("    Tower", airport, xdata::Airport::ATCFrequency::TWR);
-    str << toATCString("    Approach", airport, xdata::Airport::ATCFrequency::APP);
-    str << toATCString("    Departure", airport, xdata::Airport::ATCFrequency::DEP);
+    str << toATCString("    Recorded Messages", airport, world::Airport::ATCFrequency::RECORDED);
+    str << toATCString("    UniCom", airport, world::Airport::ATCFrequency::UNICOM);
+    str << toATCString("    Delivery", airport, world::Airport::ATCFrequency::CLD);
+    str << toATCString("    Ground", airport, world::Airport::ATCFrequency::GND);
+    str << toATCString("    Tower", airport, world::Airport::ATCFrequency::TWR);
+    str << toATCString("    Approach", airport, world::Airport::ATCFrequency::APP);
+    str << toATCString("    Departure", airport, world::Airport::ATCFrequency::DEP);
     return str.str();
 }
 
-std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type) {
+std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type) {
     std::stringstream str;
     auto &freqs = airport->getATCFrequencies(type);
     for (auto &frq: freqs) {
@@ -206,7 +206,7 @@ std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<xda
     return str.str();
 }
 
-std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
+std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
     if (airport->hasOnlyHeliports()) {
         return "No runways\n";
     }
@@ -217,7 +217,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     auto magneticVariation = api().getMagneticVariation(aptLoc.latitude, aptLoc.longitude);
 
     str << "Runways:\n";
-    airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<xdata::Runway> rwy) {
+    airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<world::Runway> rwy) {
         str << "  " + rwy->getID();
         auto ils = rwy->getILSData();
         auto elevation = rwy->getElevation();
@@ -243,7 +243,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {
-            str << ", " << std::to_string((int) (length * xdata::M_TO_FT + 0.5)) << " ft";
+            str << ", " << std::to_string((int) (length * world::M_TO_FT + 0.5)) << " ft";
         }
         str << ", " << rwy->getSurfaceTypeDescription();
         str << "\n";
@@ -251,7 +251,7 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<xdata::Airport> airport) {
     return str.str();
 }
 
-std::string AirportApp::toWeatherInfo(std::shared_ptr<xdata::Airport> airport) {
+std::string AirportApp::toWeatherInfo(std::shared_ptr<world::Airport> airport) {
     return api().getMETARForAirport(airport->getID());
 }
 
@@ -264,7 +264,7 @@ AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {
     throw std::runtime_error("Unknown page");
 }
 
-void AirportApp::toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+void AirportApp::toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     TabPage &tab = findPage(page);
     if (tab.charts.empty()) {
         fillChartsPage(page, airport);
@@ -274,7 +274,7 @@ void AirportApp::toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata:
     }
 }
 
-void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport) {
+void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     auto svc = api().getChartService();
 
     TabPage &tab = findPage(page);

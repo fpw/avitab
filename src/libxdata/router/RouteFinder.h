@@ -23,14 +23,14 @@
 #include <set>
 #include <map>
 #include <functional>
-#include "src/libxdata/world/graph/NavNode.h"
+#include "src/world/graph/NavNode.h"
 
 namespace xdata {
 
 class RouteFinder {
 public:
-    using EdgePtr = std::shared_ptr<NavEdge>;
-    using NodePtr = std::shared_ptr<NavNode>;
+    using EdgePtr = std::shared_ptr<world::NavEdge>;
+    using NodePtr = std::shared_ptr<world::NavNode>;
     using EdgeFilter = std::function<bool(const EdgePtr, const NodePtr)>;
 
     struct RouteDirection {

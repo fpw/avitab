@@ -23,7 +23,7 @@
 namespace avitab {
 
 void Environment::loadNavWorldInBackground() {
-    getNavData()->discoverSceneries();
+    getWorldManager()->discoverSceneries();
     navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
 }
 
@@ -48,10 +48,10 @@ std::shared_ptr<Settings> Environment::getSettings() {
     return settings;
 }
 
-std::shared_ptr<xdata::World> Environment::loadNavWorldAsync() {
+std::shared_ptr<world::World> Environment::loadNavWorldAsync() {
     crash::ThreadCookie crashCookie;
 
-    auto data = getNavData();
+    auto data = getWorldManager();
     logger::info("Loading nav data...");
     try {
         data->load();
@@ -74,14 +74,14 @@ bool Environment::isNavWorldReady() {
 }
 
 void Environment::cancelNavWorldLoading() {
-    getNavData()->cancelLoading();
+    getWorldManager()->cancelLoading();
     if (navWorldFuture.valid()) {
         // wait until the canceling is done to avoid race-conditions on destruction while loading
         navWorldFuture.wait();
     }
 }
 
-std::shared_ptr<xdata::World> Environment::getNavWorld() {
+std::shared_ptr<world::World> Environment::getNavWorld() {
     if (!navWorldLoadAttempted && navWorldFuture.valid()) {
         navWorldLoadAttempted = true;
         try {

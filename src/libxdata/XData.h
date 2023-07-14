@@ -21,25 +21,26 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "src/libxdata/world/World.h"
-#include "src/libxdata/world/loaders/AirportLoader.h"
+#include "src/world/Manager.h"
+#include "src/world/World.h"
+#include "src/libxdata/loaders/AirportLoader.h"
 
 namespace xdata {
 
-class XData {
+class XData : public world::Manager {
 public:
     XData(const std::string &dataRootPath);
-    void discoverSceneries();
-    void load();
-    void cancelLoading();
-    void reloadMetar();
+    void discoverSceneries() override;
+    void load() override;
+    void cancelLoading() override;
+    void reloadMetar() override;
     void loadUserFixes(std::string filename);
-    std::shared_ptr<World> getWorld();
-    void setUserFixesFilename(std::string filename);
+    std::shared_ptr<world::World> getWorld() override;
+    void setUserFixesFilename(std::string filename) override;
 private:
     std::string xplaneRoot;
     std::string navDataPath;
-    std::shared_ptr<World> world;
+    std::shared_ptr<world::World> world;
     std::vector<std::string> customSceneries;
     std::string userFixesFilename;
 
