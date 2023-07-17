@@ -22,6 +22,7 @@
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/libxdata/world/World.h"
+#include "src/libxdata/router/Route.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
@@ -33,10 +34,12 @@ namespace maps {
 class OverlayedMap: public std::enable_shared_from_this<OverlayedMap>, public IOverlayHelper {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
+    using GetRouteCallback = std::function<std::shared_ptr<xdata::Route>(void)>;
 
     OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays);
     void loadOverlayIcons(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
+    void setGetRouteCallback(GetRouteCallback cb);
     void setNavWorld(std::shared_ptr<xdata::World> world);
 
     void pan(int dx, int dy, int relx = -1, int rely = -1);
@@ -82,6 +85,7 @@ private:
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
+    GetRouteCallback getRoute;
     double mapWidthNM;
     int numAerodromesVisible;
 
@@ -109,6 +113,8 @@ private:
     // Tiles
     std::shared_ptr<img::Stitcher> stitcher;
 
+    std::map<uint32_t, std::shared_ptr<img::Image>> routeAnnotationCache;
+
     void drawOverlays();
     void drawAircraftOverlay();
     void drawOtherAircraftOverlay();
@@ -116,6 +122,9 @@ private:
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
     void drawCompass();
+    void drawRoute();
+    void drawRouteLeg(xdata::Location &from, xdata::Location &to, double distance,
+                      double trueBearing, double magneticBearing);
 
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
     float cosDegrees(int angleDegrees) const;
@@ -123,6 +132,8 @@ private:
     void polarToCartesian(float radius, float angleRadians, double& x, double& y);
     bool isHotspot(std::shared_ptr<OverlayedNode> node);
     void showHotspotDetailedText();
+    std::shared_ptr<img::Image> createRouteAnnotation(int distance, int trueBearing, int magBearing);
+    void handleIDLcrossing(xdata::Location &to, xdata::Location &from, int trueBearing, int magBearing);
 
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT = 200;
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 40;

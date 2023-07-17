@@ -70,6 +70,7 @@ public:
     Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
     std::shared_ptr<Settings> getSettings() override;
+    std::shared_ptr<xdata::Route> getRoute() override;
 
     ~AviTab();
 

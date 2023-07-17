@@ -207,6 +207,7 @@ void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
     auto pixMap = tab->pixMap;
     tab->map->setRedrawCallback([pixMap] () { if (pixMap) pixMap->invalidate(); });
     tab->map->updateImage();
+    tab->map->setGetRouteCallback([this] () { return api().getRoute(); });
 
     setTitle(tab);
 

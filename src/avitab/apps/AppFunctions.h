@@ -22,6 +22,7 @@
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/libxdata/world/World.h"
+#include "src/libxdata/router/Route.h"
 #include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 
@@ -61,6 +62,7 @@ public:
     virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;
     virtual std::shared_ptr<Settings> getSettings() = 0;
+    virtual std::shared_ptr<xdata::Route> getRoute() = 0;
     virtual ~AppFunctions() = default;
 };
 

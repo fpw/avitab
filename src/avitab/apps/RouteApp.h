@@ -39,6 +39,7 @@ namespace avitab {
 class RouteApp: public App {
 public:
     RouteApp(FuncsPtr appFuncs);
+    std::shared_ptr<xdata::Route> getRoute();
 private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;
@@ -66,6 +67,7 @@ private:
     void showError(const std::string &msg);
 
     std::string toShortRouteDescription();
+    std::string toDetailedRouteDescription();
 };
 
 } /* namespace avitab */

@@ -83,6 +83,7 @@ private:
     Location nullLocation { 0, 0, 0, 0 };
     std::atomic<float> lastDrawTime{};
     std::string aircraftPath;
+    std::map<std::pair<double, double>, double> magneticVariationCache;
 
     // State
     std::mutex stateMutex;

@@ -398,6 +398,14 @@ std::shared_ptr<apis::ChartService> AviTab::getChartService() {
     return chartService;
 }
 
+std::shared_ptr<xdata::Route> AviTab::getRoute() {
+    if (appLauncher) {
+        return appLauncher->getRoute();
+    } else {
+        return std::shared_ptr<xdata::Route>(nullptr);
+    }
+}
+
 AircraftID AviTab::getActiveAircraftCount() {
     return env->getActiveAircraftCount();
 }

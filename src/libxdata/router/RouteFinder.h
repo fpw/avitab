@@ -24,6 +24,7 @@
 #include <map>
 #include <functional>
 #include "src/libxdata/world/graph/NavNode.h"
+#include "src/libxdata/world/World.h"
 
 namespace xdata {
 
@@ -32,21 +33,36 @@ public:
     using EdgePtr = std::shared_ptr<NavEdge>;
     using NodePtr = std::shared_ptr<NavNode>;
     using EdgeFilter = std::function<bool(const EdgePtr, const NodePtr)>;
+    using GetMagVarCallback = std::function<double(double, double)>;
 
     struct RouteDirection {
+        NodePtr from = nullptr;
         EdgePtr via;
         NodePtr to;
+        double distanceNm = 0;
+        double initialTrueBearing = 0;
+        double initialMagneticBearing = 0;
 
         RouteDirection() = default;
         RouteDirection(EdgePtr via, NodePtr to): via(via), to(to) { }
+        RouteDirection(NodePtr from, EdgePtr via, NodePtr to, double magVar):
+                       from(from), via(via), to(to) {
+            double distanceMetres = from->getLocation().distanceTo(to->getLocation());
+            distanceNm = (distanceMetres / 1000) * xdata::KM_TO_NM;
+            initialTrueBearing = from->getLocation().bearingTo(to->getLocation());
+            initialMagneticBearing = initialTrueBearing + magVar;
+        }
     };
 
     void setEdgeFilter(EdgeFilter filter);
+    void setGetMagVarCallback(GetMagVarCallback cb);
     void setAirwayChangePenalty(float percent);
     std::vector<RouteDirection> findRoute(NodePtr from, NodePtr to);
 
 private:
     EdgeFilter edgeFilter;
+    GetMagVarCallback getMagneticVariation;
+
     double directDistance = 0;
     float airwayChangePenalty = 0;
 

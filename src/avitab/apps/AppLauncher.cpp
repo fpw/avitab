@@ -79,6 +79,10 @@ void AppLauncher::showApp(AppId id) {
     }
 }
 
+std::shared_ptr<xdata::Route> AppLauncher::getRoute() {
+    return std::dynamic_pointer_cast<RouteApp>(routeApp)->getRoute();
+}
+
 template<typename T>
 void AppLauncher::addEntry(const std::string& name, const std::string& icon, AppId id) {
     auto app = startSubApp<T>();
@@ -103,6 +107,9 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon, App
     entry.button->setCallback([this, index] (const Button &) {
         showApp(entries[index].id);
     });
+    if (id == AppId::ROUTES) {
+        routeApp = entry.app;
+    }
 }
 
 void AppLauncher::onMouseWheel(int dir, int x, int y) {

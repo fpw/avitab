@@ -68,6 +68,7 @@ void PDFViewer::loadCurrentFile() {
     map->loadOverlayIcons(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { pixMap->invalidate(); });
     map->updateImage();
+    map->setGetRouteCallback([this] () { return api().getRoute(); });
 
     setTitle();
 }

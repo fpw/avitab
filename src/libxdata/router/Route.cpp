@@ -35,6 +35,10 @@ void Route::setAirwayLevel(AirwayLevel level) {
     airwayLevel = level;
 }
 
+void Route::setGetMagVarCallback(GetMagVarCallback cb) {
+    getMagneticVariation = cb;
+}
+
 std::shared_ptr<NavNode> Route::getStart() const {
     return startNode;
 }
@@ -44,6 +48,9 @@ std::shared_ptr<NavNode> Route::getDestination() const {
 }
 
 void Route::find() {
+    router.setGetMagVarCallback([this] (double lat, double lon) {
+        return getMagneticVariation(lat, lon);
+    });
     waypoints = router.findRoute(startNode, destNode);
 }
 
@@ -63,6 +70,13 @@ void Route::iterateRoute(RouteIterator f) const {
     f(nullptr, startNode);
     for (auto &entry: waypoints) {
         f(entry.via, entry.to);
+    }
+}
+
+void Route::iterateLegs(LegIterator f) const {
+    for (auto &entry: waypoints) {
+        f(entry.from, entry.via, entry.to, entry.distanceNm,
+          entry.initialTrueBearing, entry.initialMagneticBearing);
     }
 }
 

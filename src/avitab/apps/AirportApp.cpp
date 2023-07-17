@@ -438,6 +438,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
         tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
         tab.map->setNavWorld(api().getNavWorld());
+        tab.map->setGetRouteCallback([this] () { return api().getRoute(); });
 
         tab.trackButton->setToggleState(tab.trackPlane);
 

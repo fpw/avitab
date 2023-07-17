@@ -346,6 +346,11 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
 }
 
 double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
+    auto it = magneticVariationCache.find(std::make_pair(lat, lon));
+    if (it != magneticVariationCache.end()) {
+        return it->second;
+    }
+
     std::promise<double> dataPromise;
     auto futureData = dataPromise.get_future();
 
@@ -357,8 +362,9 @@ double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
 
     auto res = futureData.get();
     auto duration = std::chrono::steady_clock::now() - startAt;
-    logger::verbose("Time to get magnetic variation: %d millis",
-            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    LOG_INFO(0, "Time to get magnetic variation: %d millis",
+             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    magneticVariationCache[std::make_pair(lat, lon)] = res;
     return res;
 }
 

@@ -33,6 +33,10 @@ RouteApp::RouteApp(FuncsPtr appFuncs):
     showDeparturePage();
 }
 
+std::shared_ptr<xdata::Route> RouteApp::getRoute() {
+    return route;
+}
+
 void RouteApp::showDeparturePage() {
     reset();
 
@@ -124,6 +128,10 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     route = std::make_shared<xdata::Route>(departureAirport, arrivalAirport);
     route->setAirwayLevel(airwayLevel);
+    route->setGetMagVarCallback([this] (double lat, double lon) {
+        return api().getMagneticVariation(lat, lon);
+    });
+
     try {
         route->find();
         showRoute();
@@ -149,6 +157,9 @@ void RouteApp::showRoute() {
     double directNm = directKm * xdata::KM_TO_NM;
     double routeNm = routeKm * xdata::KM_TO_NM;
 
+    desc << "-----\n";
+    std::string detailedRoute = toDetailedRouteDescription();
+    desc << detailedRoute << "\n";
     desc << "-----\n";
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
     desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
@@ -202,6 +213,34 @@ std::string RouteApp::toShortRouteDescription() {
             if (to == departureAirport || to == arrivalAirport) {
                 desc << "#";
             }
+        }
+    });
+
+    return desc.str();
+}
+std::string RouteApp::toDetailedRouteDescription() {
+    std::stringstream desc;
+
+    route->iterateLegs([this, &desc] (
+            const std::shared_ptr<xdata::NavNode> from,
+            const std::shared_ptr<xdata::NavEdge> via,
+            const std::shared_ptr<xdata::NavNode> to,
+            double distanceNm,
+            double initialTrueBearing,
+            double initialMagneticBearing) {
+
+        std::string from_str = to ? from->getID() : "(no from)";
+        std::string via_str = via ? via->getID() : "(no via)";
+        std::string to_str = to ? to->getID() : "(no to)";
+        int showInitialTrueBearing = (int)(initialTrueBearing + 0.5) % 360;
+        int showInitialMagneticBearing = (int)(initialMagneticBearing + 0.5) % 360;
+
+        desc << from_str.c_str() << "\n" << "    " << via_str.c_str() <<
+            " " << showInitialTrueBearing << "°T" << " " << showInitialMagneticBearing << "°M" <<
+            " " << (int)distanceNm << "nm\n";
+
+        if (to == arrivalAirport) {
+            desc << to_str.c_str() << "\n";
         }
     });
 

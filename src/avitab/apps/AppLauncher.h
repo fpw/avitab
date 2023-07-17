@@ -24,6 +24,7 @@
 #include "App.h"
 #include "src/gui_toolkit/widgets/Button.h"
 #include "src/gui_toolkit/widgets/Label.h"
+#include "src/libxdata/router/Route.h"
 
 namespace avitab {
 
@@ -43,10 +44,13 @@ public:
     void pan(int x, int y) override;
     void show() override;
     void showApp(AppId id);
+    std::shared_ptr<xdata::Route> getRoute();
+
 private:
     std::vector<Entry> entries;
 
     std::shared_ptr<App> activeApp;
+    std::shared_ptr<App> routeApp;
 
     template<typename T>
     void addEntry(const std::string &name, const std::string &icon, AppId id);

@@ -31,6 +31,10 @@ void RouteFinder::setEdgeFilter(EdgeFilter filter) {
     edgeFilter = filter;
 }
 
+void RouteFinder::setGetMagVarCallback(GetMagVarCallback cb) {
+    getMagneticVariation = cb;
+}
+
 std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, NodePtr goal) {
     logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
     directDistance = from->getLocation().distanceTo(goal->getLocation());
@@ -96,13 +100,15 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr la
     std::vector<RouteDirection> res;
 
     RouteDirection cur = cameFrom[lastFix];
-    res.push_back(RouteDirection(cur.via, lastFix));
+    double magVar = getMagneticVariation(lastFix->getLocation().latitude,
+                                         lastFix->getLocation().longitude);
+    res.push_back(RouteDirection(cur.to, cur.via, lastFix, magVar));
 
     decltype(cameFrom.find(nullptr)) it;
 
     while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
         cur = cameFrom[it->first];
-        res.push_back(RouteDirection(cur.via, it->first));
+        res.push_back(RouteDirection(cur.to, cur.via, it->first, magVar));
     }
 
     std::reverse(std::begin(res), std::end(res));
