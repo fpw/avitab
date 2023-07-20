@@ -30,11 +30,12 @@ namespace xdata {
 class XData : public world::Manager {
 public:
     XData(const std::string &dataRootPath);
+    virtual ~XData() = default;
     void discoverSceneries() override;
     void load() override;
     void cancelLoading() override;
     void reloadMetar() override;
-    void loadUserFixes(std::string filename);
+    void loadUserFixes(std::string filename) override;
     std::shared_ptr<world::World> getWorld() override;
     void setUserFixesFilename(std::string filename) override;
 private:
