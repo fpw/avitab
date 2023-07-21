@@ -122,7 +122,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     arrivalAirport = ap;
 
-    route = std::make_shared<xdata::Route>(departureAirport, arrivalAirport);
+    route = std::make_shared<world::Route>(departureAirport, arrivalAirport);
     route->setAirwayLevel(airwayLevel);
     try {
         route->find();
