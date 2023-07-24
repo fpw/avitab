@@ -18,11 +18,11 @@
 
 #include <cmath>
 #include "OverlayedAirport.h"
-#include "src/libxdata/world/World.h"
+#include "src/world/World.h"
 
 namespace maps {
 
-OverlayedAirport::OverlayedAirport(OverlayHelper helper, const xdata::Airport *airport):
+OverlayedAirport::OverlayedAirport(OverlayHelper helper, const world::Airport *airport):
     OverlayedNode(helper),
     airport(airport)
 {
@@ -32,7 +32,7 @@ OverlayedAirport::OverlayedAirport(OverlayHelper helper, const xdata::Airport *a
     color = getAirportColor(airport);
 }
 
-std::shared_ptr<OverlayedAirport> OverlayedAirport::getInstanceIfVisible(OverlayHelper helper, const xdata::Airport *airport) {
+std::shared_ptr<OverlayedAirport> OverlayedAirport::getInstanceIfVisible(OverlayHelper helper, const world::Airport *airport) {
     if (isVisible(helper, airport)) {
         return std::make_shared<OverlayedAirport>(helper, airport);
     } else {
@@ -89,7 +89,7 @@ void OverlayedAirport::drawText(bool detailed) {
     if (detailed) {
         std::string nameAndID = airport->getName() + " (" + airport->getID() + ")";
         std::string elevationFeet = std::to_string(airport->getElevation());
-        int rwyLengthHundredsFeet = (airport->getLongestRunwayLength() * xdata::M_TO_FT) / 100.0;
+        int rwyLengthHundredsFeet = (airport->getLongestRunwayLength() * world::M_TO_FT) / 100.0;
         std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
         std::string atcInfo = airport->getInitialATCContactInfo();
         std::string airportInfo = " " + elevationFeet + rwyLength + " " + atcInfo + " ";
@@ -100,7 +100,7 @@ void OverlayedAirport::drawText(bool detailed) {
     }
 }
 
-bool OverlayedAirport::isVisible(OverlayHelper helper, const xdata::Airport *airport) {
+bool OverlayedAirport::isVisible(OverlayHelper helper, const world::Airport *airport) {
     if (!isEnabled(helper, airport)) {
         return false;
     }
@@ -123,7 +123,7 @@ bool OverlayedAirport::isVisible(OverlayHelper helper, const xdata::Airport *air
     return helper->isAreaVisible(xmin - margin, ymin - margin, xmax + margin, ymax + margin);
 }
 
-bool OverlayedAirport::isEnabled(OverlayHelper helper, const xdata::Airport *airport) {
+bool OverlayedAirport::isEnabled(OverlayHelper helper, const world::Airport *airport) {
     auto type = getAerodromeType(airport);
     auto cfg = helper->getOverlayConfig();
     return ((type == AerodromeType::AIRPORT) && cfg.drawAirports) ||
@@ -131,7 +131,7 @@ bool OverlayedAirport::isEnabled(OverlayHelper helper, const xdata::Airport *air
            (((type == AerodromeType::HELIPORT) || (type == AerodromeType::SEAPORT)) && cfg.drawHeliportsSeaports);
 }
 
-OverlayedAirport::AerodromeType OverlayedAirport::getAerodromeType(const xdata::Airport *airport) {
+OverlayedAirport::AerodromeType OverlayedAirport::getAerodromeType(const world::Airport *airport) {
     if (airport->hasOnlyWaterRunways()) {
         return AerodromeType::SEAPORT;
     } else if (airport->hasOnlyHeliports()) {
@@ -143,7 +143,7 @@ OverlayedAirport::AerodromeType OverlayedAirport::getAerodromeType(const xdata::
     }
 }
 
-uint32_t OverlayedAirport::getAirportColor(const xdata::Airport *airport) {
+uint32_t OverlayedAirport::getAirportColor(const world::Airport *airport) {
     return airport->hasControlTower() ? img::COLOR_ICAO_BLUE : img::COLOR_ICAO_MAGENTA;
 }
 
@@ -174,7 +174,7 @@ void OverlayedAirport::getRunwaysCentre(int zoomLevel, int& xCentre, int &yCentr
 
 int OverlayedAirport::getMaxRunwayDistanceFromCentre(int zoomLevel, int xCentre, int yCentre) {
     int maxDistance = 0;
-    airport->forEachRunway([this, zoomLevel, xCentre, yCentre, &maxDistance] (const std::shared_ptr<xdata::Runway> rwy) {
+    airport->forEachRunway([this, zoomLevel, xCentre, yCentre, &maxDistance] (const std::shared_ptr<world::Runway> rwy) {
         auto loc = rwy->getLocation();
         int x, y;
         overlayHelper->positionToPixel(loc.latitude, loc.longitude, x, y, zoomLevel);
@@ -189,7 +189,7 @@ void OverlayedAirport::drawAirportICAOGeographicRunways() {
 }
 
 void OverlayedAirport::drawRunwayRectangles(float size, uint32_t rectColor) {
-    airport->forEachRunwayPair([this, size, rectColor](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
+    airport->forEachRunwayPair([this, size, rectColor](const std::shared_ptr<world::Runway> rwy1, const std::shared_ptr<world::Runway> rwy2) {
         auto loc1 = rwy1->getLocation();
         auto loc2 = rwy2->getLocation();
         int x1, y1, x2, y2;
@@ -228,7 +228,7 @@ void OverlayedAirport::drawAirportICAORing() {
 
 void OverlayedAirport::drawAirportGeographicRunways() {
     // Draw the runways as on the ground, but with slightly exaggerated widths for visibility
-    airport->forEachRunwayPair([this] (const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
+    airport->forEachRunwayPair([this] (const std::shared_ptr<world::Runway> rwy1, const std::shared_ptr<world::Runway> rwy2) {
         auto loc1 = rwy1->getLocation();
         auto loc2 = rwy2->getLocation();
         int px1, py1, px2, py2;
@@ -271,7 +271,7 @@ void OverlayedAirport::drawAirportICAOCircleAndRwyPattern() {
     xCentre /= scale;
     yCentre /= scale;
 
-    airport->forEachRunwayPair([this, mapImage, xCentre, yCentre, scale](const std::shared_ptr<xdata::Runway> rwy1, const std::shared_ptr<xdata::Runway> rwy2) {
+    airport->forEachRunwayPair([this, mapImage, xCentre, yCentre, scale](const std::shared_ptr<world::Runway> rwy1, const std::shared_ptr<world::Runway> rwy2) {
         auto loc1 = rwy1->getLocation();
         auto loc2 = rwy2->getLocation();
         int px1, py1, px2, py2;

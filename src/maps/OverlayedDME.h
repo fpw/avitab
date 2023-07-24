@@ -25,12 +25,12 @@ namespace maps {
 class OverlayedDME : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedDME> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedDME> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
     // Used by OverlayedVOR for paired VOR/DME
-    static void drawGraphicsStatic(OverlayHelper helper, const xdata::Fix *fix, int px, int py);
+    static void drawGraphicsStatic(OverlayHelper helper, const world::Fix *fix, int px, int py);
 
-    OverlayedDME(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedDME(OverlayHelper helper, const world::Fix *m_fix);
 
     void drawGraphics();
     void drawText(bool detailed);

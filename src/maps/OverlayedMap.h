@@ -21,7 +21,7 @@
 #include <memory>
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
-#include "src/libxdata/world/World.h"
+#include "src/world/World.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
@@ -37,7 +37,7 @@ public:
     OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays);
     void loadOverlayIcons(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
-    void setNavWorld(std::shared_ptr<xdata::World> world);
+    void setNavWorld(std::shared_ptr<world::World> world);
 
     void pan(int dx, int dy, int relx = -1, int rely = -1);
 
@@ -69,7 +69,7 @@ public:
     double getMapWidthNM() const override;
     int getNumAerodromesVisible() const override;
     OverlayConfig &getOverlayConfig() const override;
-    bool isLocVisibleWithMargin(const xdata::Location &loc, int margin) const override;
+    bool isLocVisibleWithMargin(const world::Location &loc, int margin) const override;
     bool isVisibleWithMargin(int x, int y, int marginPixels) const override;
     bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const override;
     void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const override;
@@ -90,7 +90,7 @@ private:
 
     // Overlays
     std::shared_ptr<OverlayConfig> overlayConfig;
-    std::shared_ptr<xdata::World> navWorld;
+    std::shared_ptr<world::World> navWorld;
     std::vector<avitab::Location> planeLocations;
     img::Image planeIcon;
     enum RelativeHeight { below, same, above, total };

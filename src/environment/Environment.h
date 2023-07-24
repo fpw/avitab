@@ -25,6 +25,7 @@
 #include <vector>
 #include <future>
 #include <atomic>
+#include "src/world/Manager.h"
 #include "src/libxdata/XData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "EnvData.h"
@@ -78,7 +79,7 @@ public:
     virtual void runInEnvironment(EnvironmentCallback cb) = 0;
     virtual double getMagneticVariation(double lat, double lon) = 0;
     virtual std::string getMETARForAirport(const std::string &icao) = 0;
-    std::shared_ptr<xdata::World> getNavWorld();
+    std::shared_ptr<world::World> getNavWorld();
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();
     virtual void reloadMetar() = 0;
@@ -98,7 +99,7 @@ protected:
      */
     void registerEnvironmentCallback(EnvironmentCallback cb);
     void runEnvironmentCallbacks();
-    virtual std::shared_ptr<xdata::XData> getNavData() = 0;
+    virtual std::shared_ptr<world::Manager> getWorldManager() = 0;
     virtual void sendUserFixesFilenameToXData(std::string filename) = 0;
 
 private:
@@ -106,15 +107,15 @@ private:
     std::shared_ptr<Settings> settings;
     std::mutex envMutex;
     std::vector<EnvironmentCallback> envCallbacks;
-    std::shared_future<std::shared_ptr<xdata::World>> navWorldFuture;
-    std::shared_ptr<xdata::World> navWorld;
+    std::shared_future<std::shared_ptr<world::World>> navWorldFuture;
+    std::shared_ptr<world::World> navWorld;
     std::atomic_bool navWorldLoadAttempted {false};
 
     bool stopped = false;
 
-    std::shared_ptr<xdata::World> loadNavWorldAsync();
+    std::shared_ptr<world::World> loadNavWorldAsync();
 };
 
-}
+} /* namespace avitab */
 
 #endif /* SRC_ENVIRONMENT_ENVIRONMENT_H_ */

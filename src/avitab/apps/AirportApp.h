@@ -49,7 +49,7 @@ private:
         std::shared_ptr<Window> window;
         std::shared_ptr<Label> label;
         std::shared_ptr<Button> trackButton, nightModeButton;
-        std::shared_ptr<xdata::Airport> airport;
+        std::shared_ptr<world::Airport> airport;
 
         apis::ChartCategory requestedList = apis::ChartCategory::ROOT;
         apis::ChartService::ChartList charts;
@@ -82,18 +82,18 @@ private:
     void removeTab(std::shared_ptr<Page> page);
     void resetLayout();
     void onSearchEntered(const std::string &code);
-    void onAirportSelected(std::shared_ptr<xdata::Airport> airport);
-    void fillPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
+    void onAirportSelected(std::shared_ptr<world::Airport> airport);
+    void fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
 
-    std::string toATCInfo(std::shared_ptr<xdata::Airport> airport);
-    std::string toATCString(const std::string &name, std::shared_ptr<xdata::Airport> airport, xdata::Airport::ATCFrequency type);
-    std::string toRunwayInfo(std::shared_ptr<xdata::Airport> airport);
-    std::string toWeatherInfo(std::shared_ptr<xdata::Airport> airport);
+    std::string toATCInfo(std::shared_ptr<world::Airport> airport);
+    std::string toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type);
+    std::string toRunwayInfo(std::shared_ptr<world::Airport> airport);
+    std::string toWeatherInfo(std::shared_ptr<world::Airport> airport);
 
     TabPage &findPage(std::shared_ptr<Page> page);
 
-    void toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
-    void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<xdata::Airport> airport);
+    void toggleCharts(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
+    void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartService::ChartList &charts);
     void onChartLoaded(std::shared_ptr<Page> page);
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);

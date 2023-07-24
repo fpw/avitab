@@ -24,7 +24,7 @@ namespace maps {
 img::Image OverlayedNDB::ndbIcon;
 int OverlayedNDB::radius;
 
-OverlayedNDB::OverlayedNDB(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedNDB::OverlayedNDB(OverlayHelper helper, const world::Fix *fix):
     OverlayedFix(helper, fix)
 {
     if (ndbIcon.getHeight() == 0) {
@@ -32,7 +32,7 @@ OverlayedNDB::OverlayedNDB(OverlayHelper helper, const xdata::Fix *fix):
     }
 }
 
-std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     if (fix.getNDB() && helper->getOverlayConfig().drawNDBs && helper->isLocVisibleWithMargin(fix.getLocation(), radius)) {
         return std::make_shared<OverlayedNDB>(helper, &fix);
     } else {

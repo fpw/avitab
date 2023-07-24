@@ -25,9 +25,9 @@ namespace maps {
 class OverlayedWaypoint : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedWaypoint> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedWaypoint> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
-    OverlayedWaypoint(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedWaypoint(OverlayHelper helper, const world::Fix *m_fix);
 
     void drawGraphics();
     void drawText(bool detailed);

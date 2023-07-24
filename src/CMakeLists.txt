@@ -11,6 +11,7 @@ endif()
 add_definitions(-DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/world/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/charts/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/maps/CMakeLists.txt)
@@ -42,6 +43,7 @@ target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libmbedcrypto.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libdetex.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libquickjs.a
+    world
     xdata
 )
 

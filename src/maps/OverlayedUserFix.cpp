@@ -26,23 +26,23 @@ img::Image OverlayedUserFix::VRPIcon;
 img::Image OverlayedUserFix::MarkerIcon;
 std::vector<std::string> OverlayedUserFix::textLines;
 
-OverlayedUserFix::OverlayedUserFix(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedUserFix::OverlayedUserFix(OverlayHelper helper, const world::Fix *fix):
     OverlayedFix(helper, fix){
     if (POIIcon.getHeight() == 0) {
         createIcons();
     }
 }
 
-std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     auto userFix = fix.getUserFix();
     if (!userFix) {
         return nullptr;
     }
     auto cfg = helper->getOverlayConfig();
     auto type = userFix->getType();
-    bool drawUserFixes = (cfg.drawPOIs && (type == xdata::UserFix::Type::POI)) ||
-                         (cfg.drawVRPs && (type == xdata::UserFix::Type::VRP)) ||
-                         (cfg.drawMarkers && (type == xdata::UserFix::Type::MARKER));
+    bool drawUserFixes = (cfg.drawPOIs && (type == world::UserFix::Type::POI)) ||
+                         (cfg.drawVRPs && (type == world::UserFix::Type::VRP)) ||
+                         (cfg.drawMarkers && (type == world::UserFix::Type::MARKER));
 
     if (drawUserFixes && helper->isLocVisibleWithMargin(fix.getLocation(), 100)) {
         return std::make_shared<OverlayedUserFix>(helper, &fix);
@@ -79,11 +79,11 @@ void OverlayedUserFix::createIcons() {
 void OverlayedUserFix::drawGraphics() {
     auto type = fix->getUserFix()->getType();
     auto mapImage = overlayHelper->getMapImage();
-    if (type == xdata::UserFix::Type::POI) {
+    if (type == world::UserFix::Type::POI) {
         mapImage->blendImage0(POIIcon, px - RADIUS, py - RADIUS);
-    } else if (type == xdata::UserFix::Type::VRP) {
+    } else if (type == world::UserFix::Type::VRP) {
         mapImage->blendImage0(VRPIcon, px - RADIUS, py - RADIUS);
-    } else if (type == xdata::UserFix::Type::MARKER) {
+    } else if (type == world::UserFix::Type::MARKER) {
         mapImage->blendImage0(MarkerIcon, px - RADIUS, py - RADIUS);
     }
 }
@@ -93,8 +93,8 @@ void OverlayedUserFix::drawText(bool detailed) {
         return;
     }
     auto type = fix->getUserFix()->getType();
-    if ((type != xdata::UserFix::Type::POI && type != xdata::UserFix::Type::VRP
-      && type != xdata::UserFix::Type::MARKER)) {
+    if ((type != world::UserFix::Type::POI && type != world::UserFix::Type::VRP
+      && type != world::UserFix::Type::MARKER)) {
         return;
     }
 
@@ -114,13 +114,13 @@ void OverlayedUserFix::drawText(bool detailed) {
 
     std::string typeString;
     uint32_t color;
-    if (type == xdata::UserFix::Type::POI) {
+    if (type == world::UserFix::Type::POI) {
         typeString = "POI";
         color = POI_TEXT_COLOR;
-    } else if (type == xdata::UserFix::Type::VRP) {
+    } else if (type == world::UserFix::Type::VRP) {
         typeString = "VRP";
         color = VRP_COLOR;
-    } else if (type == xdata::UserFix::Type::MARKER) {
+    } else if (type == world::UserFix::Type::MARKER) {
         typeString = "MRK";
         color = MARKER_COLOR;
     } else {

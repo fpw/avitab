@@ -57,9 +57,9 @@ void RouteApp::showDeparturePage() {
 
     keys->setOnOk([this] () { api().executeLater([this] () {
         if (checkBox->isChecked()) {
-            airwayLevel = xdata::AirwayLevel::UPPER;
+            airwayLevel = world::AirwayLevel::UPPER;
         } else {
-            airwayLevel = xdata::AirwayLevel::LOWER;
+            airwayLevel = world::AirwayLevel::LOWER;
         }
         onDepartureEntered(departureField->getText());
      });});
@@ -122,7 +122,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     arrivalAirport = ap;
 
-    route = std::make_shared<xdata::Route>(departureAirport, arrivalAirport);
+    route = std::make_shared<world::Route>(departureAirport, arrivalAirport);
     route->setAirwayLevel(airwayLevel);
     try {
         route->find();
@@ -146,8 +146,8 @@ void RouteApp::showRoute() {
 
     double directKm = route->getDirectDistance() / 1000;
     double routeKm = route->getRouteDistance() / 1000;
-    double directNm = directKm * xdata::KM_TO_NM;
-    double routeNm = routeKm * xdata::KM_TO_NM;
+    double directNm = directKm * world::KM_TO_NM;
+    double routeNm = routeKm * world::KM_TO_NM;
 
     desc << "-----\n";
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
@@ -185,7 +185,7 @@ void RouteApp::showError(const std::string& msg) {
 std::string RouteApp::toShortRouteDescription() {
     std::stringstream desc;
 
-    route->iterateRouteShort([this, &desc] (const std::shared_ptr<xdata::NavEdge> via, const std::shared_ptr<xdata::NavNode> to) {
+    route->iterateRouteShort([this, &desc] (const std::shared_ptr<world::NavEdge> via, const std::shared_ptr<world::NavNode> to) {
         if (via) {
             if (!via->isProcedure()) {
                 desc << " #368BC1 " << via->getID() << "#";

@@ -21,12 +21,12 @@
 
 namespace maps {
 
-OverlayedVOR::OverlayedVOR(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedVOR::OverlayedVOR(OverlayHelper helper, const world::Fix *fix):
     OverlayedFix(helper, fix)
 {
 }
 
-std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedVOR> OverlayedVOR::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     if (fix.getVOR() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedVOR>(helper, &fix);
     } else {

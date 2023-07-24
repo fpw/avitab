@@ -47,7 +47,7 @@ public:
     void sendUserFixesFilenameToXData(std::string filename) override;
     std::string getEarthTexturePath() override;
     void runInEnvironment(EnvironmentCallback cb) override;
-    std::shared_ptr<xdata::XData> getNavData() override;
+    std::shared_ptr<world::Manager> getWorldManager() override;
     std::string getMETARForAirport(const std::string &icao) override;
     double getMagneticVariation(double lat, double lon) override;
     void reloadMetar() override;
@@ -61,7 +61,7 @@ public:
 protected:
     std::string ourPath, xplaneRootPath;
     std::shared_ptr<GlfwGUIDriver> driver;
-    std::shared_ptr<xdata::XData> xplaneData;
+    std::shared_ptr<world::Manager> xplaneData;
     std::atomic<float> lastDrawTime{};
 
 private:

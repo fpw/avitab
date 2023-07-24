@@ -25,9 +25,9 @@ namespace maps {
 class OverlayedILSLocalizer : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedILSLocalizer> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedILSLocalizer> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
-    OverlayedILSLocalizer(OverlayHelper helper, const xdata::Fix *m_fix,
+    OverlayedILSLocalizer(OverlayHelper helper, const world::Fix *m_fix,
                           int lx, int ly, int cx, int cy, int rx, int ry);
 
     void drawGraphics();
@@ -36,7 +36,7 @@ public:
     int getHotspotY();
 
 private:
-    static void getTailCoords(OverlayHelper helper, const xdata::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry);
+    static void getTailCoords(OverlayHelper helper, const world::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry);
     static void polarToCartesian(float radius, float angleDegrees, double& x, double& y);
 
     static const uint32_t color = img::COLOR_DARK_GREEN;

@@ -401,7 +401,7 @@ std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
     return str.str();
 }
 
-std::shared_ptr<xdata::XData> XPlaneEnvironment::getNavData() {
+std::shared_ptr<world::Manager> XPlaneEnvironment::getWorldManager() {
     return xplaneData;
 }
 

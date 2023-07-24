@@ -19,7 +19,7 @@
 #define SRC_MAPS_OVERLAYED_NODE_H_
 
 #include "OverlayHelper.h"
-#include "src/libxdata/world/graph/NavNode.h"
+#include "src/world/graph/NavNode.h"
 #include "src/libimg/Image.h"
 #include "src/Logger.h"
 
@@ -29,7 +29,7 @@ using OverlayHelper = std::shared_ptr<IOverlayHelper>;
 
 class OverlayedNode {
 public:
-    static std::shared_ptr<OverlayedNode> getInstanceIfVisible(OverlayHelper helper, const xdata::NavNode &node);
+    static std::shared_ptr<OverlayedNode> getInstanceIfVisible(OverlayHelper helper, const world::NavNode &node);
 
     virtual void drawGraphics() = 0;
     virtual void drawText(bool detailed) = 0;

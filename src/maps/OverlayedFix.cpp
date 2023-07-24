@@ -27,9 +27,9 @@
 
 namespace maps {
 
-xdata::Morse OverlayedFix::morse;
+world::Morse OverlayedFix::morse;
 
-OverlayedFix::OverlayedFix(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedFix::OverlayedFix(OverlayHelper helper, const world::Fix *fix):
     OverlayedNode(helper),
     fix(fix)
 {
@@ -37,12 +37,12 @@ OverlayedFix::OverlayedFix(OverlayHelper helper, const xdata::Fix *fix):
     overlayHelper->positionToPixel(loc.latitude, loc.longitude, px, py);
 }
 
-bool OverlayedFix::isDMEOnly(const xdata::Fix &fix) {
+bool OverlayedFix::isDMEOnly(const world::Fix &fix) {
     // i.e. Is a DME that is not paired with a VOR or ILS/Localizer
     return fix.getDME() && !fix.getVOR() && !fix.getILSLocalizer();
 }
 
-std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     int show_at_mapwidth = fix.getUserFix() ? SHOW_USERFIXES_AT_MAPWIDTHNM : SHOW_NAVAIDS_AT_MAPWIDTHNM;
     if (helper->getMapWidthNM() > show_at_mapwidth) {
         return nullptr;

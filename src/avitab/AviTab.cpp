@@ -355,7 +355,7 @@ float AviTab::getBrightness() {
     return guiLib->getBrightness();
 }
 
-std::shared_ptr<xdata::World> AviTab::getNavWorld() {
+std::shared_ptr<world::World> AviTab::getNavWorld() {
     return env->getNavWorld();
 }
 

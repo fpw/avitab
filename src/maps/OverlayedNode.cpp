@@ -28,12 +28,12 @@ OverlayedNode::OverlayedNode(OverlayHelper helper):
 {
 }
 
-std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper helper, const xdata::NavNode &node) {
-    auto fix = dynamic_cast<const xdata::Fix *>(&node);
+std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper helper, const world::NavNode &node) {
+    auto fix = dynamic_cast<const world::Fix *>(&node);
     if (fix) {
         return OverlayedFix::getInstanceIfVisible(helper, *fix);
     }
-    auto airport = dynamic_cast<const xdata::Airport *>(&node);
+    auto airport = dynamic_cast<const world::Airport *>(&node);
     if (airport) {
         return OverlayedAirport::getInstanceIfVisible(helper, airport);
     }

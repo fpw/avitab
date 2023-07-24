@@ -19,16 +19,16 @@
 #define SRC_MAPS_OVERLAYED_AIRPORT_H_
 
 #include "OverlayedNode.h"
-#include "src/libxdata/world/models/airport/Airport.h"
+#include "src/world/models/airport/Airport.h"
 
 namespace maps {
 
 class OverlayedAirport : public OverlayedNode {
 
 public:
-    static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(OverlayHelper helper, const xdata::Airport *airport);
+    static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(OverlayHelper helper, const world::Airport *airport);
 
-    OverlayedAirport(OverlayHelper helper, const xdata::Airport *airport);
+    OverlayedAirport(OverlayHelper helper, const world::Airport *airport);
     virtual ~OverlayedAirport() = default;
 
     void drawGraphics();
@@ -44,14 +44,14 @@ private:
         HELIPORT
     };
 
-    const xdata::Airport *airport;
+    const world::Airport *airport;
     AerodromeType type = AerodromeType::AIRPORT;
     uint32_t color = 0;
 
-    static bool isVisible(OverlayHelper helper, const xdata::Airport *airport);
-    static bool isEnabled(OverlayHelper helper, const xdata::Airport *airport);
-    static AerodromeType getAerodromeType(const xdata::Airport *airport);
-    static uint32_t getAirportColor(const xdata::Airport *airport);
+    static bool isVisible(OverlayHelper helper, const world::Airport *airport);
+    static bool isEnabled(OverlayHelper helper, const world::Airport *airport);
+    static AerodromeType getAerodromeType(const world::Airport *airport);
+    static uint32_t getAirportColor(const world::Airport *airport);
 
     void drawAirportBlob();
     void drawAirportICAOCircleAndRwyPattern();

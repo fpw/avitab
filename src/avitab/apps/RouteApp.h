@@ -22,7 +22,7 @@
 #include <vector>
 #include <set>
 #include "App.h"
-#include "src/libxdata/router/Route.h"
+#include "src/world/router/Route.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
@@ -49,10 +49,10 @@ private:
     std::shared_ptr<Button> nextButton, cancelButton;
     std::shared_ptr<Checkbox> checkBox;
 
-    xdata::AirwayLevel airwayLevel = xdata::AirwayLevel::UPPER;
-    std::shared_ptr<xdata::Airport> departureAirport, arrivalAirport;
-    std::shared_ptr<xdata::Fix> departureFix, arrivalFix;
-    std::shared_ptr<xdata::Route> route;
+    world::AirwayLevel airwayLevel = world::AirwayLevel::UPPER;
+    std::shared_ptr<world::Airport> departureAirport, arrivalAirport;
+    std::shared_ptr<world::Fix> departureFix, arrivalFix;
+    std::shared_ptr<world::Route> route;
 
     void showDeparturePage();
     void onDepartureEntered(const std::string &departure);

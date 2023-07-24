@@ -19,7 +19,7 @@
 #define SRC_MAPS_OVERLAYED_USERFIX_H_
 
 #include "OverlayedFix.h"
-#include "src/libxdata/world/models/navaids/UserFix.h"
+#include "src/world/models/navaids/UserFix.h"
 #include <vector>
 
 namespace maps {
@@ -27,9 +27,9 @@ namespace maps {
 class OverlayedUserFix : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedUserFix> getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix);
+    static std::shared_ptr<OverlayedUserFix> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
 
-    OverlayedUserFix(OverlayHelper helper, const xdata::Fix *m_fix);
+    OverlayedUserFix(OverlayHelper helper, const world::Fix *m_fix);
 
     void drawGraphics();
     void drawText(bool detailed);

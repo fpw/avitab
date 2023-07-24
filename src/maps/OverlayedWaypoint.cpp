@@ -20,12 +20,12 @@
 
 namespace maps {
 
-OverlayedWaypoint::OverlayedWaypoint(OverlayHelper helper, const xdata::Fix *fix):
+OverlayedWaypoint::OverlayedWaypoint(OverlayHelper helper, const world::Fix *fix):
     OverlayedFix(helper, fix)
 {
 }
 
-std::shared_ptr<OverlayedWaypoint> OverlayedWaypoint::getInstanceIfVisible(OverlayHelper helper, const xdata::Fix &fix) {
+std::shared_ptr<OverlayedWaypoint> OverlayedWaypoint::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
     if (helper->getOverlayConfig().drawWaypoints && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
         return std::make_shared<OverlayedWaypoint>(helper, &fix);
     } else {

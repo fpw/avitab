@@ -20,12 +20,12 @@
 
 #include <string>
 #include <limits>
-#include "src/libxdata/world/models/navaids/UserFix.h"
+#include "src/world/models/navaids/UserFix.h"
 
 namespace xdata {
 
 struct UserFixData {
-    UserFix::Type type = UserFix::Type::NONE;
+    world::UserFix::Type type = world::UserFix::Type::NONE;
     std::string name;
     std::string ident;
     double latitude = std::numeric_limits<double>::quiet_NaN();

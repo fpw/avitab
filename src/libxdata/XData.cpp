@@ -19,20 +19,20 @@
 #include <thread>
 
 #include "XData.h"
-#include "src/libxdata/world/loaders/FixLoader.h"
-#include "src/libxdata/world/loaders/NavaidLoader.h"
-#include "src/libxdata/world/loaders/AirwayLoader.h"
-#include "src/libxdata/world/loaders/CIFPLoader.h"
-#include "src/libxdata/world/loaders/MetarLoader.h"
-#include "src/libxdata/world/loaders/UserFixLoader.h"
-#include "src/libxdata/parsers/CustomSceneryParser.h"
+#include "loaders/FixLoader.h"
+#include "loaders/NavaidLoader.h"
+#include "loaders/AirwayLoader.h"
+#include "loaders/CIFPLoader.h"
+#include "loaders/MetarLoader.h"
+#include "loaders/UserFixLoader.h"
+#include "parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
 namespace xdata {
 
 XData::XData(const std::string& dataRootPath):
     xplaneRoot(dataRootPath),
-    world(std::make_shared<World>())
+    world(std::make_shared<world::World>())
 {
     navDataPath = determineNavDataPath();
 }
@@ -73,7 +73,7 @@ void XData::setUserFixesFilename(std::string filename) {
     userFixesFilename = filename;
 }
 
-std::shared_ptr<World> XData::getWorld() {
+std::shared_ptr<world::World> XData::getWorld() {
     return world;
 }
 
@@ -152,7 +152,7 @@ void XData::loadAirways() {
 
 void XData::loadProcedures() {
     CIFPLoader loader(world);
-    world->forEachAirport([this, &loader] (std::shared_ptr<Airport> ap) {
+    world->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
         try {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {

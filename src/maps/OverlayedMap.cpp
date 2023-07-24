@@ -76,7 +76,7 @@ void OverlayedMap::loadOverlayIcons(const std::string& path) {
     }
 }
 
-void OverlayedMap::setNavWorld(std::shared_ptr<xdata::World> world) {
+void OverlayedMap::setNavWorld(std::shared_ptr<world::World> world) {
     navWorld = world;
 }
 
@@ -204,7 +204,7 @@ void OverlayedMap::drawOtherAircraftOverlay() {
         fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
         mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
         mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
-        unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * xdata::M_TO_FT + 50.0) / 100.0;
+        unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * world::M_TO_FT + 50.0) / 100.0;
         std::string flText = "---";
         flText[0] = '0' + (flightLevel / 100) % 10;
         flText[1] = '0' + (flightLevel / 10) % 10;
@@ -280,8 +280,8 @@ void OverlayedMap::drawDataOverlays() {
     pixelToPosition(0, 0, upLat, leftLon);
     pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomLat, rightLon);
 
-    xdata::Location upLeft { upLat, leftLon };
-    xdata::Location downRight { bottomLat, rightLon };
+    world::Location upLeft { upLat, leftLon };
+    world::Location downRight { bottomLat, rightLon };
 
     double deltaLon = rightLon - leftLon;
 
@@ -322,12 +322,12 @@ void OverlayedMap::drawDataOverlays() {
                                              lastXClicked, lastYClicked, &closestDistanceToLastClicked,
                                              planeX, planeY, &closestDistanceToPlane,
                                              centreX, centreY, &closestDistanceToCentre]
-                                             (const xdata::NavNode &node) {
+                                             (const world::NavNode &node) {
         auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
         if (overlayedNode) {
-            if (dynamic_cast<const xdata::Airport *>(&node)) {
+            if (dynamic_cast<const world::Airport *>(&node)) {
                 overlayedAerodromes.push_back(overlayedNode);
-            } else if (dynamic_cast<const xdata::Fix *>(&node)) {
+            } else if (dynamic_cast<const world::Fix *>(&node)) {
                 overlayedFixes.push_back(overlayedNode);
             }
             // Consider new node as candidate for hotspots
@@ -499,7 +499,7 @@ void OverlayedMap::polarToCartesian(float radius, float angleDegrees, double& x,
     y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
 }
 
-bool OverlayedMap::isLocVisibleWithMargin(const xdata::Location &loc, int marginPixels) const {
+bool OverlayedMap::isLocVisibleWithMargin(const world::Location &loc, int marginPixels) const {
     int x, y;
     positionToPixel(loc.latitude, loc.longitude, x, y);
     return isVisibleWithMargin(x, y, marginPixels);
