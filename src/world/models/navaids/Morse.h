@@ -15,7 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#ifndef SRC_WORLD_MODELS_NAVAIDS_MORSE_H_
+#define SRC_WORLD_MODELS_NAVAIDS_MORSE_H_
 
 #include <string>
 #include <map>
@@ -29,3 +30,5 @@ public:
 };
 
 } /* namespace world */
+
+#endif /* SRC_WORLD_MODELS_NAVAIDS_MORSE_H_ */

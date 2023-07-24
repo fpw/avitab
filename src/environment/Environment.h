@@ -15,7 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#ifndef SRC_ENVIRONMENT_ENVIRONMENT_H_
+#define SRC_ENVIRONMENT_ENVIRONMENT_H_
 
 #include <memory>
 #include <string>
@@ -115,4 +116,6 @@ private:
     std::shared_ptr<world::World> loadNavWorldAsync();
 };
 
-}
+} /* namespace avitab */
+
+#endif /* SRC_ENVIRONMENT_ENVIRONMENT_H_ */

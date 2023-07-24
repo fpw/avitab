@@ -15,7 +15,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#ifndef SRC_WORLD_WORLD_H_
+#define SRC_WORLD_WORLD_H_
 
 #include <map>
 #include <string>
@@ -74,3 +75,5 @@ private:
 
 
 } /* namespace world */
+
+#endif /* SRC_WORLD_WORLD_H_ */
