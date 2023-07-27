@@ -22,7 +22,7 @@
 
 namespace xdata {
 
-UserFixLoader::UserFixLoader(std::shared_ptr<world::World> worldPtr):
+UserFixLoader::UserFixLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }

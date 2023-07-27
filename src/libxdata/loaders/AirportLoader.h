@@ -21,16 +21,16 @@
 #include <memory>
 #include "src/libxdata/parsers/objects/AirportData.h"
 #include "src/libxdata/parsers/AirportParser.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class AirportLoader {
 public:
-    AirportLoader(std::shared_ptr<world::World> worldPtr);
+    AirportLoader(std::shared_ptr<XWorld> worldPtr);
     void load(const std::string &file) const;
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onAirportLoaded(const AirportData &port) const;
 

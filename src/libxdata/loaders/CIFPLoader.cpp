@@ -21,7 +21,7 @@
 
 namespace xdata {
 
-CIFPLoader::CIFPLoader(std::shared_ptr<world::World> worldPtr):
+CIFPLoader::CIFPLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }

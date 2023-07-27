@@ -20,16 +20,16 @@
 
 #include <memory>
 #include "src/libxdata/parsers/objects/MetarData.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class MetarLoader {
 public:
-    MetarLoader(std::shared_ptr<world::World> worldPtr);
+    MetarLoader(std::shared_ptr<XWorld> worldPtr);
     void load(const std::string &file);
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onMetarLoaded(const MetarData &metar);
 };

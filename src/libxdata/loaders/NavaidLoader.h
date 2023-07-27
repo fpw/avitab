@@ -20,16 +20,16 @@
 
 #include <memory>
 #include "src/libxdata/parsers/NavaidParser.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class NavaidLoader {
 public:
-    NavaidLoader(std::shared_ptr<world::World> worldPtr);
+    NavaidLoader(std::shared_ptr<XWorld> worldPtr);
     void load(const std::string &file);
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onNavaidLoaded(const NavaidData &navaid);
 };

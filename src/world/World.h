@@ -23,10 +23,10 @@
 #include <memory>
 #include <functional>
 #include <atomic>
-#include "src/world/models/airport/Airport.h"
-#include "src/world/models/navaids/Fix.h"
-#include "src/world/models/Region.h"
-#include "src/world/models/Airway.h"
+#include "models/airport/Airport.h"
+#include "models/navaids/Fix.h"
+#include "models/Region.h"
+#include "models/Airway.h"
 
 namespace world {
 
@@ -38,39 +38,16 @@ public:
     static constexpr const int MAX_SEARCH_RESULTS = 10;
     using NodeAcceptor = std::function<void(const world::NavNode &node)>;
 
-    World();
+    virtual std::shared_ptr<Airport> findAirportByID(const std::string &id) const = 0;
+    virtual std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const = 0;
+    virtual std::vector<std::shared_ptr<Airport>> findAirport(const std::string &keyWord) const = 0;
 
-    std::shared_ptr<Airport> findAirportByID(const std::string &id) const;
-    std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const;
-    std::vector<std::shared_ptr<Airport>> findAirport(const std::string &keyWord) const;
+    virtual std::shared_ptr<Region> findOrCreateRegion(const std::string &id) = 0;
+    virtual std::shared_ptr<Airport> findOrCreateAirport(const std::string &id) = 0;
+    virtual std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, world::AirwayLevel lvl) = 0;
 
-    void forEachAirport(std::function<void(std::shared_ptr<Airport>)> f);
-    void addFix(std::shared_ptr<Fix> fix);
-    std::shared_ptr<Region> findOrCreateRegion(const std::string &id);
-    std::shared_ptr<Airport> findOrCreateAirport(const std::string &id);
-    std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, world::AirwayLevel lvl);
+    virtual void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f) = 0;
 
-    void cancelLoading();
-    bool shouldCancelLoading() const;
-
-    void registerNavNodes();
-    void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f);
-
-private:
-    std::atomic_bool loadCancelled { false };
-
-    // Unique IDs
-    std::map<std::string, std::shared_ptr<Region>> regions;
-    std::map<std::string, std::shared_ptr<Airport>> airports;
-
-    // Unique only within region
-    std::multimap<std::string, std::shared_ptr<Fix>> fixes;
-
-    // Unique within airway level
-    std::multimap<std::string, std::shared_ptr<Airway>> airways;
-
-    // To search by location
-    std::map<std::pair<int, int>, std::vector<std::shared_ptr<world::NavNode>>> allNodes;
 };
 
 

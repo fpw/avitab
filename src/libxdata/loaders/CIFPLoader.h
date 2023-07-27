@@ -21,16 +21,16 @@
 #include <memory>
 #include "src/libxdata/parsers/objects/CIFPData.h"
 #include "src/world/models/airport/Airport.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class CIFPLoader {
 public:
-    CIFPLoader(std::shared_ptr<world::World> worldPtr);
+    CIFPLoader(std::shared_ptr<XWorld> worldPtr);
     void load(std::shared_ptr<world::Airport> airport, const std::string &file);
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onProcedureLoaded(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);
 

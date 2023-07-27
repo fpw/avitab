@@ -20,16 +20,16 @@
 
 #include <memory>
 #include "src/libxdata/parsers/UserFixParser.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class UserFixLoader {
 public:
-    UserFixLoader(std::shared_ptr<world::World> worldPtr);
+    UserFixLoader(std::shared_ptr<XWorld> worldPtr);
     void load(const std::string &file);
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onUserFixLoaded(const UserFixData &navaid);
 };

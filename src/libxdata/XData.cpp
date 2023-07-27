@@ -32,7 +32,7 @@ namespace xdata {
 
 XData::XData(const std::string& dataRootPath):
     xplaneRoot(dataRootPath),
-    world(std::make_shared<world::World>())
+    xworld(std::make_shared<xdata::XWorld>())
 {
     navDataPath = determineNavDataPath();
 }
@@ -74,7 +74,7 @@ void XData::setUserFixesFilename(std::string filename) {
 }
 
 std::shared_ptr<world::World> XData::getWorld() {
-    return world;
+    return xworld;
 }
 
 void XData::load() {
@@ -97,16 +97,16 @@ void XData::load() {
     loadMetar();
 
     logger::verbose("Build node network...");
-    world->registerNavNodes();
+    xworld->registerNavNodes();
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 
 void XData::cancelLoading() {
-    world->cancelLoading();
+    xworld->cancelLoading();
 }
 
 void XData::loadAirports() {
-    const AirportLoader loader(world);
+    const AirportLoader loader(xworld);
 
     loadCustomScenery(loader);
 
@@ -136,29 +136,29 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
 }
 
 void XData::loadFixes() {
-    FixLoader loader(world);
+    FixLoader loader(xworld);
     loader.load(navDataPath + "earth_fix.dat");
 }
 
 void XData::loadNavaids() {
-    NavaidLoader loader(world);
+    NavaidLoader loader(xworld);
     loader.load(navDataPath + "earth_nav.dat");
 }
 
 void XData::loadAirways() {
-    AirwayLoader loader(world);
+    AirwayLoader loader(xworld);
     loader.load(navDataPath + "earth_awy.dat");
 }
 
 void XData::loadProcedures() {
-    CIFPLoader loader(world);
-    world->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
+    CIFPLoader loader(xworld);
+    xworld->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
         try {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
         }
-        if (world->shouldCancelLoading()) {
+        if (xworld->shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });
@@ -170,7 +170,7 @@ void XData::loadMetar() {
     logger::verbose("Loading METAR...");
 
     try {
-        MetarLoader loader(world);
+        MetarLoader loader(xworld);
         loader.load(xplaneRoot + "METAR.rwx");
     } catch (const std::exception &e) {
         // metar is optional, so only log
@@ -189,10 +189,10 @@ void XData::loadUserFixes() {
 
 void XData::loadUserFixes(std::string userFixesFilename) {
     try {
-        UserFixLoader loader(world);
+        UserFixLoader loader(xworld);
         loader.load(userFixesFilename);
         // Re-register all nodes, but shouldn't affect existing items, just adds new
-        world->registerNavNodes();
+        xworld->registerNavNodes();
         logger::info("Loaded %s", userFixesFilename.c_str());
 
     } catch (const std::exception &e) {

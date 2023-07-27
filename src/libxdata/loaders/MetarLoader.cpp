@@ -21,7 +21,7 @@
 
 namespace xdata {
 
-MetarLoader::MetarLoader(std::shared_ptr<world::World> worldPtr):
+MetarLoader::MetarLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }
