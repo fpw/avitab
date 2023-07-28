@@ -21,7 +21,7 @@
 
 namespace xdata {
 
-FixLoader::FixLoader(std::shared_ptr<world::World> worldPtr):
+FixLoader::FixLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }

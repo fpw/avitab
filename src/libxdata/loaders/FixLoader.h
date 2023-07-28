@@ -20,16 +20,16 @@
 
 #include <memory>
 #include "src/libxdata/parsers/FixParser.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 
 namespace xdata {
 
 class FixLoader {
 public:
-    FixLoader(std::shared_ptr<world::World> worldPtr);
+    FixLoader(std::shared_ptr<XWorld> worldPtr);
     void load(const std::string &file);
 private:
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<XWorld> world;
 
     void onFixLoaded(const FixData &fix);
     void loadEnrouteFix(const FixData &fix);

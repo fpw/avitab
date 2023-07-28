@@ -22,7 +22,7 @@
 
 namespace xdata {
 
-AirportLoader::AirportLoader(std::shared_ptr<world::World> worldPtr):
+AirportLoader::AirportLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }

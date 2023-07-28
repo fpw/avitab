@@ -22,7 +22,7 @@
 
 namespace xdata {
 
-NavaidLoader::NavaidLoader(std::shared_ptr<world::World> worldPtr):
+NavaidLoader::NavaidLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
 }

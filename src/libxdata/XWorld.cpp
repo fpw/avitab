@@ -19,25 +19,25 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include "World.h"
+#include "XWorld.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 
-namespace world {
+namespace xdata {
 
-World::World()
+XWorld::XWorld()
 {
 }
 
-void World::cancelLoading() {
+void XWorld::cancelLoading() {
     loadCancelled = true;
 }
 
-bool World::shouldCancelLoading() const {
+bool XWorld::shouldCancelLoading() const {
     return loadCancelled;
 }
 
-std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
+std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) const {
     std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
@@ -49,8 +49,8 @@ std::shared_ptr<Airport> World::findAirportByID(const std::string& id) const {
     }
 }
 
-std::vector<std::shared_ptr<Airport>> World::findAirport(const std::string& keyWord) const {
-    std::vector<std::shared_ptr<Airport>> res;
+std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::string& keyWord) const {
+    std::vector<std::shared_ptr<world::Airport>> res;
 
     std::string key = platform::lower(keyWord);
 
@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<Airport>> World::findAirport(const std::string& keyW
     return res;
 }
 
-std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, const std::string& id) const {
+std::shared_ptr<world::Fix> XWorld::findFixByRegionAndID(const std::string& region, const std::string& id) const {
     auto range = fixes.equal_range(id);
 
     for (auto it = range.first; it != range.second; ++it) {
@@ -83,33 +83,33 @@ std::shared_ptr<Fix> World::findFixByRegionAndID(const std::string& region, cons
     return nullptr;
 }
 
-void World::forEachAirport(std::function<void(std::shared_ptr<Airport>)> f) {
+void XWorld::forEachAirport(std::function<void(std::shared_ptr<world::Airport>)> f) {
     for (auto it: airports) {
         f(it.second);
     }
 }
 
-std::shared_ptr<Region> World::findOrCreateRegion(const std::string& id) {
+std::shared_ptr<world::Region> XWorld::findOrCreateRegion(const std::string& id) {
     auto iter = regions.find(id);
     if (iter == regions.end()) {
-        auto ptr = std::make_shared<Region>(id);
+        auto ptr = std::make_shared<world::Region>(id);
         regions.insert(std::make_pair(id, ptr));
         return ptr;
     }
     return iter->second;
 }
 
-std::shared_ptr<Airport> World::findOrCreateAirport(const std::string& id) {
+std::shared_ptr<world::Airport> XWorld::findOrCreateAirport(const std::string& id) {
     auto iter = airports.find(id);
     if (iter == airports.end()) {
-        auto ptr = std::make_shared<Airport>(id);
+        auto ptr = std::make_shared<world::Airport>(id);
         airports.insert(std::make_pair(id, ptr));
         return ptr;
     }
     return iter->second;
 }
 
-std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, world::AirwayLevel lvl) {
+std::shared_ptr<world::Airway> XWorld::findOrCreateAirway(const std::string& name, world::AirwayLevel lvl) {
     auto range = airways.equal_range(name);
 
     for (auto it = range.first; it != range.second; ++it) {
@@ -119,17 +119,17 @@ std::shared_ptr<Airway> World::findOrCreateAirway(const std::string& name, world
     }
 
     // not found -> insert
-    auto awy = std::make_shared<Airway>(name, lvl);
+    auto awy = std::make_shared<world::Airway>(name, lvl);
     airways.insert(std::make_pair(name, awy));
     return awy;
 }
 
-void World::addFix(std::shared_ptr<Fix> fix) {
+void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
 }
 
-void World::registerNavNodes() {
+void XWorld::registerNavNodes() {
     for (auto it: airports) {
         auto node = it.second;
         auto &loc = node->getLocation();
@@ -149,7 +149,7 @@ void World::registerNavNodes() {
     }
 }
 
-void World::visitNodes(const world::Location& upLeft, const world::Location& lowRight, NodeAcceptor f) {
+void XWorld::visitNodes(const world::Location& upLeft, const world::Location& lowRight, NodeAcceptor f) {
     int lat1 = (int) std::ceil(std::min(90.0, upLeft.latitude));
     int lat2 = (int) std::floor(std::max(-90.0, lowRight.latitude));
     int lon1 = (int) std::floor(std::max(-180.0, upLeft.longitude));
@@ -168,4 +168,4 @@ void World::visitNodes(const world::Location& upLeft, const world::Location& low
     }
 }
 
-} /* namespace world */
+} /* namespace xdata */

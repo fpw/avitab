@@ -22,7 +22,7 @@
 #include <memory>
 #include <vector>
 #include "src/world/Manager.h"
-#include "src/world/World.h"
+#include "src/libxdata/XWorld.h"
 #include "src/libxdata/loaders/AirportLoader.h"
 
 namespace xdata {
@@ -41,7 +41,7 @@ public:
 private:
     std::string xplaneRoot;
     std::string navDataPath;
-    std::shared_ptr<world::World> world;
+    std::shared_ptr<xdata::XWorld> xworld;
     std::vector<std::string> customSceneries;
     std::string userFixesFilename;
 
