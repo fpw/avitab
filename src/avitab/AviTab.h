@@ -59,7 +59,8 @@ public:
     void showGUIContainer(std::shared_ptr<Container> container) override;
     void onHomeButton() override;
     std::shared_ptr<world::World> getNavWorld() override;
-    double getMagneticVariation(double lat, double lon) override;
+    using MagVarMap = std::map<std::pair<double, double>, double>;
+    MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations);
     std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
@@ -70,6 +71,8 @@ public:
     Location getAircraftLocation(AircraftID id) override;
     float getLastFrameTime() override;
     std::shared_ptr<Settings> getSettings() override;
+    std::shared_ptr<world::Route> getRoute() override;
+    void setRoute(std::shared_ptr<world::Route> route) override;
 
     ~AviTab();
 
@@ -84,6 +87,7 @@ private:
 
     std::shared_ptr<App> headerApp;
     std::shared_ptr<AppLauncher> appLauncher;
+    std::shared_ptr<world::Route> activeRoute;
 
     std::shared_ptr<apis::ChartService> chartService;
     std::shared_ptr<js::Runtime> jsRuntime;

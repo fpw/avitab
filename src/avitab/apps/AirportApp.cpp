@@ -214,7 +214,11 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
     str << std::fixed << std::setprecision(0);
     auto aptLoc = airport->getLocation();
-    auto magneticVariation = api().getMagneticVariation(aptLoc.latitude, aptLoc.longitude);
+
+    auto loc = std::make_pair(aptLoc.latitude, aptLoc.longitude);
+    std::vector<std::pair<double, double>> locations;
+    locations.push_back(loc);
+    auto magneticVariation = api().getMagneticVariations(locations)[loc];
 
     str << "Runways:\n";
     airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<world::Runway> rwy) {
@@ -438,6 +442,7 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
         tab.map->loadOverlayIcons(api().getDataPath() + "icons/");
         tab.map->setRedrawCallback([this, page] () { redrawPage(page); });
         tab.map->setNavWorld(api().getNavWorld());
+        tab.map->setGetRouteCallback([this] () { return api().getRoute(); });
 
         tab.trackButton->setToggleState(tab.trackPlane);
 

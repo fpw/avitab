@@ -49,7 +49,7 @@ public:
     void runInEnvironment(EnvironmentCallback cb) override;
     std::shared_ptr<world::Manager> getWorldManager() override;
     std::string getMETARForAirport(const std::string &icao) override;
-    double getMagneticVariation(double lat, double lon) override;
+    Environment::MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
     AircraftID getActiveAircraftCount() override;

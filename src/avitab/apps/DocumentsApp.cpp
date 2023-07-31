@@ -203,6 +203,7 @@ void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
 
     tab->map = std::make_shared<maps::OverlayedMap>(tab->stitcher, overlays);
     tab->map->loadOverlayIcons(api().getDataPath() + "icons/");
+    tab->map->setGetRouteCallback([this] () { return api().getRoute(); });
 
     auto pixMap = tab->pixMap;
     tab->map->setRedrawCallback([pixMap] () { if (pixMap) pixMap->invalidate(); });

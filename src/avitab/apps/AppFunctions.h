@@ -22,6 +22,7 @@
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/world/World.h"
+#include "src/world/router/Route.h"
 #include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 
@@ -52,7 +53,8 @@ public:
     virtual std::shared_ptr<world::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
-    virtual double getMagneticVariation(double lat, double lon) = 0;
+    using MagVarMap = std::map<std::pair<double, double>, double>;
+    virtual MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) = 0;
     virtual std::string getMETARForAirport(const std::string &icao) = 0;
     virtual void close() = 0;
     virtual void setIsInMenu(bool inMenu) = 0;
@@ -61,6 +63,8 @@ public:
     virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual float getLastFrameTime() = 0;
     virtual std::shared_ptr<Settings> getSettings() = 0;
+    virtual void setRoute(std::shared_ptr<world::Route> route) = 0;
+    virtual std::shared_ptr<world::Route> getRoute() = 0;
     virtual ~AppFunctions() = default;
 };
 

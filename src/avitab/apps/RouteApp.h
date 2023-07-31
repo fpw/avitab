@@ -66,6 +66,7 @@ private:
     void showError(const std::string &msg);
 
     std::string toShortRouteDescription();
+    std::string toDetailedRouteDescription();
 };
 
 } /* namespace avitab */

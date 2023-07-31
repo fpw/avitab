@@ -22,21 +22,25 @@
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/world/World.h"
+#include "src/world/router/Route.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
 #include "OverlayConfig.h"
 #include "OverlayedNode.h"
+#include "OverlayedRoute.h"
 
 namespace maps {
 
 class OverlayedMap: public std::enable_shared_from_this<OverlayedMap>, public IOverlayHelper {
 public:
     using OverlaysDrawnCallback = std::function<void(void)>;
+    using GetRouteCallback = std::function<std::shared_ptr<world::Route>(void)>;
 
     OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays);
     void loadOverlayIcons(const std::string &path);
     void setRedrawCallback(OverlaysDrawnCallback cb);
+    void setGetRouteCallback(GetRouteCallback cb);
     void setNavWorld(std::shared_ptr<world::World> world);
 
     void pan(int dx, int dy, int relx = -1, int rely = -1);
@@ -82,6 +86,8 @@ private:
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::TileSource> tileSource;
     OverlaysDrawnCallback onOverlaysDrawn;
+    std::unique_ptr<OverlayedRoute> overlayedRoute;
+    GetRouteCallback getRoute;
     double mapWidthNM;
     int numAerodromesVisible;
 
@@ -116,6 +122,7 @@ private:
     void drawCalibrationOverlay();
     void drawScale(double nmPerPixel);
     void drawCompass();
+    void drawRoute();
 
     void pixelToPosition(int px, int py, double &lat, double &lon) const;
     float cosDegrees(int angleDegrees) const;

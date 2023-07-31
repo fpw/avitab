@@ -29,6 +29,16 @@ namespace world {
 class Route {
 public:
     using RouteIterator = std::function<void (const std::shared_ptr<NavEdge>, const std::shared_ptr<NavNode>)>;
+    using MagVarMap = std::map<std::pair<double, double>, double>;
+    using GetMagVarsCallback = std::function<MagVarMap(std::vector<std::pair<double, double>>)>;
+
+    using LegIterator = std::function<void (
+            const std::shared_ptr<NavNode>,
+            const std::shared_ptr<NavEdge>,
+            const std::shared_ptr<NavNode>,
+            double distanceNm,
+            double initialTrueBearing,
+            double initialMagneticBearing)>;
 
     Route(std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest);
 
@@ -39,7 +49,9 @@ public:
 
     void find();
     void iterateRoute(RouteIterator f) const;
+    void iterateLegs(LegIterator f) const;
     void iterateRouteShort(RouteIterator f) const;
+    void setGetMagVarsCallback(GetMagVarsCallback cb);
 
     double getDirectDistance() const;
     double getRouteDistance() const;
@@ -49,6 +61,7 @@ private:
     std::shared_ptr<NavNode> startNode, destNode;
     AirwayLevel airwayLevel = AirwayLevel::LOWER;
     std::vector<RouteFinder::RouteDirection> waypoints;
+    GetMagVarsCallback getMagneticVariations;
 
     bool checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const;
 };

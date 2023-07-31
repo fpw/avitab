@@ -67,6 +67,10 @@ void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
     onOverlaysDrawn = cb;
 }
 
+void OverlayedMap::setGetRouteCallback(GetRouteCallback cb) {
+    getRoute = cb;
+}
+
 void OverlayedMap::loadOverlayIcons(const std::string& path) {
     std::string planeIconName = "if_icon-plane_211875.png";
     try {
@@ -161,6 +165,7 @@ void OverlayedMap::drawOverlays() {
         return;
     }
     if (tileSource->supportsWorldCoords()) {
+        drawRoute();
         drawDataOverlays();
         drawOtherAircraftOverlay();
         drawAircraftOverlay();
@@ -581,6 +586,15 @@ OverlayConfig &OverlayedMap::getOverlayConfig() const {
     return *overlayConfig;
 }
 
-
+void OverlayedMap::drawRoute() {
+    auto route = getRoute();
+    if (!route || !overlayConfig->drawRoute) {
+        return;
+    }
+    if (!overlayedRoute) {
+        overlayedRoute = std::make_unique<OverlayedRoute>(shared_from_this());
+    }
+    overlayedRoute->draw(route);
+}
 
 } /* namespace maps */
