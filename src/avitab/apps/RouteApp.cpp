@@ -112,11 +112,20 @@ void RouteApp::showArrivalPage() {
 }
 
 void RouteApp::onArrivalEntered(const std::string& arrival) {
+    if (arrival == "") {
+        return;
+    }
     auto navWorld = api().getNavWorld();
 
     auto ap = navWorld->findAirportByID(arrival);
     if (!ap) {
         showError("Airport not found");
+        return;
+    }
+
+    if (ap->getID() == departureAirport->getID()) {
+        showError("Arrival must be different from departure");
+        arrivalField->setText("");
         return;
     }
 
