@@ -29,6 +29,10 @@ XWorld::XWorld()
 {
 }
 
+XWorld::~XWorld()
+{
+}
+
 void XWorld::cancelLoading() {
     loadCancelled = true;
 }
