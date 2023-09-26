@@ -23,7 +23,7 @@
 namespace avitab {
 
 void Environment::loadNavWorldInBackground() {
-    getWorldManager()->discoverSceneries();
+    worldManager->discoverSceneries();
     navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
 }
 
@@ -41,17 +41,45 @@ void Environment::loadSettings() {
     settings = std::make_unique<Settings>(fname);
 
     std::string userfixes_file = settings->getGeneralSetting<std::string>("userfixes_file");
-    sendUserFixesFilenameToXData(userfixes_file);
+    sendUserFixesFilenameToWorldMgr(userfixes_file);
 }
 
 std::shared_ptr<Settings> Environment::getSettings() {
     return settings;
 }
 
+void Environment::setWorldManager(std::shared_ptr<world::Manager> mgr) {
+    worldManager = mgr;
+}
+
+std::shared_ptr<world::Manager> Environment::getWorldManager() {
+    return worldManager;
+}
+
+void Environment::loadUserFixes(std::string filename) {
+    worldManager->loadUserFixes(filename);
+}
+
+void Environment::sendUserFixesFilenameToWorldMgr(std::string filename) {
+    worldManager->setUserFixesFilename(filename);
+}
+
+void Environment::setLastFrameTime(float t) {
+    lastFrameTime = t;
+}
+
+float Environment::getLastFrameTime() {
+    return lastFrameTime;
+}
+
+void Environment::reloadMetar() {
+    worldManager->reloadMetar();
+}
+
 std::shared_ptr<world::World> Environment::loadNavWorldAsync() {
     crash::ThreadCookie crashCookie;
 
-    auto data = getWorldManager();
+    auto data = worldManager;
     logger::info("Loading nav data...");
     try {
         data->load();
@@ -74,7 +102,7 @@ bool Environment::isNavWorldReady() {
 }
 
 void Environment::cancelNavWorldLoading() {
-    getWorldManager()->cancelLoading();
+    worldManager->cancelLoading();
     if (navWorldFuture.valid()) {
         // wait until the canceling is done to avoid race-conditions on destruction while loading
         navWorldFuture.wait();
@@ -98,7 +126,7 @@ void Environment::resumeEnvironmentJobs() {
     stopped = false;
 }
 
-void Environment::registerEnvironmentCallback(EnvironmentCallback cb) {
+void Environment::runInEnvironment(EnvironmentCallback cb) {
     std::lock_guard<std::mutex> lock(envMutex);
     if (stopped) {
         throw std::runtime_error("Environment is stopped");

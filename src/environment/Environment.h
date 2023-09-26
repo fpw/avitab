@@ -72,35 +72,37 @@ public:
     void resumeEnvironmentJobs();
 
     // Can be called from any thread
-    virtual std::string getFontDirectory() = 0;
-    virtual std::string getProgramPath() = 0;
-    virtual std::string getSettingsDir() = 0;
-    virtual std::string getEarthTexturePath() = 0;
-    virtual void runInEnvironment(EnvironmentCallback cb) = 0;
-    virtual double getMagneticVariation(double lat, double lon) = 0;
-    virtual std::string getMETARForAirport(const std::string &icao) = 0;
-    std::shared_ptr<world::World> getNavWorld();
-    virtual std::string getAirplanePath() = 0;
-    void cancelNavWorldLoading();
-    virtual void reloadMetar() = 0;
-    virtual void loadUserFixes(std::string filename) = 0;
-    virtual void enableAndPowerPanel();
-    virtual void setIsInMenu(bool menu);
-    virtual AircraftID getActiveAircraftCount() = 0;
-    virtual Location getAircraftLocation(AircraftID id) = 0;
-    virtual float getLastFrameTime() = 0;
-
-    virtual ~Environment() = default;
-protected:
     /**
      * Stores a callback in the pending callbacks queue to
      * be executed by the environment thread.
      * @param cb the callback to enqueue
      */
-    void registerEnvironmentCallback(EnvironmentCallback cb);
+    void runInEnvironment(EnvironmentCallback cb);
+    virtual std::string getFontDirectory() = 0;
+    virtual std::string getProgramPath() = 0;
+    virtual std::string getSettingsDir() = 0;
+    virtual std::string getEarthTexturePath() = 0;
+    virtual double getMagneticVariation(double lat, double lon) = 0;
+    virtual std::string getMETARForAirport(const std::string &icao) = 0;
+    std::shared_ptr<world::World> getNavWorld();
+    virtual std::string getAirplanePath() = 0;
+    void cancelNavWorldLoading();
+    void reloadMetar();
+    void loadUserFixes(std::string filename);
+    virtual void enableAndPowerPanel();
+    virtual void setIsInMenu(bool menu);
+    virtual AircraftID getActiveAircraftCount() = 0;
+    virtual Location getAircraftLocation(AircraftID id) = 0;
+    float getLastFrameTime();
+
+    virtual ~Environment() = default;
+
+protected:
     void runEnvironmentCallbacks();
-    virtual std::shared_ptr<world::Manager> getWorldManager() = 0;
-    virtual void sendUserFixesFilenameToXData(std::string filename) = 0;
+    void setWorldManager(std::shared_ptr<world::Manager> mgr);
+    std::shared_ptr<world::Manager> getWorldManager();
+    void sendUserFixesFilenameToWorldMgr(std::string filename);
+    void setLastFrameTime(float t);
 
 private:
     std::shared_ptr<Config> config;
@@ -109,7 +111,9 @@ private:
     std::vector<EnvironmentCallback> envCallbacks;
     std::shared_future<std::shared_ptr<world::World>> navWorldFuture;
     std::shared_ptr<world::World> navWorld;
+    std::shared_ptr<world::Manager> worldManager;
     std::atomic_bool navWorldLoadAttempted {false};
+    std::atomic<float> lastFrameTime {};
 
     bool stopped = false;
 

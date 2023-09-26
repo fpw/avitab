@@ -24,7 +24,7 @@
 #include <locale.h>
 #include "strtod.h"
 extern  int     errno;
-namespace xdata {
+namespace avitab {
 
 #ifndef __STDC__
 # ifdef __GNUC__
@@ -258,4 +258,4 @@ done:
     return fraction;
 }
 
-} /* namespace xdata */
+} /* namespace avitab */

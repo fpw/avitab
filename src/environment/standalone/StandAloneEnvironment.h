@@ -21,11 +21,11 @@
 #include "GlfwGUIDriver.h"
 #include <memory>
 #include <map>
-#include "src/environment/Environment.h"
+#include "src/environment/ToolEnvironment.h"
 
 namespace avitab {
 
-class StandAloneEnvironment: public Environment {
+class StandAloneEnvironment: public ToolEnvironment {
 public:
     StandAloneEnvironment();
 
@@ -33,36 +33,20 @@ public:
 
     // Must be called from the environment thread - do not call from GUI thread!
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
-    void createMenu(const std::string &name) override;
-    void addMenuEntry(const std::string &label, std::function<void()> cb) override;
-    void destroyMenu() override;
-    void createCommand(const std::string &name, const std::string &desc, CommandCallback cb) override;
-    void destroyCommands() override;
-    std::string getAirplanePath() override;
 
     // Can be called from any thread
     std::string getFontDirectory() override;
-    std::string getProgramPath() override;
-    std::string getSettingsDir() override;
-    void sendUserFixesFilenameToXData(std::string filename) override;
     std::string getEarthTexturePath() override;
-    void runInEnvironment(EnvironmentCallback cb) override;
-    std::shared_ptr<world::Manager> getWorldManager() override;
     std::string getMETARForAirport(const std::string &icao) override;
     double getMagneticVariation(double lat, double lon) override;
-    void reloadMetar() override;
-    void loadUserFixes(std::string filename) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
-    float getLastFrameTime() override;
 
     virtual ~StandAloneEnvironment();
 
 protected:
-    std::string ourPath, xplaneRootPath;
+    std::string xplaneRootPath;
     std::shared_ptr<GlfwGUIDriver> driver;
-    std::shared_ptr<world::Manager> xplaneData;
-    std::atomic<float> lastDrawTime{};
 
 private:
 
