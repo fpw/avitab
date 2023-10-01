@@ -70,9 +70,9 @@ void UserFixParser::parseLine() {
         }
 
         std::string latStr = parser.nextCSVValue();
-        userFix.latitude = avitab::locale_independent_strtod(latStr.c_str(), NULL);
+        userFix.latitude = platform::locale_independent_strtod(latStr.c_str(), NULL);
         std::string lonStr = parser.nextCSVValue();
-        userFix.longitude = avitab::locale_independent_strtod(lonStr.c_str(), NULL);
+        userFix.longitude = platform::locale_independent_strtod(lonStr.c_str(), NULL);
         if (std::isnan(userFix.latitude) || std::isnan(userFix.longitude)) {
             throw std::runtime_error("Bad values");
         }

@@ -18,10 +18,10 @@
 #ifndef SRC_PLATFORM_STRTOD_H_
 #define SRC_PLATFORM_STRTOD_H_
 
-namespace avitab {
+namespace platform {
 
 double locale_independent_strtod(const char *string, char** endPtr);
 
-} /* namespace avitab */
+} /* namespace platform */
 
 #endif /* SRC_PLATFORM_STRTOD_H_ */

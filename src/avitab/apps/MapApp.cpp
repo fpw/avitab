@@ -623,7 +623,7 @@ double MapApp::getCoordinate(const std::string &input) {
 
     if (coordStr.find(" ") == std::string::npos) {
         // Parse decimal format
-        return locale_independent_strtod(coordStr.c_str(), NULL);
+        return platform::locale_independent_strtod(coordStr.c_str(), NULL);
     } else {
         // Parse DMS format with space separator between D M and M S.
         // Also handles D M only with no seconds field.
