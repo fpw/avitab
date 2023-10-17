@@ -15,13 +15,13 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_PARSERS_STRTOD_H_
-#define SRC_LIBXDATA_PARSERS_STRTOD_H_
+#ifndef SRC_PLATFORM_STRTOD_H_
+#define SRC_PLATFORM_STRTOD_H_
 
-namespace xdata {
+namespace platform {
 
 double locale_independent_strtod(const char *string, char** endPtr);
 
-} /* namespace xdata */
+} /* namespace platform */
 
-#endif /* SRC_LIBXDATA_PARSERS_STRTOD_H_ */
+#endif /* SRC_PLATFORM_STRTOD_H_ */

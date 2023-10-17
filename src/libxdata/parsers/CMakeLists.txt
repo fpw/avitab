@@ -8,5 +8,4 @@ target_sources(xdata PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/MetarParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/CustomSceneryParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/UserFixParser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/strtod.cpp
 )

@@ -22,11 +22,9 @@
 
 namespace avitab {
 
-StandAloneEnvironment::StandAloneEnvironment() {
-    ourPath = platform::getProgramPath();
-
+StandAloneEnvironment::StandAloneEnvironment() : ToolEnvironment() {
     xplaneRootPath = findXPlaneInstallationPath();
-    xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
+    setWorldManager(std::make_shared<xdata::XData>(xplaneRootPath));
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {
@@ -68,7 +66,7 @@ std::string StandAloneEnvironment::getFontDirectory() {
 void StandAloneEnvironment::eventLoop() {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();
-        lastDrawTime = driver->getLastDrawTime() / 1000.0;
+        setLastFrameTime(driver->getLastDrawTime() / 1000.0);
     }
     driver.reset();
 }
@@ -78,59 +76,12 @@ std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
     return std::make_shared<LVGLToolkit>(driver);
 }
 
-void StandAloneEnvironment::createMenu(const std::string& name) {
-}
-
-void StandAloneEnvironment::addMenuEntry(const std::string& label, MenuCallback cb) {
-}
-
-void StandAloneEnvironment::destroyMenu() {
-}
-
-void StandAloneEnvironment::createCommand(const std::string& name, const std::string& desc, CommandCallback cb) {
-}
-
-void StandAloneEnvironment::destroyCommands() {
-}
-
-std::string StandAloneEnvironment::getAirplanePath() {
-    return "";
-}
-
-std::string StandAloneEnvironment::getProgramPath() {
-    return ourPath;
-}
-
-std::string StandAloneEnvironment::getSettingsDir() {
-    return ourPath;
-}
-
-void StandAloneEnvironment::sendUserFixesFilenameToXData(std::string filename) {
-    xplaneData->setUserFixesFilename(filename);
-}
-
 double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
     return 0;
 }
 
 std::string StandAloneEnvironment::getMETARForAirport(const std::string &icao) {
     return "METAR";
-}
-
-void StandAloneEnvironment::runInEnvironment(EnvironmentCallback cb) {
-    registerEnvironmentCallback(cb);
-}
-
-std::shared_ptr<world::Manager> StandAloneEnvironment::getWorldManager() {
-    return xplaneData;
-}
-
-void StandAloneEnvironment::reloadMetar() {
-    xplaneData->reloadMetar();
-}
-
-void StandAloneEnvironment::loadUserFixes(std::string filename) {
-    xplaneData->loadUserFixes(filename);
 }
 
 AircraftID StandAloneEnvironment::getActiveAircraftCount() {
@@ -176,10 +127,6 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
     }
     ++t;
     return loc[id];
-}
-
-float StandAloneEnvironment::getLastFrameTime() {
-    return lastDrawTime;
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

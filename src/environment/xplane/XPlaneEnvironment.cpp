@@ -38,7 +38,7 @@ XPlaneEnvironment::XPlaneEnvironment() {
     flightLoopId = createFlightLoop();
 
     xplaneRootPath = getXPlanePath();
-    xplaneData = std::make_shared<xdata::XData>(xplaneRootPath);
+    setWorldManager(std::make_shared<xdata::XData>(xplaneRootPath));
 
     int xpVersion, xplmVersion;
     XPLMHostApplicationID hostId;
@@ -266,20 +266,12 @@ std::string XPlaneEnvironment::getSettingsDir() {
     return xplanePrefsDir;
 }
 
-void XPlaneEnvironment::sendUserFixesFilenameToXData(std::string filename) {
-    xplaneData->setUserFixesFilename(filename);
-}
-
 std::string XPlaneEnvironment::getEarthTexturePath() {
     return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
 
 std::string XPlaneEnvironment::getFontDirectory() {
     return xplaneRootPath + "/Resources/fonts/";
-}
-
-void XPlaneEnvironment::runInEnvironment(EnvironmentCallback cb) {
-    registerEnvironmentCallback(cb);
 }
 
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
@@ -305,7 +297,7 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
         aircraftLocations = activeAircraftLocations;
     }
 
-    lastDrawTime = dataCache.getData("sim/operation/misc/frame_rate_period").floatValue;
+    setLastFrameTime(dataCache.getData("sim/operation/misc/frame_rate_period").floatValue);
 
     runEnvironmentCallbacks();
     return -1;
@@ -323,10 +315,6 @@ Location XPlaneEnvironment::getAircraftLocation(AircraftID id) {
     } else {
         return nullLocation;
     }
-}
-
-float XPlaneEnvironment::getLastFrameTime() {
-    return lastDrawTime;
 }
 
 EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
@@ -380,7 +368,7 @@ std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
         logger::verbose("Time to get METAR: %d millis",
             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
     } else {
-        auto airport = xplaneData->getWorld()->findAirportByID(icao);
+        auto airport = getWorldManager()->getWorld()->findAirportByID(icao);
         if (!airport) {
             throw std::invalid_argument("No such airport");
         }
@@ -399,18 +387,6 @@ std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
     }
     str << ":\n" << metar << "\n";
     return str.str();
-}
-
-std::shared_ptr<world::Manager> XPlaneEnvironment::getWorldManager() {
-    return xplaneData;
-}
-
-void XPlaneEnvironment::reloadMetar() {
-    xplaneData->reloadMetar();
-}
-
-void XPlaneEnvironment::loadUserFixes(std::string filename) {
-    xplaneData->loadUserFixes(filename);
 }
 
 void XPlaneEnvironment::enableAndPowerPanel() {
