@@ -333,20 +333,24 @@ EnvData XPlaneEnvironment::getData(const std::string& dataRef) {
     return futureData.get();
 }
 
-double XPlaneEnvironment::getMagneticVariation(double lat, double lon) {
-    std::promise<double> dataPromise;
+Environment::MagVarMap XPlaneEnvironment::getMagneticVariations(std::vector<std::pair<double, double>> locations) {
+    std::promise<MagVarMap> dataPromise;
     auto futureData = dataPromise.get_future();
 
     auto startAt = std::chrono::steady_clock::now();
-    runInEnvironment([&dataPromise, &lat, &lon] () {
-        double variation = XPLMGetMagneticVariation(lat, lon);
-        dataPromise.set_value(variation);
+    runInEnvironment([&dataPromise, &locations] () {
+        MagVarMap magVarMap;
+        for (auto loc : locations) {
+            double variation = XPLMGetMagneticVariation(loc.first, loc.second);
+            magVarMap[loc] = variation;
+        }
+        dataPromise.set_value(magVarMap);
     });
 
     auto res = futureData.get();
     auto duration = std::chrono::steady_clock::now() - startAt;
-    logger::verbose("Time to get magnetic variation: %d millis",
-            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+    LOG_INFO(0, "Time to get %d magnetic variations: %d millis", locations.size(),
+             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
     return res;
 }
 

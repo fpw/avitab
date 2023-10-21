@@ -112,6 +112,9 @@ void RouteApp::showArrivalPage() {
 }
 
 void RouteApp::onArrivalEntered(const std::string& arrival) {
+    if (arrival == "") {
+        return;
+    }
     auto navWorld = api().getNavWorld();
 
     auto ap = navWorld->findAirportByID(arrival);
@@ -120,10 +123,20 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
         return;
     }
 
+    if (ap->getID() == departureAirport->getID()) {
+        showError("Arrival must be different from departure");
+        arrivalField->setText("");
+        return;
+    }
+
     arrivalAirport = ap;
 
     route = std::make_shared<world::Route>(departureAirport, arrivalAirport);
     route->setAirwayLevel(airwayLevel);
+    route->setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
+        return api().getMagneticVariations(locations);
+    });
+
     try {
         route->find();
         showRoute();
@@ -131,6 +144,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
         std::string error = std::string("Couldn't find a preliminary route, error: ") + e.what();
         showError(error);
     }
+    api().setRoute(route);
 }
 
 void RouteApp::showRoute() {
@@ -149,6 +163,9 @@ void RouteApp::showRoute() {
     double directNm = directKm * world::KM_TO_NM;
     double routeNm = routeKm * world::KM_TO_NM;
 
+    desc << "-----\n";
+    std::string detailedRoute = toDetailedRouteDescription();
+    desc << detailedRoute << "\n";
     desc << "-----\n";
     desc << "Direct distance: " << directKm << "km / " << directNm << "nm\n";
     desc << "Route distance: " << routeKm << "km / " << routeNm << "nm\n";
@@ -202,6 +219,35 @@ std::string RouteApp::toShortRouteDescription() {
             if (to == departureAirport || to == arrivalAirport) {
                 desc << "#";
             }
+        }
+    });
+
+    return desc.str();
+}
+std::string RouteApp::toDetailedRouteDescription() {
+    std::stringstream desc;
+
+    route->iterateLegs([this, &desc] (
+            const std::shared_ptr<world::NavNode> from,
+            const std::shared_ptr<world::NavEdge> via,
+            const std::shared_ptr<world::NavNode> to,
+            double distanceNm,
+            double initialTrueBearing,
+            double initialMagneticBearing) {
+
+        std::string from_str = to ? from->getID() : "(no from)";
+        std::string via_str = via ? via->getID() : "(no via)";
+        std::string to_str = to ? to->getID() : "(no to)";
+        int showInitialTrueBearing = (int)(initialTrueBearing + 0.5) % 360;
+        int showInitialMagneticBearing = (int)(initialMagneticBearing + 0.5) % 360;
+
+        desc << from_str.c_str() << "\n" << "    " << via_str.c_str() << " " <<
+            std::setfill('0') << std::setw(3) << showInitialTrueBearing << "�T" << " " <<
+            std::setfill('0') << std::setw(3) << showInitialMagneticBearing << "�M" <<
+            " " << (int)distanceNm << "nm\n";
+
+        if (to == arrivalAirport) {
+            desc << to_str.c_str() << "\n";
         }
     });
 

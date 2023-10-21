@@ -76,7 +76,7 @@ private:
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
     std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton;
     std::shared_ptr<Label> overlayLabel;
-    std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox;
+    std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox, routeCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
     std::shared_ptr<Checkbox> vorCheckbox, ndbCheckbox, ilsCheckbox, waypointCheckbox;
     std::shared_ptr<Button> loadUserFixesButton;

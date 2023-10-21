@@ -298,6 +298,7 @@ void MapApp::setTileSource(std::shared_ptr<img::TileSource> source) {
     map = std::make_shared<maps::OverlayedMap>(mapStitcher, overlayConf);
     map->loadOverlayIcons(api().getDataPath() + "icons/");
     map->setRedrawCallback([this] () { onRedrawNeeded(); });
+    map->setGetRouteCallback([this] () { return api().getRoute(); });
     map->setNavWorld(api().getNavWorld());
 
     keyboard.reset();
@@ -317,6 +318,7 @@ void MapApp::resetWidgets() {
     heliseaportCheckbox.reset();
     myAircraftCheckbox.reset();
     otherAircraftCheckbox.reset();
+    routeCheckbox.reset();
     loadUserFixesButton.reset();
     poiCheckbox.reset();
     vrpCheckbox.reset();
@@ -401,6 +403,12 @@ void MapApp::showOverlaySettings() {
     otherAircraftCheckbox->setChecked(overlayConf->drawOtherAircraft);
     otherAircraftCheckbox->alignRightOf(myAircraftCheckbox);
     otherAircraftCheckbox->setCallback([this] (bool checked) { overlayConf->drawOtherAircraft = checked; });
+
+    routeCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Route");
+    routeCheckbox->setChecked(overlayConf->drawRoute);
+    routeCheckbox->alignRightOf(otherAircraftCheckbox);
+    routeCheckbox->setCallback([this] (bool checked) { overlayConf->drawRoute = checked; });
+    routeCheckbox->setVisible((bool)api().getRoute());
 
     airportCheckbox = std::make_shared<Checkbox>(overlaysContainer, "Airports");
     airportCheckbox->setChecked(overlayConf->drawAirports);

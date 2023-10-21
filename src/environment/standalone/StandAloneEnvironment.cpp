@@ -76,8 +76,12 @@ std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
     return std::make_shared<LVGLToolkit>(driver);
 }
 
-double StandAloneEnvironment::getMagneticVariation(double lat, double lon) {
-    return 0;
+Environment::MagVarMap StandAloneEnvironment::getMagneticVariations(std::vector<std::pair<double, double>> locations) {
+    Environment::MagVarMap zeros;
+    for (auto location : locations) {
+        zeros[location] = 0;
+    }
+    return zeros;
 }
 
 std::string StandAloneEnvironment::getMETARForAirport(const std::string &icao) {

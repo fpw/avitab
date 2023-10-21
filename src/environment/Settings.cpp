@@ -122,6 +122,7 @@ void Settings::loadOverlayConfig() {
     overlayConfig = std::make_shared<maps::OverlayConfig>();
     overlayConfig->drawMyAircraft = getSetting("/overlay/my_aircraft", true);
     overlayConfig->drawOtherAircraft = getSetting("/overlay/other_aircraft", true);
+    overlayConfig->drawRoute = getSetting("/overlay/route", true);
     overlayConfig->drawAirports = getSetting("/overlay/airports", false);
     overlayConfig->drawAirstrips = getSetting("/overlay/airstrips", false);
     overlayConfig->drawHeliportsSeaports = getSetting("/overlay/heliports_seaports", false);
@@ -140,6 +141,7 @@ void Settings::loadOverlayConfig() {
 void Settings::saveOverlayConfig() {
     setSetting("/overlay/my_aircraft", overlayConfig->drawMyAircraft);
     setSetting("/overlay/other_aircraft", overlayConfig->drawOtherAircraft);
+    setSetting("/overlay/route", overlayConfig->drawRoute);
     setSetting("/overlay/airports", overlayConfig->drawAirports);
     setSetting("/overlay/airstrips", overlayConfig->drawAirstrips);
     setSetting("/overlay/heliports_seaports", overlayConfig->drawHeliportsSeaports);

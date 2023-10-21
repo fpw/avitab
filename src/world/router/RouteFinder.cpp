@@ -31,6 +31,10 @@ void RouteFinder::setEdgeFilter(EdgeFilter filter) {
     edgeFilter = filter;
 }
 
+void RouteFinder::setGetMagVarsCallback(GetMagVarsCallback cb) {
+    getMagneticVariations = cb;
+}
+
 std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, NodePtr goal) {
     logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
     directDistance = from->getLocation().distanceTo(goal->getLocation());
@@ -94,15 +98,33 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
 std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr lastFix) {
     logger::info("Backtracking route...");
     std::vector<RouteDirection> res;
+    std::vector<std::pair<double, double>> locations;
+
+    // Collate magnetic variations for the node locations used in the route
+    // Getting magVar from XPlane is asynchronous and slow, so batch request
+    auto locLast = lastFix->getLocation();
+    locations.push_back(std::make_pair(locLast.latitude, locLast.longitude));
 
     RouteDirection cur = cameFrom[lastFix];
-    res.push_back(RouteDirection(cur.via, lastFix));
-
     decltype(cameFrom.find(nullptr)) it;
+    while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
+        cur = cameFrom[it->first];
+        auto loc = it->first->getLocation();
+        locations.push_back(std::make_pair(loc.latitude, loc.longitude));
+    }
+    auto magVarMap = getMagneticVariations(locations);
+
+
+    // Now we've got magvars, reconstruct the path
+    cur = cameFrom[lastFix];
+    double magVar = magVarMap[std::make_pair(locLast.latitude, locLast.longitude)];
+    res.push_back(RouteDirection(cur.to, cur.via, lastFix, magVar));
 
     while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
         cur = cameFrom[it->first];
-        res.push_back(RouteDirection(cur.via, it->first));
+        auto loc = it->first->getLocation();
+        magVar = magVarMap[std::make_pair(loc.latitude, loc.longitude)];
+        res.push_back(RouteDirection(cur.to, cur.via, it->first, magVar));
     }
 
     std::reverse(std::begin(res), std::end(res));

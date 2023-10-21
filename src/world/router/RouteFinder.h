@@ -23,7 +23,9 @@
 #include <set>
 #include <map>
 #include <functional>
+#include <cmath>
 #include "../graph/NavNode.h"
+#include "../World.h"
 
 namespace world {
 
@@ -32,21 +34,37 @@ public:
     using EdgePtr = std::shared_ptr<NavEdge>;
     using NodePtr = std::shared_ptr<NavNode>;
     using EdgeFilter = std::function<bool(const EdgePtr, const NodePtr)>;
+    using MagVarMap = std::map<std::pair<double, double>, double>;
+    using GetMagVarsCallback = std::function<MagVarMap(std::vector<std::pair<double, double>>)>;
 
     struct RouteDirection {
+        NodePtr from = nullptr;
         EdgePtr via;
         NodePtr to;
+        double distanceNm = 0;
+        double initialTrueBearing = 0;
+        double initialMagneticBearing = 0;
 
         RouteDirection() = default;
         RouteDirection(EdgePtr via, NodePtr to): via(via), to(to) { }
+        RouteDirection(NodePtr from, EdgePtr via, NodePtr to, double magVar):
+                       from(from), via(via), to(to) {
+            double distanceMetres = from->getLocation().distanceTo(to->getLocation());
+            distanceNm = (distanceMetres / 1000) * world::KM_TO_NM;
+            initialTrueBearing = from->getLocation().bearingTo(to->getLocation());
+            initialMagneticBearing = std::fmod(initialTrueBearing + magVar, 360.0);
+        }
     };
 
     void setEdgeFilter(EdgeFilter filter);
+    void setGetMagVarsCallback(GetMagVarsCallback cb);
     void setAirwayChangePenalty(float percent);
     std::vector<RouteDirection> findRoute(NodePtr from, NodePtr to);
 
 private:
     EdgeFilter edgeFilter;
+    GetMagVarsCallback getMagneticVariations;
+
     double directDistance = 0;
     float airwayChangePenalty = 0;
 

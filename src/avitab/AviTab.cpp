@@ -375,8 +375,8 @@ std::string AviTab::getAirplanePath() {
     return env->getAirplanePath();
 }
 
-double AviTab::getMagneticVariation(double lat, double lon) {
-    return env->getMagneticVariation(lat, lon);
+AviTab::MagVarMap AviTab::getMagneticVariations(std::vector<std::pair<double, double>> locations) {
+    return env->getMagneticVariations(locations);
 }
 
 std::string AviTab::getMETARForAirport(const std::string &icao) {
@@ -396,6 +396,14 @@ void AviTab::loadUserFixes(std::string filename) {
 
 std::shared_ptr<apis::ChartService> AviTab::getChartService() {
     return chartService;
+}
+
+std::shared_ptr<world::Route> AviTab::getRoute() {
+    return activeRoute;
+}
+
+void AviTab::setRoute(std::shared_ptr<world::Route> route) {
+    activeRoute = route;
 }
 
 AircraftID AviTab::getActiveAircraftCount() {

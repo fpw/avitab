@@ -66,6 +66,7 @@ void PDFViewer::loadCurrentFile() {
 
     map = std::make_shared<maps::OverlayedMap>(stitcher, overlays);
     map->loadOverlayIcons(api().getDataPath() + "icons/");
+    map->setGetRouteCallback([this] () { return api().getRoute(); });
     map->setRedrawCallback([this] () { pixMap->invalidate(); });
     map->updateImage();
 
