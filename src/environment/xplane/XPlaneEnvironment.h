@@ -49,20 +49,14 @@ public:
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
     std::string getSettingsDir() override;
-    void sendUserFixesFilenameToXData(std::string filename) override;
     std::string getEarthTexturePath() override;
-    void runInEnvironment(EnvironmentCallback cb) override;
-    std::shared_ptr<world::Manager> getWorldManager() override;
     std::string getAirplanePath() override;
     Environment::MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     std::string getMETARForAirport(const std::string &icao) override;
-    void reloadMetar() override;
-    void loadUserFixes(std::string filename) override;
     void enableAndPowerPanel() override;
     void setIsInMenu(bool menu) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
-    float getLastFrameTime() override;
 
     ~XPlaneEnvironment();
 private:
@@ -78,10 +72,8 @@ private:
     GetMetarPtr getMetar{};
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
-    std::shared_ptr<world::Manager> xplaneData;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
-    std::atomic<float> lastDrawTime{};
     std::string aircraftPath;
 
     // State

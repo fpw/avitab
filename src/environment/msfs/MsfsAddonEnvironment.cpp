@@ -47,7 +47,7 @@ void MsfsAddonEnvironment::eventLoop()
 {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();
-        lastDrawTime = driver->getLastDrawTime() / 1000.0;
+        setLastFrameTime(driver->getLastDrawTime() / 1000.0);
 
         auto t = GetTickCount64();
         if (t >= nextSimUpdate) {

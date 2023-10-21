@@ -31,6 +31,8 @@ class XWorld : public world::World {
 public:
     XWorld();
 
+    virtual ~XWorld() = default;
+
     std::shared_ptr<world::Airport> findAirportByID(const std::string &id) const override;
     std::shared_ptr<world::Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const override;
     std::vector<std::shared_ptr<world::Airport>> findAirport(const std::string &keyWord) const override;
@@ -45,7 +47,7 @@ public:
     bool shouldCancelLoading() const;
 
     void registerNavNodes();
-    void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f);
+    void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f) override;
 
 private:
     std::atomic_bool loadCancelled { false };
