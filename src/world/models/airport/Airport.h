@@ -77,6 +77,7 @@ public:
     void addRunwayEnds(std::shared_ptr<Runway> rwy1, std::shared_ptr<Runway> rwy2);
     void forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>, const std::shared_ptr<Runway>)> f) const;
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
+    const std::shared_ptr<Runway> getOppositeRunwayEnd(const std::shared_ptr<Runway> rw) const;
     void addHeliport(std::shared_ptr<Heliport> port);
 
     bool hasOnlyHeliports() const;

@@ -36,6 +36,7 @@ public:
     void cancelLoading() override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
+    std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) override;
     std::shared_ptr<world::World> getWorld() override;
     void setUserFixesFilename(std::string filename) override;
 private:

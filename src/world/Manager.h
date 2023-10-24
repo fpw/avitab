@@ -30,6 +30,7 @@ public:
     virtual void cancelLoading() = 0;
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
+    virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) = 0;
     virtual std::shared_ptr<World> getWorld() = 0;
     virtual void setUserFixesFilename(std::string filename) = 0;
 

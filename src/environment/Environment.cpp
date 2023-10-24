@@ -60,6 +60,10 @@ void Environment::loadUserFixes(std::string filename) {
     worldManager->loadUserFixes(filename);
 }
 
+std::vector<std::shared_ptr<world::NavNode>> Environment::loadFlightPlan(const std::string filename) {
+    return worldManager->loadFlightPlan(filename);
+}
+
 void Environment::sendUserFixesFilenameToWorldMgr(std::string filename) {
     worldManager->setUserFixesFilename(filename);
 }

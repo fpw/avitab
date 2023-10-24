@@ -25,6 +25,7 @@
 #include "loaders/CIFPLoader.h"
 #include "loaders/MetarLoader.h"
 #include "loaders/UserFixLoader.h"
+#include "loaders/FMSLoader.h"
 #include "parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
@@ -198,6 +199,18 @@ void XData::loadUserFixes(std::string userFixesFilename) {
     } catch (const std::exception &e) {
         // User fixes are optional, so could be no CSV file or parse error
         logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());
+    }
+}
+
+std::vector<std::shared_ptr<world::NavNode>> XData::loadFlightPlan(const std::string filename) {
+    try {
+        FMSLoader loader(xworld);
+        auto res = loader.load(filename);
+        return res;
+
+    } catch (const std::exception &e) {
+        logger::warn("Unable to load/parse flight plan file '%s' %s", filename.c_str(), e.what());
+        return std::vector<std::shared_ptr<world::NavNode>>();
     }
 }
 

@@ -367,6 +367,10 @@ std::string AviTab::getDataPath() {
     return env->getProgramPath();
 }
 
+std::string AviTab::getFlightPlansPath() {
+    return env->getFlightPlansPath();
+}
+
 std::string AviTab::getEarthTexturePath() {
     return env->getEarthTexturePath();
 }
@@ -392,6 +396,10 @@ void AviTab::reloadMetar() {
 
 void AviTab::loadUserFixes(std::string filename) {
     env->loadUserFixes(filename);
+}
+
+std::vector<std::shared_ptr<world::NavNode>> AviTab::loadFlightPlan(const std::string filename) {
+    return env->loadFlightPlan(filename);
 }
 
 std::shared_ptr<apis::ChartService> AviTab::getChartService() {

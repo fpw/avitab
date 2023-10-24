@@ -37,6 +37,7 @@ public:
     // Can be called from any thread
     std::string getFontDirectory() override;
     std::string getEarthTexturePath() override;
+    std::string getFlightPlansPath() override;
     std::string getMETARForAirport(const std::string &icao) override;
     Environment::MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     AircraftID getActiveAircraftCount() override;

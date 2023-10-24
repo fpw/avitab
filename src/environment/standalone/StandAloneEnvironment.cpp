@@ -63,6 +63,10 @@ std::string StandAloneEnvironment::getFontDirectory() {
     return xplaneRootPath + "/Resources/fonts/";
 }
 
+std::string StandAloneEnvironment::getFlightPlansPath() {
+    return xplaneRootPath + "/Output/FMS Plans/";
+}
+
 void StandAloneEnvironment::eventLoop() {
     while (driver->handleEvents()) {
         runEnvironmentCallbacks();

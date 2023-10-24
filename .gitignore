@@ -46,3 +46,7 @@ cmake-build-debug
 
 # VSCode IDE
 .vscode/
+
+# Eclipse IDE
+.project
+.cproject

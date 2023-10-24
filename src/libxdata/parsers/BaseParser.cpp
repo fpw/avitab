@@ -73,6 +73,12 @@ std::string BaseParser::restOfLine() {
     return rest;
 }
 
+std::string BaseParser::consumeLine() {
+    std::string line;
+    std::getline(stream, line);
+    return line;
+}
+
 int BaseParser::parseInt() {
     skipWhiteSpace();
 
