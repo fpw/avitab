@@ -73,9 +73,10 @@ void CIFPLoader::loadSID(std::shared_ptr<world::Airport> airport, const CIFPData
     loadEnroute(procedure, *sid, airport);
 
     airport->addSID(sid);
-    sid->iterate([&sid, &airport] (std::shared_ptr<world::Runway> rw, std::shared_ptr<world::Fix> finalFix) {
+    auto w = this->world;
+    sid->iterate([w, &sid, &airport] (std::shared_ptr<world::Runway> rw, std::shared_ptr<world::Fix> finalFix) {
         if (finalFix->isGlobalFix()) {
-            airport->connectTo(sid, finalFix);
+            w->connectTo(airport, sid, finalFix);
         }
     });
 }
@@ -88,9 +89,10 @@ void CIFPLoader::loadSTAR(std::shared_ptr<world::Airport> airport, const CIFPDat
     loadRunwayTransition(procedure, *star, airport);
 
     airport->addSTAR(star);
-    star->iterate([&star, &airport] (std::shared_ptr<world::Runway> rw, std::shared_ptr<world::Fix> startFix, std::shared_ptr<world::NavNode> endPoint) {
+    auto w = this->world;
+    star->iterate([w, &star, &airport] (std::shared_ptr<world::Runway> rw, std::shared_ptr<world::Fix> startFix, std::shared_ptr<world::NavNode> endPoint) {
         if (startFix->isGlobalFix()) {
-            startFix->connectTo(star, airport);
+            w->connectTo(startFix, star, airport);
         }
     });
 }
@@ -105,12 +107,13 @@ void CIFPLoader::loadApproach(std::shared_ptr<world::Airport> airport, const CIF
 
     auto startFix = approach->getStartFix();
     if (startFix != nullptr && startFix->isGlobalFix()) {
-        startFix->connectTo(approach, airport);
+        world->connectTo(startFix, approach, airport);
     }
 
-    approach->iterateTransitions([&approach, &airport] (const std::string &name, std::shared_ptr<world::Fix> startFix, std::shared_ptr<world::Runway> rw) {
+    auto w = this->world;
+    approach->iterateTransitions([w, &approach, &airport] (const std::string &name, std::shared_ptr<world::Fix> startFix, std::shared_ptr<world::Runway> rw) {
         if (startFix != nullptr && startFix->isGlobalFix()) {
-            startFix->connectTo(approach, airport);
+            w->connectTo(startFix, approach, airport);
         }
     });
 }

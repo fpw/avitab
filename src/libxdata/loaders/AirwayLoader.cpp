@@ -59,14 +59,14 @@ void AirwayLoader::onAirwayLoaded(const AirwayData& airway) {
     auto awy = world->findOrCreateAirway(airway.name, level);
     switch (airway.dirRestriction) {
     case AirwayData::DirectionRestriction::FORWARD:
-        fromFix->connectTo(awy, toFix);
+        world->connectTo(fromFix, awy, toFix);
         break;
     case AirwayData::DirectionRestriction::BACKWARD:
-        toFix->connectTo(awy, fromFix);
+        world->connectTo(fromFix, awy, fromFix);
         break;
     case AirwayData::DirectionRestriction::NONE:
-        fromFix->connectTo(awy, toFix);
-        toFix->connectTo(awy, fromFix);
+        world->connectTo(fromFix, awy, toFix);
+        world->connectTo(toFix, awy, fromFix);
         break;
     }
 }

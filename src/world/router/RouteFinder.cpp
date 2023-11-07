@@ -23,11 +23,17 @@
 
 namespace world {
 
+RouteFinder::RouteFinder(std::shared_ptr<world::World> w):
+    world(w)
+{
+}
+
 void RouteFinder::setAirwayChangePenalty(float percent) {
     airwayChangePenalty = percent;
 }
 
-void RouteFinder::setEdgeFilter(EdgeFilter filter) {
+void RouteFinder::setEdgeFilter(EdgeFilter filter)
+{
     edgeFilter = filter;
 }
 
@@ -60,7 +66,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
         openSet.erase(current);
         closedSet.insert(current);
 
-        auto &neighbors = current->getConnections();
+        auto &neighbors = world->getConnections(current);
         for (auto neighborConn: neighbors) {
             auto &edge = std::get<0>(neighborConn);
             auto &neighbor = std::get<1>(neighborConn);

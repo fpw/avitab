@@ -21,23 +21,6 @@
 
 namespace world {
 
-void NavNode::connectTo(std::shared_ptr<NavEdge> via, std::shared_ptr<NavNode> to) {
-    connections.push_back(std::make_tuple(via, to));
-}
-
-const std::vector<NavNode::Connection>& NavNode::getConnections() const {
-    return connections;
-}
-
-bool NavNode::isConnectedTo(const std::shared_ptr<NavNode> other) const {
-    for (auto &conn: connections) {
-        if (std::get<1>(conn) == other) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool NavNode::isRunway() const {
     return false;
 }

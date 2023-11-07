@@ -56,12 +56,17 @@ public:
         }
     };
 
+    RouteFinder() = delete;
+    RouteFinder(std::shared_ptr<world::World> world);
+
     void setEdgeFilter(EdgeFilter filter);
     void setGetMagVarsCallback(GetMagVarsCallback cb);
     void setAirwayChangePenalty(float percent);
     std::vector<RouteDirection> findRoute(NodePtr from, NodePtr to);
 
 private:
+    std::shared_ptr<World> world;
+
     EdgeFilter edgeFilter;
     GetMagVarsCallback getMagneticVariations;
 
