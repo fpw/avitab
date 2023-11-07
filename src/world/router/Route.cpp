@@ -18,7 +18,6 @@
 #include <limits>
 #include "Route.h"
 #include "src/Logger.h"
-#include "../models/airport/Airport.h"
 
 namespace world {
 
@@ -52,6 +51,10 @@ void Route::find() {
         return getMagneticVariations(locations);
     });
     waypoints = router.findRoute(startNode, destNode);
+}
+
+void Route::loadRoute(std::vector<RouteFinder::RouteDirection> route) {
+    waypoints = route;
 }
 
 bool Route::checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const {

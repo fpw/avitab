@@ -25,11 +25,18 @@ namespace avitab {
 RouteApp::RouteApp(FuncsPtr appFuncs):
     App(appFuncs)
 {
-    window = std::make_shared<Window>(getUIContainer(), "Route");
+    auto ui = getUIContainer();
+    window = std::make_shared<Window>(ui, "Route");
     window->setOnClose([this] () {
         showDeparturePage();
         exit();
     });
+
+    chooserContainer = std::make_shared<Container>();
+    chooserContainer->setDimensions(ui->getWidth() * 0.75, ui->getHeight() * 0.75);
+    chooserContainer->centerInParent();
+    chooserContainer->setVisible(false);
+
     showDeparturePage();
 }
 
@@ -38,8 +45,14 @@ void RouteApp::showDeparturePage() {
 
     window->setCaption("Route Wizard - Departure");
 
+    loadContainer = std::make_shared<Container>(window);
+    loadButton = std::make_shared<Button>(loadContainer, "Load");
+    loadContainer->setDimensions(window->getWidth(), loadButton->getHeight() + 2);
+    loadButton->alignInTopRight();
+    loadButton->setCallback([this] (const Button &) { selectFlightPlanFile(); });
+
     label = std::make_shared<Label>(window, "Departure airport code:");
-    label->alignInTopLeft();
+    label->alignBelow(loadContainer);
 
     departureField = std::make_shared<TextArea>(window, "");
     departureField->setMultiLine(false);
@@ -80,7 +93,7 @@ void RouteApp::onDepartureEntered(const std::string& departure) {
         return;
     }
 
-    departureAirport = ap;
+    departureNode = ap;
 
     showArrivalPage();
 }
@@ -123,15 +136,15 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
         return;
     }
 
-    if (ap->getID() == departureAirport->getID()) {
+    if (ap->getID() == departureNode->getID()) {
         showError("Arrival must be different from departure");
         arrivalField->setText("");
         return;
     }
 
-    arrivalAirport = ap;
+    arrivalNode = ap;
 
-    route = std::make_shared<world::Route>(departureAirport, arrivalAirport);
+    route = std::make_shared<world::Route>(departureNode, arrivalNode);
     route->setAirwayLevel(airwayLevel);
     route->setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
         return api().getMagneticVariations(locations);
@@ -139,6 +152,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     try {
         route->find();
+        fromFMS = false;
         showRoute();
     } catch (const std::exception &e) {
         std::string error = std::string("Couldn't find a preliminary route, error: ") + e.what();
@@ -153,7 +167,12 @@ void RouteApp::showRoute() {
     std::stringstream desc;
     desc << std::fixed << std::setprecision(0);
 
-    std::string shortRoute = toShortRouteDescription();
+    std::string shortRoute;
+    if (fromFMS) {
+        shortRoute = fmsText;
+    } else {
+        shortRoute = toShortRouteDescription();
+    }
 
     desc << "Route: \n";
     desc << shortRoute << "\n";
@@ -175,6 +194,7 @@ void RouteApp::showRoute() {
     label->setLongMode(true);
     label->setText(desc.str());
     label->setDimensions(window->getContentWidth(), window->getHeight() - 40);
+    label->alignBelow(loadContainer);
 }
 
 void RouteApp::reset() {
@@ -187,6 +207,7 @@ void RouteApp::reset() {
     keys.reset();
     nextButton.reset();
     cancelButton.reset();
+    loadButton.reset();
 }
 
 void RouteApp::showError(const std::string& msg) {
@@ -210,13 +231,13 @@ std::string RouteApp::toShortRouteDescription() {
         }
 
         if (to) {
-            if (to == departureAirport || to == arrivalAirport) {
+            if (to == departureNode || to == arrivalNode) {
                 desc << " #99CC00";
             }
 
             desc << " " << to->getID();
 
-            if (to == departureAirport || to == arrivalAirport) {
+            if (to == departureNode || to == arrivalNode) {
                 desc << "#";
             }
         }
@@ -235,8 +256,8 @@ std::string RouteApp::toDetailedRouteDescription() {
             double initialTrueBearing,
             double initialMagneticBearing) {
 
-        std::string from_str = to ? from->getID() : "(no from)";
-        std::string via_str = via ? via->getID() : "(no via)";
+        std::string from_str = from ? from->getID() : "(no from)";
+        std::string via_str = via ? via->getID() : "-";
         std::string to_str = to ? to->getID() : "(no to)";
         int showInitialTrueBearing = (int)(initialTrueBearing + 0.5) % 360;
         int showInitialMagneticBearing = (int)(initialMagneticBearing + 0.5) % 360;
@@ -246,12 +267,90 @@ std::string RouteApp::toDetailedRouteDescription() {
             std::setfill('0') << std::setw(3) << showInitialMagneticBearing << "�M" <<
             " " << (int)distanceNm << "nm\n";
 
-        if (to == arrivalAirport) {
+        if (to == arrivalNode) {
             desc << to_str.c_str() << "\n";
         }
     });
 
     return desc.str();
+}
+
+void RouteApp::selectFlightPlanFile() {
+    reset();
+    fileChooser = std::make_unique<FileChooser>(&api(), "Flight Plan: ");
+    fileChooser->setBaseDirectory(api().getFlightPlansPath());
+    fileChooser->setFilterRegex("\\.fms$");
+    fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
+        api().executeLater([this, selectedUTF8] () {
+            try {
+                fileChooser.reset();
+                chooserContainer->setVisible(false);
+                fmsText = getFMSTextFromFile(selectedUTF8);
+                parseFMS(selectedUTF8);
+                fromFMS = true;
+                showRoute();
+            } catch (const std::exception &e) {
+                showDeparturePage();
+                showError("Couldn't load FMS file, see Avitab.log");
+                logger::warn("Couldn't load FMS file '%s': %s", selectedUTF8.c_str(), e.what());
+                return;
+            }
+        });
+    });
+    fileChooser->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            fileChooser.reset();
+            chooserContainer->setVisible(false);
+            showDeparturePage();
+        });
+    });
+    fileChooser->show(chooserContainer);
+    chooserContainer->setVisible(true);
+}
+
+std::string RouteApp::getFMSTextFromFile(const std::string &fmsFilename) {
+    std::ifstream ifs(fs::u8path(fmsFilename));
+    if (!ifs) {
+        throw std::runtime_error(std::string("Couldn't read FMS file") + fmsFilename);
+    }
+    std::stringstream ss;
+    ss << ifs.rdbuf();
+    return ss.str();
+}
+
+void RouteApp::parseFMS(const std::string &fmsFilename) {
+    auto nodes = api().loadFlightPlan(fmsFilename);
+    if (nodes.empty()) {
+        throw std::runtime_error(std::string("Found no waypoints"));
+    }
+
+    logger::info("Loaded %s", fmsFilename.c_str());
+
+    // Collate magnetic variations for the node locations used in the route
+    // Getting magVar from XPlane is asynchronous and slow, so batch request
+    std::vector<std::pair<double, double>> locations;
+    for (auto node: nodes) {
+        auto loc = node->getLocation();
+        locations.push_back(std::make_pair(loc.latitude, loc.longitude));
+    }
+    auto magVarMap = api().getMagneticVariations(locations);
+
+    std::vector<world::RouteFinder::RouteDirection> fmsRoute;
+    std::shared_ptr<world::NavNode> prevNode;
+    for (auto node: nodes) {
+        if (prevNode) {
+            auto prevLoc = prevNode->getLocation();
+            auto magVar = magVarMap[std::make_pair(prevLoc.latitude, prevLoc.longitude)];
+            fmsRoute.push_back(world::RouteFinder::RouteDirection(prevNode, nullptr, node, magVar));
+        } else {
+            departureNode = node;
+        }
+        prevNode = node;
+    }
+    arrivalNode = prevNode;
+    route = std::make_shared<world::Route>(departureNode, arrivalNode);
+    route->loadRoute(fmsRoute);
+    api().setRoute(route);
 }
 
 } /* namespace avitab */

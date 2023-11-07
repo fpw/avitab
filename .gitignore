@@ -50,3 +50,7 @@ cmake-build-debug
 # clangd index and compilation database
 .cache
 compile_commands.json
+
+# Eclipse IDE
+.project
+.cproject

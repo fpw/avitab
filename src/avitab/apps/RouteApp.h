@@ -23,6 +23,7 @@
 #include <set>
 #include "App.h"
 #include "src/world/router/Route.h"
+#include "src/avitab/apps/components/FileChooser.h"
 #include "src/gui_toolkit/widgets/TabGroup.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/TextArea.h"
@@ -43,16 +44,21 @@ private:
     std::shared_ptr<Window> window;
     std::shared_ptr<Label> label;
     std::shared_ptr<TextArea> departureField, arrivalField;
+    std::shared_ptr<Container> loadContainer, chooserContainer;
+    std::shared_ptr<Button> loadButton;
     std::shared_ptr<Keyboard> keys;
     std::shared_ptr<DropDownList> list;
     std::shared_ptr<MessageBox> errorMessage;
     std::shared_ptr<Button> nextButton, cancelButton;
     std::shared_ptr<Checkbox> checkBox;
+    std::unique_ptr<FileChooser> fileChooser;
 
     world::AirwayLevel airwayLevel = world::AirwayLevel::UPPER;
-    std::shared_ptr<world::Airport> departureAirport, arrivalAirport;
+    std::shared_ptr<world::NavNode> departureNode, arrivalNode;
     std::shared_ptr<world::Fix> departureFix, arrivalFix;
     std::shared_ptr<world::Route> route;
+    std::string fmsText;
+    bool fromFMS = false;
 
     void showDeparturePage();
     void onDepartureEntered(const std::string &departure);
@@ -67,6 +73,10 @@ private:
 
     std::string toShortRouteDescription();
     std::string toDetailedRouteDescription();
+
+    void selectFlightPlanFile();
+    std::string getFMSTextFromFile(const std::string &fmsFilename);
+    void parseFMS(const std::string &fmsFilename);
 };
 
 } /* namespace avitab */

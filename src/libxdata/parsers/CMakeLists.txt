@@ -1,5 +1,4 @@
 target_sources(xdata PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/BaseParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/AirportParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/CIFPParser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/FixParser.cpp

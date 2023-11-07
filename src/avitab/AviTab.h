@@ -55,6 +55,7 @@ public:
     std::string getDataPath() override;
     std::string getEarthTexturePath() override;
     std::string getAirplanePath() override;
+    std::string getFlightPlansPath() override;
     std::shared_ptr<Container> createGUIContainer() override;
     void showGUIContainer(std::shared_ptr<Container> container) override;
     void onHomeButton() override;
@@ -64,6 +65,7 @@ public:
     std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
+    std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
     std::shared_ptr<apis::ChartService> getChartService() override;

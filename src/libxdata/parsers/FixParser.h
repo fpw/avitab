@@ -20,8 +20,8 @@
 
 #include <string>
 #include <functional>
-#include "BaseParser.h"
-#include "src/libxdata/parsers/objects/FixData.h"
+#include "src/world/parsers/BaseParser.h"
+#include "objects/FixData.h"
 
 namespace xdata {
 
@@ -36,7 +36,7 @@ public:
 private:
     Acceptor acceptor;
     std::string header;
-    BaseParser parser;
+    world::BaseParser parser;
 
     void parseLine();
 };

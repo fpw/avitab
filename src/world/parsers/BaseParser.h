@@ -15,30 +15,44 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_PARSERS_CUSTOMSCENERYPARSER_H_
-#define SRC_LIBXDATA_PARSERS_CUSTOMSCENERYPARSER_H_
+#ifndef SRC_WORLD_PARSERS_BASEPARSER_H_
+#define SRC_WORLD_PARSERS_BASEPARSER_H_
 
 #include <string>
 #include <functional>
-#include "src/world/parsers/BaseParser.h"
+#include <sstream>
+#include <iosfwd>
+#include "src/platform/Platform.h"
 
-namespace xdata {
+namespace world {
 
-class CustomSceneryParser {
+class BaseParser {
 public:
-    using Acceptor = std::function<void(const std::string &)>;
+    using LineFunctor = std::function<void()>;
+    BaseParser(const std::string &file);
 
-    CustomSceneryParser(const std::string &file);
-    void setAcceptor(Acceptor a);
-    void loadCustomScenery();
+    std::string parseHeader();
+    void eachLine(LineFunctor f);
+
+    bool isEOL();
+    std::string restOfLine();
+    std::string consumeLine();
+    std::string parseWord();
+    std::string nextDelimitedWord(char delim);
+    std::string nextCSVValue();
+    int parseInt();
+    double parseDouble();
+    void skip(char c);
+
+    void skipWhiteSpace();
+    int getVersion();
 private:
-    Acceptor acceptor;
-    world::BaseParser parser;
-    std::string curData {};
-
-    void parseLine();
+    fs::ifstream stream;
+    std::istringstream lineStream;
+    std::istream &getLine(std::string &str);
+    int version;
 };
 
-} /* namespace xdata */
+} /* namespace world */
 
-#endif /* SRC_LIBXDATA_PARSERS_CUSTOMSCENERYPARSER_H_ */
+#endif /* SRC_WORLD_PARSERS_BASEPARSER_H_ */

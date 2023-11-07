@@ -47,12 +47,14 @@ public:
     virtual std::string getDataPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
     virtual std::string getAirplanePath() = 0;
+    virtual std::string getFlightPlansPath() = 0;
     virtual std::shared_ptr<Container> createGUIContainer() = 0;
     virtual void showGUIContainer(std::shared_ptr<Container> container) = 0;
     virtual void onHomeButton() = 0;
     virtual std::shared_ptr<world::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
+    virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) = 0;
     using MagVarMap = std::map<std::pair<double, double>, double>;
     virtual MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) = 0;
     virtual std::string getMETARForAirport(const std::string &icao) = 0;

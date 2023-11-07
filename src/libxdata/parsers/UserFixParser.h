@@ -21,8 +21,8 @@
 #include <string>
 #include <functional>
 #include "src/world/models/navaids/UserFix.h"
-#include "src/libxdata/parsers/objects/UserFixData.h"
-#include "BaseParser.h"
+#include "objects/UserFixData.h"
+#include "src/world/parsers/BaseParser.h"
 
 namespace xdata {
 
@@ -37,7 +37,7 @@ public:
 private:
     Acceptor acceptor;
     std::string header;
-    BaseParser parser;
+    world::BaseParser parser;
     int lineNum;
 
     void parseLine();
