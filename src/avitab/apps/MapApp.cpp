@@ -89,7 +89,7 @@ void MapApp::createSettingsLayout() {
     stamenButton->setCallback([this] (const Button &) { setMapSource(MapSource::STAMEN_TERRAIN); });
     stamenButton->setFit(false, true);
     stamenButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    stamenButton->alignBelow(openTopoButton, 30);
+    stamenButton->alignBelow(openTopoButton, 20);
     auto stamenLabel = std::make_shared<Label>(settingsContainer,
             "Map Data (c) OpenStreetMap\nEnglish map tiles by Stamen Design");
     stamenLabel->alignRightOf(stamenButton, 10);
@@ -130,6 +130,15 @@ void MapApp::createSettingsLayout() {
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
+
+    onlineMapsButton = std::make_shared<Button>(settingsContainer, "Online");
+    onlineMapsButton->setCallback([this] (const Button &) { setMapSource(MapSource::ONLINE_TILES); });
+    onlineMapsButton->setFit(false, true);
+    onlineMapsButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    onlineMapsButton->alignBelow(mercatorButton, 10);
+    auto onlineMapsLabel = std::make_shared<Label>(settingsContainer, "Select slippy tiles from online sources.");
+    onlineMapsLabel->alignRightOf(onlineMapsButton, 10);
+    onlineMapsLabel->setManaged();
 }
 
 void MapApp::setMapSource(MapSource style) {
@@ -172,6 +181,8 @@ void MapApp::setMapSource(MapSource style) {
         break;
     case MapSource::NAVIGRAPH_WORLD:
         selectNavigraph(maps::NavigraphMapType::WORLD);
+        break;
+    case MapSource::ONLINE_TILES:
         break;
     }
 

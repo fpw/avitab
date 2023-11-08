@@ -60,6 +60,7 @@ private:
         NAVIGRAPH_LOW,
         NAVIGRAPH_VFR,
         NAVIGRAPH_WORLD,
+        ONLINE_TILES,
     };
 
     std::shared_ptr<maps::OverlayConfig> overlayConf;
@@ -74,7 +75,7 @@ private:
     std::shared_ptr<Button> trackButton;
     std::shared_ptr<Button> rotateButton;
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
-    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton;
+    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton, onlineMapsButton;
     std::shared_ptr<Label> overlayLabel;
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox, routeCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
