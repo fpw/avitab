@@ -46,3 +46,7 @@ cmake-build-debug
 
 # VSCode IDE
 .vscode/
+
+# clangd index and compilation database
+.cache
+compile_commands.json
