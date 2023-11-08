@@ -22,6 +22,7 @@
 #include <vector>
 #include "App.h"
 #include "src/avitab/apps/components/FileChooser.h"
+#include "src/avitab/apps/components/ContainerWithClickableCustomList.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/Window.h"
 #include "src/gui_toolkit/widgets/Button.h"
@@ -65,6 +66,7 @@ private:
 
     std::shared_ptr<maps::OverlayConfig> overlayConf;
     std::unique_ptr<FileChooser> fileChooser;
+    std::unique_ptr<ContainerWithClickableCustomList> containerWithClickableList;
     std::shared_ptr<img::TileSource> tileSource;
     std::shared_ptr<img::Image> mapImage;
     std::shared_ptr<img::Stitcher> mapStitcher;
@@ -103,6 +105,7 @@ private:
     void selectGeoTIFF();
     void selectMercator();
     void selectEPSG();
+    void selectOnlineMaps();
     void selectNavigraph(maps::NavigraphMapType type);
     void selectUserFixesFile();
 

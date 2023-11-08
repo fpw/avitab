@@ -183,6 +183,7 @@ void MapApp::setMapSource(MapSource style) {
         selectNavigraph(maps::NavigraphMapType::WORLD);
         break;
     case MapSource::ONLINE_TILES:
+        selectOnlineMaps();
         break;
     }
 
@@ -269,6 +270,27 @@ void MapApp::selectEPSG() {
         });
     });
     fileChooser->show(chooserContainer);
+    chooserContainer->setVisible(true);
+}
+
+void MapApp::selectOnlineMaps() {
+    std::vector<std::string> slippyMapNames{"Dummy map 1", "Dummy map 2"};
+
+    containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(&api(), "Select online slippy maps");
+    containerWithClickableList->setListItems(slippyMapNames);
+
+    containerWithClickableList->setSelectCallback([this](int selectedItem) {
+        logger::verbose("selected map %d: %s", selectedItem,
+                containerWithClickableList->getEntry(selectedItem).c_str());
+    });
+    containerWithClickableList->setCancelCallback([this] () {
+        api().executeLater([this] () {
+            containerWithClickableList.reset();
+            chooserContainer->setVisible(false);
+        });
+    });
+
+    containerWithClickableList->show(chooserContainer);
     chooserContainer->setVisible(true);
 }
 
