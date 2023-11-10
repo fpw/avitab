@@ -131,7 +131,7 @@ std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) 
         nameStream << *hosts.begin();
     }
     nameStream << tileServer;
-    nameStream << zoom << "/" << x << "/" << y << ".png";
+    nameStream << "/" << zoom << "/" << x << "/" << y << ".png";
     return nameStream.str();
 }
 

@@ -1,0 +1,21 @@
+[
+    {
+        "name": "OpenStreetMap",
+        "servers": [
+            ".tile.openstreetmap.org"
+        ],
+        "copyright": "Map tiles (c) OpenStreetMap (ODbL)",
+        "url": "{z}/{x}/{y}.png",
+        "min_zoom_level": 1,
+        "max_zoom_level": 17
+    },
+    {
+        "name": "OpenTopoMap",
+        "servers": [
+            ".tile.opentopomap.org"
+        ],
+        "copyright": "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)",
+        "url": "{z}/{x}/{y}.png",
+        "enabled": false
+    }
+]
