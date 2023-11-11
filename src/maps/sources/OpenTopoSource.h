@@ -26,7 +26,7 @@ namespace maps {
 class OpenTopoSource: public img::TileSource {
 public:
     OpenTopoSource(std::vector<std::string> tileServers, std::string url,
-           size_t minZoom, size_t maxZoom,
+           size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
            std::string copyrightInfo);
 
     // Basic information

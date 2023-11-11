@@ -154,7 +154,7 @@ void MapApp::setMapSource(MapSource style) {
                 "c.tile.opentopomap.org",
             },
             "{z}/{x}/{y}.png",
-            0, 17,
+            0, 17, 256, 256,
             "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
         setTileSource(newSource);
         break;
@@ -162,7 +162,7 @@ void MapApp::setMapSource(MapSource style) {
         newSource = std::make_shared<maps::OpenTopoSource>(
             std::vector<std::string>{"a.tile.stamen.com"},
             "terrain/{z}/{x}/{y}.png",
-            0, 17,
+            0, 17, 256, 256,
             "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.");
         setTileSource(newSource);
         break;
@@ -371,7 +371,8 @@ void MapApp::selectOnlineMaps() {
         const auto &conf = slippyMaps.at(selectedItem);
 
         newSource = std::make_shared<maps::OpenTopoSource>(
-            conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel, conf.copyright);
+            conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
+            conf.tileWidthPx, conf.tileHeightPx, conf.copyright);
 
         setTileSource(newSource);
     });
