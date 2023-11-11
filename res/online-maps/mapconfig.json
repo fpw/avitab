@@ -7,7 +7,8 @@
         "copyright": "Map tiles (c) OpenStreetMap (ODbL)",
         "url": "{z}/{x}/{y}.png",
         "min_zoom_level": 1,
-        "max_zoom_level": 17
+        "max_zoom_level": 17,
+        "enabled": false
     },
     {
         "name": "OpenTopoMap",
@@ -16,6 +17,8 @@
         ],
         "copyright": "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)",
         "url": "{z}/{x}/{y}.png",
-        "enabled": false
+        "min_zoom_level": 1,
+        "max_zoom_level": 17,
+        "enabled": true
     }
 ]

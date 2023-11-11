@@ -302,7 +302,7 @@ void MapApp::selectOnlineMaps() {
 
     // Read the config
     std::string mapConfigPath(api().getDataPath() + "online-maps/mapconfig.json");
-    std::ifstream mapConfigFstream(fs::u8path(mapConfigPath));
+    fs::ifstream mapConfigFstream(fs::u8path(mapConfigPath));
 
     if (!mapConfigFstream) {
         logger::error("No mapconfig.json file found in '%s'",
@@ -314,15 +314,15 @@ void MapApp::selectOnlineMaps() {
     }
 
     // Parse the config content
-    try{
+    try {
         const auto &mapConfig = nlohmann::json::parse(mapConfigFstream);
         logger::verbose("Found %u maps in %s", mapConfig.size(), mapConfigPath.c_str());
 
         uint32_t i = 0;
         for (const auto &item : mapConfig.items()){
-            const auto &conf = item.value().get<OnlineSlippyMapConfig>();
+            const auto &conf = item.value().get<maps::OnlineSlippyMapConfig>();
             if (conf.enabled) {
-                slippyMaps.insert(std::pair<uint32_t, OnlineSlippyMapConfig>(i++, conf));
+                slippyMaps.insert(std::pair<size_t, maps::OnlineSlippyMapConfig>(i++, conf));
                 slippyMapNames.push_back(conf.name);
             }
         }

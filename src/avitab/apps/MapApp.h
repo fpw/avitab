@@ -18,12 +18,7 @@
 #ifndef SRC_AVITAB_APPS_MAPAPP_H_
 #define SRC_AVITAB_APPS_MAPAPP_H_
 
-#include <memory>
-#include <stdexcept>
-#include <vector>
 #include "App.h"
-#include <nlohmann/json.hpp>
-#include <optional>
 #include "src/avitab/apps/components/FileChooser.h"
 #include "src/avitab/apps/components/ContainerWithClickableCustomList.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
@@ -41,85 +36,9 @@
 #include "src/libimg/Image.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/NavigraphSource.h"
+#include "src/maps/sources/OnlineSlippyMapConfig.h"
 
 namespace avitab {
-
-struct OnlineSlippyMapConfig {
-    std::string name;
-    std::string copyright;
-    std::vector<std::string> servers;
-    std::string url;
-    uint32_t minZoomLevel;
-    uint32_t maxZoomLevel;
-    bool enabled;
-};
-
-/***
- * Attemps to parse a json value of type T from a json key, with an
- * optional default value when the key cannot be found or unmarshalled
- * correctly.
- *
- * If a default value is not given, the json key is treated as a required
- * key. If the parsing of a required json key fails, an error is logged
- * and an std::runtime_error exception is thrown, unless
- * ignoreError == true
- *
- * The function will return true if the parsing succeeds and false
- * otherwise
- */
-template <typename T>
-inline bool parse_json_key(const nlohmann::json &j, std::string json_key, T &var_to_unmarshall, std::optional<T> default_val, bool ignoreError = false) {
-    try {
-        j.at(json_key).get_to(var_to_unmarshall);
-    } catch (const nlohmann::json::out_of_range &) {
-        if (default_val) {
-            var_to_unmarshall = *default_val;
-        } else {
-            if (!ignoreError) {
-                logger::error("    '%s' is a required config key but was not found in the json configuration", json_key.c_str());
-                throw std::runtime_error(std::string("missing required config key '") + json_key + std::string("'"));
-            }
-        }
-        return false;
-    }
-    return true;
-}
-
-// Function to deserialize the OnlineSlippyMapConfig
-// https://json.nlohmann.me/api/adl_serializer/from_json/
-// https://github.com/nlohmann/json#basic-usage
-inline void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
-    parse_json_key<bool>(j, "enabled", c.enabled, true, true);
-
-    parse_json_key<std::string>(j, "name", c.name, std::nullopt);
-
-    if (!c.enabled) {
-        logger::verbose("Hiding (explicitly disabled in json config) %s online map", c.name.c_str());
-        return;
-    }
-
-    logger::verbose("Enabling %s online map", c.name.c_str());
-
-    parse_json_key<std::string>(j, "copyright", c.copyright, std::nullopt);
-    parse_json_key<std::vector<std::string>>(j, "servers", c.servers, std::nullopt);
-    parse_json_key<std::string>(j, "url", c.url, std::nullopt);
-    parse_json_key<uint32_t>(j, "min_zoom_level", c.minZoomLevel, 0);
-    parse_json_key<uint32_t>(j, "max_zoom_level", c.maxZoomLevel, 16);
-
-    logger::verbose("    Map copyright: '%s'", c.copyright.c_str());
-    logger::verbose("    Servers to download tiles from: [");
-    for (const auto &s : c.servers)
-        logger::verbose("        '%s',", s.c_str());
-    logger::verbose("    ]");
-    logger::verbose("    Server URL: '%s'", c.url.c_str());
-    logger::verbose("    Min zoom level: %u", c.minZoomLevel);
-    logger::verbose("    Max zoom level: %u", c.maxZoomLevel);
-
-    if (c.servers.size() < 1)
-        throw std::runtime_error(
-                std::string("no servers found for ") + c.name + std::string(". Requires at least one"));
-
-}
 
 class MapApp: public App {
 public:
@@ -170,7 +89,7 @@ private:
     std::unique_ptr<Keyboard> keyboard;
 
     std::shared_ptr<avitab::Settings> savedSettings;
-    std::map<uint32_t, OnlineSlippyMapConfig> slippyMaps;
+    std::map<size_t, maps::OnlineSlippyMapConfig> slippyMaps;
 
     Timer updateTimer;
     bool trackPlane = true;
