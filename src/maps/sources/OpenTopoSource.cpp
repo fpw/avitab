@@ -22,21 +22,39 @@
 
 namespace maps {
 
-OpenTopoSource::OpenTopoSource(std::string tileServer, std::string copyrightInfo):
-    tileServer(tileServer),
+OpenTopoSource::OpenTopoSource(
+        std::vector<std::string> tileServers, std::string url,
+        size_t minZoom, size_t maxZoom, std::string copyrightInfo):
+    tileServers(tileServers),
+    minZoom(minZoom),
+    maxZoom(maxZoom),
     copyrightInfo(copyrightInfo) {
+
+    if (this->tileServers.size() == 0) {
+        throw std::runtime_error("no tile servers. A minimum of one tile server is required");
+    }
+
+    if (url.size() && url[0] != '/') {
+        this->url = std::string("/") + url;
+    } else {
+        this->url = url;
+    }
 }
 
 int OpenTopoSource::getMinZoomLevel() {
-    return 0;
+    return minZoom;
 }
 
 int OpenTopoSource::getMaxZoomLevel() {
-    return 17;
+    return maxZoom;
 }
 
 int OpenTopoSource::getInitialZoomLevel() {
-    return 12;
+    const int desiredZoomLevel = 12;
+    if (desiredZoomLevel >= minZoom and desiredZoomLevel <= maxZoom) {
+        return desiredZoomLevel;
+    }
+    return abs(int(maxZoom - minZoom) / 2);
 }
 
 bool OpenTopoSource::supportsWorldCoords() {
@@ -48,7 +66,7 @@ img::Point<double> OpenTopoSource::suggestInitialCenter(int page) {
 }
 
 img::Point<int> OpenTopoSource::getTileDimensions(int zoom) {
-    return img::Point<int>{256, 256};
+    return img::Point<int>{tileWidth, tileHeight};
 }
 
 img::Point<double> OpenTopoSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
@@ -119,19 +137,34 @@ bool OpenTopoSource::isTileValid(int page, int x, int y, int zoom) {
     return true;
 }
 
+inline void searchAndReplace(std::string &str, const std::string &search, const std::string &replace) {
+    std::string::size_type pos = 0u;
+    while ((pos = str.find(search, pos)) != std::string::npos) {
+        str.replace(pos, search.length(), replace);
+        pos += replace.length();
+    }
+}
+
 std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) {
-    if (++hostIndex == hosts.length()) {
+    std::string tileUrl = url;
+
+    // Replace url placeholders with correct values
+    searchAndReplace(tileUrl, "{z}", std::to_string(zoom));
+    searchAndReplace(tileUrl, "{x}", std::to_string(x));
+    searchAndReplace(tileUrl, "{y}", std::to_string(y));
+
+    if (++hostIndex == tileServers.size()) {
         hostIndex = 0;
     }
 
     std::ostringstream nameStream;
     if (randomHost) {
-        nameStream << hosts[hostIndex];
+        nameStream << tileServers[hostIndex];
     } else {
-        nameStream << *hosts.begin();
+        nameStream << tileServers[0];
     }
-    nameStream << tileServer;
-    nameStream << "/" << zoom << "/" << x << "/" << y << ".png";
+
+    nameStream << tileUrl;
     return nameStream.str();
 }
 

@@ -148,13 +148,21 @@ void MapApp::setMapSource(MapSource style) {
     switch (style) {
     case MapSource::OPEN_TOPO:
         newSource = std::make_shared<maps::OpenTopoSource>(
-            ".tile.opentopomap.org/",
+            std::vector<std::string>{
+                "a.tile.opentopomap.org",
+                "b.tile.opentopomap.org",
+                "c.tile.opentopomap.org",
+            },
+            "{z}/{x}/{y}.png",
+            0, 17,
             "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
         setTileSource(newSource);
         break;
     case MapSource::STAMEN_TERRAIN:
         newSource = std::make_shared<maps::OpenTopoSource>(
-            ".tile.stamen.com/terrain/",
+            std::vector<std::string>{"a.tile.stamen.com"},
+            "terrain/{z}/{x}/{y}.png",
+            0, 17,
             "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.");
         setTileSource(newSource);
         break;
@@ -363,7 +371,7 @@ void MapApp::selectOnlineMaps() {
         const auto &conf = slippyMaps.at(selectedItem);
 
         newSource = std::make_shared<maps::OpenTopoSource>(
-            conf.servers[0], conf.copyright);
+            conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel, conf.copyright);
 
         setTileSource(newSource);
     });
