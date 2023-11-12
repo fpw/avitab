@@ -19,13 +19,14 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include <algorithm>
 
 namespace maps {
 
 OpenTopoSource::OpenTopoSource(
         std::vector<std::string> tileServers, std::string url,
         size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
-        std::string copyrightInfo):
+        std::string copyrightInfo, std::string protocol):
     tileServers(tileServers),
     minZoom(minZoom),
     maxZoom(maxZoom),
@@ -37,11 +38,23 @@ OpenTopoSource::OpenTopoSource(
         throw std::runtime_error("no tile servers. A minimum of one tile server is required");
     }
 
+    // Ensure we have a leading forward slash in the url.
+    // Do that once in the constructor, as the url remains the same
+    // for the lifetime of object
     if (url.size() && url[0] != '/') {
         this->url = std::string("/") + url;
     } else {
         this->url = url;
     }
+
+
+    this->protocol = protocol;
+    // Convert the protocol to lower case. Although casing doesn't matter
+    // as long as it is a correct protocol (the get requests still work on
+    // HTtpS://www.server.org), it looks better in the logs if all letter
+    // are printed in lower case.
+    std::transform(this->protocol.begin(), this->protocol.end(), this->protocol.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
 }
 
 int OpenTopoSource::getMinZoomLevel() {
@@ -183,7 +196,7 @@ std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) 
 std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
     std::string path = getTileURL(true, x, y, zoom);
-    auto data = downloader.download("https://" + path, cancelToken);
+    auto data = downloader.download(protocol + "://" + path, cancelToken);
     auto image = std::make_unique<img::Image>();
     image->loadEncodedData(data, true);
     return image;

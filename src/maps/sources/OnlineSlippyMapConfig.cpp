@@ -104,6 +104,30 @@ static void validateUrl(const std::string &url, std::string mapName) {
     }
 }
 
+static void validateProtocol(const std::string &protocol, std::string mapName) {
+    auto toLowerCase = [](std::string str) {
+        std::transform(str.begin(), str.end(), str.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        return str;
+    };
+
+    // Be forgiving and accept mixed case as long as the lower-cased protocol
+    // string is correct. In the most common scenarios, a user will either
+    // go all capital, all lowercase, or only the first letter will be capital
+    // and the rest will be lower case.
+    //
+    // Note that in the following test case we only test against a lower cased
+    // copy of the protocol variable - we don't change casing on the input
+    // variable. If the validation fails, we want to print in the error logs the
+    // exact string that the user passed in the mapconfig.json to assist with
+    // config issues debugging
+    if (toLowerCase(protocol) != "https" && toLowerCase(protocol) != "http") {
+        throw std::runtime_error("unsupported protocol '" + protocol +
+                                 "' for " + mapName +
+                                 ". Only http and https are supported");
+    }
+}
+
 void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
     parse_json_key<bool>(j, "enabled", c.enabled, true, std::nullopt, true);
 
@@ -118,10 +142,12 @@ void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
 
     logger::verbose("Enabling %s online map", c.name.c_str());
 
-    parse_json_key<std::string>(j, "copyright", c.copyright, std::nullopt, c.name);
+    parse_json_key<std::string>(j, "copyright", c.copyright, std::nullopt,
+                                c.name);
     parse_json_key<std::vector<std::string>>(j, "servers", c.servers,
                                              std::nullopt, c.name);
     parse_json_key<std::string>(j, "url", c.url, std::nullopt, c.name);
+    parse_json_key<std::string>(j, "protocol", c.protocol, "https", c.name);
     parse_json_key<size_t>(j, "min_zoom_level", c.minZoomLevel, 0, c.name);
     parse_json_key<size_t>(j, "max_zoom_level", c.maxZoomLevel, 16, c.name);
     parse_json_key<size_t>(j, "tile_width_px", c.tileWidthPx, 256, c.name);
@@ -136,12 +162,12 @@ void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
         logger::verbose("        '%s',", s.c_str());
     }
     logger::verbose("    ]");
+    logger::verbose("    Communication protocol: '%s'", c.protocol.c_str());
     logger::verbose("    Server URL: '%s'", c.url.c_str());
     logger::verbose("    Min zoom level: %u", c.minZoomLevel);
     logger::verbose("    Max zoom level: %u", c.maxZoomLevel);
     logger::verbose("    Tile width: %upx", c.tileWidthPx);
     logger::verbose("    Tile height: %upx", c.tileHeightPx);
-    
 
     // The validation functions throw exceptions, so call them after the
     // verbose print out so in the case of an exception, the user can look
@@ -149,6 +175,7 @@ void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
     // with the validation
     validateTileServers(c.servers, c.name);
     validateUrl(c.url, c.name);
+    validateProtocol(c.protocol, c.name);
 }
 
 } // namespace maps
