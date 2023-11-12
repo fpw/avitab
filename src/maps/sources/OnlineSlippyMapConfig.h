@@ -31,6 +31,7 @@ struct OnlineSlippyMapConfig {
     std::string name;
     std::string copyright;
     std::vector<std::string> servers;
+    std::string protocol;
     std::string url;
     size_t minZoomLevel;
     size_t maxZoomLevel;

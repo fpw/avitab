@@ -372,7 +372,8 @@ void MapApp::selectOnlineMaps() {
 
         newSource = std::make_shared<maps::OpenTopoSource>(
             conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
-            conf.tileWidthPx, conf.tileHeightPx, conf.copyright);
+            conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
+            conf.protocol);
 
         setTileSource(newSource);
     });

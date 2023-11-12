@@ -4,10 +4,13 @@
         "servers": [
             "tile.openstreetmap.org"
         ],
+        "protocol": "https",
         "copyright": "Map tiles (c) OpenStreetMap (ODbL)",
         "url": "{z}/{x}/{y}.png",
         "min_zoom_level": 1,
         "max_zoom_level": 17,
+        "tile_width_px": 256,
+        "tile_height_px": 256,
         "enabled": false,
         "comment": "https://wiki.openstreetmap.org/wiki/Raster_tile_providers"
     },
@@ -18,10 +21,13 @@
             "b.tile.opentopomap.org",
             "c.tile.opentopomap.org"
         ],
+        "protocol": "https",
         "copyright": "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)",
         "url": "{z}/{x}/{y}.png",
         "min_zoom_level": 1,
         "max_zoom_level": 17,
+        "tile_width_px": 256,
+        "tile_height_px": 256,
         "enabled": true
     }
 ]

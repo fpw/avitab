@@ -27,7 +27,7 @@ class OpenTopoSource: public img::TileSource {
 public:
     OpenTopoSource(std::vector<std::string> tileServers, std::string url,
            size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
-           std::string copyrightInfo);
+           std::string copyrightInfo, std::string protocol = "https");
 
     // Basic information
     int getMinZoomLevel() override;
@@ -66,6 +66,7 @@ private:
     int tileWidth = 256;
     int tileHeight = 256;
     std::string copyrightInfo;
+    std::string protocol = "https";
 };
 
 } /* namespace maps */
