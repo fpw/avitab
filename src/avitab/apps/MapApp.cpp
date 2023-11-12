@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <cmath>
 #include "MapApp.h"
+#include "ghc/filesystem.hpp"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 #include "src/platform/strtod.h"
@@ -274,15 +275,99 @@ void MapApp::selectEPSG() {
 }
 
 void MapApp::selectOnlineMaps() {
-    std::vector<std::string> slippyMapNames{"Dummy map 1", "Dummy map 2"};
+    auto showOnlineMapsError([this](std::vector<std::string> errorMsgs) {
+        // Lambda function to show an error in the online maps window
+        // when we have trouble loading the user-defined online map
+        // configuration. JSON configs are very delicate (an extra comma
+        // can cause trouble), so it will be annoying if the user configured
+        // some maps, but can't see anything when starting AviTab. At least
+        // an error message briefing the user and advising them to look at
+        // the AviTab logs for more information improves the user experience
+        containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(
+                &api(), "Error loading online maps");
+        containerWithClickableList->setListItems(errorMsgs);
+        containerWithClickableList->setSelectCallback([](int selectedItem) {});
+        containerWithClickableList->setCancelCallback([this] () {
+            api().executeLater([this] () {
+                containerWithClickableList.reset();
+                chooserContainer->setVisible(false);
+            });
+        });
+        containerWithClickableList->show(chooserContainer);
+        chooserContainer->setVisible(true);
+    });
 
-    containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(&api(), "Select online slippy maps");
+    slippyMaps.clear();
+    std::vector<std::string> slippyMapNames;
+
+    // Read the config
+    std::string mapConfigPath(api().getDataPath() + "online-maps/mapconfig.json");
+    fs::ifstream mapConfigFstream(fs::u8path(mapConfigPath));
+
+    if (!mapConfigFstream) {
+        logger::error("No mapconfig.json file found in '%s'",
+                fs::u8path(mapConfigPath).c_str());
+        showOnlineMapsError(std::vector<std::string>{
+                "cannot load mapconfig.json from path:",
+                fs::u8path(mapConfigPath)});
+        return;
+    }
+
+    // Parse the config content
+    try {
+        const auto &mapConfig = nlohmann::json::parse(mapConfigFstream);
+        logger::verbose("Found %u maps in %s", mapConfig.size(), mapConfigPath.c_str());
+
+        uint32_t i = 0;
+        for (const auto &item : mapConfig.items()){
+            const auto &conf = item.value().get<maps::OnlineSlippyMapConfig>();
+            if (conf.enabled) {
+                slippyMaps.insert(std::pair<size_t, maps::OnlineSlippyMapConfig>(i++, conf));
+                slippyMapNames.push_back(conf.name);
+            }
+        }
+    } catch (const nlohmann::json::exception &e) {
+        logger::error("Failed to parse '%s': %s", mapConfigPath.c_str(), e.what());
+        showOnlineMapsError(std::vector<std::string>{
+                "Failed to parse mapconfig.json",
+                "Please check the AviTab logs for more details"});
+        return;
+    } catch (const std::runtime_error &e) {
+        logger::error("Failed to parse '%s': %s", mapConfigPath.c_str(), e.what());
+        showOnlineMapsError(std::vector<std::string>{
+                "Failed to parse mapconfig.json:",
+                e.what(),
+                "Please check the AviTab logs for more details"});
+        return;
+    }
+
+    // At this point we parse the config correctly - if the config is empty,
+    // Give a hint to the user that they need to populate the config and
+    // point the user to documentation
+    if (slippyMapNames.size() == 0) {
+        logger::warn("No enabled online maps found in %s", mapConfigPath.c_str());
+        showOnlineMapsError(std::vector<std::string>{
+                "No enabled online maps found in mapconfig.json",
+                "Please read the docs to learn how you can add your own",
+                "maps from an online source"});
+        return;
+    }
+
+    // List the user-defined online maps
+    containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(
+            &api(), "Select online slippy maps");
     containerWithClickableList->setListItems(slippyMapNames);
 
     containerWithClickableList->setSelectCallback([this](int selectedItem) {
-        logger::verbose("selected map %d: %s", selectedItem,
-                containerWithClickableList->getEntry(selectedItem).c_str());
+        std::shared_ptr<img::TileSource> newSource;
+        const auto &conf = slippyMaps.at(selectedItem);
+
+        newSource = std::make_shared<maps::OpenTopoSource>(
+            conf.servers[0], conf.copyright);
+
+        setTileSource(newSource);
     });
+
     containerWithClickableList->setCancelCallback([this] () {
         api().executeLater([this] () {
             containerWithClickableList.reset();

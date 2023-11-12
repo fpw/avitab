@@ -41,7 +41,7 @@ class ContainerWithClickableCustomList {
     void setSelectCallback(SelectCallback cb);
     void setListItems(const std::vector<std::string> &items);
     void show(std::shared_ptr<Container> parent);
-    std::string getEntry(uint32_t index);
+    std::string getEntry(int index);
 
   private:
     App::FuncsPtr api{};

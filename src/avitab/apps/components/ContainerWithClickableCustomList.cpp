@@ -58,11 +58,8 @@ void ContainerWithClickableCustomList::show(std::shared_ptr<Container> parent) {
     showCurrentEntries();
 }
 
-std::string ContainerWithClickableCustomList::getEntry(uint32_t index) {
-    if (index < currentEntries.size()) {
-        return currentEntries[index];
-    }
-    return std::string("Unknown entry for index ") + std::to_string(index);
+std::string ContainerWithClickableCustomList::getEntry(int index) {
+    return currentEntries.at(index);
 }
 
 void ContainerWithClickableCustomList::showCurrentEntries() {

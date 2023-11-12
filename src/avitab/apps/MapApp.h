@@ -18,8 +18,6 @@
 #ifndef SRC_AVITAB_APPS_MAPAPP_H_
 #define SRC_AVITAB_APPS_MAPAPP_H_
 
-#include <memory>
-#include <vector>
 #include "App.h"
 #include "src/avitab/apps/components/FileChooser.h"
 #include "src/avitab/apps/components/ContainerWithClickableCustomList.h"
@@ -38,6 +36,7 @@
 #include "src/libimg/Image.h"
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/NavigraphSource.h"
+#include "src/maps/sources/OnlineSlippyMapConfig.h"
 
 namespace avitab {
 
@@ -90,6 +89,7 @@ private:
     std::unique_ptr<Keyboard> keyboard;
 
     std::shared_ptr<avitab::Settings> savedSettings;
+    std::map<size_t, maps::OnlineSlippyMapConfig> slippyMaps;
 
     Timer updateTimer;
     bool trackPlane = true;
