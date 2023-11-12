@@ -314,10 +314,10 @@ void MapApp::selectOnlineMaps() {
 
     if (!mapConfigFstream) {
         logger::error("No mapconfig.json file found in '%s'",
-                fs::u8path(mapConfigPath).c_str());
+                mapConfigPath.c_str());
         showOnlineMapsError(std::vector<std::string>{
                 "cannot load mapconfig.json from path:",
-                fs::u8path(mapConfigPath)});
+                mapConfigPath});
         return;
     }
 
