@@ -21,8 +21,8 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include "src/libxdata/parsers/objects/CIFPData.h"
-#include "BaseParser.h"
+#include "objects/CIFPData.h"
+#include "src/world/parsers/BaseParser.h"
 
 namespace xdata {
 
@@ -40,7 +40,7 @@ private:
     };
 
     Acceptor acceptor;
-    BaseParser parser;
+    world::BaseParser parser;
     RecordType currentType = RecordType::UNKNOWN;
     CIFPData curData;
 

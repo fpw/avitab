@@ -20,8 +20,8 @@
 
 #include <string>
 #include <functional>
-#include "src/libxdata/parsers/objects/AirwayData.h"
-#include "BaseParser.h"
+#include "objects/AirwayData.h"
+#include "src/world/parsers/BaseParser.h"
 
 namespace xdata {
 
@@ -36,7 +36,7 @@ public:
 private:
     Acceptor acceptor;
     std::string header;
-    BaseParser parser;
+    world::BaseParser parser;
 
     void parseLine();
     AirwayData::AltitudeLevel parseLevel(int num);

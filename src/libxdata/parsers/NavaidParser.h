@@ -20,8 +20,8 @@
 
 #include <string>
 #include <functional>
-#include "src/libxdata/parsers/objects/NavaidData.h"
-#include "BaseParser.h"
+#include "objects/NavaidData.h"
+#include "src/world/parsers/BaseParser.h"
 
 namespace xdata {
 
@@ -36,7 +36,7 @@ public:
 private:
     Acceptor acceptor;
     std::string header;
-    BaseParser parser;
+    world::BaseParser parser;
 
     void parseLine();
     NavaidData::Type parseType(int num);

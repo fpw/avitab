@@ -274,6 +274,10 @@ std::string XPlaneEnvironment::getFontDirectory() {
     return xplaneRootPath + "/Resources/fonts/";
 }
 
+std::string XPlaneEnvironment::getFlightPlansPath() {
+    return xplaneRootPath + "/Output/FMS Plans/";
+}
+
 float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSinceLastLoop, int count) {
     std::vector<Location> activeAircraftLocations;
 

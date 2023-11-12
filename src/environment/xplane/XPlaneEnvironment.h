@@ -51,6 +51,7 @@ public:
     std::string getSettingsDir() override;
     std::string getEarthTexturePath() override;
     std::string getAirplanePath() override;
+    std::string getFlightPlansPath() override;
     Environment::MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     std::string getMETARForAirport(const std::string &icao) override;
     void enableAndPowerPanel() override;

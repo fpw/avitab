@@ -173,6 +173,19 @@ const std::shared_ptr<Runway> Airport::getRunwayByName(const std::string& rw) co
     return rwy->second;
 }
 
+const std::shared_ptr<Runway> Airport::getOppositeRunwayEnd(const std::shared_ptr<Runway> rw) const {
+    std::string rwyName = rw->getID();
+    for (auto &rwys: runwayPairs) {
+        if (rwys.first->getID() == rwyName) {
+            return rwys.second;
+        }
+        if (rwys.second->getID() == rwyName) {
+            return rwys.first;
+        }
+    };
+    return nullptr;
+}
+
 void Airport::forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) const {
     for (auto &rwy: runways) {
         f(rwy.second);

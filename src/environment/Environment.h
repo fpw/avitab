@@ -81,6 +81,7 @@ public:
     virtual std::string getFontDirectory() = 0;
     virtual std::string getProgramPath() = 0;
     virtual std::string getSettingsDir() = 0;
+    virtual std::string getFlightPlansPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
     // Getting magVar from XPlane is asynchronous and slow, so batch request
     using MagVarMap = std::map<std::pair<double, double>, double>;
@@ -90,6 +91,7 @@ public:
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();
     void reloadMetar();
+    std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
     void loadUserFixes(std::string filename);
     virtual void enableAndPowerPanel();
     virtual void setIsInMenu(bool menu);

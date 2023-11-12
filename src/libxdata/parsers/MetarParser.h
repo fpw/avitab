@@ -20,8 +20,8 @@
 
 #include <string>
 #include <functional>
-#include "src/libxdata/parsers/objects/MetarData.h"
-#include "BaseParser.h"
+#include "objects/MetarData.h"
+#include "src/world/parsers/BaseParser.h"
 
 namespace xdata {
 
@@ -34,7 +34,7 @@ public:
     void loadMetar();
 private:
     Acceptor acceptor;
-    BaseParser parser;
+    world::BaseParser parser;
     MetarData curData {};
 
     void parseLine();

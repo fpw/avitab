@@ -28,7 +28,8 @@ OverlayedRoute::OverlayedRoute(OverlayHelper helper):
 }
 
 void OverlayedRoute::draw(std::shared_ptr<world::Route> route) {
-    route->iterateLegs([this] (
+    world::Location toLoc;
+    route->iterateLegs([this, &toLoc] (
             const std::shared_ptr<world::NavNode> from,
             const std::shared_ptr<world::NavEdge> via,
             const std::shared_ptr<world::NavNode> to,
@@ -37,9 +38,14 @@ void OverlayedRoute::draw(std::shared_ptr<world::Route> route) {
             double initialMagneticBearing) {
 
         auto fromLoc = from->getLocation();
-        auto toLoc = to->getLocation();
+        toLoc = to->getLocation();
         drawLeg(fromLoc, toLoc, distanceNm, initialTrueBearing, initialMagneticBearing);
     });
+
+    // Draw last node
+    int toX, toY;
+    overlayHelper->positionToPixel(toLoc.latitude, toLoc.longitude, toX, toY);
+    overlayHelper->getMapImage()->fillCircle(toX, toY, 3, img::COLOR_BLACK);
 }
 
 void OverlayedRoute::handleIDLcrossing(world::Location &to, world::Location &from,

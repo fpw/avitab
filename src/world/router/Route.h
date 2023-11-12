@@ -48,6 +48,7 @@ public:
     std::shared_ptr<NavNode> getDestination() const;
 
     void find();
+    void loadRoute(std::vector<RouteFinder::RouteDirection> route);
     void iterateRoute(RouteIterator f) const;
     void iterateLegs(LegIterator f) const;
     void iterateRouteShort(RouteIterator f) const;
