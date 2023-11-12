@@ -36,18 +36,18 @@ constexpr const double M_TO_FT = 3.28084;
 class World {
 public:
     static constexpr const int MAX_SEARCH_RESULTS = 10;
+
     using NodeAcceptor = std::function<void(const world::NavNode &node)>;
+    using Connection = std::pair<std::shared_ptr<NavEdge>, std::shared_ptr<NavNode>>;
+
+    virtual void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f) = 0;
 
     virtual std::shared_ptr<Airport> findAirportByID(const std::string &id) const = 0;
     virtual std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const = 0;
     virtual std::vector<std::shared_ptr<Airport>> findAirport(const std::string &keyWord) const = 0;
 
-    virtual std::shared_ptr<Region> findOrCreateRegion(const std::string &id) = 0;
-    virtual std::shared_ptr<Airport> findOrCreateAirport(const std::string &id) = 0;
-    virtual std::shared_ptr<Airway> findOrCreateAirway(const std::string &name, world::AirwayLevel lvl) = 0;
-
-    virtual void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor f) = 0;
-
+    virtual std::vector<Connection> &getConnections(std::shared_ptr<NavNode> from) = 0;
+    virtual bool areConnected(std::shared_ptr<NavNode> from, const std::shared_ptr<NavNode> to) = 0;
 };
 
 

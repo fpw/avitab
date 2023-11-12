@@ -144,7 +144,7 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     arrivalNode = ap;
 
-    route = std::make_shared<world::Route>(departureNode, arrivalNode);
+    route = std::make_shared<world::Route>(navWorld, departureNode, arrivalNode);
     route->setAirwayLevel(airwayLevel);
     route->setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
         return api().getMagneticVariations(locations);
@@ -348,7 +348,7 @@ void RouteApp::parseFMS(const std::string &fmsFilename) {
         prevNode = node;
     }
     arrivalNode = prevNode;
-    route = std::make_shared<world::Route>(departureNode, arrivalNode);
+    route = std::make_shared<world::Route>(api().getNavWorld(), departureNode, arrivalNode);
     route->loadRoute(fmsRoute);
     api().setRoute(route);
 }

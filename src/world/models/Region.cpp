@@ -29,7 +29,9 @@ const std::string& Region::getId() const {
 }
 
 void Region::setName(const std::string& name) {
-    this->name = name;
+    if (this->name.empty()) {
+        this->name = name;
+    }
 }
 
 } /* namespace world */

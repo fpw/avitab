@@ -124,6 +124,32 @@ std::shared_ptr<world::Airway> XWorld::findOrCreateAirway(const std::string& nam
     return awy;
 }
 
+std::vector<world::World::Connection> &XWorld::getConnections(std::shared_ptr<world::NavNode> from) {
+    auto iter = connections.find(from);
+    if (iter != connections.end()) {
+        return iter->second;
+    }
+    return noConnection;
+}
+
+bool XWorld::areConnected(std::shared_ptr<world::NavNode> from, const std::shared_ptr<world::NavNode> to) {
+    for (auto &c: getConnections(from)) {
+        if (c.second == to) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to) {
+    auto iter = connections.find(from);
+    if (iter == connections.end()) {
+        connections[from] = std::vector<world::World::Connection>();
+        iter = connections.find(from);
+    }
+    (iter->second).push_back(std::make_pair(via, to));
+}
+
 void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
