@@ -23,7 +23,7 @@
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 #include "src/platform/strtod.h"
-#include "src/maps/sources/OpenTopoSource.h"
+#include "src/maps/sources/OnlineSlippySource.h"
 #include "src/maps/sources/GeoTIFFSource.h"
 #include "src/maps/sources/PDFSource.h"
 #include "src/maps/sources/XPlaneSource.h"
@@ -147,7 +147,7 @@ void MapApp::setMapSource(MapSource style) {
 
     switch (style) {
     case MapSource::OPEN_TOPO:
-        newSource = std::make_shared<maps::OpenTopoSource>(
+        newSource = std::make_shared<maps::OnlineSlippySource>(
             std::vector<std::string>{
                 "a.tile.opentopomap.org",
                 "b.tile.opentopomap.org",
@@ -159,7 +159,7 @@ void MapApp::setMapSource(MapSource style) {
         setTileSource(newSource);
         break;
     case MapSource::STAMEN_TERRAIN:
-        newSource = std::make_shared<maps::OpenTopoSource>(
+        newSource = std::make_shared<maps::OnlineSlippySource>(
             std::vector<std::string>{"a.tile.stamen.com"},
             "terrain/{z}/{x}/{y}.png",
             0, 17, 256, 256,
@@ -370,7 +370,7 @@ void MapApp::selectOnlineMaps() {
         std::shared_ptr<img::TileSource> newSource;
         const auto &conf = slippyMaps.at(selectedItem);
 
-        newSource = std::make_shared<maps::OpenTopoSource>(
+        newSource = std::make_shared<maps::OnlineSlippySource>(
             conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
             conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
             conf.protocol);
