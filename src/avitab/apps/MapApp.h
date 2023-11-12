@@ -37,8 +37,27 @@
 #include "src/maps/OverlayedMap.h"
 #include "src/maps/sources/NavigraphSource.h"
 #include "src/maps/sources/OnlineSlippyMapConfig.h"
+#include "src/maps/sources/OnlineSlippySource.h"
 
 namespace avitab {
+
+const struct maps::OnlineSlippyMapConfig fallbackOnlineMap = {
+    .name = "OpenTopoMap",
+    .copyright = "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)",
+    .servers = std::vector<std::string>
+    {
+        "a.tile.opentopomap.org",
+        "b.tile.opentopomap.org",
+        "c.tile.opentopomap.org",
+    },
+    .protocol = "https",
+    .url = "{z}/{x}/{y}.png",
+    .minZoomLevel = 1,
+    .maxZoomLevel = 16,
+    .tileWidthPx = 256,
+    .tileHeightPx = 256,
+    .enabled = true,
+};
 
 class MapApp: public App {
 public:
@@ -50,7 +69,6 @@ public:
     void resume() override;
 private:
     enum class MapSource {
-        OPEN_TOPO,
         XPLANE,
         MERCATOR,
         GEOTIFF,
@@ -77,7 +95,7 @@ private:
     std::shared_ptr<Button> trackButton;
     std::shared_ptr<Button> rotateButton;
     std::shared_ptr<Container> settingsContainer, chooserContainer, overlaysContainer;
-    std::shared_ptr<Button> openTopoButton, stamenButton, mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton, onlineMapsButton;
+    std::shared_ptr<Button> mercatorButton, xplaneButton, geoTiffButton, epsgButton, naviLowButton, naviHighButton, naviVFRButton, naviWorldButton, onlineMapsButton;
     std::shared_ptr<Label> overlayLabel;
     std::shared_ptr<Checkbox> myAircraftCheckbox, otherAircraftCheckbox, routeCheckbox;
     std::shared_ptr<Checkbox> airportCheckbox, heliseaportCheckbox, airstripCheckbox;
@@ -104,12 +122,22 @@ private:
 
     void createSettingsLayout();
     void showOverlaySettings();
-    void setMapSource(MapSource style);
+    void setMapSource(MapSource style, bool init = false);
     void setTileSource(std::shared_ptr<img::TileSource> source);
     void selectGeoTIFF();
     void selectMercator();
     void selectEPSG();
-    void selectOnlineMaps();
+    void selectOnlineMaps(bool interactive = true, const std::shared_ptr<maps::OnlineSlippySource> fallback = 
+            std::make_shared<maps::OnlineSlippySource>(
+                fallbackOnlineMap.servers,
+                fallbackOnlineMap.url,
+                fallbackOnlineMap.minZoomLevel,
+                fallbackOnlineMap.maxZoomLevel,
+                fallbackOnlineMap.tileWidthPx,
+                fallbackOnlineMap.tileHeightPx,
+                fallbackOnlineMap.copyright,
+                fallbackOnlineMap.name,
+                fallbackOnlineMap.protocol));
     void selectNavigraph(maps::NavigraphMapType type);
     void selectUserFixesFile();
 
