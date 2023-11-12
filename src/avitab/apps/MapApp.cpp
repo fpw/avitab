@@ -137,7 +137,10 @@ void MapApp::createSettingsLayout() {
     onlineMapsButton->setFit(false, true);
     onlineMapsButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
     onlineMapsButton->alignBelow(mercatorButton, 10);
-    auto onlineMapsLabel = std::make_shared<Label>(settingsContainer, "Select slippy tiles from online sources.");
+    // The onlineMapsLabel is defined as a private variable; We want
+    // to refer to it throught the program's execution to update the label
+    // when selecting a different online map, or selecting a non-online map
+    onlineMapsLabel = std::make_shared<Label>(settingsContainer, baseOnlineMapsLabel);
     onlineMapsLabel->alignRightOf(onlineMapsButton, 10);
     onlineMapsLabel->setManaged();
 }
@@ -195,6 +198,10 @@ void MapApp::setMapSource(MapSource style) {
         selectOnlineMaps();
         break;
     }
+    // Update the current active map after the switch statement;
+    // If we reached at this point, the new map style has been applied successfully
+    // (i.e., no exceptions were thrown when trying to apply the map)
+    currentActiveMapSource = style;
 
     settingsContainer->setVisible(false);
 }
@@ -376,6 +383,7 @@ void MapApp::selectOnlineMaps() {
             conf.protocol);
 
         setTileSource(newSource);
+        currentActiveOnlineMap = conf.name;
     });
 
     containerWithClickableList->setCancelCallback([this] () {
@@ -496,6 +504,12 @@ void MapApp::onSettingsButton() {
         naviLabel->alignRightOf(naviWorldButton, 10);
         naviLabel->setManaged();
     }
+
+    if (currentActiveMapSource != MapSource::ONLINE_TILES) {
+        currentActiveOnlineMap = "";
+    } 
+    onlineMapsLabel->setText(baseOnlineMapsLabel + (
+                currentActiveOnlineMap != "" ? "\nCurrent active map: " + currentActiveOnlineMap : ""));
 
     settingsContainer->setVisible(!settingsContainer->isVisible());
 }
