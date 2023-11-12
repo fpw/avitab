@@ -51,7 +51,6 @@ public:
 private:
     enum class MapSource {
         OPEN_TOPO,
-        STAMEN_TERRAIN,
         XPLANE,
         MERCATOR,
         GEOTIFF,

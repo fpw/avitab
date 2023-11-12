@@ -86,21 +86,23 @@ void MapApp::createSettingsLayout() {
     openTopoLabel->alignRightOf(openTopoButton, 10);
     openTopoLabel->setManaged();
 
-    stamenButton = std::make_shared<Button>(settingsContainer, "Stamen");
-    stamenButton->setCallback([this] (const Button &) { setMapSource(MapSource::STAMEN_TERRAIN); });
-    stamenButton->setFit(false, true);
-    stamenButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    stamenButton->alignBelow(openTopoButton, 20);
-    auto stamenLabel = std::make_shared<Label>(settingsContainer,
-            "Map Data (c) OpenStreetMap\nEnglish map tiles by Stamen Design");
-    stamenLabel->alignRightOf(stamenButton, 10);
-    stamenLabel->setManaged();
+    onlineMapsButton = std::make_shared<Button>(settingsContainer, "Online");
+    onlineMapsButton->setCallback([this] (const Button &) { setMapSource(MapSource::ONLINE_TILES); });
+    onlineMapsButton->setFit(false, true);
+    onlineMapsButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    onlineMapsButton->alignBelow(openTopoButton, 10);
+    // The onlineMapsLabel is defined as a private variable; We want
+    // to refer to it throught the program's execution to update the label
+    // when selecting a different online map, or selecting a non-online map
+    onlineMapsLabel = std::make_shared<Label>(settingsContainer, baseOnlineMapsLabel);
+    onlineMapsLabel->alignRightOf(onlineMapsButton, 10);
+    onlineMapsLabel->setManaged();
 
     epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3857");
     epsgButton->setCallback([this] (const Button &) { setMapSource(MapSource::EPSG3857); });
     epsgButton->setFit(false, true);
     epsgButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    epsgButton->alignBelow(stamenButton, 20);
+    epsgButton->alignBelow(onlineMapsButton, 10);
     auto epsgLabel = std::make_shared<Label>(settingsContainer, "Uses slippy tiles that you downloaded.");
     epsgLabel->alignRightOf(epsgButton, 10);
     epsgLabel->setManaged();
@@ -131,18 +133,6 @@ void MapApp::createSettingsLayout() {
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
-
-    onlineMapsButton = std::make_shared<Button>(settingsContainer, "Online");
-    onlineMapsButton->setCallback([this] (const Button &) { setMapSource(MapSource::ONLINE_TILES); });
-    onlineMapsButton->setFit(false, true);
-    onlineMapsButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    onlineMapsButton->alignBelow(mercatorButton, 10);
-    // The onlineMapsLabel is defined as a private variable; We want
-    // to refer to it throught the program's execution to update the label
-    // when selecting a different online map, or selecting a non-online map
-    onlineMapsLabel = std::make_shared<Label>(settingsContainer, baseOnlineMapsLabel);
-    onlineMapsLabel->alignRightOf(onlineMapsButton, 10);
-    onlineMapsLabel->setManaged();
 }
 
 void MapApp::setMapSource(MapSource style) {
@@ -159,14 +149,6 @@ void MapApp::setMapSource(MapSource style) {
             "{z}/{x}/{y}.png",
             0, 17, 256, 256,
             "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
-        setTileSource(newSource);
-        break;
-    case MapSource::STAMEN_TERRAIN:
-        newSource = std::make_shared<maps::OnlineSlippySource>(
-            std::vector<std::string>{"a.tile.stamen.com"},
-            "terrain/{z}/{x}/{y}.png",
-            0, 17, 256, 256,
-            "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.");
         setTileSource(newSource);
         break;
     case MapSource::XPLANE:
