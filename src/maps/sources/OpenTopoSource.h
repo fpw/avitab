@@ -25,7 +25,9 @@ namespace maps {
 
 class OpenTopoSource: public img::TileSource {
 public:
-    OpenTopoSource(std::string tile_server, std::string copyrightInfo);
+    OpenTopoSource(std::vector<std::string> tileServers, std::string url,
+           size_t minZoom, size_t maxZoom,
+           std::string copyrightInfo);
 
     // Basic information
     int getMinZoomLevel() override;
@@ -56,9 +58,13 @@ public:
 private:
     bool cancelToken = false;
     uint8_t hostIndex = 0;
-    std::string hosts = "abc";
     Downloader downloader;
-    std::string tileServer;
+    std::vector<std::string> tileServers;
+    std::string url;
+    size_t minZoom;
+    size_t maxZoom;
+    int tileWidth = 256;
+    int tileHeight = 256;
     std::string copyrightInfo;
 };
 
