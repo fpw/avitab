@@ -34,6 +34,8 @@ struct OnlineSlippyMapConfig {
     std::string url;
     size_t minZoomLevel;
     size_t maxZoomLevel;
+    size_t tileWidthPx;
+    size_t tileHeightPx;
     bool enabled;
 };
 

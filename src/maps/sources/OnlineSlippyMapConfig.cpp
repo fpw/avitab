@@ -124,6 +124,8 @@ void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
     parse_json_key<std::string>(j, "url", c.url, std::nullopt, c.name);
     parse_json_key<size_t>(j, "min_zoom_level", c.minZoomLevel, 0, c.name);
     parse_json_key<size_t>(j, "max_zoom_level", c.maxZoomLevel, 16, c.name);
+    parse_json_key<size_t>(j, "tile_width_px", c.tileWidthPx, 256, c.name);
+    parse_json_key<size_t>(j, "tile_height_px", c.tileHeightPx, 256, c.name);
 
     sanitizeTileServers(c.servers);
     sanitizeUrl(c.url);
@@ -137,6 +139,9 @@ void from_json(const nlohmann::json &j, OnlineSlippyMapConfig &c) {
     logger::verbose("    Server URL: '%s'", c.url.c_str());
     logger::verbose("    Min zoom level: %u", c.minZoomLevel);
     logger::verbose("    Max zoom level: %u", c.maxZoomLevel);
+    logger::verbose("    Tile width: %upx", c.tileWidthPx);
+    logger::verbose("    Tile height: %upx", c.tileHeightPx);
+    
 
     // The validation functions throw exceptions, so call them after the
     // verbose print out so in the case of an exception, the user can look

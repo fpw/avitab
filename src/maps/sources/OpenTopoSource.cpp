@@ -24,10 +24,13 @@ namespace maps {
 
 OpenTopoSource::OpenTopoSource(
         std::vector<std::string> tileServers, std::string url,
-        size_t minZoom, size_t maxZoom, std::string copyrightInfo):
+        size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
+        std::string copyrightInfo):
     tileServers(tileServers),
     minZoom(minZoom),
     maxZoom(maxZoom),
+    tileWidth(tileWidth),
+    tileHeight(tileHeight),
     copyrightInfo(copyrightInfo) {
 
     if (this->tileServers.size() == 0) {
