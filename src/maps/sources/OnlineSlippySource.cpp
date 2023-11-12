@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "OpenTopoSource.h"
+#include "OnlineSlippySource.h"
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
@@ -23,7 +23,7 @@
 
 namespace maps {
 
-OpenTopoSource::OpenTopoSource(
+OnlineSlippySource::OnlineSlippySource(
         std::vector<std::string> tileServers, std::string url,
         size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
         std::string copyrightInfo, std::string protocol):
@@ -57,15 +57,15 @@ OpenTopoSource::OpenTopoSource(
                    [](unsigned char c) { return std::tolower(c); });
 }
 
-int OpenTopoSource::getMinZoomLevel() {
+int OnlineSlippySource::getMinZoomLevel() {
     return minZoom;
 }
 
-int OpenTopoSource::getMaxZoomLevel() {
+int OnlineSlippySource::getMaxZoomLevel() {
     return maxZoom;
 }
 
-int OpenTopoSource::getInitialZoomLevel() {
+int OnlineSlippySource::getInitialZoomLevel() {
     const int desiredZoomLevel = 12;
     if (desiredZoomLevel >= minZoom and desiredZoomLevel <= maxZoom) {
         return desiredZoomLevel;
@@ -73,19 +73,19 @@ int OpenTopoSource::getInitialZoomLevel() {
     return abs(int(maxZoom - minZoom) / 2);
 }
 
-bool OpenTopoSource::supportsWorldCoords() {
+bool OnlineSlippySource::supportsWorldCoords() {
     return true;
 }
 
-img::Point<double> OpenTopoSource::suggestInitialCenter(int page) {
+img::Point<double> OnlineSlippySource::suggestInitialCenter(int page) {
     return img::Point<double>{0, 0};
 }
 
-img::Point<int> OpenTopoSource::getTileDimensions(int zoom) {
+img::Point<int> OnlineSlippySource::getTileDimensions(int zoom) {
     return img::Point<int>{tileWidth, tileHeight};
 }
 
-img::Point<double> OpenTopoSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> OnlineSlippySource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     if (oldZoom == newZoom) {
         return img::Point<double>{oldX, oldY};
     }
@@ -101,7 +101,7 @@ img::Point<double> OpenTopoSource::transformZoomedPoint(int page, double oldX, d
     return img::Point<double>{oldX, oldY};
 }
 
-img::Point<double> OpenTopoSource::worldToXY(double lon, double lat, int zoom) {
+img::Point<double> OnlineSlippySource::worldToXY(double lon, double lat, int zoom) {
     double zp = std::pow(2.0, zoom);
     double x = (lon + 180.0) / 360.0 * zp;
     double y = (1.0 - std::log(std::tan(lat * M_PI / 180.0) +
@@ -109,7 +109,7 @@ img::Point<double> OpenTopoSource::worldToXY(double lon, double lat, int zoom) {
     return img::Point<double>{x, y};
 }
 
-img::Point<double> OpenTopoSource::xyToWorld(double x, double y, int zoom) {
+img::Point<double> OnlineSlippySource::xyToWorld(double x, double y, int zoom) {
     double zp = std::pow(2.0, zoom);
     double plainLon = x / zp * 360.0 - 180;
     double lon = std::fmod(plainLon, 360.0);
@@ -125,15 +125,15 @@ img::Point<double> OpenTopoSource::xyToWorld(double x, double y, int zoom) {
     return img::Point<double>{lon, lat};
 }
 
-int OpenTopoSource::getPageCount() {
+int OnlineSlippySource::getPageCount() {
     return 1;
 }
 
-img::Point<int> OpenTopoSource::getPageDimensions(int page, int zoom) {
+img::Point<int> OnlineSlippySource::getPageDimensions(int page, int zoom) {
     return img::Point<int>{0, 0};
 }
 
-bool OpenTopoSource::isTileValid(int page, int x, int y, int zoom) {
+bool OnlineSlippySource::isTileValid(int page, int x, int y, int zoom) {
     if (page != 0) {
         return false;
     }
@@ -161,7 +161,7 @@ inline void searchAndReplace(std::string &str, const std::string &search, const 
     }
 }
 
-std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) {
+std::string OnlineSlippySource::getTileURL(bool randomHost, int x, int y, int zoom) {
     std::string tileUrl = url;
 
     // Replace url placeholders with correct values
@@ -184,7 +184,7 @@ std::string OpenTopoSource::getTileURL(bool randomHost, int x, int y, int zoom) 
     return nameStream.str();
 }
 
-std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) {
+std::string OnlineSlippySource::getUniqueTileName(int page, int x, int y, int zoom) {
     if (!isTileValid(page, x, y, zoom)) {
         throw std::runtime_error("Invalid coordinates");
     }
@@ -193,7 +193,7 @@ std::string OpenTopoSource::getUniqueTileName(int page, int x, int y, int zoom) 
     return getTileURL(false, x, y, zoom);
 }
 
-std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int page, int x, int y, int zoom) {
+std::unique_ptr<img::Image> OnlineSlippySource::loadTileImage(int page, int x, int y, int zoom) {
     cancelToken = false;
     std::string path = getTileURL(true, x, y, zoom);
     auto data = downloader.download(protocol + "://" + path, cancelToken);
@@ -202,15 +202,15 @@ std::unique_ptr<img::Image> OpenTopoSource::loadTileImage(int page, int x, int y
     return image;
 }
 
-void OpenTopoSource::cancelPendingLoads() {
+void OnlineSlippySource::cancelPendingLoads() {
     cancelToken = true;
 }
 
-void OpenTopoSource::resumeLoading() {
+void OnlineSlippySource::resumeLoading() {
     cancelToken = false;
 }
 
-std::string OpenTopoSource::getCopyrightInfo() {
+std::string OnlineSlippySource::getCopyrightInfo() {
     return copyrightInfo;
 }
 
