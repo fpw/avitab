@@ -63,6 +63,8 @@ private:
         ONLINE_TILES,
     };
 
+    MapSource currentActiveMapSource;
+    std::string currentActiveOnlineMap;
     std::shared_ptr<maps::OverlayConfig> overlayConf;
     std::unique_ptr<FileChooser> fileChooser;
     std::unique_ptr<ContainerWithClickableCustomList> containerWithClickableList;
@@ -90,6 +92,9 @@ private:
 
     std::shared_ptr<avitab::Settings> savedSettings;
     std::map<size_t, maps::OnlineSlippyMapConfig> slippyMaps;
+
+    const std::string baseOnlineMapsLabel = "Select slippy tiles from online sources.";
+    std::shared_ptr<Label> onlineMapsLabel;
 
     Timer updateTimer;
     bool trackPlane = true;
