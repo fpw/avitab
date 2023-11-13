@@ -1,0 +1,21 @@
+# Rules to ensure files are normalized in the Avitab repository
+
+CMakeLists.txt  text=auto
+*.cmake         text=auto
+
+*.h             text=auto
+*.cpp           text=auto
+*.c             text=auto
+*.h.in          text=auto
+
+*.json          text=auto
+*.md            text=auto
+*.yml           text=auto
+
+*.sh            text=lf
+*.patch         text=lf
+
+*.pdf           binary
+*.png           binary
+*.jpg           binary
+
