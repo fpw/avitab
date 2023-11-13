@@ -1,21 +1,5 @@
-# Rules to ensure files are normalized in the Avitab repository
+# Enforce consistent line feed for all files that Git considers texty.
+* text=auto eol=lf
 
-CMakeLists.txt  text=auto
-*.cmake         text=auto
-
-*.h             text=auto
-*.cpp           text=auto
-*.c             text=auto
-*.h.in          text=auto
-
-*.json          text=auto
-*.md            text=auto
-*.yml           text=auto
-
-*.sh            text=lf
-*.patch         text=lf
-
-*.pdf           binary
-*.png           binary
-*.jpg           binary
-
+# NB will need to add specific rules for any files that require CRLF line endings.
+# Currently Avitab does not have any of these in its repository.
