@@ -41,13 +41,16 @@ class Fix;
 class Airport: public NavNode {
 public:
     enum class ATCFrequency {
-        RECORDED,
-        UNICOM,
-        CLD,
+        RECORDED,   // ATIS, AWOS, ASOS
+        UNICOM,     // also CTAF
+        MULTICOM,
+        FSS,
+        CLD,        // also CPT
         GND,
         TWR,
         APP,
-        DEP
+        DEP,
+        CTR
     };
 
     Airport(const std::string &airportId);
