@@ -98,7 +98,7 @@ void AirportParser::parseRunway() {
     AirportData::RunwayData rwy;
 
     rwy.width = parser.parseDouble();
-    rwy.surfaceType = parser.parseInt();
+    rwy.surfaceTypeCode = (AirportData::SurfaceCode)parser.parseInt();
     parser.parseInt(); // shoulder
     parser.parseDouble(); // smoothness
     parser.parseInt(); // center lights
@@ -134,7 +134,7 @@ bool AirportParser::parseRunwayEnd(AirportData::RunwayEnd &end) {
 void AirportParser::parseWaterway() {
     AirportData::RunwayData rwy;
     rwy.width = parser.parseDouble();
-    rwy.surfaceType = (int)world::Runway::SurfaceType::WATER_RUNWAY;
+    rwy.surfaceTypeCode = AirportData::SurfaceCode::SC_WATER_RUNWAY;
     parser.parseInt(); // buoys
 
     AirportData::RunwayEnd end;
@@ -167,7 +167,7 @@ void AirportParser::parseHelipad() {
     parser.parseDouble(); // orientation
     parser.parseDouble(); // length
     parser.parseDouble(); // width
-    port.surfaceType = parser.parseInt();
+    port.surfaceTypeCode = (AirportData::SurfaceCode)parser.parseInt();
 
     curPort.heliports.push_back(port);
 }

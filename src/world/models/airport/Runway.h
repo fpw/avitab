@@ -31,16 +31,22 @@ class Fix;
 class Runway: public NavNode {
 public:
 
-    enum class SurfaceType {
-        ASPHALT = 1,
-        CONCRETE = 2,
-        TURF_GRASS = 3,
-        DIRT_BROWN = 4,
-        GRAVEL_GREY = 5,
-        DRY_LAKEBED = 12, // "Example: KEDW (Edwards AFB)"
-        WATER_RUNWAY = 13, // "Nothing displayed"
-        SNOW_OR_ICE = 14, // "Poor friction. Runway markings cannot be added"
-        TRANSPARENT_SURFACE = 15 // "Hard surface, but no texture/markings (use in custom scenery)"
+    enum class SurfaceMaterial {
+        ASPHALT,
+        BITUMINOUS,
+        CONCRETE,
+        CORAL,
+        DIRT,
+        GRASS,
+        GRAVEL,
+        ICE,
+        LAKEBED,
+        SAND,
+        SNOW,
+        TARMAC,
+        WATER,
+        CUSTOM,
+        UNKNOWN
     };
 
     Runway(const std::string &name);
@@ -49,7 +55,7 @@ public:
     void setHeading(float b);
     void setLength(float l);
     void setLocation(const Location &loc);
-    void setSurfaceType(SurfaceType surfaceType);
+    void setSurfaceType(SurfaceMaterial surfaceType);
     void setElevation(float elevation);
     float getHeading() const; // can be NaN
     float getLength() const; // can be NaN
@@ -61,7 +67,7 @@ public:
     float getWidth() const;
     bool hasHardSurface() const;
     bool isWater() const;
-    SurfaceType getSurfaceType() const;
+    SurfaceMaterial getSurfaceType() const;
     const std::string getSurfaceTypeDescription() const;
     void attachILSData(std::weak_ptr<Fix> ils);
 
@@ -74,7 +80,7 @@ private:
     float width = std::numeric_limits<float>::quiet_NaN(); // meters
     float heading = std::numeric_limits<float>::quiet_NaN(); // degrees
     float length = std::numeric_limits<float>::quiet_NaN(); // meters
-    SurfaceType surfaceType;
+    SurfaceMaterial surfaceType;
 
     // optional
     std::weak_ptr<Fix> ils;
