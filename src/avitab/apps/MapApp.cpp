@@ -63,7 +63,7 @@ MapApp::MapApp(FuncsPtr funcs):
     chooserContainer->centerInParent();
     chooserContainer->setVisible(false);
 
-    setMapSource(MapSource::OPEN_TOPO);
+    setMapSource(MapSource::ONLINE_TILES, true);
     mercatorDir = api().getDataPath() + "/MapTiles/Mercator/";
 
     mapWidget->draw(*mapImage);
@@ -79,18 +79,10 @@ void MapApp::createSettingsLayout() {
     settingsContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     settingsContainer->setVisible(false);
 
-    openTopoButton = std::make_shared<Button>(settingsContainer, "OpenTopo");
-    openTopoButton->setCallback([this] (const Button &) { setMapSource(MapSource::OPEN_TOPO); });
-    auto openTopoLabel = std::make_shared<Label>(settingsContainer,
-            "Map Data (c) OpenStreetMap + SRTM\nMap Style (c) OpenTopoMap.org");
-    openTopoLabel->alignRightOf(openTopoButton, 10);
-    openTopoLabel->setManaged();
-
     onlineMapsButton = std::make_shared<Button>(settingsContainer, "Online");
     onlineMapsButton->setCallback([this] (const Button &) { setMapSource(MapSource::ONLINE_TILES); });
     onlineMapsButton->setFit(false, true);
-    onlineMapsButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
-    onlineMapsButton->alignBelow(openTopoButton, 10);
+    onlineMapsButton->setDimensions(onlineMapsButton->getWidth() + 30, onlineMapsButton->getHeight());
     // The onlineMapsLabel is defined as a private variable; We want
     // to refer to it throught the program's execution to update the label
     // when selecting a different online map, or selecting a non-online map
@@ -101,7 +93,7 @@ void MapApp::createSettingsLayout() {
     epsgButton = std::make_shared<Button>(settingsContainer, "EPSG-3857");
     epsgButton->setCallback([this] (const Button &) { setMapSource(MapSource::EPSG3857); });
     epsgButton->setFit(false, true);
-    epsgButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    epsgButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
     epsgButton->alignBelow(onlineMapsButton, 10);
     auto epsgLabel = std::make_shared<Label>(settingsContainer, "Uses slippy tiles that you downloaded.");
     epsgLabel->alignRightOf(epsgButton, 10);
@@ -110,7 +102,7 @@ void MapApp::createSettingsLayout() {
     geoTiffButton = std::make_shared<Button>(settingsContainer, "GeoTIFF");
     geoTiffButton->setCallback([this] (const Button &) { setMapSource(MapSource::GEOTIFF); });
     geoTiffButton->setFit(false, true);
-    geoTiffButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    geoTiffButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
     geoTiffButton->alignBelow(epsgButton, 10);
     auto geoTiffLabel = std::make_shared<Label>(settingsContainer, "Uses GeoTIFF images that you downloaded.");
     geoTiffLabel->alignRightOf(geoTiffButton, 10);
@@ -119,7 +111,7 @@ void MapApp::createSettingsLayout() {
     xplaneButton = std::make_shared<Button>(settingsContainer, "X-Plane");
     xplaneButton->setCallback([this] (const Button &) { setMapSource(MapSource::XPLANE); });
     xplaneButton->setFit(false, true);
-    xplaneButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    xplaneButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
     xplaneButton->alignBelow(geoTiffButton, 10);
     auto xplaneLabel = std::make_shared<Label>(settingsContainer, "Uses X-Plane earth textures as map.");
     xplaneLabel->alignRightOf(xplaneButton, 10);
@@ -128,29 +120,17 @@ void MapApp::createSettingsLayout() {
     mercatorButton = std::make_shared<Button>(settingsContainer, "Mercator");
     mercatorButton->setCallback([this] (const Button &) { setMapSource(MapSource::MERCATOR); });
     mercatorButton->setFit(false, true);
-    mercatorButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+    mercatorButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
     mercatorButton->alignBelow(xplaneButton, 10);
     auto mercatorLabel = std::make_shared<Label>(settingsContainer, "Uses any PDF or image as Mercator map.");
     mercatorLabel->alignRightOf(mercatorButton, 10);
     mercatorLabel->setManaged();
 }
 
-void MapApp::setMapSource(MapSource style) {
+void MapApp::setMapSource(MapSource style, bool init) {
     std::shared_ptr<img::TileSource> newSource;
 
     switch (style) {
-    case MapSource::OPEN_TOPO:
-        newSource = std::make_shared<maps::OnlineSlippySource>(
-            std::vector<std::string>{
-                "a.tile.opentopomap.org",
-                "b.tile.opentopomap.org",
-                "c.tile.opentopomap.org",
-            },
-            "{z}/{x}/{y}.png",
-            0, 17, 256, 256,
-            "Map Data (c) OpenStreetMap, SRTM - Map Style (c) OpenTopoMap (CC-BY-SA)");
-        setTileSource(newSource);
-        break;
     case MapSource::XPLANE:
         newSource = std::make_shared<maps::XPlaneSource>(api().getEarthTexturePath());
         setTileSource(newSource);
@@ -177,7 +157,11 @@ void MapApp::setMapSource(MapSource style) {
         selectNavigraph(maps::NavigraphMapType::WORLD);
         break;
     case MapSource::ONLINE_TILES:
-        selectOnlineMaps();
+        if (init) {
+            selectOnlineMaps(false);
+        } else {
+            selectOnlineMaps();
+        }
         break;
     }
     // Update the current active map after the switch statement;
@@ -271,8 +255,8 @@ void MapApp::selectEPSG() {
     chooserContainer->setVisible(true);
 }
 
-void MapApp::selectOnlineMaps() {
-    auto showOnlineMapsError([this](std::vector<std::string> errorMsgs) {
+void MapApp::selectOnlineMaps(bool interactive, const std::shared_ptr<maps::OnlineSlippySource> fallback) {
+    auto showOnlineMapsError([this, fallback](std::vector<std::string> errorMsgs) {
         // Lambda function to show an error in the online maps window
         // when we have trouble loading the user-defined online map
         // configuration. JSON configs are very delicate (an extra comma
@@ -292,6 +276,11 @@ void MapApp::selectOnlineMaps() {
         });
         containerWithClickableList->show(chooserContainer);
         chooserContainer->setVisible(true);
+
+        // If there is an issue reading the mapconfig.json,
+        // user the fallback map
+        setTileSource(fallback);
+        currentActiveOnlineMap = fallback->name;
     });
 
     slippyMaps.clear();
@@ -350,33 +339,49 @@ void MapApp::selectOnlineMaps() {
         return;
     }
 
-    // List the user-defined online maps
-    containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(
-            &api(), "Select online slippy maps");
-    containerWithClickableList->setListItems(slippyMapNames);
 
-    containerWithClickableList->setSelectCallback([this](int selectedItem) {
-        std::shared_ptr<img::TileSource> newSource;
-        const auto &conf = slippyMaps.at(selectedItem);
+    if (interactive) {
+        // List the user-defined online maps and let the user pick
+        // which map they want to use
+        containerWithClickableList = std::make_unique<ContainerWithClickableCustomList>(
+                &api(), "Select online slippy maps");
+        containerWithClickableList->setListItems(slippyMapNames);
 
-        newSource = std::make_shared<maps::OnlineSlippySource>(
-            conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
-            conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
-            conf.protocol);
+        containerWithClickableList->setSelectCallback([this](int selectedItem) {
+            const auto &conf = slippyMaps.at(selectedItem);
+            std::shared_ptr<img::TileSource> tileSource;
 
-        setTileSource(newSource);
-        currentActiveOnlineMap = conf.name;
-    });
+            tileSource = std::make_shared<maps::OnlineSlippySource>(
+                conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
+                conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
+                conf.name, conf.protocol);
 
-    containerWithClickableList->setCancelCallback([this] () {
-        api().executeLater([this] () {
-            containerWithClickableList.reset();
-            chooserContainer->setVisible(false);
+            setTileSource(tileSource);
+            currentActiveOnlineMap = conf.name;
         });
-    });
 
-    containerWithClickableList->show(chooserContainer);
-    chooserContainer->setVisible(true);
+        containerWithClickableList->setCancelCallback([this] () {
+            api().executeLater([this] () {
+                containerWithClickableList.reset();
+                chooserContainer->setVisible(false);
+            });
+        });
+
+        containerWithClickableList->show(chooserContainer);
+        chooserContainer->setVisible(true);
+    } else {
+        // If non-interactive selection, pick the first map
+        // found in the mapconfig.json
+        const auto &conf = slippyMaps.at(0);
+        std::shared_ptr<img::TileSource> tileSource;
+        tileSource = 
+            std::make_shared<maps::OnlineSlippySource>(
+                conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
+                conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
+                conf.name, conf.protocol);
+        setTileSource(tileSource);
+        currentActiveOnlineMap = conf.name;
+    }
 }
 
 void MapApp::selectNavigraph(maps::NavigraphMapType type) {
@@ -461,25 +466,25 @@ void MapApp::onSettingsButton() {
         naviLowButton = std::make_shared<Button>(settingsContainer, "IFR Low");
         naviLowButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_LOW); });
         naviLowButton->setFit(false, true);
-        naviLowButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviLowButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
         naviLowButton->alignBelow(mercatorButton, 10);
 
         naviHighButton = std::make_shared<Button>(settingsContainer, "IFR High");
         naviHighButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_HIGH); });
         naviHighButton->setFit(false, true);
-        naviHighButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviHighButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
         naviHighButton->alignRightOf(naviLowButton, 10);
 
         naviVFRButton = std::make_shared<Button>(settingsContainer, "VFR");
         naviVFRButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_VFR); });
         naviVFRButton->setFit(false, true);
-        naviVFRButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviVFRButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
         naviVFRButton->alignRightOf(naviHighButton, 10);
 
         naviWorldButton = std::make_shared<Button>(settingsContainer, "World");
         naviWorldButton->setCallback([this] (const Button &) { setMapSource(MapSource::NAVIGRAPH_WORLD); });
         naviWorldButton->setFit(false, true);
-        naviWorldButton->setDimensions(openTopoButton->getWidth(), openTopoButton->getHeight());
+        naviWorldButton->setDimensions(onlineMapsButton->getWidth(), onlineMapsButton->getHeight());
         naviWorldButton->alignRightOf(naviVFRButton, 10);
 
         auto naviLabel = std::make_shared<Label>(settingsContainer, "Navigraph maps");
