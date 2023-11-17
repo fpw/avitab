@@ -1,0 +1,5 @@
+# Enforce consistent line feed for all files that Git considers texty.
+* text=auto eol=lf
+
+# NB will need to add specific rules for any files that require CRLF line endings.
+# Currently Avitab does not have any of these in its repository.

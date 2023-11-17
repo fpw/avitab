@@ -374,7 +374,7 @@ void MapApp::selectOnlineMaps(bool interactive, const std::shared_ptr<maps::Onli
         // found in the mapconfig.json
         const auto &conf = slippyMaps.at(0);
         std::shared_ptr<img::TileSource> tileSource;
-        tileSource = 
+        tileSource =
             std::make_shared<maps::OnlineSlippySource>(
                 conf.servers, conf.url, conf.minZoomLevel, conf.maxZoomLevel,
                 conf.tileWidthPx, conf.tileHeightPx, conf.copyright,
@@ -494,7 +494,7 @@ void MapApp::onSettingsButton() {
 
     if (currentActiveMapSource != MapSource::ONLINE_TILES) {
         currentActiveOnlineMap = "";
-    } 
+    }
     onlineMapsLabel->setText(baseOnlineMapsLabel + (
                 currentActiveOnlineMap != "" ? "\nCurrent active map: " + currentActiveOnlineMap : ""));
 

@@ -127,7 +127,7 @@ private:
     void selectGeoTIFF();
     void selectMercator();
     void selectEPSG();
-    void selectOnlineMaps(bool interactive = true, const std::shared_ptr<maps::OnlineSlippySource> fallback = 
+    void selectOnlineMaps(bool interactive = true, const std::shared_ptr<maps::OnlineSlippySource> fallback =
             std::make_shared<maps::OnlineSlippySource>(
                 fallbackOnlineMap.servers,
                 fallbackOnlineMap.url,
