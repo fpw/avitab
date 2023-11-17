@@ -27,7 +27,7 @@ class OnlineSlippySource: public img::TileSource {
 public:
     OnlineSlippySource(std::vector<std::string> tileServers, std::string url,
            size_t minZoom, size_t maxZoom, size_t tileWidth, size_t tileHeight,
-           std::string copyrightInfo, std::string protocol = "https");
+           std::string copyrightInfo, std::string name, std::string protocol = "https");
 
     // Basic information
     int getMinZoomLevel() override;
@@ -55,6 +55,7 @@ public:
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
     std::string getCopyrightInfo() override;
+    const std::string name;
 private:
     bool cancelToken = false;
     uint8_t hostIndex = 0;

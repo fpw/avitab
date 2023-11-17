@@ -1,20 +1,5 @@
 [
     {
-        "name": "OpenStreetMap",
-        "servers": [
-            "tile.openstreetmap.org"
-        ],
-        "protocol": "https",
-        "copyright": "Map tiles (c) OpenStreetMap (ODbL)",
-        "url": "{z}/{x}/{y}.png",
-        "min_zoom_level": 1,
-        "max_zoom_level": 17,
-        "tile_width_px": 256,
-        "tile_height_px": 256,
-        "enabled": false,
-        "comment": "https://wiki.openstreetmap.org/wiki/Raster_tile_providers"
-    },
-    {
         "name": "OpenTopoMap",
         "servers": [
             "a.tile.opentopomap.org",
@@ -29,5 +14,20 @@
         "tile_width_px": 256,
         "tile_height_px": 256,
         "enabled": true
+    },
+    {
+        "name": "OpenStreetMap",
+        "servers": [
+            "tile.openstreetmap.org"
+        ],
+        "protocol": "https",
+        "copyright": "Map tiles (c) OpenStreetMap (ODbL)",
+        "url": "{z}/{x}/{y}.png",
+        "min_zoom_level": 1,
+        "max_zoom_level": 17,
+        "tile_width_px": 256,
+        "tile_height_px": 256,
+        "enabled": false,
+        "comment": "https://wiki.openstreetmap.org/wiki/Raster_tile_providers"
     }
 ]
