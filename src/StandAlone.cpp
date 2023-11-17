@@ -29,7 +29,12 @@ int main() {
     try {
         // Using the heap so we can debug destructors with log messages
         auto env = std::make_shared<avitab::StandAloneEnvironment>();
-        env->loadConfig();
+        try {
+            env->loadConfig();
+        } catch (const std::exception &e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+            exit(1);
+        }
         logger::setStdOut(env->getConfig()->getBool("/AviTab/logToStdOut"));
         logger::init(env->getProgramPath());
         logger::verbose("Main thread has id %d", std::this_thread::get_id());
