@@ -33,6 +33,8 @@ public:
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
+    bool isAirport() const override { return true; }
+    bool isFix() const override { return false; }
 
 private:
     std::string name;

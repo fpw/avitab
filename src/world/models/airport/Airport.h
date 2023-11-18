@@ -59,6 +59,8 @@ public:
     int getElevation() const;
 
     const std::string& getID() const override;
+    bool isAirport() const override { return true; }
+    bool isFix() const override { return false; }
     const Location &getLocation() const override;
     const Location &getLocationUpLeft() const;
     const Location &getLocationDownRight() const;

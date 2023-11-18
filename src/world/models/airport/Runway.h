@@ -63,6 +63,8 @@ public:
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
+    bool isAirport() const override { return false; }
+    bool isFix() const override { return false; }
     bool isRunway() const override;
     float getWidth() const;
     bool hasHardSurface() const;

@@ -175,20 +175,63 @@ void XWorld::registerNavNodes() {
     }
 }
 
-void XWorld::visitNodes(const world::Location& upLeft, const world::Location& lowRight, NodeAcceptor f) {
-    int lat1 = (int) std::ceil(std::min(90.0, upLeft.latitude));
-    int lat2 = (int) std::floor(std::max(-90.0, lowRight.latitude));
-    int lon1 = (int) std::floor(std::max(-180.0, upLeft.longitude));
-    int lon2 = (int) std::ceil(std::min(180.0, lowRight.longitude));
+int XWorld::countNodes(const world::Location &upLeft, const world::Location &lowRight) {
+    int total = 0;
 
-    for (int lat = lat2; lat <= lat1; lat++) {
-        for (int lon = lon1; lon <= lon2; lon++) {
-            auto it = allNodes.find(std::make_pair(lat, lon));
+    // nodes are grouped by integer lat/lon 'squares'. find the boundaries
+    // for iteration, and then total the nodes in each 'square'.
+    int latl = (int) std::floor(std::max(-90.0, lowRight.latitude));
+    int lath = (int) std::ceil(std::min(90.0, upLeft.latitude));
+    int lonl = (int) std::floor(std::max(-180.0, upLeft.longitude));
+    int lonh = (int) std::ceil(std::min(180.0, lowRight.longitude));
+    for (int laty = latl; laty <= lath; ++laty) {
+        for (int lonx = lonl; lonx <= lonh; ++lonx) {
+            auto it = allNodes.find(std::make_pair(laty, lonx));
+            if (it == allNodes.end()) continue;
+            total += it->second.size();
+        }
+    }
+
+    // the total might include some nodes that are external to the requested area.
+    // return an approximation assuming a uniform distribution of nodes. this will be
+    // inaccurate, but should be good enough.
+    float areaMap = (upLeft.latitude - lowRight.latitude) * (lowRight.longitude - upLeft.longitude);
+    float areaCounted = (1 + lath - latl) * (1 + lonh - lonl);
+    float r = areaMap / areaCounted;
+    return (int)((float)total * r);
+}
+
+void XWorld::visitNodes(const world::Location& upLeft, const world::Location& lowRight, NodeAcceptor callback, int filter) {
+    int latl = (int) std::floor(std::max(-90.0, lowRight.latitude));
+    int lath = (int) std::ceil(std::min(90.0, upLeft.latitude));
+    int lonl = (int) std::floor(std::max(-180.0, upLeft.longitude));
+    int lonh = (int) std::ceil(std::min(180.0, lowRight.longitude));
+
+    for (int laty = latl; laty <= lath; ++laty) {
+        for (int lonx = lonl; lonx <= lonh; ++lonx) {
+            auto it = allNodes.find(std::make_pair(laty, lonx));
             if (it == allNodes.end()) {
                 continue;
             }
             for (auto node: it->second) {
-                f(*node);
+                bool accept = false;
+                if (node->isAirport()) {
+                    if (std::dynamic_pointer_cast<world::Airport>(node)->hasControlTower()) {
+                        accept = (filter & world::World::VISIT_AIRPORTS);
+                    } else {
+                        accept = (filter & world::World::VISIT_AIRFIELDS);
+                    }
+                } else if (node->isFix()) {
+                    auto f = std::dynamic_pointer_cast<world::Fix>(node);
+                    if (f->isNavaid()) {
+                        accept = (filter & world::World::VISIT_NAVAIDS);
+                    } else if (f->isUserFix()) {
+                        accept = (filter & world::World::VISIT_USER_FIXES);
+                    } else {
+                        accept = (filter & world::World::VISIT_FIXES);
+                    }
+                }
+                if (accept) callback(*node);
             }
         }
     }

@@ -36,6 +36,8 @@ public:
     Fix(std::shared_ptr<Region> region, std::string id, Location loc);
     const std::string &getID() const override;
     const Location &getLocation() const override;
+    bool isAirport() const override { return false; }
+    bool isFix() const override { return true; }
     bool isGlobalFix() const override;
     std::shared_ptr<Region> getRegion() const;
 
@@ -51,6 +53,9 @@ public:
     std::shared_ptr<VOR> getVOR() const;
     std::shared_ptr<ILSLocalizer> getILSLocalizer() const;
     std::shared_ptr<UserFix> getUserFix() const;
+
+    bool isNavaid() const;
+    bool isUserFix() const;
 
 private:
     std::shared_ptr<Region> region;
