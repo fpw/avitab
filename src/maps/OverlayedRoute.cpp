@@ -18,6 +18,7 @@
 
 #include "OverlayedRoute.h"
 #include "src/Logger.h"
+#include <sstream>
 #include <iomanip>
 
 namespace maps {
