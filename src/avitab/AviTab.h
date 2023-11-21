@@ -61,7 +61,7 @@ public:
     void onHomeButton() override;
     std::shared_ptr<world::World> getNavWorld() override;
     using MagVarMap = std::map<std::pair<double, double>, double>;
-    MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations);
+    MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
