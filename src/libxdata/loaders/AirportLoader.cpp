@@ -22,6 +22,31 @@
 
 namespace xdata {
 
+inline world::Runway::SurfaceMaterial mapToSurfaceMaterial(AirportData::SurfaceCode c) {
+    static const world::Runway::SurfaceMaterial runwaySurfaceMap[] = {
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [0]
+        world::Runway::SurfaceMaterial::ASPHALT,    // [1]
+        world::Runway::SurfaceMaterial::CONCRETE,   // [2]
+        world::Runway::SurfaceMaterial::GRASS,      // [3]
+        world::Runway::SurfaceMaterial::DIRT,       // [4]
+        world::Runway::SurfaceMaterial::GRAVEL,     // [5]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [6]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [7]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [8]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [9]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [10]
+        world::Runway::SurfaceMaterial::UNKNOWN,    // [11]
+        world::Runway::SurfaceMaterial::LAKEBED,    // [12]
+        world::Runway::SurfaceMaterial::WATER,      // [13]
+        world::Runway::SurfaceMaterial::SNOW,       // [14]
+        world::Runway::SurfaceMaterial::CUSTOM      // [15]
+    };
+    if (c > AirportData::SurfaceCode::SC_TRANSPARENT_SURFACE) {
+        return world::Runway::SurfaceMaterial::UNKNOWN;
+    }
+    return runwaySurfaceMap[(size_t)c];
+}
+
 AirportLoader::AirportLoader(std::shared_ptr<XWorld> worldPtr):
     world(worldPtr)
 {
@@ -120,7 +145,7 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
             auto rwy = std::make_shared<world::Runway>(end->name);
             rwy->setLocation(world::Location(end->latitude, end->longitude));
             rwy->setWidth(entry.width);
-            rwy->setSurfaceType((world::Runway::SurfaceType) entry.surfaceType);
+            rwy->setSurfaceType(mapToSurfaceMaterial(entry.surfaceTypeCode));
             if (!std::isnan(heading)) {
                 rwy->setHeading(end == entry.ends.begin() ? heading : std::fmod(heading + 180.0, 360.0));
             }
@@ -148,22 +173,22 @@ void AirportLoader::patchCustomSceneryRunwaySurfaces(const AirportData& defaultA
     // Note that 15 is also used in default scenery, but there's not a lot we can do about that.
 
     // Gather map of runway IDs and their surface types from airport in the default scenery being loaded
-    std::map<std::string, world::Runway::SurfaceType> defaultRwySurface;
+    std::map<std::string, AirportData::SurfaceCode> defaultRwySurfaceCode;
     for (auto &entry: defaultAirportData.runways) {
         for (auto end = entry.ends.begin(); end != entry.ends.end(); ++end) {
-            if ((world::Runway::SurfaceType) entry.surfaceType != world::Runway::SurfaceType::TRANSPARENT_SURFACE) {
-                defaultRwySurface[end->name] = (world::Runway::SurfaceType) entry.surfaceType;
+            if (entry.surfaceTypeCode != AirportData::SurfaceCode::SC_TRANSPARENT_SURFACE) {
+                defaultRwySurfaceCode[end->name] = entry.surfaceTypeCode;
             }
         }
     }
 
     // Patch surface type from airport in default scenery into the airport that came from custom scenery loaded earlier
-    customAirport->forEachRunway([customAirport, defaultRwySurface] (std::shared_ptr<world::Runway> customRwy) {
+    customAirport->forEachRunway([customAirport, defaultRwySurfaceCode] (std::shared_ptr<world::Runway> customRwy) {
         auto runwayID = customRwy->getID();
-        if (customRwy->getSurfaceType() == world::Runway::SurfaceType::TRANSPARENT_SURFACE) {
-            auto defaultSurface = defaultRwySurface.find(runwayID);
-            if (defaultSurface != defaultRwySurface.end()) {
-                 customRwy->setSurfaceType(defaultSurface->second);
+        if (customRwy->getSurfaceType() == world::Runway::SurfaceMaterial::CUSTOM) {
+            auto defaultSurface = defaultRwySurfaceCode.find(runwayID);
+            if (defaultSurface != defaultRwySurfaceCode.end()) {
+                 customRwy->setSurfaceType(mapToSurfaceMaterial(defaultSurface->second));
                  LOG_INFO(0, "For custom scenery %s, rwy %s, transparent surface overridden with %s from default scenery",
                      customAirport->getID().c_str(), runwayID.c_str(), customRwy->getSurfaceTypeDescription().c_str());
             }

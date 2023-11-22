@@ -323,36 +323,43 @@ void OverlayedMap::drawDataOverlays() {
     // Gather list of visible OverlayedNodes, instancing those that are visible
     std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
     std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
-    navWorld->visitNodes(upLeft, downRight, [this, &overlayedAerodromes, &overlayedFixes,
-                                             lastXClicked, lastYClicked, &closestDistanceToLastClicked,
-                                             planeX, planeY, &closestDistanceToPlane,
-                                             centreX, centreY, &closestDistanceToCentre]
-                                             (const world::NavNode &node) {
-        auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
-        if (overlayedNode) {
-            if (dynamic_cast<const world::Airport *>(&node)) {
-                overlayedAerodromes.push_back(overlayedNode);
-            } else if (dynamic_cast<const world::Fix *>(&node)) {
-                overlayedFixes.push_back(overlayedNode);
+    auto nodeCount = navWorld->countNodes(upLeft, downRight);
+
+    // Will use nodeCount in a future update to improve performance, by: filtering objects
+    // reported in the visit callback, and determining text size and detail.
+    if (nodeCount <= MAX_VISIT_OBJECTS_IN_FRAME) {
+        navWorld->visitNodes(upLeft, downRight, [this, &overlayedAerodromes, &overlayedFixes,
+                                                lastXClicked, lastYClicked, &closestDistanceToLastClicked,
+                                                planeX, planeY, &closestDistanceToPlane,
+                                                centreX, centreY, &closestDistanceToCentre]
+                                                (const world::NavNode &node) {
+            auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
+            if (overlayedNode) {
+                if (dynamic_cast<const world::Airport *>(&node)) {
+                    overlayedAerodromes.push_back(overlayedNode);
+                } else if (dynamic_cast<const world::Fix *>(&node)) {
+                    overlayedFixes.push_back(overlayedNode);
+                }
+                // Consider new node as candidate for hotspots
+                int distanceToLastClicked = overlayedNode->getDistanceFromHotspot(lastXClicked, lastYClicked);
+                if (distanceToLastClicked < closestDistanceToLastClicked) {
+                    closestDistanceToLastClicked = distanceToLastClicked;
+                    closestNodeToLastClicked = overlayedNode;
+                }
+                int distanceToPlane = overlayedNode->getDistanceFromHotspot(planeX, planeY);
+                if (distanceToPlane < closestDistanceToPlane) {
+                    closestDistanceToPlane = distanceToPlane;
+                    closestNodeToPlane = overlayedNode;
+                }
+                int distanceToCentre = overlayedNode->getDistanceFromHotspot(centreX, centreY);
+                if (distanceToCentre < closestDistanceToCentre) {
+                    closestDistanceToCentre = distanceToCentre;
+                    closestNodeToCentre = overlayedNode;
+                }
             }
-            // Consider new node as candidate for hotspots
-            int distanceToLastClicked = overlayedNode->getDistanceFromHotspot(lastXClicked, lastYClicked);
-            if (distanceToLastClicked < closestDistanceToLastClicked) {
-                closestDistanceToLastClicked = distanceToLastClicked;
-                closestNodeToLastClicked = overlayedNode;
-            }
-            int distanceToPlane = overlayedNode->getDistanceFromHotspot(planeX, planeY);
-            if (distanceToPlane < closestDistanceToPlane) {
-                closestDistanceToPlane = distanceToPlane;
-                closestNodeToPlane = overlayedNode;
-            }
-            int distanceToCentre = overlayedNode->getDistanceFromHotspot(centreX, centreY);
-            if (distanceToCentre < closestDistanceToCentre) {
-                closestDistanceToCentre = distanceToCentre;
-                closestNodeToCentre = overlayedNode;
-            }
-        }
-    });
+        },
+        world::World::VISIT_EVERYTHING);
+    }
 
     numAerodromesVisible = overlayedAerodromes.size();
     LOG_INFO(dbg, "%d aerodromes, %d fixes visible", numAerodromesVisible, overlayedFixes.size());
@@ -384,8 +391,8 @@ void OverlayedMap::drawDataOverlays() {
 
     showHotspotDetailedText();
 
-    LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm",
-        stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM);
+    LOG_INFO(dbg, "zoom = %2d, deltaLon = %7.3f, %5.4f nm/pix, mapWidth = %6.1f nm, approxNodes = %d",
+        stitcher->getZoomLevel(), deltaLon, nmPerPixel, mapWidthNM, nodeCount);
 
     drawScale(nmPerPixel);
 }

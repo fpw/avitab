@@ -131,6 +131,7 @@ private:
     bool isHotspot(std::shared_ptr<OverlayedNode> node);
     void showHotspotDetailedText();
 
+    static const int MAX_VISIT_OBJECTS_IN_FRAME = 5000;
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT = 200;
     static const int MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT = 40;
 };
