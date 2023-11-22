@@ -17,6 +17,7 @@
  */
 #include <algorithm>
 #include <iomanip>
+#include <sstream>
 #include "HeaderApp.h"
 #include "src/platform/Platform.h"
 #include "src/Logger.h"
