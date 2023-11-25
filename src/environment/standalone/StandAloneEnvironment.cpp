@@ -102,9 +102,15 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
     static double vel[4];
     static double asc[4];
     if (t == 0) {
+#if 1 // normal setting, user aircraft at EDHL, no lateral movement
         loc[0] = { 10.7017287, 53.8019434, 400, 70 };
         vel[0] = 0.0;
         asc[0] = 2;
+#else // these settings can be enabed for reviewing map tiling behaviour at the 180/-180 boundary
+        loc[0] = { 179.8, 67.8, 400, 20 };
+        vel[0] = 0.005;
+        asc[0] = 2;
+#endif
         loc[1] = { 10.69, 53.81, 400, 230 };
         vel[1] = 0.00007;
         asc[1] = 3;
@@ -118,6 +124,8 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
         for (size_t i = 0; i < 4; ++i) {
             if ( vel[i] > 0.0 ) {
                 loc[i].longitude += (std::sin(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
+                if (loc[i].longitude >= 180) loc[i].longitude -= 360;
+                if (loc[i].longitude < -180) loc[i].longitude += 360;
                 loc[i].latitude += (std::cos(loc[i].heading * 3.14159265 / 180.0) * vel[i]);
             }
         }

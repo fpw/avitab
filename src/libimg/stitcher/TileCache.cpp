@@ -38,6 +38,7 @@ void TileCache::setCacheDirectory(const std::string& utf8Path) {
 }
 
 std::shared_ptr<Image> TileCache::getTile(int page, int x, int y, int zoom) {
+    tileSource->constrainXY(x, y, zoom);
     if (!tileSource->isTileValid(page, x, y, zoom)) {
         // coords out of bounds: treat as transparent
         throw std::runtime_error(std::string("Invalid coordinates in ") + __FUNCTION__);

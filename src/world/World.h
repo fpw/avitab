@@ -47,8 +47,8 @@ public:
     using NodeAcceptor = std::function<void(const world::NavNode &node)>;
     using Connection = std::pair<std::shared_ptr<NavEdge>, std::shared_ptr<NavNode>>;
 
-    virtual int countNodes(const world::Location &upLeft, const world::Location &lowRight) = 0;
-    virtual void visitNodes(const world::Location &upLeft, const world::Location &lowRight, NodeAcceptor calllback, int filter) = 0;
+    virtual int countNodes(const world::Location &bottomLeft, const world::Location &topRight) = 0;
+    virtual void visitNodes(const world::Location &bottomLeft, const world::Location &topRight, NodeAcceptor calllback, int filter) = 0;
 
     virtual std::shared_ptr<Airport> findAirportByID(const std::string &id) const = 0;
     virtual std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const = 0;

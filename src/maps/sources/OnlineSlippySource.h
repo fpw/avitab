@@ -37,6 +37,8 @@ public:
     bool supportsWorldCoords() override;
     img::Point<int> getTileDimensions(int zoom) override;
     img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) override;
+    void constrainXY(int &x, int &y, int zoom) override;
+    void constrainXY(double &x, double &y, int zoom) override;
 
     // Control the underlying loader
     void cancelPendingLoads() override;
