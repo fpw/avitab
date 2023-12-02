@@ -175,18 +175,22 @@ void XWorld::registerNavNodes() {
     }
 }
 
-int XWorld::countNodes(const world::Location &upLeft, const world::Location &lowRight) {
+int XWorld::countNodes(const world::Location &bottomLeft, const world::Location &topRight) {
     int total = 0;
 
-    // nodes are grouped by integer lat/lon 'squares'. find the boundaries
-    // for iteration, and then total the nodes in each 'square'.
-    int latl = (int) std::floor(std::max(-90.0, lowRight.latitude));
-    int lath = (int) std::ceil(std::min(90.0, upLeft.latitude));
-    int lonl = (int) std::floor(std::max(-180.0, upLeft.longitude));
-    int lonh = (int) std::ceil(std::min(180.0, lowRight.longitude));
+    // nodes are grouped by integer lat/lon 'squares'.
+    int latl = std::max((int)std::floor(bottomLeft.latitude), -90);
+    int lath = std::min((int)std::ceil(topRight.latitude), 89);
+    int lonl = (int)std::floor(bottomLeft.longitude);
+    int lonh = (int)std::ceil(topRight.longitude);
+
+    // the area might span the -180/180 meridian. bias it here, normalise again in iteration
+    if (lonh < lonl) { lonh += 360; }
+
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
-            auto it = allNodes.find(std::make_pair(laty, lonx));
+            int normx = (lonx >= 180) ? (lonx - 360) : lonx;
+            auto it = allNodes.find(std::make_pair(laty, normx));
             if (it == allNodes.end()) continue;
             total += it->second.size();
         }
@@ -195,21 +199,28 @@ int XWorld::countNodes(const world::Location &upLeft, const world::Location &low
     // the total might include some nodes that are external to the requested area.
     // return an approximation assuming a uniform distribution of nodes. this will be
     // inaccurate, but should be good enough.
-    float areaMap = (upLeft.latitude - lowRight.latitude) * (lowRight.longitude - upLeft.longitude);
+    float areaMap = (topRight.longitude > bottomLeft.longitude)
+                    ? (topRight.latitude - bottomLeft.latitude) * (topRight.longitude - bottomLeft.longitude)
+                    : (topRight.latitude - bottomLeft.latitude) * (360 + topRight.longitude - bottomLeft.longitude);
     float areaCounted = (1 + lath - latl) * (1 + lonh - lonl);
     float r = areaMap / areaCounted;
     return (int)((float)total * r);
 }
 
-void XWorld::visitNodes(const world::Location& upLeft, const world::Location& lowRight, NodeAcceptor callback, int filter) {
-    int latl = (int) std::floor(std::max(-90.0, lowRight.latitude));
-    int lath = (int) std::ceil(std::min(90.0, upLeft.latitude));
-    int lonl = (int) std::floor(std::max(-180.0, upLeft.longitude));
-    int lonh = (int) std::ceil(std::min(180.0, lowRight.longitude));
+void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location &topRight, NodeAcceptor callback, int filter) {
+    // nodes are grouped by integer lat/lon 'squares'.
+    int latl = std::min((int)std::floor(bottomLeft.latitude), -90);
+    int lath = std::min((int)std::ceil(topRight.latitude), 89);
+    int lonl = (int)std::floor(bottomLeft.longitude);
+    int lonh = (int)std::ceil(topRight.longitude);
+
+    // the area might span the -180/180 meridian. bias it here, normalise again in iteration
+    if (lonh < lonl) { lonh += 360; }
 
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
-            auto it = allNodes.find(std::make_pair(laty, lonx));
+            int normx = (lonx >= 180) ? (lonx - 360) : lonx;
+            auto it = allNodes.find(std::make_pair(laty, normx));
             if (it == allNodes.end()) {
                 continue;
             }

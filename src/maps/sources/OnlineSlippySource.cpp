@@ -102,6 +102,24 @@ img::Point<double> OnlineSlippySource::transformZoomedPoint(int page, double old
     return img::Point<double>{oldX, oldY};
 }
 
+void OnlineSlippySource::constrainXY(int &x, int &, int zoom) {
+    auto xDim = 1 << zoom;
+    if (x < 0) {
+        x += xDim;
+    } else if (x >= xDim) {
+        x -= xDim;
+    }
+}
+
+void OnlineSlippySource::constrainXY(double &x, double &, int zoom) {
+    auto xDim = 1 << zoom;
+    if (x < 0) {
+        x += xDim;
+    } else if (x >= xDim) {
+        x -= xDim;
+    }
+}
+
 img::Point<double> OnlineSlippySource::worldToXY(double lon, double lat, int zoom) {
     double zp = std::pow(2.0, zoom);
     double x = (lon + 180.0) / 360.0 * zp;
@@ -131,7 +149,7 @@ int OnlineSlippySource::getPageCount() {
 }
 
 img::Point<int> OnlineSlippySource::getPageDimensions(int page, int zoom) {
-    return img::Point<int>{0, 0};
+    return img::Point<int>{1 << zoom, 1 << zoom};
 }
 
 bool OnlineSlippySource::isTileValid(int page, int x, int y, int zoom) {
@@ -139,15 +157,15 @@ bool OnlineSlippySource::isTileValid(int page, int x, int y, int zoom) {
         return false;
     }
 
-    uint32_t endXY = 1 << zoom;
-
-    if (y < 0 || (uint32_t) y >= endXY) {
-        // y isn't repeating, so don't correct it
+    auto maxXY = 1 << zoom;
+    if (y < 0 || y >= maxXY) {
+        // cannot wrap map at polar boundaries
         return false;
     }
 
-    if (x < 0 || (uint32_t) x >= endXY) {
-        // disable wrapping for now because it is broken on higher layers
+    auto extraX = maxXY /2;
+    if (x < (0 - extraX) || x >= (maxXY + extraX)) {
+        // allow wrapping around at the 180 medidian, , but only as far back as the 0 meridian
         return false;
     }
 
