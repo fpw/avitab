@@ -15,27 +15,28 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
+#ifndef SRC_WORLD_LOADERS_USERFIXLOADER_H_
+#define SRC_WORLD_LOADERS_USERFIXLOADER_H_
 
 #include <memory>
-#include "src/world/LoadManager.h"
-#include "../parsers/objects/UserFixData.h"
-#include "../XWorld.h"
+#include "../LoadManager.h"
+#include "../World.h"
 
-namespace xdata {
+namespace world {
+
+struct UserFixData;
 
 class UserFixLoader {
 public:
-    UserFixLoader(world::LoadManager *mgr);
+    UserFixLoader(LoadManager *mgr);
     void load(const std::string &file);
 private:
-    world::LoadManager * const loadMgr;
-    std::shared_ptr<XWorld> world;
+    LoadManager * const loadMgr;
+    std::shared_ptr<World> world;
 
     void onUserFixLoaded(const UserFixData &navaid);
 };
 
-} /* namespace xdata */
+} /* namespace world */
 
-#endif /* SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_ */
+#endif /* SRC_WORLD_LOADERS_USERFIXLOADER_H_ */

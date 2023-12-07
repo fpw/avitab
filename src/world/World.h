@@ -56,6 +56,10 @@ public:
 
     virtual std::vector<Connection> &getConnections(std::shared_ptr<NavNode> from) = 0;
     virtual bool areConnected(std::shared_ptr<NavNode> from, const std::shared_ptr<NavNode> to) = 0;
+
+    virtual std::shared_ptr<Region> getRegion(const std::string &code) = 0;
+
+    virtual void addFix(std::shared_ptr<Fix> f) = 0;
 };
 
 

@@ -55,7 +55,7 @@ void NavaidLoader::onNavaidLoaded(const NavaidData& navaid) {
     }
     if (!fix || dontPair) {
         world::Location location(navaid.latitude, navaid.longitude);
-        auto region = world->findOrCreateRegion(navaid.icaoRegion);
+        auto region = world->getRegion(navaid.icaoRegion);
         fix = std::make_shared<world::Fix>(region, navaid.id, location);
         world->addFix(fix);
     }

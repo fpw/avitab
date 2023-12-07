@@ -24,21 +24,27 @@ namespace world {
 
 class LoadManager {
 public:
-
     virtual std::shared_ptr<World> getWorld() = 0;
 
     virtual void discoverSceneries() = 0;
     virtual void load() = 0;
     virtual void reloadMetar() = 0;
-    virtual void loadUserFixes(std::string filename) = 0;
-    virtual void setUserFixesFilename(std::string filename) = 0;
+
     virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
+
+    void setUserFixesFilename(std::string &filename);
+    void loadUserFixes(std::string &filename);
 
     void cancelLoading();
     bool shouldCancelLoading() const;
 
 protected:
+    void loadUserFixes();
+
+protected:
     std::atomic_bool loadCancelled { false };
+    std::string userFixesFilename;
+
 };
 
 } /* namespace world */

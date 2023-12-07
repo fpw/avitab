@@ -81,7 +81,7 @@ void XWorld::forEachAirport(std::function<void(std::shared_ptr<world::Airport>)>
     }
 }
 
-std::shared_ptr<world::Region> XWorld::findOrCreateRegion(const std::string& id) {
+std::shared_ptr<world::Region> XWorld::getRegion(const std::string& id) {
     auto iter = regions.find(id);
     if (iter == regions.end()) {
         auto ptr = std::make_shared<world::Region>(id);

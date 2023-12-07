@@ -24,7 +24,6 @@
 #include "loaders/AirwayLoader.h"
 #include "loaders/CIFPLoader.h"
 #include "loaders/MetarLoader.h"
-#include "loaders/UserFixLoader.h"
 #include "parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
@@ -67,10 +66,6 @@ void XData::discoverSceneries() {
     } catch (const std::exception &e) {
         logger::warn("Could not load scenery_packs.ini: %s", e.what());
     }
-}
-
-void XData::setUserFixesFilename(std::string filename) {
-    userFixesFilename = filename;
 }
 
 std::shared_ptr<world::World> XData::getWorld() {
@@ -171,26 +166,6 @@ void XData::loadMetar() {
     } catch (const std::exception &e) {
         // metar is optional, so only log
         logger::warn("Error parsing METAR: %s", e.what());
-    }
-}
-
-void XData::loadUserFixes() {
-    if (userFixesFilename == "") {
-        logger::info("No user fixes file specified");
-        return;
-    } else {
-        loadUserFixes(userFixesFilename);
-    }
-}
-
-void XData::loadUserFixes(std::string userFixesFilename) {
-    try {
-        UserFixLoader loader(this);
-        loader.load(userFixesFilename);
-        logger::info("Loaded %s", userFixesFilename.c_str());
-    } catch (const std::exception &e) {
-        // User fixes are optional, so could be no CSV file or parse error
-        logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());
     }
 }
 

@@ -15,23 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
-#define SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
+#ifndef SRC_WORLD_PARSERS_USERFIXPARSER_H_
+#define SRC_WORLD_PARSERS_USERFIXPARSER_H_
 
 #include <string>
-#include <limits>
-#include "src/world/models/navaids/UserFix.h"
+#include <functional>
+#include "../models/navaids/UserFix.h"
+#include "objects/UserFixData.h"
+#include "BaseParser.h"
 
-namespace xdata {
+namespace world {
 
-struct UserFixData {
-    world::UserFix::Type type = world::UserFix::Type::NONE;
-    std::string name;
-    std::string ident;
-    double latitude = std::numeric_limits<double>::quiet_NaN();
-    double longitude = std::numeric_limits<double>::quiet_NaN();
+class UserFixParser {
+public:
+    using Acceptor = std::function<void(const UserFixData &)>;
+
+    UserFixParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadUserFixes();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+    int lineNum;
+
+    void parseLine();
+    UserFix::Type parseType(std::string& typeString);
 };
 
-} /* namespace xdata */
+} /* namespace world */
 
-#endif /* SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_ */
+#endif /* SRC_WORLD_PARSERS_USERFIXPARSER_H_ */

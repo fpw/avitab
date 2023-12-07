@@ -16,14 +16,14 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "UserFixLoader.h"
-#include "src/libxdata/parsers/UserFixParser.h"
-#include "src/world/models/navaids/Fix.h"
+#include "../parsers/UserFixParser.h"
+#include "../models/navaids/Fix.h"
 #include "src/Logger.h"
 
-namespace xdata {
+namespace world {
 
-UserFixLoader::UserFixLoader(world::LoadManager *mgr):
-    loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
+UserFixLoader::UserFixLoader(LoadManager *mgr):
+    loadMgr(mgr), world(mgr->getWorld())
 {
 }
 
@@ -45,14 +45,14 @@ void UserFixLoader::load(const std::string& file) {
 void UserFixLoader::onUserFixLoaded(const UserFixData& userfixdata) {
     // User fixes are unique, so create new fix each time
     // No region in LNM/PlanG csv format, so just use dummy one
-    auto region = world->findOrCreateRegion("USER_FIX");
-    world::Location location(userfixdata.latitude, userfixdata.longitude);
-    auto fix = std::make_shared<world::Fix>(region, userfixdata.ident, location);
-    auto userFix = std::make_shared<world::UserFix>();
+    auto region = world->getRegion("USER");
+    Location location(userfixdata.latitude, userfixdata.longitude);
+    auto fix = std::make_shared<Fix>(region, userfixdata.ident, location);
+    auto userFix = std::make_shared<UserFix>();
     userFix->setType(userfixdata.type);
     userFix->setName(userfixdata.name);
     fix->attachUserFix(userFix);
     world->addFix(fix);
 }
 
-} /* namespace xdata */
+} /* namespace world */

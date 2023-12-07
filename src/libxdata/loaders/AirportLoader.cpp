@@ -87,7 +87,7 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     airport->setElevation(port.elevation);
 
     if (!port.region.empty()) {
-        auto region = world->findOrCreateRegion(port.region);
+        auto region = world->getRegion(port.region);
         airport->setRegion(region);
         if (!port.country.empty()) {
             region->setName(port.country);

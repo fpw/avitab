@@ -35,8 +35,6 @@ public:
     void discoverSceneries() override;
     void load() override;
     void reloadMetar() override;
-    void loadUserFixes(std::string filename) override;
-    void setUserFixesFilename(std::string filename) override;
 private:
     std::string xplaneRoot;
     std::string navDataPath;
@@ -53,7 +51,6 @@ private:
     void loadProcedures();
     void loadMetar();
     void loadCustomScenery(const AirportLoader& loader);
-    void loadUserFixes();
 
 };
 
