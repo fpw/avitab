@@ -153,26 +153,29 @@ void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<wor
 void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
+    // fixes may be added after the initial loading of the NAV world.
+    // if so, register the node independently here
+    if (allNodesRegistered) {
+        registerNode(fix);
+    }
 }
 
 void XWorld::registerNavNodes() {
+    if (allNodesRegistered) return;
     for (auto it: airports) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
-
     for (auto it: fixes) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
+    allNodesRegistered = true;
+}
+
+void XWorld::registerNode(std::shared_ptr<world::NavNode> n) {
+    auto &loc = n->getLocation();
+    int lat = (int) loc.latitude;
+    int lon = (int) loc.longitude;
+    allNodes[std::make_pair(lat, lon)].push_back(n);
 }
 
 int XWorld::countNodes(const world::Location &bottomLeft, const world::Location &topRight) {

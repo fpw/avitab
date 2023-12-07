@@ -191,8 +191,6 @@ void XData::loadUserFixes(std::string userFixesFilename) {
     try {
         UserFixLoader loader(xworld);
         loader.load(userFixesFilename);
-        // Re-register all nodes, but shouldn't affect existing items, just adds new
-        xworld->registerNavNodes();
         logger::info("Loaded %s", userFixesFilename.c_str());
 
     } catch (const std::exception &e) {

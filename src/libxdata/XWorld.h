@@ -56,6 +56,10 @@ public:
     void registerNavNodes();
 
 private:
+    void registerNode(std::shared_ptr<world::NavNode> n);
+
+private:
+    bool allNodesRegistered { false };
     std::atomic_bool loadCancelled { false };
 
     // Unique IDs
