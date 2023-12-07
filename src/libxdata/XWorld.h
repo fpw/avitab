@@ -50,9 +50,6 @@ public:
     std::shared_ptr<world::Airway> findOrCreateAirway(const std::string &name, world::AirwayLevel lvl);
     void connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to);
 
-    void cancelLoading();
-    bool shouldCancelLoading() const;
-
     void registerNavNodes();
 
 private:
@@ -60,7 +57,6 @@ private:
 
 private:
     bool allNodesRegistered { false };
-    std::atomic_bool loadCancelled { false };
 
     // Unique IDs
     std::map<std::string, std::shared_ptr<world::Region>> regions;

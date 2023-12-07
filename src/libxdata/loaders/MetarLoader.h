@@ -19,16 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_METARLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/objects/MetarData.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../XWorld.h"
+#include "../parsers/objects/MetarData.h"
 
 namespace xdata {
 
 class MetarLoader {
 public:
-    MetarLoader(std::shared_ptr<XWorld> worldPtr);
+    MetarLoader(world::LoadManager *mgr);
     void load(const std::string &file);
 private:
+    world::LoadManager * const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onMetarLoaded(const MetarData &metar);

@@ -101,12 +101,8 @@ void XData::load() {
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 
-void XData::cancelLoading() {
-    xworld->cancelLoading();
-}
-
 void XData::loadAirports() {
-    const AirportLoader loader(xworld);
+    const AirportLoader loader(this);
 
     loadCustomScenery(loader);
 
@@ -136,29 +132,29 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
 }
 
 void XData::loadFixes() {
-    FixLoader loader(xworld);
+    FixLoader loader(this);
     loader.load(navDataPath + "earth_fix.dat");
 }
 
 void XData::loadNavaids() {
-    NavaidLoader loader(xworld);
+    NavaidLoader loader(this);
     loader.load(navDataPath + "earth_nav.dat");
 }
 
 void XData::loadAirways() {
-    AirwayLoader loader(xworld);
+    AirwayLoader loader(this);
     loader.load(navDataPath + "earth_awy.dat");
 }
 
 void XData::loadProcedures() {
-    CIFPLoader loader(xworld);
+    CIFPLoader loader(this);
     xworld->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
         try {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
         }
-        if (xworld->shouldCancelLoading()) {
+        if (shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });
@@ -170,7 +166,7 @@ void XData::loadMetar() {
     logger::verbose("Loading METAR...");
 
     try {
-        MetarLoader loader(xworld);
+        MetarLoader loader(this);
         loader.load(xplaneRoot + "METAR.rwx");
     } catch (const std::exception &e) {
         // metar is optional, so only log
@@ -189,10 +185,9 @@ void XData::loadUserFixes() {
 
 void XData::loadUserFixes(std::string userFixesFilename) {
     try {
-        UserFixLoader loader(xworld);
+        UserFixLoader loader(this);
         loader.load(userFixesFilename);
         logger::info("Loaded %s", userFixesFilename.c_str());
-
     } catch (const std::exception &e) {
         // User fixes are optional, so could be no CSV file or parse error
         logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());

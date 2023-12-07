@@ -29,14 +29,6 @@ XWorld::XWorld()
 {
 }
 
-void XWorld::cancelLoading() {
-    loadCancelled = true;
-}
-
-bool XWorld::shouldCancelLoading() const {
-    return loadCancelled;
-}
-
 std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) const {
     std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());

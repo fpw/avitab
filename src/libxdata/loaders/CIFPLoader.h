@@ -19,17 +19,19 @@
 #define SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/objects/CIFPData.h"
+#include "src/world/LoadManager.h"
 #include "src/world/models/airport/Airport.h"
-#include "src/libxdata/XWorld.h"
+#include "../parsers/objects/CIFPData.h"
+#include "../XWorld.h"
 
 namespace xdata {
 
 class CIFPLoader {
 public:
-    CIFPLoader(std::shared_ptr<XWorld> worldPtr);
+    CIFPLoader(world::LoadManager *mgr);
     void load(std::shared_ptr<world::Airport> airport, const std::string &file);
 private:
+    world::LoadManager * const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onProcedureLoaded(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);

@@ -19,17 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_AIRWAYLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/objects/AirwayData.h"
-#include "src/libxdata/parsers/AirwayParser.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../parsers/objects/AirwayData.h"
+#include "../XWorld.h"
 
 namespace xdata {
 
 class AirwayLoader {
 public:
-    AirwayLoader(std::shared_ptr<XWorld> worldPtr);
+    AirwayLoader(world::LoadManager *mgr);
     void load(const std::string &file);
 private:
+    world::LoadManager * const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onAirwayLoaded(const AirwayData &airway);

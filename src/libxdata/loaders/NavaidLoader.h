@@ -19,16 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_NAVAIDLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/NavaidParser.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../XWorld.h"
+#include "../parsers/NavaidParser.h"
 
 namespace xdata {
 
 class NavaidLoader {
 public:
-    NavaidLoader(std::shared_ptr<XWorld> worldPtr);
+    NavaidLoader(world::LoadManager *mgr);
     void load(const std::string &file);
 private:
+    world::LoadManager * const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onNavaidLoaded(const NavaidData &navaid);

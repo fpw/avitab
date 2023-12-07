@@ -22,8 +22,8 @@
 
 namespace xdata {
 
-UserFixLoader::UserFixLoader(std::shared_ptr<XWorld> worldPtr):
-    world(worldPtr)
+UserFixLoader::UserFixLoader(world::LoadManager *mgr):
+    loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
 {
 }
 
@@ -35,7 +35,7 @@ void UserFixLoader::load(const std::string& file) {
         } catch (const std::exception &e) {
             logger::warn("Can't parse userfix %s: %s", data.ident.c_str(), e.what());
         }
-        if (world->shouldCancelLoading()) {
+        if (loadMgr->shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });

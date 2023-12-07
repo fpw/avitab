@@ -19,16 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/UserFixParser.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../parsers/objects/UserFixData.h"
+#include "../XWorld.h"
 
 namespace xdata {
 
 class UserFixLoader {
 public:
-    UserFixLoader(std::shared_ptr<XWorld> worldPtr);
+    UserFixLoader(world::LoadManager *mgr);
     void load(const std::string &file);
 private:
+    world::LoadManager * const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onUserFixLoaded(const UserFixData &navaid);

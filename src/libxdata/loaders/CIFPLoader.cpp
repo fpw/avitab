@@ -21,8 +21,8 @@
 
 namespace xdata {
 
-CIFPLoader::CIFPLoader(std::shared_ptr<XWorld> worldPtr):
-    world(worldPtr)
+CIFPLoader::CIFPLoader(world::LoadManager *mgr):
+    loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
 {
 }
 
@@ -34,7 +34,7 @@ void CIFPLoader::load(std::shared_ptr<world::Airport> airport, const std::string
         } catch (const std::exception &e) {
             logger::warn("CIFP error in %s: %s", cifp.id.c_str(), e.what());
         }
-        if (world->shouldCancelLoading()) {
+        if (loadMgr->shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });

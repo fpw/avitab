@@ -15,23 +15,32 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Manager.h"
-#include "loaders/FMSLoader.h"
-#include "src/Logger.h"
+#ifndef SRC_WORLD_LOADMANAGER_H_
+#define SRC_WORLD_LOADMANAGER_H_
+
+#include "src/world/World.h"
 
 namespace world {
 
-std::vector<std::shared_ptr<NavNode>> Manager::loadFlightPlan(const std::string filename)
-{
-    try {
-        FMSLoader loader(getWorld());
-        auto res = loader.load(filename);
-        return res;
+class LoadManager {
+public:
 
-    } catch (const std::exception &e) {
-        logger::warn("Unable to load/parse flight plan file '%s' %s", filename.c_str(), e.what());
-        return std::vector<std::shared_ptr<NavNode>>();
-    }
-}
+    virtual std::shared_ptr<World> getWorld() = 0;
 
-}
+    virtual void discoverSceneries() = 0;
+    virtual void load() = 0;
+    virtual void reloadMetar() = 0;
+    virtual void loadUserFixes(std::string filename) = 0;
+    virtual void setUserFixesFilename(std::string filename) = 0;
+    virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
+
+    void cancelLoading();
+    bool shouldCancelLoading() const;
+
+protected:
+    std::atomic_bool loadCancelled { false };
+};
+
+} /* namespace world */
+
+#endif /* SRC_WORLD_LOADMANAGER_H_ */

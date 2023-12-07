@@ -48,11 +48,11 @@ std::shared_ptr<Settings> Environment::getSettings() {
     return settings;
 }
 
-void Environment::setWorldManager(std::shared_ptr<world::Manager> mgr) {
+void Environment::setWorldManager(std::shared_ptr<world::LoadManager> mgr) {
     worldManager = mgr;
 }
 
-std::shared_ptr<world::Manager> Environment::getWorldManager() {
+std::shared_ptr<world::LoadManager> Environment::getWorldManager() {
     return worldManager;
 }
 
