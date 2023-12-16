@@ -23,41 +23,23 @@
 
 namespace maps {
 
-OverlayedNode::OverlayedNode(OverlayHelper helper):
-    overlayHelper(helper)
+OverlayedNode::OverlayedNode(IOverlayHelper *h, bool a)
+:   overlayHelper(h), enabled(true), airfield(a), highlight(false), posX(0), posY(0)
 {
 }
 
-std::shared_ptr<OverlayedNode> OverlayedNode::getInstanceIfVisible(OverlayHelper helper, const world::NavNode &node) {
-    auto fix = dynamic_cast<const world::Fix *>(&node);
-    if (fix) {
-        return OverlayedFix::getInstanceIfVisible(helper, *fix);
-    }
-    auto airport = dynamic_cast<const world::Airport *>(&node);
-    if (airport) {
-        return OverlayedAirport::getInstanceIfVisible(helper, airport);
-    }
-    return nullptr;
+void OverlayedNode::configure(const OverlayConfig &cfg, const world::Location &loc)
+{
+    overlayHelper->positionToPixel(loc.latitude, loc.longitude, posX, posY);
+    highlight = false;
 }
 
-int OverlayedNode::getDistanceFromHotspot(int x, int y) {
+int OverlayedNode::getHotspotDistance(int x, int y) const {
+    if (!enabled) return 1 << 15; // sufficiently big to not be selected!
+
     // Taxicab distance ok for use-case, instead of more compute intensive full pythagoras
-    return std::abs(getHotspotX() - x) + std::abs(getHotspotY() - y);
-}
-
-int OverlayedNode::getHotspotX() {
-    return px;    
-}
-
-int OverlayedNode::getHotspotY() {
-    return py;    
-}
-
-bool OverlayedNode::isEqual(OverlayedNode & node) {
-   return (this->getID() == node.getID()) &&
-          (typeid(*this) == typeid(node)) &&
-          (this->px == node.px) &&
-          (this->py == node.py);
+    auto hs = getClickHotspot();
+    return std::abs(x - hs.first) + std::abs(y - hs.second);
 }
 
 } /* namespace maps */

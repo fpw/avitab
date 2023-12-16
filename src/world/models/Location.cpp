@@ -59,4 +59,17 @@ double Location::distanceTo(const Location& other) const {
     return R * c;
 }
 
+bool Location::isInArea(const Location &bottomLeft, const Location &topRight) const {
+    if (latitude < bottomLeft.latitude) return false;
+    if (latitude > topRight.latitude) return false;
+    if (bottomLeft.longitude < topRight.longitude) {
+        if (longitude < bottomLeft.longitude) return false;
+        if (longitude > topRight.longitude) return false;
+        return true;
+    }
+    // if we get this far it's because the area spans the -180/+180 discontinuity
+    if ((longitude > bottomLeft.longitude) && (longitude < topRight.longitude)) return false;
+    return true;
+}
+
 } /* namespace world */
