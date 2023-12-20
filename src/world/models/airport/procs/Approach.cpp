@@ -17,6 +17,7 @@
  */
 #include <sstream>
 #include "Approach.h"
+#include "src/Logger.h"
 
 namespace world {
 
@@ -59,6 +60,53 @@ void Approach::iterateTransitions(std::function<void(const std::string&, std::sh
             f(it.first, std::dynamic_pointer_cast<Fix>(startFix), getRunway());
         }
     }
+
+    LOG_INFO(0, "\n%s", toDebugString().c_str());
+}
+
+std::vector<std::shared_ptr<world::NavNode>> Approach::getWaypoints(std::string appTransName) const {
+    if ((transitions.size() + approach.size()) == 0) {
+        LOG_INFO(1, "Approach %s has no waypoints", getID().c_str());
+        return std::vector<std::shared_ptr<world::NavNode>>();
+    }
+
+    LOG_INFO(1, "Approach %s from fix '%s'", getID().c_str(), appTransName.c_str());
+    LOG_INFO(1, "\n%s", toDebugString().c_str());
+
+    if (transitions.empty() || appTransName.empty()) {
+        return approach;
+    }
+
+    // Populate waypoints from requested transition then the approach waypoints
+    std::vector<std::shared_ptr<NavNode>> waypoints;
+    try {
+        waypoints = transitions.at(appTransName);
+    } catch (std::out_of_range &e) {
+        LOG_WARN("Couldn't find '%s' in approach transitions", appTransName);
+    }
+    if (waypoints.back() != approach.front()) {
+        LOG_WARN("Disconnect %s -> %s", waypoints.back()->getID().c_str(), approach.front()->getID().c_str());
+    }
+    waypoints.insert(waypoints.end(), approach.begin(), approach.end());
+
+    auto newEnd = std::unique(waypoints.begin(), waypoints.end());
+    waypoints.erase(newEnd, waypoints.end());
+
+    // Remove all waypoints after any runway as these are missed approach
+    for (auto it = waypoints.begin(); it != waypoints.end(); it++) {
+        if ((*it)->isRunway()) {
+            LOG_INFO(1, "%s", (*it)->getID().c_str());
+            waypoints.erase(it + 1, waypoints.end());
+        }
+    }
+
+    std::stringstream ss;
+    for (auto w: waypoints) {
+        ss << w->getID() << " ";
+    }
+    LOG_INFO(1, " %s", ss.str().c_str());
+
+    return waypoints;
 }
 
 std::string Approach::toDebugString() const {

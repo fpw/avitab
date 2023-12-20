@@ -255,6 +255,14 @@ std::vector<std::shared_ptr<SID>> Airport::getSIDs() const {
     return res;
 }
 
+std::shared_ptr<SID> Airport::getSIDByName(std::string sidName) const {
+    auto sid = sids.find(sidName);
+    if (sid == sids.end()) {
+        return nullptr;
+    }
+    return sid->second;
+}
+
 std::vector<std::shared_ptr<STAR>> Airport::getSTARs() const {
     std::vector<std::shared_ptr<STAR>> res;
     for (auto &it: stars) {
@@ -263,12 +271,28 @@ std::vector<std::shared_ptr<STAR>> Airport::getSTARs() const {
     return res;
 }
 
+std::shared_ptr<STAR> Airport::getSTARByName(std::string starName) const {
+    auto star = stars.find(starName);
+    if (star == stars.end()) {
+        return nullptr;
+    }
+    return star->second;
+}
+
 std::vector<std::shared_ptr<Approach>> Airport::getApproaches() const {
     std::vector<std::shared_ptr<Approach>> res;
     for (auto &it: approaches) {
         res.push_back(it.second);
     }
     return res;
+}
+
+std::shared_ptr<Approach> Airport::getApproachByName(std::string appName) const {
+    auto approach = approaches.find(appName);
+    if (approach == approaches.end()) {
+        return nullptr;
+    }
+    return approach->second;
 }
 
 const std::string& Airport::getMetarTimestamp() const {
