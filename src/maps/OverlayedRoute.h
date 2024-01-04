@@ -39,8 +39,8 @@ private:
 
     void drawLeg(world::Location &from, world::Location &to, double distance,
                  double trueBearing, double magneticBearing);
+    std::pair<int, int> drawLeg(int x0, int y0, int x1, int y1);
     std::shared_ptr<img::Image> createRouteAnnotation(int distance, int trueBearing, int magBearing);
-    void handleIDLcrossing(world::Location &to, world::Location &from, int trueBearing, int magBearing);
 };
 
 } /* namespace maps */

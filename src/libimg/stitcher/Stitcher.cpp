@@ -107,6 +107,7 @@ void Stitcher::pan(int dx, int dy) {
         centerY += dx / (double) dim.x;
         break;
     }
+    tileSource->constrainXY(centerX, centerY, zoomLevel);
     updateImage();
 }
 

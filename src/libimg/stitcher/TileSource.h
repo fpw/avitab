@@ -39,6 +39,8 @@ public:
     virtual Point<int> getTileDimensions(int zoom) = 0;
     virtual bool supportsWorldCoords() = 0;
     virtual img::Point<double> transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) = 0;
+    virtual void constrainXY(int &x, int &y, int zoom) { /* default is a noop */ }
+    virtual void constrainXY(double &x, double &y, int zoom) { /* default is a noop */ }
     virtual std::string getCalibrationReport() {return "No calibration"; };
     virtual double getNorthOffsetAngle() { return 0.0; };
     virtual bool isPDFSource() { return false; };

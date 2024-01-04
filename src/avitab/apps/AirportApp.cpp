@@ -189,11 +189,14 @@ std::string AirportApp::toATCInfo(std::shared_ptr<world::Airport> airport) {
     str << "ATC Frequencies\n";
     str << toATCString("    Recorded Messages", airport, world::Airport::ATCFrequency::RECORDED);
     str << toATCString("    UniCom", airport, world::Airport::ATCFrequency::UNICOM);
+    str << toATCString("    MultiCom", airport, world::Airport::ATCFrequency::MULTICOM);
+    str << toATCString("    Flight Service", airport, world::Airport::ATCFrequency::FSS);
     str << toATCString("    Delivery", airport, world::Airport::ATCFrequency::CLD);
     str << toATCString("    Ground", airport, world::Airport::ATCFrequency::GND);
     str << toATCString("    Tower", airport, world::Airport::ATCFrequency::TWR);
     str << toATCString("    Approach", airport, world::Airport::ATCFrequency::APP);
     str << toATCString("    Departure", airport, world::Airport::ATCFrequency::DEP);
+    str << toATCString("    Centre", airport, world::Airport::ATCFrequency::CTR);
     return str.str();
 }
 

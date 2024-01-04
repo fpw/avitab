@@ -25,6 +25,19 @@
 namespace xdata {
 
 struct AirportData {
+
+    enum class SurfaceCode {
+        SC_ASPHALT = 1,
+        SC_CONCRETE = 2,
+        SC_TURF_GRASS = 3,
+        SC_DIRT_BROWN = 4,
+        SC_GRAVEL_GREY = 5,
+        SC_DRY_LAKEBED = 12, // "Example: KEDW (Edwards AFB)"
+        SC_WATER_RUNWAY = 13, // "Nothing displayed"
+        SC_SNOW_OR_ICE = 14, // "Poor friction. Runway markings cannot be added"
+        SC_TRANSPARENT_SURFACE = 15 // "Hard surface, but no texture/markings (use in custom scenery)"
+    };
+
     struct Frequency {
         /**
          * 50: ATC - Recorded: AWOS, ASOS or ATIS
@@ -49,7 +62,7 @@ struct AirportData {
 
     struct RunwayData {
         float width; // meters
-        int surfaceType;
+        SurfaceCode surfaceTypeCode;
         std::vector<RunwayEnd> ends;
     };
 
@@ -57,7 +70,7 @@ struct AirportData {
         std::string name;
         double latitude;
         double longitude;
-        int surfaceType;
+        SurfaceCode surfaceTypeCode;
     };
 
     std::string id;

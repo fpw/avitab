@@ -50,7 +50,7 @@ void Runway::setLocation(const world::Location &loc) {
     this->location = loc;
 }
 
-void Runway::setSurfaceType(SurfaceType surfaceType) {
+void Runway::setSurfaceType(SurfaceMaterial surfaceType) {
     this->surfaceType = surfaceType ;
 }
 
@@ -99,33 +99,41 @@ float Runway::getElevation() const {
     return elevation;
 }
 
-Runway::SurfaceType Runway::getSurfaceType() const{
+Runway::SurfaceMaterial Runway::getSurfaceType() const{
     return surfaceType;
 }
 
 const std::string Runway::getSurfaceTypeDescription() const {
     switch(surfaceType) {
-    case SurfaceType::ASPHALT:              return "Asphalt";
-    case SurfaceType::CONCRETE:             return "Concrete";
-    case SurfaceType::TURF_GRASS:           return "Turf/Grass";
-    case SurfaceType::DIRT_BROWN:           return "Dirt";
-    case SurfaceType::GRAVEL_GREY:          return "Gravel";
-    case SurfaceType::DRY_LAKEBED:          return "Dry lakebed";
-    case SurfaceType::WATER_RUNWAY:         return "Water";
-    case SurfaceType::SNOW_OR_ICE:          return "Snow/Ice";
-    case SurfaceType::TRANSPARENT_SURFACE:  return "Hard?";
-    default: return "Unknown surface";
+    case SurfaceMaterial::ASPHALT:      return "Asphalt";
+    case SurfaceMaterial::BITUMINOUS:   return "Bituminous";
+    case SurfaceMaterial::CONCRETE:     return "Concrete";
+    case SurfaceMaterial::CORAL:        return "Coral";
+    case SurfaceMaterial::DIRT:         return "Dirt";
+    case SurfaceMaterial::GRASS:        return "Grass";
+    case SurfaceMaterial::GRAVEL:       return "Gravel";
+    case SurfaceMaterial::ICE:          return "Ice";
+    case SurfaceMaterial::LAKEBED:      return "Lakebed";
+    case SurfaceMaterial::SAND:         return "Sand";
+    case SurfaceMaterial::SNOW:         return "Snow";
+    case SurfaceMaterial::TARMAC:       return "Tarmacadam";
+    case SurfaceMaterial::WATER:        return "Water";
+    default:                            return "Unknown";
     }
 }
 
 bool Runway::hasHardSurface() const{
-    return ((surfaceType == SurfaceType::ASPHALT) ||
-            (surfaceType == SurfaceType::CONCRETE) ||
-            (surfaceType == SurfaceType::TRANSPARENT_SURFACE));
+    return ((surfaceType == SurfaceMaterial::ASPHALT) ||
+            (surfaceType == SurfaceMaterial::BITUMINOUS) ||
+            (surfaceType == SurfaceMaterial::CONCRETE) ||
+            (surfaceType == SurfaceMaterial::ICE) ||
+            (surfaceType == SurfaceMaterial::LAKEBED) ||
+            (surfaceType == SurfaceMaterial::TARMAC) ||
+            (surfaceType == SurfaceMaterial::CUSTOM));
 }
 
 bool Runway::isWater() const{
-    return (surfaceType == SurfaceType::WATER_RUNWAY);
+    return (surfaceType == SurfaceMaterial::WATER);
 }
 
 } /* namespace world */

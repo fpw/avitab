@@ -86,4 +86,12 @@ std::shared_ptr<UserFix> Fix::getUserFix() const {
     return userFix;
 }
 
+bool Fix::isNavaid() const {
+    return ndb || dme || vor || ilsLoc;
+}
+
+bool Fix::isUserFix() const {
+    return (bool)userFix;
+}
+
 } /* namespace world */
