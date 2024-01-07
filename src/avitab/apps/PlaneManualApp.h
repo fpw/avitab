@@ -26,8 +26,8 @@ namespace avitab {
 class PlaneManualApp: public DocumentsApp {
 public:
     PlaneManualApp(FuncsPtr appFuncs);
+    void onPlaneLoad() override;
 private:
-    bool findStartDirectory(std::string &startDir);
     void ShowMessage();
     std::shared_ptr<MessageBox> errorMsg;
 };

@@ -38,6 +38,7 @@ public:
     void setOnExit(ExitFunct onExitFunct);
     ContPtr getUIContainer();
     virtual void show();
+    virtual void onPlaneLoad();
     virtual void onMouseWheel(int dir, int x, int y);
     virtual void recentre();
     virtual void pan(int x, int y);

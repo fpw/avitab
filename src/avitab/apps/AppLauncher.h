@@ -38,6 +38,7 @@ public:
 
     AppLauncher(FuncsPtr appFuncs);
     void onScreenResize(int width, int height) override;
+    void onPlaneLoad() override;
     void onMouseWheel(int dir, int x, int y) override;
     void recentre() override;
     void pan(int x, int y) override;

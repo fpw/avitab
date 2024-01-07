@@ -44,7 +44,9 @@ public:
     DocumentsApp(FuncsPtr appFuncs, const std::string &title, const std::string &group, const std::string &fileRegex);
     void onMouseWheel(int dir, int x, int y) override;
 protected:
-    void Run();
+    void Run(const std::string &dir);
+    void ChangeBrowseDirectory(const std::string &dir);
+private:
     std::string browseStartDirectory;
 private:
     const std::string appTitle;
