@@ -57,6 +57,9 @@ void App::resume() {
 void App::suspend() {
 }
 
+void App::onPlaneLoad() {
+}
+
 void App::onMouseWheel(int dir, int x, int y) {
 }
 

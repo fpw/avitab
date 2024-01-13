@@ -29,11 +29,18 @@ DocumentsApp::DocumentsApp(FuncsPtr appFuncs, const std::string &title, const st
     setFilterRegex(fileRegex);
 }
 
-void DocumentsApp::Run() {
+void DocumentsApp::Run(const std::string &dir) {
     api().getSettings()->loadPdfReadingConfig(configGroup, settings);
+    browseStartDirectory = dir;
     fsBrowser.goTo(browseStartDirectory);
     overlays = std::make_shared<maps::OverlayConfig>();
     resetLayout();
+    showDirectory();
+}
+
+void DocumentsApp::ChangeBrowseDirectory(const std::string &dir) {
+    browseStartDirectory = dir;
+    fsBrowser.goTo(browseStartDirectory);
     showDirectory();
 }
 

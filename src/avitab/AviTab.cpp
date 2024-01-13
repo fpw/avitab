@@ -123,6 +123,9 @@ void AviTab::onPlaneLoad() {
     createPanel();
 
     guiLib->executeLater([this] () {
+        if (appLauncher) {
+            appLauncher->onPlaneLoad();
+        }
         auto screen = guiLib->screen();
         if (hideHeader) {
             headerApp.reset();
