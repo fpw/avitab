@@ -22,9 +22,13 @@
 
 namespace world {
 
+constexpr const char *USER_REGION = "USER";
+
 UserFixLoader::UserFixLoader(LoadManager *mgr):
     loadMgr(mgr), world(mgr->getWorld())
 {
+    // Create a dummy region for user fixes (they are normally not region coded)
+    world->addRegion(USER_REGION);
 }
 
 void UserFixLoader::load(const std::string& file) {
@@ -45,7 +49,7 @@ void UserFixLoader::load(const std::string& file) {
 void UserFixLoader::onUserFixLoaded(const UserFixData& userfixdata) {
     // User fixes are unique, so create new fix each time
     // No region in LNM/PlanG csv format, so just use dummy one
-    auto region = world->getRegion("USER");
+    auto region = world->getRegion(USER_REGION);
     Location location(userfixdata.latitude, userfixdata.longitude);
     auto fix = std::make_shared<Fix>(region, userfixdata.ident, location);
     auto userFix = std::make_shared<UserFix>();

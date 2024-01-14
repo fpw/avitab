@@ -67,7 +67,8 @@ std::shared_ptr<world::Fix> XWorld::findFixByRegionAndID(const std::string& regi
     auto range = fixes.equal_range(id);
 
     for (auto it = range.first; it != range.second; ++it) {
-        if (it->second->getRegion()->getId() == region) {
+        auto r = it->second->getRegion();
+        if (r && (r->getId() == region)) {
             return it->second;
         }
     }
@@ -81,7 +82,7 @@ void XWorld::forEachAirport(std::function<void(std::shared_ptr<world::Airport>)>
     }
 }
 
-std::shared_ptr<world::Region> XWorld::getRegion(const std::string& id) {
+std::shared_ptr<world::Region> XWorld::findOrCreateRegion(const std::string& id) {
     auto iter = regions.find(id);
     if (iter == regions.end()) {
         auto ptr = std::make_shared<world::Region>(id);
@@ -131,6 +132,18 @@ bool XWorld::areConnected(std::shared_ptr<world::NavNode> from, const std::share
         }
     }
     return false;
+}
+
+void XWorld::addRegion(const std::string &code) {
+    findOrCreateRegion(code);
+}
+
+std::shared_ptr<world::Region> XWorld::getRegion(const std::string &id) {
+    auto iter = regions.find(id);
+    if (iter == regions.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to) {
