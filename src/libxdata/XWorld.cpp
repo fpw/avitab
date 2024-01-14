@@ -29,14 +29,6 @@ XWorld::XWorld()
 {
 }
 
-void XWorld::cancelLoading() {
-    loadCancelled = true;
-}
-
-bool XWorld::shouldCancelLoading() const {
-    return loadCancelled;
-}
-
 std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) const {
     std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
@@ -75,7 +67,8 @@ std::shared_ptr<world::Fix> XWorld::findFixByRegionAndID(const std::string& regi
     auto range = fixes.equal_range(id);
 
     for (auto it = range.first; it != range.second; ++it) {
-        if (it->second->getRegion()->getId() == region) {
+        auto r = it->second->getRegion();
+        if (r && (r->getId() == region)) {
             return it->second;
         }
     }
@@ -141,6 +134,18 @@ bool XWorld::areConnected(std::shared_ptr<world::NavNode> from, const std::share
     return false;
 }
 
+void XWorld::addRegion(const std::string &code) {
+    findOrCreateRegion(code);
+}
+
+std::shared_ptr<world::Region> XWorld::getRegion(const std::string &id) {
+    auto iter = regions.find(id);
+    if (iter == regions.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to) {
     auto iter = connections.find(from);
     if (iter == connections.end()) {
@@ -153,26 +158,29 @@ void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<wor
 void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
+    // fixes may be added after the initial loading of the NAV world.
+    // if so, register the node independently here
+    if (allNodesRegistered) {
+        registerNode(fix);
+    }
 }
 
 void XWorld::registerNavNodes() {
+    if (allNodesRegistered) return;
     for (auto it: airports) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
-
     for (auto it: fixes) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
+    allNodesRegistered = true;
+}
+
+void XWorld::registerNode(std::shared_ptr<world::NavNode> n) {
+    auto &loc = n->getLocation();
+    int lat = (int) loc.latitude;
+    int lon = (int) loc.longitude;
+    allNodes[std::make_pair(lat, lon)].push_back(n);
 }
 
 int XWorld::countNodes(const world::Location &bottomLeft, const world::Location &topRight) {

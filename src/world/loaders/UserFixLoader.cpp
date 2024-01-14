@@ -16,15 +16,19 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "UserFixLoader.h"
-#include "src/libxdata/parsers/UserFixParser.h"
-#include "src/world/models/navaids/Fix.h"
+#include "../parsers/UserFixParser.h"
+#include "../models/navaids/Fix.h"
 #include "src/Logger.h"
 
-namespace xdata {
+namespace world {
 
-UserFixLoader::UserFixLoader(std::shared_ptr<XWorld> worldPtr):
-    world(worldPtr)
+constexpr const char *USER_REGION = "USER";
+
+UserFixLoader::UserFixLoader(LoadManager *mgr):
+    loadMgr(mgr), world(mgr->getWorld())
 {
+    // Create a dummy region for user fixes (they are normally not region coded)
+    world->addRegion(USER_REGION);
 }
 
 void UserFixLoader::load(const std::string& file) {
@@ -35,7 +39,7 @@ void UserFixLoader::load(const std::string& file) {
         } catch (const std::exception &e) {
             logger::warn("Can't parse userfix %s: %s", data.ident.c_str(), e.what());
         }
-        if (world->shouldCancelLoading()) {
+        if (loadMgr->shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });
@@ -45,14 +49,14 @@ void UserFixLoader::load(const std::string& file) {
 void UserFixLoader::onUserFixLoaded(const UserFixData& userfixdata) {
     // User fixes are unique, so create new fix each time
     // No region in LNM/PlanG csv format, so just use dummy one
-    auto region = world->findOrCreateRegion("USER_FIX");
-    world::Location location(userfixdata.latitude, userfixdata.longitude);
-    auto fix = std::make_shared<world::Fix>(region, userfixdata.ident, location);
-    auto userFix = std::make_shared<world::UserFix>();
+    auto region = world->getRegion(USER_REGION);
+    Location location(userfixdata.latitude, userfixdata.longitude);
+    auto fix = std::make_shared<Fix>(region, userfixdata.ident, location);
+    auto userFix = std::make_shared<UserFix>();
     userFix->setType(userfixdata.type);
     userFix->setName(userfixdata.name);
     fix->attachUserFix(userFix);
     world->addFix(fix);
 }
 
-} /* namespace xdata */
+} /* namespace world */

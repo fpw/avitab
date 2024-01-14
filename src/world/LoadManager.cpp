@@ -15,13 +15,47 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Manager.h"
+#include "LoadManager.h"
+#include "loaders/UserFixLoader.h"
 #include "loaders/FMSLoader.h"
 #include "src/Logger.h"
 
 namespace world {
 
-std::vector<std::shared_ptr<NavNode>> Manager::loadFlightPlan(const std::string filename)
+void LoadManager::cancelLoading() {
+    loadCancelled = true;
+}
+
+bool LoadManager::shouldCancelLoading() const {
+    return loadCancelled;
+}
+
+void LoadManager::setUserFixesFilename(std::string &filename) {
+    userFixesFilename = filename;
+}
+
+void LoadManager::loadUserFixes(std::string &userFixesFilename) {
+    try {
+        UserFixLoader loader(this);
+        loader.load(userFixesFilename);
+        logger::info("Loaded %s", userFixesFilename.c_str());
+
+    } catch (const std::exception &e) {
+        // User fixes are optional, so could be no CSV file or parse error
+        logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());
+    }
+}
+
+void LoadManager::loadUserFixes() {
+    if (userFixesFilename == "") {
+        logger::info("No user fixes file specified");
+        return;
+    } else {
+        loadUserFixes(userFixesFilename);
+    }
+}
+
+std::vector<std::shared_ptr<NavNode>> LoadManager::loadFlightPlan(const std::string filename)
 {
     try {
         FMSLoader loader(getWorld());

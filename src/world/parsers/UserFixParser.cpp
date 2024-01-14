@@ -21,7 +21,7 @@
 #include <cmath>
 #include "src/platform/strtod.h"
 
-namespace xdata {
+namespace world {
 
 UserFixParser::UserFixParser(const std::string& file):
     parser(file)
@@ -48,7 +48,7 @@ void UserFixParser::parseLine() {
     // See online manual for Little Nav Map, and Manual in Plan G install folder for further info
 
     std::string typeString = parser.nextCSVValue();
-    if (parseType(typeString) == world::UserFix::Type::NONE) {
+    if (parseType(typeString) == UserFix::Type::NONE) {
         lineNum++;
         return;
     }
@@ -90,16 +90,16 @@ void UserFixParser::parseLine() {
     lineNum++;
 }
 
-world::UserFix::Type UserFixParser::parseType(std::string& typeString) {
+UserFix::Type UserFixParser::parseType(std::string& typeString) {
     if ((typeString == "VRP") || (typeString == "11")) {
-        return world::UserFix::Type::VRP;
+        return UserFix::Type::VRP;
     } else if ((typeString == "POI") || (typeString == "8")) {
-        return world::UserFix::Type::POI;
+        return UserFix::Type::POI;
     } else if ((typeString == "Marker") || (typeString == "9") || (typeString == "10")) {
-        return world::UserFix::Type::MARKER;
+        return UserFix::Type::MARKER;
     } else {
-        return world::UserFix::Type::NONE;
+        return UserFix::Type::NONE;
     }
 }
 
-} /* namespace xdata */
+} /* namespace world */

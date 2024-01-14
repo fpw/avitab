@@ -7,5 +7,5 @@ include(${CMAKE_CURRENT_LIST_DIR}/parsers/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/router/CMakeLists.txt)
 
 target_sources(world PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/Manager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/LoadManager.cpp
 )

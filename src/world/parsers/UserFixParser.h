@@ -15,25 +15,35 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
-#define SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_
+#ifndef SRC_WORLD_PARSERS_USERFIXPARSER_H_
+#define SRC_WORLD_PARSERS_USERFIXPARSER_H_
 
-#include <memory>
-#include "src/libxdata/parsers/UserFixParser.h"
-#include "src/libxdata/XWorld.h"
+#include <string>
+#include <functional>
+#include "../models/navaids/UserFix.h"
+#include "objects/UserFixData.h"
+#include "BaseParser.h"
 
-namespace xdata {
+namespace world {
 
-class UserFixLoader {
+class UserFixParser {
 public:
-    UserFixLoader(std::shared_ptr<XWorld> worldPtr);
-    void load(const std::string &file);
-private:
-    std::shared_ptr<XWorld> world;
+    using Acceptor = std::function<void(const UserFixData &)>;
 
-    void onUserFixLoaded(const UserFixData &navaid);
+    UserFixParser(const std::string &file);
+    void setAcceptor(Acceptor a);
+    std::string getHeader() const;
+    void loadUserFixes();
+private:
+    Acceptor acceptor;
+    std::string header;
+    BaseParser parser;
+    int lineNum;
+
+    void parseLine();
+    UserFix::Type parseType(std::string& typeString);
 };
 
-} /* namespace xdata */
+} /* namespace world */
 
-#endif /* SRC_LIBXDATA_LOADERS_USERFIXLOADER_H_ */
+#endif /* SRC_WORLD_PARSERS_USERFIXPARSER_H_ */

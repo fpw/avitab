@@ -43,20 +43,24 @@ public:
     std::vector<world::World::Connection> &getConnections(std::shared_ptr<world::NavNode> from) override;
     bool areConnected(std::shared_ptr<world::NavNode> from, const std::shared_ptr<world::NavNode> to) override;
 
+    void addRegion(const std::string &code) override;
+    std::shared_ptr<world::Region> getRegion(const std::string &id) override;
+
+    void addFix(std::shared_ptr<world::Fix> fix) override;
+
     void forEachAirport(std::function<void(std::shared_ptr<world::Airport>)> f);
-    void addFix(std::shared_ptr<world::Fix> fix);
     std::shared_ptr<world::Region> findOrCreateRegion(const std::string &id);
     std::shared_ptr<world::Airport> findOrCreateAirport(const std::string &id);
     std::shared_ptr<world::Airway> findOrCreateAirway(const std::string &name, world::AirwayLevel lvl);
     void connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to);
 
-    void cancelLoading();
-    bool shouldCancelLoading() const;
-
     void registerNavNodes();
 
 private:
-    std::atomic_bool loadCancelled { false };
+    void registerNode(std::shared_ptr<world::NavNode> n);
+
+private:
+    bool allNodesRegistered { false };
 
     // Unique IDs
     std::map<std::string, std::shared_ptr<world::Region>> regions;
