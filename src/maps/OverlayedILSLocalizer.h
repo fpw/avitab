@@ -19,27 +19,29 @@
 #define SRC_MAPS_OVERLAYED_ILSLOCALIZER_H_
 
 #include "OverlayedFix.h"
+#include "OverlayedDME.h"
 
 namespace maps {
 
 class OverlayedILSLocalizer : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedILSLocalizer> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
+    OverlayedILSLocalizer(IOverlayHelper *h, const world::Fix *f);
 
-    OverlayedILSLocalizer(OverlayHelper helper, const world::Fix *m_fix,
-                          int lx, int ly, int cx, int cy, int rx, int ry);
+    void configure(const OverlayConfig &cfg, const world::Location &loc) override;
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
-    void drawGraphics();
-    void drawText(bool detailed);
-    int getHotspotX();
-    int getHotspotY();
+    Hotspot getClickHotspot() const override;
 
 private:
-    static void getTailCoords(OverlayHelper helper, const world::Fix *fix, int &lx, int &ly, int &cx, int &cy, int &rx, int &ry);
-    static void polarToCartesian(float radius, float angleDegrees, double& x, double& y);
+    void setTailCoords();
+    void polarToCartesian(float radius, float angleDegrees, double& x, double& y);
 
-    static const uint32_t color = img::COLOR_DARK_GREEN;
+    const world::ILSLocalizer * const navILS;
+    std::unique_ptr<OverlayedDME> linkedDME;
+
+    static constexpr const uint32_t color = img::COLOR_DARK_GREEN;
     
     int textLocationX = 0;
     int textLocationY = 0;

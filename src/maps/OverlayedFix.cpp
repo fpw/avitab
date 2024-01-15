@@ -18,56 +18,24 @@
 
 #include "OverlayedFix.h"
 
-#include "OverlayedNDB.h"
-#include "OverlayedVOR.h"
-#include "OverlayedDME.h"
-#include "OverlayedILSLocalizer.h"
-#include "OverlayedWaypoint.h"
-#include "OverlayedUserFix.h"
-
 namespace maps {
 
 world::Morse OverlayedFix::morse;
 
-OverlayedFix::OverlayedFix(OverlayHelper helper, const world::Fix *fix):
-    OverlayedNode(helper),
-    fix(fix)
+OverlayedFix::OverlayedFix(IOverlayHelper *h, const world::Fix *f):
+    OverlayedNode(h, false),
+    fix(f)
 {
     auto &loc = fix->getLocation();
-    overlayHelper->positionToPixel(loc.latitude, loc.longitude, px, py);
+    overlayHelper->positionToPixel(loc.latitude, loc.longitude, posX, posY);
 }
 
-bool OverlayedFix::isDMEOnly(const world::Fix &fix) {
-    // i.e. Is a DME that is not paired with a VOR or ILS/Localizer
-    return fix.getDME() && !fix.getVOR() && !fix.getILSLocalizer();
-}
-
-std::shared_ptr<OverlayedFix> OverlayedFix::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
-    int show_at_mapwidth = fix.getUserFix() ? SHOW_USERFIXES_AT_MAPWIDTHNM : SHOW_NAVAIDS_AT_MAPWIDTHNM;
-    if (helper->getMapWidthNM() > show_at_mapwidth) {
-        return nullptr;
-    }
-
-    if (fix.getNDB()) {
-        return OverlayedNDB::getInstanceIfVisible(helper, fix);
-    } else if (fix.getVOR()) {
-        return OverlayedVOR::getInstanceIfVisible(helper, fix);
-    } else if (isDMEOnly(fix)) {
-        return OverlayedDME::getInstanceIfVisible(helper, fix);
-    } else if (fix.getILSLocalizer()) {
-        return OverlayedILSLocalizer::getInstanceIfVisible(helper, fix);
-    } else if (fix.getUserFix()) {
-        return OverlayedUserFix::getInstanceIfVisible(helper, fix);
-    } else {
-        return OverlayedWaypoint::getInstanceIfVisible(helper, fix);
-    }
-}
-
-std::string OverlayedFix::getID() {
+std::string OverlayedFix::getID() const {
     return fix->getID();
 }
-void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color, const std::string &ilsHeadingMagnetic) {
-    auto mapImage = helper->getMapImage();
+
+void OverlayedFix::drawNavTextBox(const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color, const std::string &ilsHeadingMagnetic) {
+    auto mapImage = overlayHelper->getMapImage();
     // x, y is top left corner of rectangular border. If type is not required, pass in as ""
     const int MORSE_SIZE = 2;
     const int XBORDER = 2;
@@ -86,7 +54,7 @@ void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type,
     mapImage->fillRectangle(x + 1, y + 1, x + boxWidth, y + boxHeight, img::COLOR_WHITE);
     mapImage->drawText(id, TEXT_SIZE, xTextCentre, y + yo + 1, color, 0, img::Align::CENTRE);
     mapImage->drawText(freq, TEXT_SIZE, xTextCentre, y + TEXT_SIZE + yo + 1, color, 0, img::Align::CENTRE);
-    drawMorse(helper, x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
+    drawMorse(x + textWidth + (XBORDER * 3), y + yo + 4, id, MORSE_SIZE, color);
     if (ilsHeadingMagnetic != "") {
         mapImage->drawText(ilsHeadingMagnetic, TEXT_SIZE, x + (boxWidth / 2), y + (TEXT_SIZE * 2) + yo + 1, color, 0, img::Align::CENTRE);
     }
@@ -96,8 +64,8 @@ void OverlayedFix::drawNavTextBox(OverlayHelper helper, const std::string &type,
     }
 }
 
-void OverlayedFix::drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color) {
-    auto mapImage = helper->getMapImage();
+void OverlayedFix::drawMorse(int x, int y, std::string text, int size, uint32_t color) {
+    auto mapImage = overlayHelper->getMapImage();
     for (char const &c: text) {
         std::string morseForChar = morse.getCode(c);
         for (int row = 0; row < size; row++) {

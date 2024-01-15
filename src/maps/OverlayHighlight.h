@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2023 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,26 +15,29 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_OVERLAYED_WAYPOINT_H_
-#define SRC_MAPS_OVERLAYED_WAYPOINT_H_
+#pragma once
 
-#include "OverlayedFix.h"
+#include "OverlayedNode.h"
 
 namespace maps {
 
-class OverlayedWaypoint : public OverlayedFix {
-
+class OverlayHighlight
+{
 public:
-    OverlayedWaypoint(IOverlayHelper *h, const world::Fix *f);
+    void reset();
+    void activate(int x, int y);
+    void update(std::shared_ptr<OverlayedNode> on);
+    void select();
+    void highlight();
 
-    void drawGraphic() override;
-    void drawText(bool detailed) override;
+    virtual ~OverlayHighlight() = default;
 
 private:
-    static constexpr const uint32_t color = img::COLOR_BLACK;
-    static constexpr const int MARGIN = 50;
+    bool active;
+    int refX, refY;
+    int distance;
+    std::shared_ptr<OverlayedNode> node;
+
 };
 
 } /* namespace maps */
-
-#endif /* SRC_MAPS_OVERLAYED_WAYPOINT_H_ */

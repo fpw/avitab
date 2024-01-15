@@ -26,28 +26,10 @@ img::Image OverlayedUserFix::VRPIcon;
 img::Image OverlayedUserFix::MarkerIcon;
 std::vector<std::string> OverlayedUserFix::textLines;
 
-OverlayedUserFix::OverlayedUserFix(OverlayHelper helper, const world::Fix *fix):
-    OverlayedFix(helper, fix){
+OverlayedUserFix::OverlayedUserFix(IOverlayHelper *h, const world::Fix *f):
+    OverlayedFix(h, f){
     if (POIIcon.getHeight() == 0) {
         createIcons();
-    }
-}
-
-std::shared_ptr<OverlayedUserFix> OverlayedUserFix::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
-    auto userFix = fix.getUserFix();
-    if (!userFix) {
-        return nullptr;
-    }
-    auto cfg = helper->getOverlayConfig();
-    auto type = userFix->getType();
-    bool drawUserFixes = (cfg.drawPOIs && (type == world::UserFix::Type::POI)) ||
-                         (cfg.drawVRPs && (type == world::UserFix::Type::VRP)) ||
-                         (cfg.drawMarkers && (type == world::UserFix::Type::MARKER));
-
-    if (drawUserFixes && helper->isLocVisibleWithMargin(fix.getLocation(), 100)) {
-        return std::make_shared<OverlayedUserFix>(helper, &fix);
-    } else {
-        return nullptr;
     }
 }
 
@@ -76,15 +58,15 @@ void OverlayedUserFix::createIcons() {
     MarkerIcon.drawCircle(xc, yc, r / 2, MARKER_COLOR);
 }
 
-void OverlayedUserFix::drawGraphics() {
+void OverlayedUserFix::drawGraphic() {
     auto type = fix->getUserFix()->getType();
     auto mapImage = overlayHelper->getMapImage();
     if (type == world::UserFix::Type::POI) {
-        mapImage->blendImage0(POIIcon, px - RADIUS, py - RADIUS);
+        mapImage->blendImage0(POIIcon, posX - RADIUS, posY - RADIUS);
     } else if (type == world::UserFix::Type::VRP) {
-        mapImage->blendImage0(VRPIcon, px - RADIUS, py - RADIUS);
+        mapImage->blendImage0(VRPIcon, posX - RADIUS, posY - RADIUS);
     } else if (type == world::UserFix::Type::MARKER) {
-        mapImage->blendImage0(MarkerIcon, px - RADIUS, py - RADIUS);
+        mapImage->blendImage0(MarkerIcon, posX - RADIUS, posY - RADIUS);
     }
 }
 
@@ -105,8 +87,8 @@ void OverlayedUserFix::drawText(bool detailed) {
     if (textLines.size() == 2) {
         textWidth = std::max(mapImage->getTextWidth(textLines[1], TEXT_SIZE), textWidth);
     }
-    int x = px + DIAG + 1;
-    int y = py + DIAG + 1;
+    int x = posX + DIAG + 1;
+    int y = posY + DIAG + 1;
     int yo = TEXT_SIZE / 2;
     int borderWidth = textWidth + 4;
     int borderHeight = (TEXT_SIZE * (textLines.size() + 0.5)) + 1;

@@ -23,8 +23,8 @@
 
 namespace maps {
 
-OverlayedRoute::OverlayedRoute(OverlayHelper helper):
-    overlayHelper(helper)
+OverlayedRoute::OverlayedRoute(IOverlayHelper *h):
+    overlayHelper(h)
 {
 }
 

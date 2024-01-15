@@ -27,29 +27,25 @@ namespace maps {
 class OverlayedFix : public OverlayedNode {
 
 public:
-    static std::shared_ptr<OverlayedFix> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
-
-    virtual void drawGraphics() = 0;
-    virtual void drawText(bool detailed) = 0;
-    virtual std::string getID();
+    std::string getID() const override;
 
 protected:
-    OverlayedFix(OverlayHelper helper, const world::Fix *fix);
+    OverlayedFix(IOverlayHelper *h, const world::Fix *f);
     virtual ~OverlayedFix() = default;
 
-    static void drawNavTextBox(OverlayHelper helper, const std::string &type, const std::string &id, const std::string &freq, int x, int y, uint32_t color,
-                               const std::string &ilsHeadingMagnetic = "");
+    void drawNavTextBox(const std::string &type, const std::string &id, const std::string &freq,
+                                int x, int y, uint32_t color,
+                                const std::string &ilsHeadingMagnetic = "");
+
+protected:
     const world::Fix *fix;
 
-    static const int TEXT_SIZE = 10;
+    static constexpr const int TEXT_SIZE = 10;
 
 private:
     static world::Morse morse;
 
-    static void drawMorse(OverlayHelper helper, int x, int y, std::string text, int size, uint32_t color);
-    static bool isDMEOnly(const world::Fix &fix);
-    static const int SHOW_NAVAIDS_AT_MAPWIDTHNM = 200;
-    static const int SHOW_USERFIXES_AT_MAPWIDTHNM = 1000;
+    void drawMorse(int x, int y, std::string text, int size, uint32_t color);
 };
 
 } /* namespace maps */

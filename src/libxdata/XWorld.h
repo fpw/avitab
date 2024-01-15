@@ -33,7 +33,7 @@ public:
 
     virtual ~XWorld() = default;
 
-    int countNodes(const world::Location &bottomLeft, const world::Location &topRight) override;
+    int maxDensity(const world::Location &bottomLeft, const world::Location &topRight) override;
     void visitNodes(const world::Location &bottomLeft, const world::Location &topRight, NodeAcceptor callback, int filter) override;
 
     std::shared_ptr<world::Airport> findAirportByID(const std::string &id) const override;

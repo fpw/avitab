@@ -646,12 +646,22 @@ void MapApp::onRedrawNeeded() {
 
 void MapApp::onMapPan(int x, int y, bool start, bool end) {
     if (start) {
+        wasTrackingPlaneAtPanStart = trackPlane;
         trackPlane = false;
         trackButton->setToggleState(trackPlane);
+        (void)map->mouse(x, y, true);
     } else if (!end) {
         int panVecX = panPosX - x;
         int panVecY = panPosY - y;
         map->pan(panVecX, panVecY, x, y);
+    } else {
+        if (map->mouse(x, y, false)) {
+            // restore the trackPlane setting before the pan started
+            if (wasTrackingPlaneAtPanStart) {
+                trackPlane = true;
+                trackButton->setToggleState(trackPlane);
+            }
+        }
     }
     panPosX = x;
     panPosY = y;

@@ -27,19 +27,16 @@ namespace maps {
 
 class IOverlayHelper {
 public:
-    virtual std::shared_ptr<img::Image> getMapImage() = 0;
-    virtual void positionToPixel(double lat, double lon, int &px, int &py) const = 0;
-    virtual void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const = 0;
+    virtual int getMapDensity() const = 0;
     virtual double getMapWidthNM() const = 0;
-    virtual int getNumAerodromesVisible() const = 0;
-    virtual OverlayConfig &getOverlayConfig() const = 0;
-    virtual bool isLocVisibleWithMargin(const world::Location &loc, int margin) const = 0;
-    virtual bool isVisibleWithMargin(int x, int y, int margin) const = 0;
-    virtual bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const = 0;
-    virtual void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const = 0;
     virtual int getZoomLevel() const = 0;
     virtual int getMaxZoomLevel() const = 0;
     virtual double getNorthOffset() const = 0;
+    virtual std::shared_ptr<img::Image> getMapImage() = 0;
+    virtual bool isAreaVisible(int xmin, int ymin, int xmax, int ymax) const = 0;
+    virtual void fastPolarToCartesian(float radius, int angleDegrees, double& x, double& y) const = 0;
+    virtual void positionToPixel(double lat, double lon, int &px, int &py) const = 0;
+    virtual void positionToPixel(double lat, double lon, int &px, int &py, int zoomLevel) const = 0;
 
     virtual ~IOverlayHelper() = default;
 };

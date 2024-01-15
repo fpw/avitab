@@ -19,16 +19,28 @@
 #include <algorithm>
 #include <cmath>
 #include "OverlayedMap.h"
+#include "OverlayedAirport.h"
+#include "OverlayedDME.h"
+#include "OverlayedNDB.h"
+#include "OverlayedVOR.h"
+#include "OverlayedILSLocalizer.h"
+#include "OverlayedWaypoint.h"
+#include "OverlayedUserFix.h"
 #include "src/Logger.h"
+
+constexpr static bool DBG_OVERLAYS = false;
+constexpr static int INVALID_CLICK = -9999;
 
 namespace maps {
 
 OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shared_ptr<OverlayConfig> overlays):
     mapImage(stitchedMap->getPreRotatedImage()),
     tileSource(stitchedMap->getTileSource()),
+    stitcher(stitchedMap),
     overlayConfig(overlays),
     copyrightStamp("Inconsolata.ttf"),
-    stitcher(stitchedMap)
+    lastClickX(INVALID_CLICK),
+    lastClickY(INVALID_CLICK)
 {
     /*
      * This class is injected between a stitcher and its client:
@@ -60,7 +72,7 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
     otherAircraftColors[RelativeHeight::same] = overlayConfig->colorOtherAircraftSame;
     otherAircraftColors[RelativeHeight::above] = overlayConfig->colorOtherAircraftAbove;
 
-    dbg = false;
+    overlayNodeCache = std::make_shared<NavNodeToOverlayMap>();
 }
 
 void OverlayedMap::setRedrawCallback(OverlaysDrawnCallback cb) {
@@ -134,22 +146,42 @@ void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
     pixelToPosition(mapImage->getWidth() / 2, mapImage->getHeight() / 2, latitude, longitude);
 }
 
-void OverlayedMap::pan(int dx, int dy, int relx, int rely) {
-    if ((relx >= 0) && (rely >= 0)) {
-        stitcher->convertSourceImageToRenderedCoords(relx, rely);
-        pixelToPosition(relx, rely, lastLatClicked, lastLongClicked);
+bool OverlayedMap::mouse(int x, int y, bool down)
+{
+    bool wasClick = false;
+    if ((x < 0) || (y < 0)) return wasClick;
+    if (down) {
+        lastClickX = 0 - x;
+        lastClickY = 0 - y;
+    } else {
+        // if the mouse down and up points are sufficiently close then assume this was a click
+        // rather than a pan and use this to highlight the nearest overlay
+        if ((std::abs(x + lastClickX) + std::abs(y + lastClickY)) < 10) {
+            lastClickX = x;
+            lastClickY = y;
+            stitcher->convertSourceImageToRenderedCoords(lastClickX, lastClickY);
+            wasClick = true;
+        } else {
+            lastClickX = lastClickY = INVALID_CLICK;
+        }
     }
+    return wasClick;
+}
+
+void OverlayedMap::pan(int dx, int dy, int relx, int rely) {
     stitcher->pan(dx, dy);
 }
 
 void OverlayedMap::zoomIn() {
     int zoomLevel = stitcher->getZoomLevel();
     stitcher->setZoomLevel(zoomLevel + 1);
+    lastClickX = lastClickY = INVALID_CLICK;
 }
 
 void OverlayedMap::zoomOut() {
     int zoomLevel = stitcher->getZoomLevel();
     stitcher->setZoomLevel(zoomLevel - 1);
+    lastClickX = lastClickY = INVALID_CLICK;
 }
 
 void OverlayedMap::updateImage() {
@@ -161,12 +193,20 @@ void OverlayedMap::doWork() {
 }
 
 void OverlayedMap::drawOverlays() {
+    static bool skippedFirst = false;
+    if (!skippedFirst) {
+        // ignore the first call as the stitcher has not been fully initialised
+        skippedFirst = true;
+        return;
+    }
     if ((mapImage->getWidth() == 0) || (mapImage->getHeight() == 0)) {
         return;
     }
     if (tileSource->supportsWorldCoords()) {
+        updateMapAttributes();
         drawRoute();
-        drawDataOverlays();
+        drawNavWorldOverlays();
+        drawScale();
         drawOtherAircraftOverlay();
         drawAircraftOverlay();
     }
@@ -249,161 +289,166 @@ void OverlayedMap::drawCalibrationOverlay() {
     mapImage->drawLine(centerX, centerY + r / 2, centerX, centerY - r / 2, color);
 }
 
-bool OverlayedMap::isHotspot(std::shared_ptr<OverlayedNode> node) {
-    return (node->isEqual(*closestNodeToLastClicked)) ||
-           (node->isEqual(*closestNodeToPlane)) ||
-           (node->isEqual(*closestNodeToCentre));
-}
-
-void OverlayedMap::showHotspotDetailedText() {
-    if (closestNodeToLastClicked) {
-        closestNodeToLastClicked->drawText(true);
-    }
-    if (closestNodeToCentre &&
-        (!closestNodeToCentre->isEqual(*closestNodeToLastClicked))) {
-        closestNodeToCentre->drawText(true);
-    }
-    if (closestNodeToPlane && overlayConfig->drawMyAircraft &&
-        (!closestNodeToPlane->isEqual(*closestNodeToLastClicked)) &&
-        (!closestNodeToPlane->isEqual(*closestNodeToCentre))) {
-        closestNodeToPlane->drawText(true);
-    }
-}
-
-void OverlayedMap::drawDataOverlays() {
+void OverlayedMap::drawNavWorldOverlays() {
     if (!navWorld) {
         return;
     }
-    if (!overlayConfig->drawAirports && !overlayConfig->drawAirstrips && !overlayConfig->drawHeliportsSeaports &&
-        !overlayConfig->drawVORs && !overlayConfig->drawNDBs && !overlayConfig->drawILSs && !overlayConfig->drawWaypoints &&
-        !overlayConfig->drawPOIs && !overlayConfig->drawVRPs && !overlayConfig->drawMarkers) {
+
+    int nodeFilter = 0;
+    nodeFilter |= (overlayConfig->drawAirports) ? world::World::VISIT_TOWERED_AIRPORTS : 0;
+    nodeFilter |= (overlayConfig->drawAirstrips || overlayConfig->drawHeliportsSeaports) ? world::World::VISIT_OTHER_AIRPORTS : 0;
+    nodeFilter |= (overlayConfig->drawWaypoints) ? world::World::VISIT_FIXES : 0;
+    nodeFilter |= (overlayConfig->drawVORs || overlayConfig->drawNDBs || overlayConfig->drawILSs) ? world::World::VISIT_NAVAIDS : 0;
+    nodeFilter |= (overlayConfig->drawPOIs || overlayConfig->drawVRPs || overlayConfig->drawMarkers) ? world::World::VISIT_USER_FIXES : 0;
+    if (!nodeFilter) {
         return;
     }
 
-    double leftLon, rightLon;
-    double bottomLat, topLat;
-    pixelToPosition(0, 0, topLat, leftLon);
-    pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomLat, rightLon);
     // Don't overlay anything if zoomed out beyond half of the globe
     if (rightLon > (leftLon + 180)) return;
     if ((rightLon < leftLon) && ((rightLon + 360) > (leftLon + 180))) return;
 
-    world::Location bottomLeft { bottomLat, leftLon };
-    world::Location topRight { topLat, rightLon };
+    // Extend the area of the search to ensure that any NAV data that might be partially visible
+    // at the edges of the window will be included, even if the specific NAV item ends up being
+    // entirely off-screen.
+    double marginDegrees = (double)MAX_ILS_RANGE_NM / MAX_NM_PER_DEGREE;
+    world::Location searchBottomLeft(bottomLat - marginDegrees, leftLon - marginDegrees);
+    world::Location searchTopRight(topLat + marginDegrees, rightLon + marginDegrees);
 
-    // Calculate scaling from a hybrid of horizontal and vertical axes
-    double diagonalPixels = sqrt(pow(mapImage->getWidth(), 2) + pow(mapImage->getHeight(), 2));
-    double metresPerPixel = bottomLeft.distanceTo(topRight) / diagonalPixels;
-    double nmPerPixel = metresPerPixel / 1852;
-    mapWidthNM = nmPerPixel * mapImage->getWidth();
-
-    // Define last clicked, centre and plane positions for establishing hotspots
-    int lastXClicked, lastYClicked; // Last lat, long clicked, converted to x, y
-    positionToPixel(lastLatClicked, lastLongClicked, lastXClicked, lastYClicked);
-    int centreX = mapImage->getWidth() / 2;
-    int centreY = mapImage->getHeight() / 2;
-    int planeX = centreX;
-    int planeY = centreY;
-    if (!planeLocations.empty()) {
-        positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, planeX, planeY);
+    // Find out what is the likely maximum density of the area being shown, and use this value
+    // to configure filters for the node search and graphic/text drawing styles.
+    maxNodeDensity = navWorld->maxDensity(searchBottomLeft, searchTopRight);
+    LOG_INFO(DBG_OVERLAYS,"Estimating %d nodes in (%0.2f,%0.2f) -> (%0.2f,%0.2f)",
+                    maxNodeDensity, searchBottomLeft.longitude, searchBottomLeft.latitude,
+                    searchTopRight.longitude, searchTopRight.latitude);
+    if (maxNodeDensity > MAX_VISIT_OBJECTS_IN_FRAME) {
+        return;
     }
-    int closestDistanceToLastClicked = std::numeric_limits<int>::max();
-    int closestDistanceToPlane = std::numeric_limits<int>::max();
-    int closestDistanceToCentre = std::numeric_limits<int>::max();
-    closestNodeToLastClicked.reset();
-    closestNodeToPlane.reset();
-    closestNodeToCentre.reset();
-
-    // Gather list of visible OverlayedNodes, instancing those that are visible
-    std::vector<std::shared_ptr<OverlayedNode>> overlayedAerodromes;
-    std::vector<std::shared_ptr<OverlayedNode>> overlayedFixes;
-    auto nodeCount = navWorld->countNodes(bottomLeft, topRight);
-
-    // Will use nodeCount in a future update to improve performance, by: filtering objects
-    // reported in the visit callback, and determining text size and detail.
-    if (nodeCount <= MAX_VISIT_OBJECTS_IN_FRAME) {
-        navWorld->visitNodes(bottomLeft, topRight,
-                                [this, &overlayedAerodromes, &overlayedFixes,
-                                lastXClicked, lastYClicked, &closestDistanceToLastClicked,
-                                planeX, planeY, &closestDistanceToPlane,
-                                centreX, centreY, &closestDistanceToCentre]
-                                (const world::NavNode &node) {
-            auto overlayedNode = OverlayedNode::getInstanceIfVisible(shared_from_this(), node);
-            if (overlayedNode) {
-                if (dynamic_cast<const world::Airport *>(&node)) {
-                    overlayedAerodromes.push_back(overlayedNode);
-                } else if (dynamic_cast<const world::Fix *>(&node)) {
-                    overlayedFixes.push_back(overlayedNode);
-                }
-                // Consider new node as candidate for hotspots
-                int distanceToLastClicked = overlayedNode->getDistanceFromHotspot(lastXClicked, lastYClicked);
-                if (distanceToLastClicked < closestDistanceToLastClicked) {
-                    closestDistanceToLastClicked = distanceToLastClicked;
-                    closestNodeToLastClicked = overlayedNode;
-                }
-                int distanceToPlane = overlayedNode->getDistanceFromHotspot(planeX, planeY);
-                if (distanceToPlane < closestDistanceToPlane) {
-                    closestDistanceToPlane = distanceToPlane;
-                    closestNodeToPlane = overlayedNode;
-                }
-                int distanceToCentre = overlayedNode->getDistanceFromHotspot(centreX, centreY);
-                if (distanceToCentre < closestDistanceToCentre) {
-                    closestDistanceToCentre = distanceToCentre;
-                    closestNodeToCentre = overlayedNode;
-                }
-            }
-        },
-        world::World::VISIT_EVERYTHING);
+    if (maxNodeDensity > DENSITY_LIMIT_AIRFIELDS) {
+        nodeFilter &= ~(world::World::VISIT_OTHER_AIRPORTS);
+    }
+    if (maxNodeDensity > DENSITY_LIMIT_NAVAIDS) {
+        nodeFilter &= ~(world::World::VISIT_NAVAIDS);
+    }
+    if (maxNodeDensity > DENSITY_LIMIT_FIXES) {
+        nodeFilter &= ~(world::World::VISIT_FIXES);
+    }
+    if (mapWidthNM > MAPWIDTH_LIMIT_USERFIXES) {
+        nodeFilter &= ~(world::World::VISIT_USER_FIXES);
+    }
+    if (!nodeFilter) {
+        return;
     }
 
-    numAerodromesVisible = overlayedAerodromes.size();
-    LOG_INFO(dbg, "%d aerodromes, %d fixes visible", numAerodromesVisible, overlayedFixes.size());
+    // All the short-circuit tests have been done now, and we know that at least some
+    // overlays should be displayed. Get the qualifying NAV nodes from the world data
+    // and reuse the associated overlay where available, or create a new overlay if not.
+
+    int reusedOverlays = 0; // this is only used for cache hit statistics
+    std::shared_ptr<NavNodeToOverlayMap> nodes = std::make_shared<NavNodeToOverlayMap>();
+
+    navWorld->visitNodes(searchBottomLeft, searchTopRight,
+                        [this, &reusedOverlays, nodes] (const world::NavNode *node) {
+                            // coarse filtering has been done by the NAV world, but
+                            // further detailed filtering is needed here
+                            if (!isOverlayConfigured(node)) return;
+                            // did we already see this NAV item in the previous frame?
+                            // if so then we can just reuse its overlay node
+                            std::shared_ptr<OverlayedNode> on;
+                            auto i = overlayNodeCache->find(node);
+                            if (i == overlayNodeCache->end()) {
+                                on = makeOverlayedNode(node);
+                            } else {
+                                on = (*overlayNodeCache)[node];
+                                ++reusedOverlays;
+                            }
+                            if (on) {
+                                (*nodes)[node] = on;
+                                on->configure(*(overlayConfig.get()), node->getLocation());
+                            }
+                        },
+                        nodeFilter);
+
+    // decide whether all nodes should show their detailed text, this will be based
+    // on the reported node density
+    const bool showDetailedText = (maxNodeDensity < DENSITY_LIMIT_DETAILED_TEXT);
+
+    // work out which highlights are active, and initialise them
+    for (size_t i = 0; i < NUM_HIGHLIGHT_NODES; ++i) {
+        highlights[i].reset();
+    }
+    if (!showDetailedText) {
+        if (lastClickX > 0) {
+            highlights[LAST_CLICK].activate(lastClickX, lastClickY);
+        }
+        if (overlayConfig->drawMyAircraft && !planeLocations.empty()) {
+            int x, y;
+            positionToPixel(planeLocations[0].latitude, planeLocations[0].longitude, x, y);
+            highlights[USER_PLANE].activate(x, y);
+        }
+        highlights[MAP_CENTER].activate(mapImage->getWidth() / 2, mapImage->getHeight() / 2);
+    }
+
+    // split the collection of nodes into fixes and aerodromes, and find the ones to be highlighted
+    std::vector<std::shared_ptr<OverlayedNode>> fixes;
+    std::vector<std::shared_ptr<OverlayedNode>> aerodromes;
+    for (auto on: *nodes) {
+        if (on.second->isAirfield()) {
+            aerodromes.push_back(on.second);
+        } else {
+            fixes.push_back(on.second);
+        }
+        for (size_t i = 0; i < NUM_HIGHLIGHT_NODES; ++i) {
+            highlights[i].update(on.second);
+        }
+    }
+
+    // the nearest nodes have been identified, now mark them as selected
+    for (size_t i = 0; i < NUM_HIGHLIGHT_NODES; ++i) {
+        highlights[i].select();
+    }
 
     // Render the list of visible OverlayedNodes:
-    // Fix graphics, aerodrome graphics, then fix text and aerodrome text, then hotspot text
-    for (auto overlayedNode : overlayedFixes) {
-        overlayedNode->drawGraphics();
+    // Fix graphics, aerodrome graphics, then fix text and aerodrome text, then highlighted text
+    for (auto on: fixes) {
+        on->drawGraphic();
     }
-
-    for (auto overlayedNode : overlayedAerodromes) {
-        overlayedNode->drawGraphics();
+    for (auto on: aerodromes) {
+        on->drawGraphic();
     }
-
-    int numNodesVisible = overlayedAerodromes.size() + overlayedFixes.size();
-    if (numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_TEXT) {
-        bool detailedText = numNodesVisible < MAX_VISIBLE_OBJECTS_TO_SHOW_DETAILED_TEXT;
-        for (auto overlayedNode : overlayedFixes) {
-            if (!isHotspot(overlayedNode)) {
-                overlayedNode->drawText(detailedText);
-            }
+    if (maxNodeDensity < DENSITY_LIMIT_SHOW_TEXT) {
+        for (auto on: fixes) {
+            if (!on->isHighlighted()) on->drawText(showDetailedText);
         }
-        for (auto overlayedNode : overlayedAerodromes) {
-            if (!isHotspot(overlayedNode)) {
-                overlayedNode->drawText(detailedText);
-            }
+        for (auto on: aerodromes) {
+            if (!on->isHighlighted()) on->drawText(showDetailedText);
         }
     }
+    for (size_t i = 0; i < NUM_HIGHLIGHT_NODES; ++i) {
+        highlights[i].highlight();
+    }
 
-    showHotspotDetailedText();
+    LOG_INFO(DBG_OVERLAYS, "zoom = %2d, nm/pix = %0.3f, mapWidth = %0.1f nm, maxNodes = %d, actual = %d (%d/%d from cache)",
+        stitcher->getZoomLevel(), mapScaleNMperPixel, mapWidthNM, maxNodeDensity, nodes->size(), reusedOverlays, overlayNodeCache->size());
 
-    LOG_INFO(dbg, "zoom = %2d, %5.4f nm/pix, mapWidth = %6.1f nm, approxNodes = %d",
-        stitcher->getZoomLevel(), nmPerPixel, mapWidthNM, nodeCount);
+    // Keep this frame's overlays for next time. The previous cache will be disposed of and
+    // and the overlay shared pointers released, which will result in the overlay being destroyed
+    // if it wasn't reused in this frame.
+    overlayNodeCache = nodes;
+}
 
-    drawScale(nmPerPixel);
+int OverlayedMap::getMapDensity() const {
+    return maxNodeDensity;
 }
 
 double OverlayedMap::getMapWidthNM() const {
     return mapWidthNM;
 }
 
-int OverlayedMap::getNumAerodromesVisible() const {
-    return numAerodromesVisible;
-}
-
-void OverlayedMap::drawScale(double nmPerPixel) {
-    bool useFeet = (nmPerPixel < 0.005);
+void OverlayedMap::drawScale() {
+    bool useFeet = (mapScaleNMperPixel < 0.005);
     std::string units = useFeet ? "ft" : "nm";
-    double perPixel = useFeet ? (nmPerPixel * 6076) : nmPerPixel;
+    double perPixel = useFeet ? (mapScaleNMperPixel * 6076) : mapScaleNMperPixel;
     double maxRange = 300 * perPixel;
     double step = std::pow(10, (std::floor(std::log10(maxRange))));
     double rangeToShow = step;
@@ -412,7 +457,7 @@ void OverlayedMap::drawScale(double nmPerPixel) {
     } else if ((rangeToShow * 2) < maxRange) {
         rangeToShow *= 2;
     }
-    LOG_INFO(dbg, "zoom = %d, %f%s/pixel, maxRange = %f%s, step = %f%s, show = %f%s",
+    LOG_INFO(DBG_OVERLAYS, "zoom = %d, %f%s/pixel, maxRange = %f%s, step = %f%s, show = %f%s",
         stitcher->getZoomLevel(),  perPixel, units.c_str(),  maxRange, units.c_str(),
         step, units.c_str(),  rangeToShow, units.c_str());
     int x = 5;
@@ -471,7 +516,22 @@ void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py, int
     py = mapImage->getHeight() / 2 + (tileXY.y - centerXY.y) * dim.y;
 }
 
-void OverlayedMap::pixelToPosition(int px, int py, double& lat, double& lon) const {
+void OverlayedMap::updateMapAttributes()
+{
+    // Calculate scaling from a hybrid of horizontal and vertical axes
+    pixelToPosition(0, 0, topLat, leftLon);
+    pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomLat, rightLon);
+    world::Location bl(bottomLat, leftLon);
+    world::Location tr(topLat, rightLon);
+    double diagonalPixels = sqrt(pow(mapImage->getWidth(), 2) + pow(mapImage->getHeight(), 2));
+    double kmPerPixel = (bl.distanceTo(tr) / diagonalPixels) / 1000;
+    mapScaleNMperPixel = kmPerPixel * world::KM_TO_NM;
+    mapWidthNM = mapScaleNMperPixel * mapImage->getWidth();
+
+}
+
+void OverlayedMap::pixelToPosition(int px, int py, double &lat,
+                                   double &lon) const {
     int zoomLevel = stitcher->getZoomLevel();
     auto dim = tileSource->getTileDimensions(zoomLevel);
 
@@ -512,17 +572,6 @@ void OverlayedMap::fastPolarToCartesian(float radius, int angleDegrees, double& 
 void OverlayedMap::polarToCartesian(float radius, float angleDegrees, double& x, double& y) {
     x = std::sin(angleDegrees * M_PI / 180.0) * radius;
     y = -std::cos(angleDegrees * M_PI / 180.0) * radius; // 0 degrees is up, decreasing y values
-}
-
-bool OverlayedMap::isLocVisibleWithMargin(const world::Location &loc, int marginPixels) const {
-    int x, y;
-    positionToPixel(loc.latitude, loc.longitude, x, y);
-    return isVisibleWithMargin(x, y, marginPixels);
-}
-
-bool OverlayedMap::isVisibleWithMargin(int x, int y, int marginPixels) const {
-    return  (x > -marginPixels) && (x < mapImage->getWidth() + marginPixels) &&
-            (y > -marginPixels) && (y < mapImage->getHeight() + marginPixels);
 }
 
 bool OverlayedMap::isAreaVisible(int xmin, int ymin, int xmax, int ymax) const {
@@ -592,19 +641,60 @@ std::shared_ptr<img::Image> OverlayedMap::getMapImage() {
     return mapImage;
 }
 
-OverlayConfig &OverlayedMap::getOverlayConfig() const {
-    return *overlayConfig;
-}
-
 void OverlayedMap::drawRoute() {
     auto route = getRoute();
     if (!route || !overlayConfig->drawRoute) {
         return;
     }
     if (!overlayedRoute) {
-        overlayedRoute = std::make_unique<OverlayedRoute>(shared_from_this());
+        overlayedRoute = std::make_unique<OverlayedRoute>(static_cast<IOverlayHelper *>(this));
     }
     overlayedRoute->draw(route);
+}
+
+bool maps::OverlayedMap::isOverlayConfigured(const world::NavNode *nn) const {
+    if (auto a = dynamic_cast<const world::Airport *>(nn)) {
+        // use config settings to filter heliports/seaports and airfields
+        if (a->hasOnlyHeliports() || a->hasOnlyWaterRunways()) {
+            return overlayConfig->drawHeliportsSeaports;
+        } else if (!a->hasHardRunway()) {
+            return overlayConfig->drawAirstrips;
+        }
+    } else if (auto f = dynamic_cast<const world::Fix *>(nn)) {
+        // Navaid overlays make their own decision about enablement on each frame
+        if (auto uf = f->getUserFix()) {
+            if (uf->getType() == world::UserFix::Type::VRP) {
+                return overlayConfig->drawVRPs;
+            } else if (uf->getType() == world::UserFix::Type::POI) {
+                return overlayConfig->drawPOIs;
+            } else if (uf->getType() == world::UserFix::Type::MARKER) {
+                return overlayConfig->drawMarkers;
+            }
+        }
+    }
+    return true; // coarse filtering has already removed other options
+}
+
+std::shared_ptr<OverlayedNode> OverlayedMap::makeOverlayedNode(world::NavNode const *nn) {
+    std::shared_ptr<OverlayedNode> on;
+    if (auto a = dynamic_cast<const world::Airport *>(nn)) {
+        on = std::make_shared<OverlayedAirport>(static_cast<IOverlayHelper *>(this), a);
+    } else if (auto f = dynamic_cast<const world::Fix *>(nn)) {
+        if (f->getILSLocalizer()) {
+            on = std::make_shared<OverlayedILSLocalizer>(static_cast<IOverlayHelper *>(this), f);
+        } else if (f->getVOR()) {
+            on = std::make_shared<OverlayedVOR>(static_cast<IOverlayHelper *>(this), f);
+        } else if (f->getDME()) {
+            on = std::make_shared<OverlayedDME>(static_cast<IOverlayHelper *>(this), f);
+        } else if (f->getNDB()) {
+            on = std::make_shared<OverlayedNDB>(static_cast<IOverlayHelper *>(this), f);
+        } else if (f->getUserFix()) {
+            on = std::make_shared<OverlayedUserFix>(static_cast<IOverlayHelper *>(this), f);
+        } else {
+            on = std::make_shared<OverlayedWaypoint>(static_cast<IOverlayHelper *>(this), f);
+        }
+    }
+    return on;
 }
 
 } /* namespace maps */

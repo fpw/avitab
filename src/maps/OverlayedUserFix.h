@@ -27,12 +27,10 @@ namespace maps {
 class OverlayedUserFix : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedUserFix> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
+    OverlayedUserFix(IOverlayHelper *h, const world::Fix *f);
 
-    OverlayedUserFix(OverlayHelper helper, const world::Fix *m_fix);
-
-    void drawGraphics();
-    void drawText(bool detailed);
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
 private:
     void splitNameToLines();

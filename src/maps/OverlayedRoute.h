@@ -26,15 +26,13 @@
 
 namespace maps {
 
-using OverlayHelper = std::shared_ptr<IOverlayHelper>;
-
 class OverlayedRoute {
 public:
-    OverlayedRoute(OverlayHelper helper);
+    OverlayedRoute(IOverlayHelper *h);
     void draw(std::shared_ptr<world::Route> route);
 
 private:
-    OverlayHelper overlayHelper;
+    IOverlayHelper * const overlayHelper;
     std::map<uint32_t, std::shared_ptr<img::Image>> routeAnnotationCache;
 
     void drawLeg(world::Location &from, world::Location &to, double distance,

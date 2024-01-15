@@ -32,8 +32,8 @@ struct Location {
     bool isValid() const;
 
     double bearingTo(const Location &other) const;
-
     double distanceTo(const Location &other) const;
+    bool isInArea(const Location &bottomLeft, const Location &topRight) const;
 };
 
 } /* namespace world */

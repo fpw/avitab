@@ -183,8 +183,8 @@ void XWorld::registerNode(std::shared_ptr<world::NavNode> n) {
     allNodes[std::make_pair(lat, lon)].push_back(n);
 }
 
-int XWorld::countNodes(const world::Location &bottomLeft, const world::Location &topRight) {
-    int total = 0;
+int XWorld::maxDensity(const world::Location &bottomLeft, const world::Location &topRight) {
+    int m = 0;
 
     // nodes are grouped by integer lat/lon 'squares'.
     int latl = std::max((int)std::floor(bottomLeft.latitude), -90);
@@ -192,27 +192,23 @@ int XWorld::countNodes(const world::Location &bottomLeft, const world::Location 
     int lonl = (int)std::floor(bottomLeft.longitude);
     int lonh = (int)std::ceil(topRight.longitude);
 
-    // the area might span the -180/180 meridian. bias it here, normalise again in iteration
+    // the area might span the -180/180 meridian. bias it here, normalise again in the iteration
     if (lonh < lonl) { lonh += 360; }
-
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
             int normx = (lonx >= 180) ? (lonx - 360) : lonx;
             auto it = allNodes.find(std::make_pair(laty, normx));
             if (it == allNodes.end()) continue;
-            total += it->second.size();
+            m = std::max(m, (int)it->second.size());
         }
     }
 
-    // the total might include some nodes that are external to the requested area.
-    // return an approximation assuming a uniform distribution of nodes. this will be
-    // inaccurate, but should be good enough.
-    float areaMap = (topRight.longitude > bottomLeft.longitude)
+    // pretend that each grid area has 'max' nodes in it, and report the total number of visible nodes that
+    // would be seen if this was the case.
+    float mapArea = (topRight.longitude > bottomLeft.longitude)
                     ? (topRight.latitude - bottomLeft.latitude) * (topRight.longitude - bottomLeft.longitude)
                     : (topRight.latitude - bottomLeft.latitude) * (360 + topRight.longitude - bottomLeft.longitude);
-    float areaCounted = (1 + lath - latl) * (1 + lonh - lonl);
-    float r = areaMap / areaCounted;
-    return (int)((float)total * r);
+    return (int)(mapArea * m);
 }
 
 void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location &topRight, NodeAcceptor callback, int filter) {
@@ -228,17 +224,19 @@ void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
             int normx = (lonx >= 180) ? (lonx - 360) : lonx;
-            auto it = allNodes.find(std::make_pair(laty, normx));
+            std::pair<int, int> key = std::make_pair(laty, normx);
+            auto it = allNodes.find(key);
             if (it == allNodes.end()) {
                 continue;
             }
             for (auto node: it->second) {
+                if (!node->getLocation().isInArea(bottomLeft, topRight)) continue;
                 bool accept = false;
                 if (node->isAirport()) {
                     if (std::dynamic_pointer_cast<world::Airport>(node)->hasControlTower()) {
-                        accept = (filter & world::World::VISIT_AIRPORTS);
+                        accept = (filter & world::World::VISIT_TOWERED_AIRPORTS);
                     } else {
-                        accept = (filter & world::World::VISIT_AIRFIELDS);
+                        accept = (filter & world::World::VISIT_OTHER_AIRPORTS);
                     }
                 } else if (node->isFix()) {
                     auto f = std::dynamic_pointer_cast<world::Fix>(node);
@@ -250,7 +248,7 @@ void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location
                         accept = (filter & world::World::VISIT_FIXES);
                     }
                 }
-                if (accept) callback(*node);
+                if (accept) callback(node.get());
             }
         }
     }
