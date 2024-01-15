@@ -36,7 +36,7 @@ void LoadManager::setUserFixesFilename(std::string &filename) {
 
 void LoadManager::loadUserFixes(std::string &userFixesFilename) {
     try {
-        UserFixLoader loader(this);
+        UserFixLoader loader(shared_from_this());
         loader.load(userFixesFilename);
         logger::info("Loaded %s", userFixesFilename.c_str());
 

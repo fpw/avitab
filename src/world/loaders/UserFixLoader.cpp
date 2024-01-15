@@ -24,7 +24,7 @@ namespace world {
 
 constexpr const char *USER_REGION = "USER";
 
-UserFixLoader::UserFixLoader(LoadManager *mgr):
+UserFixLoader::UserFixLoader(std::shared_ptr<LoadManager> mgr):
     loadMgr(mgr), world(mgr->getWorld())
 {
     // Create a dummy region for user fixes (they are normally not region coded)

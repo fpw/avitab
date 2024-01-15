@@ -27,10 +27,10 @@ namespace xdata {
 
 class FixLoader {
 public:
-    FixLoader(world::LoadManager *mgr);
+    FixLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file);
 private:
-    world::LoadManager * const loadMgr;
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onFixLoaded(const FixData &fix);

@@ -97,7 +97,7 @@ void XData::load() {
 }
 
 void XData::loadAirports() {
-    const AirportLoader loader(this);
+    const AirportLoader loader(shared_from_this());
 
     loadCustomScenery(loader);
 
@@ -127,22 +127,22 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
 }
 
 void XData::loadFixes() {
-    FixLoader loader(this);
+    FixLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_fix.dat");
 }
 
 void XData::loadNavaids() {
-    NavaidLoader loader(this);
+    NavaidLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_nav.dat");
 }
 
 void XData::loadAirways() {
-    AirwayLoader loader(this);
+    AirwayLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_awy.dat");
 }
 
 void XData::loadProcedures() {
-    CIFPLoader loader(this);
+    CIFPLoader loader(shared_from_this());
     xworld->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
         try {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
@@ -161,7 +161,7 @@ void XData::loadMetar() {
     logger::verbose("Loading METAR...");
 
     try {
-        MetarLoader loader(this);
+        MetarLoader loader(shared_from_this());
         loader.load(xplaneRoot + "METAR.rwx");
     } catch (const std::exception &e) {
         // metar is optional, so only log
