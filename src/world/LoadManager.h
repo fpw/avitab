@@ -19,10 +19,11 @@
 #define SRC_WORLD_LOADMANAGER_H_
 
 #include "src/world/World.h"
+#include <memory>
 
 namespace world {
 
-class LoadManager {
+class LoadManager : public std::enable_shared_from_this<LoadManager> {
 public:
     virtual std::shared_ptr<World> getWorld() = 0;
 

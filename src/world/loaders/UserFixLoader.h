@@ -28,10 +28,10 @@ struct UserFixData;
 
 class UserFixLoader {
 public:
-    UserFixLoader(LoadManager *mgr);
+    UserFixLoader(std::shared_ptr<LoadManager> mgr);
     void load(const std::string &file);
 private:
-    LoadManager * const loadMgr;
+    std::shared_ptr<LoadManager> const loadMgr;
     std::shared_ptr<World> world;
 
     void onUserFixLoaded(const UserFixData &navaid);

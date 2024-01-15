@@ -27,10 +27,10 @@ namespace xdata {
 
 class MetarLoader {
 public:
-    MetarLoader(world::LoadManager *mgr);
+    MetarLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file);
 private:
-    world::LoadManager * const loadMgr;
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onMetarLoaded(const MetarData &metar);

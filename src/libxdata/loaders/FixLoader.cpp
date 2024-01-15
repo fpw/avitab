@@ -21,7 +21,7 @@
 
 namespace xdata {
 
-FixLoader::FixLoader(world::LoadManager *mgr):
+FixLoader::FixLoader(std::shared_ptr<world::LoadManager> mgr):
     loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
 {
 }

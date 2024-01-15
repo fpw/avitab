@@ -27,10 +27,10 @@ namespace xdata {
 
 class AirportLoader {
 public:
-    AirportLoader(world::LoadManager *mgr);
+    AirportLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file) const;
 private:
-    world::LoadManager * const loadMgr;
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onAirportLoaded(const AirportData &port) const;

@@ -27,10 +27,10 @@ namespace xdata {
 
 class NavaidLoader {
 public:
-    NavaidLoader(world::LoadManager *mgr);
+    NavaidLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file);
 private:
-    world::LoadManager * const loadMgr;
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onNavaidLoaded(const NavaidData &navaid);

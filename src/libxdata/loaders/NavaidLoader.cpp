@@ -22,7 +22,7 @@
 
 namespace xdata {
 
-NavaidLoader::NavaidLoader(world::LoadManager *mgr):
+NavaidLoader::NavaidLoader(std::shared_ptr<world::LoadManager> mgr):
     loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
 {
 }

@@ -28,10 +28,10 @@ namespace xdata {
 
 class CIFPLoader {
 public:
-    CIFPLoader(world::LoadManager *mgr);
+    CIFPLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(std::shared_ptr<world::Airport> airport, const std::string &file);
 private:
-    world::LoadManager * const loadMgr;
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onProcedureLoaded(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);
