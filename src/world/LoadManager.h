@@ -15,28 +15,39 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_MANAGER_H_
-#define SRC_WORLD_MANAGER_H_
+#ifndef SRC_WORLD_LOADMANAGER_H_
+#define SRC_WORLD_LOADMANAGER_H_
 
 #include "src/world/World.h"
+#include <memory>
 
 namespace world {
 
-class Manager {
+class LoadManager : public std::enable_shared_from_this<LoadManager> {
 public:
+    virtual std::shared_ptr<World> getWorld() = 0;
 
     virtual void discoverSceneries() = 0;
     virtual void load() = 0;
-    virtual void cancelLoading() = 0;
     virtual void reloadMetar() = 0;
-    virtual void loadUserFixes(std::string filename) = 0;
+
     virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
-    virtual std::shared_ptr<World> getWorld() = 0;
-    virtual void setUserFixesFilename(std::string filename) = 0;
+
+    void setUserFixesFilename(std::string &filename);
+    void loadUserFixes(std::string &filename);
+
+    void cancelLoading();
+    bool shouldCancelLoading() const;
+
+protected:
+    void loadUserFixes();
+
+protected:
+    std::atomic_bool loadCancelled { false };
+    std::string userFixesFilename;
 
 };
 
 } /* namespace world */
 
-#endif /* SRC_WORLD_MANAGER_H_ */
-
+#endif /* SRC_WORLD_LOADMANAGER_H_ */

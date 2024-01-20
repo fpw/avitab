@@ -15,23 +15,28 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
-#define SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_
+#ifndef SRC_WORLD_LOADERS_USERFIXLOADER_H_
+#define SRC_WORLD_LOADERS_USERFIXLOADER_H_
 
-#include <string>
-#include <limits>
-#include "src/world/models/navaids/UserFix.h"
+#include <memory>
+#include "../LoadManager.h"
+#include "../World.h"
 
-namespace xdata {
+namespace world {
 
-struct UserFixData {
-    world::UserFix::Type type = world::UserFix::Type::NONE;
-    std::string name;
-    std::string ident;
-    double latitude = std::numeric_limits<double>::quiet_NaN();
-    double longitude = std::numeric_limits<double>::quiet_NaN();
+struct UserFixData;
+
+class UserFixLoader {
+public:
+    UserFixLoader(std::shared_ptr<LoadManager> mgr);
+    void load(const std::string &file);
+private:
+    std::shared_ptr<LoadManager> const loadMgr;
+    std::shared_ptr<World> world;
+
+    void onUserFixLoaded(const UserFixData &navaid);
 };
 
-} /* namespace xdata */
+} /* namespace world */
 
-#endif /* SRC_LIBXDATA_PARSERS_OBJECTS_USERFIXDATA_H_ */
+#endif /* SRC_WORLD_LOADERS_USERFIXLOADER_H_ */

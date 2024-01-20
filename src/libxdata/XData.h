@@ -21,23 +21,20 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "src/world/Manager.h"
+#include "src/world/LoadManager.h"
 #include "src/libxdata/XWorld.h"
 #include "src/libxdata/loaders/AirportLoader.h"
 
 namespace xdata {
 
-class XData : public world::Manager {
+class XData : public world::LoadManager {
 public:
     XData(const std::string &dataRootPath);
     virtual ~XData() = default;
+    std::shared_ptr<world::World> getWorld() override;
     void discoverSceneries() override;
     void load() override;
-    void cancelLoading() override;
     void reloadMetar() override;
-    void loadUserFixes(std::string filename) override;
-    std::shared_ptr<world::World> getWorld() override;
-    void setUserFixesFilename(std::string filename) override;
 private:
     std::string xplaneRoot;
     std::string navDataPath;
@@ -54,7 +51,6 @@ private:
     void loadProcedures();
     void loadMetar();
     void loadCustomScenery(const AirportLoader& loader);
-    void loadUserFixes();
 
 };
 

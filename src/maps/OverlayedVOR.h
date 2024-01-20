@@ -19,24 +19,27 @@
 #define SRC_MAPS_OVERLAYED_VOR_H_
 
 #include "OverlayedFix.h"
+#include "OverlayedDME.h"
 
 namespace maps {
 
 class OverlayedVOR : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedVOR> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
+    OverlayedVOR(IOverlayHelper *h, const world::Fix *f);
 
-    OverlayedVOR(OverlayHelper helper, const world::Fix *m_fix);
+    void configure(const OverlayConfig &cfg, const world::Location &loc) override;
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
-    void drawGraphics();
-    void drawText(bool detailed);
-    int getHotspotX();
-    int getHotspotY();
+    Hotspot getClickHotspot() const override;
 
 private:
-    static const int CIRCLE_RADIUS = 70;
-    static const int MARGIN = CIRCLE_RADIUS;
+    const world::VOR * const navVOR;
+    std::unique_ptr<OverlayedDME> linkedDME;
+
+    static constexpr const int CIRCLE_RADIUS = 70;
+    static constexpr const int MARGIN = CIRCLE_RADIUS;
 };
 
 } /* namespace maps */

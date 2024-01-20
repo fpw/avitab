@@ -20,29 +20,21 @@
 
 namespace maps {
 
-OverlayedWaypoint::OverlayedWaypoint(OverlayHelper helper, const world::Fix *fix):
-    OverlayedFix(helper, fix)
+OverlayedWaypoint::OverlayedWaypoint(IOverlayHelper *h, const world::Fix *f):
+    OverlayedFix(h, f)
 {
 }
 
-std::shared_ptr<OverlayedWaypoint> OverlayedWaypoint::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
-    if (helper->getOverlayConfig().drawWaypoints && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
-        return std::make_shared<OverlayedWaypoint>(helper, &fix);
-    } else {
-        return nullptr;
-    }
-}
-
-void OverlayedWaypoint::drawGraphics() {
+void OverlayedWaypoint::drawGraphic() {
     auto mapImage = overlayHelper->getMapImage();
-    mapImage->drawLine(px, py - 6, px + 5, py + 3, color);
-    mapImage->drawLine(px + 5, py + 3, px - 5, py + 3, color);
-    mapImage->drawLine(px - 5, py + 3, px, py - 6, color);
+    mapImage->drawLine(posX, posY - 6, posX + 5, posY + 3, color);
+    mapImage->drawLine(posX + 5, posY + 3, posX - 5, posY + 3, color);
+    mapImage->drawLine(posX - 5, posY + 3, posX, posY - 6, color);
 }
 
 void OverlayedWaypoint::drawText(bool detailed) {
     auto mapImage = overlayHelper->getMapImage();
-    mapImage->drawText(fix->getID(), 10, px + 6, py - 6, color, 0, img::Align::LEFT);
+    mapImage->drawText(fix->getID(), 10, posX + 6, posY - 6, color, 0, img::Align::LEFT);
 }
 
 } /* namespace maps */

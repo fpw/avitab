@@ -20,51 +20,47 @@
 
 namespace maps {
 
-OverlayedDME::OverlayedDME(OverlayHelper helper, const world::Fix *fix):
-    OverlayedFix(helper, fix)
+OverlayedDME::OverlayedDME(IOverlayHelper *h, const world::Fix *f):
+    OverlayedFix(h, f),
+    navDME(f->getDME().get())
 {
 }
 
-std::shared_ptr<OverlayedDME> OverlayedDME::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
-    if (fix.getDME() && helper->getOverlayConfig().drawVORs && helper->isLocVisibleWithMargin(fix.getLocation(), MARGIN)) {
-        return std::make_shared<OverlayedDME>(helper, &fix);
-    } else {
-        return nullptr;
-    }
+void OverlayedDME::configure(const OverlayConfig &cfg, const world::Location &loc)
+{
+    OverlayedFix::configure(cfg, loc);
+    enabled = navDME && cfg.drawVORs;
 }
 
-int OverlayedDME::getHotspotX() {
-    return px - 20;
-}
+void OverlayedDME::drawGraphic()
+{
+    if (!enabled) return;
 
-int OverlayedDME::getHotspotY() {
-    return py - 20;
-}
-
-void OverlayedDME::drawGraphics() {
-    drawGraphicsStatic(overlayHelper, fix, px, py);
-}
-
-void OverlayedDME::drawGraphicsStatic(OverlayHelper helper, const world::Fix *fix, int px, int py) {
     double r = 8;
-    if (fix->getDME()) {
-        auto mapImage = helper->getMapImage();
-        mapImage->drawLine(px - r, py - r, px + r, py - r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px + r, py - r, px + r, py + r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px + r, py + r, px - r, py + r, img::COLOR_ICAO_VOR_DME);
-        mapImage->drawLine(px - r, py + r, px - r, py - r, img::COLOR_ICAO_VOR_DME);
-    }
+    auto mapImage = overlayHelper->getMapImage();
+    mapImage->drawLine(posX - r, posY - r, posX + r, posY - r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(posX + r, posY - r, posX + r, posY + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(posX + r, posY + r, posX - r, posY + r, img::COLOR_ICAO_VOR_DME);
+    mapImage->drawLine(posX - r, posY + r, posX - r, posY - r, img::COLOR_ICAO_VOR_DME);
 }
 
-void OverlayedDME::drawText(bool detailed) {
+void OverlayedDME::drawText(bool detailed)
+{
+    if (!enabled) return;
+
     if (detailed) {
-        auto freqString = fix->getDME()->getFrequency().getFrequencyString(false);
-        drawNavTextBox(overlayHelper, "DME", fix->getID(), freqString, px - 47, py - 37, img::COLOR_ICAO_VOR_DME);
+        auto freqString = navDME->getFrequency().getFrequencyString(false);
+        drawNavTextBox("DME", getID(), freqString, posX - 47, posY - 37, img::COLOR_ICAO_VOR_DME);
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, getHotspotX(), getHotspotY(),
+        auto hs = getClickHotspot();
+        mapImage->drawText(getID(), 12, hs.first, hs.second,
             img::COLOR_ICAO_VOR_DME, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
+}
+
+OverlayedNode::Hotspot OverlayedDME::getClickHotspot() const {
+    return Hotspot(posX - 20, posY - 20);
 }
 
 } /* namespace maps */

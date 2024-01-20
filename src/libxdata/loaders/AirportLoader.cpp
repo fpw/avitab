@@ -47,8 +47,8 @@ inline world::Runway::SurfaceMaterial mapToSurfaceMaterial(AirportData::SurfaceC
     return runwaySurfaceMap[(size_t)c];
 }
 
-AirportLoader::AirportLoader(std::shared_ptr<XWorld> worldPtr):
-    world(worldPtr)
+AirportLoader::AirportLoader(std::shared_ptr<world::LoadManager> mgr):
+    loadMgr(mgr), world(std::dynamic_pointer_cast<XWorld>(mgr->getWorld()))
 {
 }
 
@@ -60,7 +60,7 @@ void AirportLoader::load(const std::string& file) const {
         } catch (const std::exception &e) {
             logger::warn("Can't parse airport %s: %s", data.id.c_str(), e.what());
         }
-        if (world->shouldCancelLoading()) {
+        if (loadMgr->shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });

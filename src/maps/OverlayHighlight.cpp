@@ -15,23 +15,50 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Manager.h"
-#include "loaders/FMSLoader.h"
-#include "src/Logger.h"
 
-namespace world {
+#include "OverlayHighlight.h"
 
-std::vector<std::shared_ptr<NavNode>> Manager::loadFlightPlan(const std::string filename)
+namespace maps {
+
+static constexpr const int FAR_FAR_AWAY = 1 << 15;
+
+void OverlayHighlight::reset()
 {
-    try {
-        FMSLoader loader(getWorld());
-        auto res = loader.load(filename);
-        return res;
+    active = false;
+    distance = FAR_FAR_AWAY;
+}
 
-    } catch (const std::exception &e) {
-        logger::warn("Unable to load/parse flight plan file '%s' %s", filename.c_str(), e.what());
-        return std::vector<std::shared_ptr<NavNode>>();
+void OverlayHighlight::activate(int x, int y)
+{
+    active = true;
+    refX = x;
+    refY = y;
+}
+
+void OverlayHighlight::update(std::shared_ptr<OverlayedNode> on)
+{
+    if (!active) return;
+    auto d = on->getHotspotDistance(refX, refY);
+    if (d < distance) {
+        distance = d;
+        node = on;
     }
 }
 
+void OverlayHighlight::select()
+{
+    if (!active || !node) return;
+    node->setHighlighted();
 }
+
+void OverlayHighlight::highlight()
+{
+    if (!active || !node) return;
+    if (node->isHighlighted()) {
+        node->drawText(true);
+        node->clearHighlighted();
+    }
+}
+
+} /* namespace maps */
+

@@ -105,6 +105,12 @@ void AppLauncher::addEntry(const std::string& name, const std::string& icon, App
     });
 }
 
+void AppLauncher::onPlaneLoad() {
+    for (auto &entry: entries) {
+        entry.app->onPlaneLoad();
+    }
+}
+
 void AppLauncher::onMouseWheel(int dir, int x, int y) {
     if (activeApp) {
         activeApp->onMouseWheel(dir, x, y);

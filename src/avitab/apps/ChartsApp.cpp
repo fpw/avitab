@@ -22,8 +22,7 @@ namespace avitab {
 ChartsApp::ChartsApp(FuncsPtr appFuncs):
     DocumentsApp(appFuncs, "Charts", "chartsapp", "\\.(pdf|png|jpg|jpeg|bmp)$")
 {
-    browseStartDirectory = api().getDataPath() + "charts";
-    Run();
+    Run(api().getDataPath() + "charts");
 }
 
 } /* namespace avitab */

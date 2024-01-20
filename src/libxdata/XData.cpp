@@ -24,7 +24,6 @@
 #include "loaders/AirwayLoader.h"
 #include "loaders/CIFPLoader.h"
 #include "loaders/MetarLoader.h"
-#include "loaders/UserFixLoader.h"
 #include "parsers/CustomSceneryParser.h"
 #include "src/Logger.h"
 
@@ -69,10 +68,6 @@ void XData::discoverSceneries() {
     }
 }
 
-void XData::setUserFixesFilename(std::string filename) {
-    userFixesFilename = filename;
-}
-
 std::shared_ptr<world::World> XData::getWorld() {
     return xworld;
 }
@@ -101,12 +96,8 @@ void XData::load() {
     logger::info("Loaded nav data in %.2f seconds", millis / 1000.0f);
 }
 
-void XData::cancelLoading() {
-    xworld->cancelLoading();
-}
-
 void XData::loadAirports() {
-    const AirportLoader loader(xworld);
+    const AirportLoader loader(shared_from_this());
 
     loadCustomScenery(loader);
 
@@ -136,29 +127,29 @@ void XData::loadCustomScenery(const AirportLoader& loader) {
 }
 
 void XData::loadFixes() {
-    FixLoader loader(xworld);
+    FixLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_fix.dat");
 }
 
 void XData::loadNavaids() {
-    NavaidLoader loader(xworld);
+    NavaidLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_nav.dat");
 }
 
 void XData::loadAirways() {
-    AirwayLoader loader(xworld);
+    AirwayLoader loader(shared_from_this());
     loader.load(navDataPath + "earth_awy.dat");
 }
 
 void XData::loadProcedures() {
-    CIFPLoader loader(xworld);
+    CIFPLoader loader(shared_from_this());
     xworld->forEachAirport([this, &loader] (std::shared_ptr<world::Airport> ap) {
         try {
             loader.load(ap, navDataPath + "CIFP/" + ap->getID() + ".dat");
         } catch (const std::exception &e) {
             // many airports do not have CIFP data, so ignore silently
         }
-        if (xworld->shouldCancelLoading()) {
+        if (shouldCancelLoading()) {
             throw std::runtime_error("Cancelled");
         }
     });
@@ -170,34 +161,11 @@ void XData::loadMetar() {
     logger::verbose("Loading METAR...");
 
     try {
-        MetarLoader loader(xworld);
+        MetarLoader loader(shared_from_this());
         loader.load(xplaneRoot + "METAR.rwx");
     } catch (const std::exception &e) {
         // metar is optional, so only log
         logger::warn("Error parsing METAR: %s", e.what());
-    }
-}
-
-void XData::loadUserFixes() {
-    if (userFixesFilename == "") {
-        logger::info("No user fixes file specified");
-        return;
-    } else {
-        loadUserFixes(userFixesFilename);
-    }
-}
-
-void XData::loadUserFixes(std::string userFixesFilename) {
-    try {
-        UserFixLoader loader(xworld);
-        loader.load(userFixesFilename);
-        // Re-register all nodes, but shouldn't affect existing items, just adds new
-        xworld->registerNavNodes();
-        logger::info("Loaded %s", userFixesFilename.c_str());
-
-    } catch (const std::exception &e) {
-        // User fixes are optional, so could be no CSV file or parse error
-        logger::warn("Unable to load/parse user fixes file '%s' %s", userFixesFilename.c_str(), e.what());
     }
 }
 

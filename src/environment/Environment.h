@@ -25,7 +25,7 @@
 #include <vector>
 #include <future>
 #include <atomic>
-#include "src/world/Manager.h"
+#include "src/world/LoadManager.h"
 #include "src/libxdata/XData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "EnvData.h"
@@ -103,8 +103,8 @@ public:
 
 protected:
     void runEnvironmentCallbacks();
-    void setWorldManager(std::shared_ptr<world::Manager> mgr);
-    std::shared_ptr<world::Manager> getWorldManager();
+    void setWorldManager(std::shared_ptr<world::LoadManager> mgr);
+    std::shared_ptr<world::LoadManager> getWorldManager();
     void sendUserFixesFilenameToWorldMgr(std::string filename);
     void setLastFrameTime(float t);
 
@@ -115,7 +115,7 @@ private:
     std::vector<EnvironmentCallback> envCallbacks;
     std::shared_future<std::shared_ptr<world::World>> navWorldFuture;
     std::shared_ptr<world::World> navWorld;
-    std::shared_ptr<world::Manager> worldManager;
+    std::shared_ptr<world::LoadManager> worldManager;
     std::atomic_bool navWorldLoadAttempted {false};
     std::atomic<float> lastFrameTime {};
 

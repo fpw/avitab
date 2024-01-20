@@ -24,39 +24,26 @@ namespace avitab {
 PlaneManualApp::PlaneManualApp(FuncsPtr appFuncs):
     DocumentsApp(appFuncs, "Manuals", "manualsapp", "\\.(pdf|png|jpg|jpeg|bmp)$")
 {
-    bool ok = findStartDirectory(browseStartDirectory);
-    Run();
-    if (!ok) {
-        api().executeLater([this] () { ShowMessage(); });
-    }
-#if 0
-        if (!errorMsg) {
-            errorMsg = std::make_shared<MessageBox>(
-                    getUIContainer(),
-                    "Put your aircraft's manuals into the 'manuals' folder inside your aircraft folder.");
-            errorMsg->addButton("Ok", [this] () {
-                api().executeLater([this] () {
-                    Run();
-                    errorMsg.reset();
-                });
-            });
-            errorMsg->centerInParent();
-        }
-#endif
+    Run(api().getAirplanePath());
 }
 
-bool PlaneManualApp::findStartDirectory(std::string &startDir) {
-    startDir = api().getAirplanePath();
+void PlaneManualApp::onPlaneLoad() {
+    std::string aircraftPath = api().getAirplanePath();
+    std::string manualsPath;
 
     std::array<std::string, 6> subdirs = { "manuals", "docs", "handbook", "manual", "documentation", "doc" };
     for (auto sd = subdirs.begin(); sd != subdirs.end(); ++sd) {
-        if (platform::fileExists(startDir + *sd)) {
-            startDir += *sd;
-            return true;
+        if (platform::fileExists(aircraftPath + *sd)) {
+            manualsPath = aircraftPath + *sd;
+            logger::info("Aircraft manuals path is %s", manualsPath.c_str());
         }
     }
 
-    return false;
+    bool foundManualsDir = manualsPath.length() > 0;
+    ChangeBrowseDirectory(foundManualsDir ? manualsPath : aircraftPath);
+    if (!foundManualsDir) {
+        api().executeLater([this] () { ShowMessage(); });
+    }
 }
 
 void PlaneManualApp::ShowMessage() {

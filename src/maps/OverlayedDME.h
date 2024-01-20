@@ -25,20 +25,18 @@ namespace maps {
 class OverlayedDME : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedDME> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
+    OverlayedDME(IOverlayHelper *h, const world::Fix *f);
 
-    // Used by OverlayedVOR for paired VOR/DME
-    static void drawGraphicsStatic(OverlayHelper helper, const world::Fix *fix, int px, int py);
+    void configure(const OverlayConfig &cfg, const world::Location &loc) override;
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
-    OverlayedDME(OverlayHelper helper, const world::Fix *m_fix);
-
-    void drawGraphics();
-    void drawText(bool detailed);
-    int getHotspotX();
-    int getHotspotY();
+    Hotspot getClickHotspot() const override;
 
 private:
-    static const int MARGIN = 60;
+    const world::DME * const navDME;
+
+    static constexpr const int MARGIN = 60;
 };
 
 } /* namespace maps */

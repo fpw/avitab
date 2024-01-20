@@ -37,17 +37,17 @@ class World {
 public:
     static constexpr const int MAX_SEARCH_RESULTS = 10;
 
-    static constexpr const int VISIT_AIRPORTS =    0b1;
-    static constexpr const int VISIT_AIRFIELDS =   0b10;
-    static constexpr const int VISIT_FIXES =       0b100;
-    static constexpr const int VISIT_NAVAIDS =     0b1000;
-    static constexpr const int VISIT_USER_FIXES =  0b10000;
-    static constexpr const int VISIT_EVERYTHING = (VISIT_AIRPORTS | VISIT_AIRFIELDS | VISIT_NAVAIDS | VISIT_FIXES | VISIT_USER_FIXES);
+    static constexpr const int VISIT_TOWERED_AIRPORTS = 0b1;
+    static constexpr const int VISIT_OTHER_AIRPORTS =   0b10;
+    static constexpr const int VISIT_FIXES =            0b100;
+    static constexpr const int VISIT_NAVAIDS =          0b1000;
+    static constexpr const int VISIT_USER_FIXES =       0b10000;
+    static constexpr const int VISIT_EVERYTHING = (VISIT_TOWERED_AIRPORTS | VISIT_OTHER_AIRPORTS | VISIT_NAVAIDS | VISIT_FIXES | VISIT_USER_FIXES);
 
-    using NodeAcceptor = std::function<void(const world::NavNode &node)>;
+    using NodeAcceptor = std::function<void(const world::NavNode *)>;
     using Connection = std::pair<std::shared_ptr<NavEdge>, std::shared_ptr<NavNode>>;
 
-    virtual int countNodes(const world::Location &bottomLeft, const world::Location &topRight) = 0;
+    virtual int maxDensity(const world::Location &bottomLeft, const world::Location &topRight) = 0;
     virtual void visitNodes(const world::Location &bottomLeft, const world::Location &topRight, NodeAcceptor calllback, int filter) = 0;
 
     virtual std::shared_ptr<Airport> findAirportByID(const std::string &id) const = 0;
@@ -56,6 +56,11 @@ public:
 
     virtual std::vector<Connection> &getConnections(std::shared_ptr<NavNode> from) = 0;
     virtual bool areConnected(std::shared_ptr<NavNode> from, const std::shared_ptr<NavNode> to) = 0;
+
+    virtual void addRegion(const std::string &code) = 0;
+    virtual std::shared_ptr<Region> getRegion(const std::string &code) = 0;
+
+    virtual void addFix(std::shared_ptr<Fix> f) = 0;
 };
 
 

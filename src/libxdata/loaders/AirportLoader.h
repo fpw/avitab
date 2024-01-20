@@ -19,17 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_AIRPORTLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/objects/AirportData.h"
-#include "src/libxdata/parsers/AirportParser.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../parsers/AirportParser.h"
+#include "../XWorld.h"
 
 namespace xdata {
 
 class AirportLoader {
 public:
-    AirportLoader(std::shared_ptr<XWorld> worldPtr);
+    AirportLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file) const;
 private:
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onAirportLoaded(const AirportData &port) const;

@@ -118,6 +118,7 @@ private:
     bool suspended = true;
 
     int panPosX = 0, panPosY = 0;
+    bool wasTrackingPlaneAtPanStart;
     std::string mercatorDir;
 
     void createSettingsLayout();

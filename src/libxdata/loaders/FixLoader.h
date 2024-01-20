@@ -19,16 +19,18 @@
 #define SRC_LIBXDATA_LOADERS_FIXLOADER_H_
 
 #include <memory>
-#include "src/libxdata/parsers/FixParser.h"
-#include "src/libxdata/XWorld.h"
+#include "src/world/LoadManager.h"
+#include "../XWorld.h"
+#include "src/libxdata/parsers/objects/FixData.h"
 
 namespace xdata {
 
 class FixLoader {
 public:
-    FixLoader(std::shared_ptr<XWorld> worldPtr);
+    FixLoader(std::shared_ptr<world::LoadManager> mgr);
     void load(const std::string &file);
 private:
+    std::shared_ptr<world::LoadManager> const loadMgr;
     std::shared_ptr<XWorld> world;
 
     void onFixLoaded(const FixData &fix);

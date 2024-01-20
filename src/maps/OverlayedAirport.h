@@ -26,14 +26,12 @@ namespace maps {
 class OverlayedAirport : public OverlayedNode {
 
 public:
-    static std::shared_ptr<OverlayedAirport> getInstanceIfVisible(OverlayHelper helper, const world::Airport *airport);
-
-    OverlayedAirport(OverlayHelper helper, const world::Airport *airport);
+    OverlayedAirport(IOverlayHelper *, const world::Airport *);
     virtual ~OverlayedAirport() = default;
 
-    void drawGraphics();
-    void drawText(bool detailed);
-    virtual std::string getID();
+    std::string getID() const override;
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
 private:
 
@@ -48,10 +46,8 @@ private:
     AerodromeType type = AerodromeType::AIRPORT;
     uint32_t color = 0;
 
-    static bool isVisible(OverlayHelper helper, const world::Airport *airport);
-    static bool isEnabled(OverlayHelper helper, const world::Airport *airport);
-    static AerodromeType getAerodromeType(const world::Airport *airport);
-    static uint32_t getAirportColor(const world::Airport *airport);
+    AerodromeType getAerodromeType();
+    uint32_t getAirportColor();
 
     void drawAirportBlob();
     void drawAirportICAOCircleAndRwyPattern();
@@ -63,14 +59,13 @@ private:
     void drawRunwayRectangles(float size, uint32_t rectColor);
     bool isBlob();
 
-    static const int ICAO_CIRCLE_RADIUS = 15;
-    static const int SHOW_DETAILED_INFO_AT_MAPWIDTHNM = 40;
-    static const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
-    static const int DRAW_BLOB_RUNWAYS_NUM_AERODROMES_VISIBLE = 100;
-    static const int MAX_BLOB_SIZE = 12;
-    static const int BLOB_SIZE_DIVIDEND = DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM * MAX_BLOB_SIZE;
-    static const int DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM = 5;
-    static const int ICAO_RING_RADIUS = 12;
+    static constexpr const int ICAO_CIRCLE_RADIUS = 15;
+    static constexpr const int DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM = 200;
+    static constexpr const int DRAW_BLOBS_ABOVE_NODE_DENSITY = 1200;
+    static constexpr const int MAX_BLOB_SIZE = 12;
+    static constexpr const int BLOB_SIZE_DIVIDEND = DRAW_BLOB_RUNWAYS_AT_MAPWIDTHNM * MAX_BLOB_SIZE;
+    static constexpr const int DRAW_GEOGRAPHIC_RUNWAYS_AT_MAPWIDTHNM = 5;
+    static constexpr const int ICAO_RING_RADIUS = 12;
 };
 
 } /* namespace maps */

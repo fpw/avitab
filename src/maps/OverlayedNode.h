@@ -25,25 +25,39 @@
 
 namespace maps {
 
-using OverlayHelper = std::shared_ptr<IOverlayHelper>;
-
-class OverlayedNode {
+class OverlayedNode
+{
 public:
-    static std::shared_ptr<OverlayedNode> getInstanceIfVisible(OverlayHelper helper, const world::NavNode &node);
+    virtual ~OverlayedNode() = default;
 
-    virtual void drawGraphics() = 0;
+    virtual std::string getID() const = 0;
+
+    virtual void configure(const OverlayConfig &cfg, const world::Location &loc);
+    virtual void drawGraphic() = 0;
     virtual void drawText(bool detailed) = 0;
-    virtual int getDistanceFromHotspot(int x, int y);
-    virtual int getHotspotX();
-    virtual int getHotspotY();
-    virtual std::string getID() = 0;
-    bool isEqual(OverlayedNode &node);
-protected:
-    OverlayedNode(OverlayHelper helper);
 
-    OverlayHelper overlayHelper;
-    int px = 0;
-    int py = 0;
+    void setHighlighted() { highlight = true; }
+    void clearHighlighted() { highlight = false; }
+
+    bool isAirfield() const { return airfield; }
+    bool isHighlighted() const { return highlight; }
+
+    int getHotspotDistance(int x, int y) const;
+
+protected:
+    using Hotspot = std::pair<int, int>;
+    virtual Hotspot getClickHotspot() const { return Hotspot(posX, posY); }
+
+protected:
+    OverlayedNode() = delete;
+    OverlayedNode(IOverlayHelper *helper, bool airfield);
+
+protected:
+    IOverlayHelper * const overlayHelper;
+    bool enabled;           // true if overlay is enabled (some overlays are instantiated even when not configured)
+    bool const airfield;    // used when sorting for drawing order
+    bool highlight;         // true if the overlay is selected for highlighting
+    int posX, posY;         // pixel coordinates of the item, could be off-screen
 };
 
 } /* namespace maps */

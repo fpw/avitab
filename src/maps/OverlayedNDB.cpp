@@ -24,19 +24,12 @@ namespace maps {
 img::Image OverlayedNDB::ndbIcon;
 int OverlayedNDB::radius;
 
-OverlayedNDB::OverlayedNDB(OverlayHelper helper, const world::Fix *fix):
-    OverlayedFix(helper, fix)
+OverlayedNDB::OverlayedNDB(IOverlayHelper *h, const world::Fix *f):
+    OverlayedFix(h, f),
+    navNDB(f->getNDB().get())
 {
     if (ndbIcon.getHeight() == 0) {
         createNDBIcon();
-    }
-}
-
-std::shared_ptr<OverlayedNDB> OverlayedNDB::getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix) {
-    if (fix.getNDB() && helper->getOverlayConfig().drawNDBs && helper->isLocVisibleWithMargin(fix.getLocation(), radius)) {
-        return std::make_shared<OverlayedNDB>(helper, &fix);
-    } else {
-        return nullptr;
     }
 }
 
@@ -59,28 +52,37 @@ void OverlayedNDB::createNDBIcon() {
     radius = ndbIcon.getWidth() / 2;
 }
 
-int OverlayedNDB::getHotspotX() {
-    return px + radius + 5;
+void OverlayedNDB::configure(const OverlayConfig &cfg, const world::Location &loc)
+{
+    OverlayedFix::configure(cfg, loc);
+    enabled = navNDB && cfg.drawNDBs;
 }
 
-int OverlayedNDB::getHotspotY() {
-    return py - radius - 5;
-}
+void OverlayedNDB::drawGraphic()
+{
+    if (!enabled) return;
 
-void OverlayedNDB::drawGraphics() {
     auto mapImage = overlayHelper->getMapImage();
-    mapImage->blendImage0(ndbIcon, px - radius, py - radius);
+    mapImage->blendImage0(ndbIcon, posX - radius, posY - radius);
 }
 
-void OverlayedNDB::drawText(bool detailed) {
+void OverlayedNDB::drawText(bool detailed)
+{
+    if (!enabled) return;
+
     if (detailed) {
-        auto freqString = fix->getNDB()->getFrequency().getFrequencyString(false);
-        drawNavTextBox(overlayHelper, "", fix->getID(), freqString, px + radius, py - radius - 10, img::COLOR_ICAO_MAGENTA);
+        auto freqString = navNDB->getFrequency().getFrequencyString(false);
+        drawNavTextBox("", getID(), freqString, posX + radius, posY - radius - 10, img::COLOR_ICAO_MAGENTA);
     } else {
         auto mapImage = overlayHelper->getMapImage();
-        mapImage->drawText(fix->getID(), 12, getHotspotX(), getHotspotY(),
+        auto hs = getClickHotspot();
+        mapImage->drawText(getID(), 12, hs.first, hs.second,
             img::COLOR_ICAO_MAGENTA, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
+}
+
+OverlayedNode::Hotspot OverlayedNDB::getClickHotspot() const {
+    return Hotspot(posX + radius + 5, posY - radius - 5);
 }
 
 } /* namespace maps */

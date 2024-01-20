@@ -25,16 +25,17 @@ namespace maps {
 class OverlayedNDB : public OverlayedFix {
 
 public:
-    static std::shared_ptr<OverlayedNDB> getInstanceIfVisible(OverlayHelper helper, const world::Fix &fix);
+    OverlayedNDB(IOverlayHelper *h, const world::Fix *f);
 
-    OverlayedNDB(OverlayHelper helper, const world::Fix *m_fix);
+    void configure(const OverlayConfig &cfg, const world::Location &loc) override;
+    void drawGraphic() override;
+    void drawText(bool detailed) override;
 
-    void drawGraphics();
-    void drawText(bool detailed);
-    int getHotspotX();
-    int getHotspotY();
+    Hotspot getClickHotspot() const override;
 
 private:
+    const world::NDB * const navNDB;
+
     static img::Image ndbIcon;
     static int radius;
     static void createNDBIcon();

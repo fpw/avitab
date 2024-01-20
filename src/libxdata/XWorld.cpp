@@ -29,14 +29,6 @@ XWorld::XWorld()
 {
 }
 
-void XWorld::cancelLoading() {
-    loadCancelled = true;
-}
-
-bool XWorld::shouldCancelLoading() const {
-    return loadCancelled;
-}
-
 std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) const {
     std::string cleanId = platform::upper(id);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
@@ -75,7 +67,8 @@ std::shared_ptr<world::Fix> XWorld::findFixByRegionAndID(const std::string& regi
     auto range = fixes.equal_range(id);
 
     for (auto it = range.first; it != range.second; ++it) {
-        if (it->second->getRegion()->getId() == region) {
+        auto r = it->second->getRegion();
+        if (r && (r->getId() == region)) {
             return it->second;
         }
     }
@@ -141,6 +134,18 @@ bool XWorld::areConnected(std::shared_ptr<world::NavNode> from, const std::share
     return false;
 }
 
+void XWorld::addRegion(const std::string &code) {
+    findOrCreateRegion(code);
+}
+
+std::shared_ptr<world::Region> XWorld::getRegion(const std::string &id) {
+    auto iter = regions.find(id);
+    if (iter == regions.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
 void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<world::NavEdge> via, std::shared_ptr<world::NavNode> to) {
     auto iter = connections.find(from);
     if (iter == connections.end()) {
@@ -153,30 +158,33 @@ void XWorld::connectTo(std::shared_ptr<world::NavNode> from, std::shared_ptr<wor
 void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     fix->setGlobal(true);
     fixes.insert(std::make_pair(fix->getID(), fix));
+    // fixes may be added after the initial loading of the NAV world.
+    // if so, register the node independently here
+    if (allNodesRegistered) {
+        registerNode(fix);
+    }
 }
 
 void XWorld::registerNavNodes() {
+    if (allNodesRegistered) return;
     for (auto it: airports) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
-
     for (auto it: fixes) {
-        auto node = it.second;
-        auto &loc = node->getLocation();
-        int lat = (int) loc.latitude;
-        int lon = (int) loc.longitude;
-
-        allNodes[std::make_pair(lat, lon)].push_back(node);
+        registerNode(it.second);
     }
+    allNodesRegistered = true;
 }
 
-int XWorld::countNodes(const world::Location &bottomLeft, const world::Location &topRight) {
-    int total = 0;
+void XWorld::registerNode(std::shared_ptr<world::NavNode> n) {
+    auto &loc = n->getLocation();
+    int lat = (int) loc.latitude;
+    int lon = (int) loc.longitude;
+    allNodes[std::make_pair(lat, lon)].push_back(n);
+}
+
+int XWorld::maxDensity(const world::Location &bottomLeft, const world::Location &topRight) {
+    int m = 0;
 
     // nodes are grouped by integer lat/lon 'squares'.
     int latl = std::max((int)std::floor(bottomLeft.latitude), -90);
@@ -184,27 +192,23 @@ int XWorld::countNodes(const world::Location &bottomLeft, const world::Location 
     int lonl = (int)std::floor(bottomLeft.longitude);
     int lonh = (int)std::ceil(topRight.longitude);
 
-    // the area might span the -180/180 meridian. bias it here, normalise again in iteration
+    // the area might span the -180/180 meridian. bias it here, normalise again in the iteration
     if (lonh < lonl) { lonh += 360; }
-
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
             int normx = (lonx >= 180) ? (lonx - 360) : lonx;
             auto it = allNodes.find(std::make_pair(laty, normx));
             if (it == allNodes.end()) continue;
-            total += it->second.size();
+            m = std::max(m, (int)it->second.size());
         }
     }
 
-    // the total might include some nodes that are external to the requested area.
-    // return an approximation assuming a uniform distribution of nodes. this will be
-    // inaccurate, but should be good enough.
-    float areaMap = (topRight.longitude > bottomLeft.longitude)
+    // pretend that each grid area has 'max' nodes in it, and report the total number of visible nodes that
+    // would be seen if this was the case.
+    float mapArea = (topRight.longitude > bottomLeft.longitude)
                     ? (topRight.latitude - bottomLeft.latitude) * (topRight.longitude - bottomLeft.longitude)
                     : (topRight.latitude - bottomLeft.latitude) * (360 + topRight.longitude - bottomLeft.longitude);
-    float areaCounted = (1 + lath - latl) * (1 + lonh - lonl);
-    float r = areaMap / areaCounted;
-    return (int)((float)total * r);
+    return (int)(mapArea * m);
 }
 
 void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location &topRight, NodeAcceptor callback, int filter) {
@@ -220,17 +224,19 @@ void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location
     for (int laty = latl; laty <= lath; ++laty) {
         for (int lonx = lonl; lonx <= lonh; ++lonx) {
             int normx = (lonx >= 180) ? (lonx - 360) : lonx;
-            auto it = allNodes.find(std::make_pair(laty, normx));
+            std::pair<int, int> key = std::make_pair(laty, normx);
+            auto it = allNodes.find(key);
             if (it == allNodes.end()) {
                 continue;
             }
             for (auto node: it->second) {
+                if (!node->getLocation().isInArea(bottomLeft, topRight)) continue;
                 bool accept = false;
                 if (node->isAirport()) {
                     if (std::dynamic_pointer_cast<world::Airport>(node)->hasControlTower()) {
-                        accept = (filter & world::World::VISIT_AIRPORTS);
+                        accept = (filter & world::World::VISIT_TOWERED_AIRPORTS);
                     } else {
-                        accept = (filter & world::World::VISIT_AIRFIELDS);
+                        accept = (filter & world::World::VISIT_OTHER_AIRPORTS);
                     }
                 } else if (node->isFix()) {
                     auto f = std::dynamic_pointer_cast<world::Fix>(node);
@@ -242,7 +248,7 @@ void XWorld::visitNodes(const world::Location& bottomLeft, const world::Location
                         accept = (filter & world::World::VISIT_FIXES);
                     }
                 }
-                if (accept) callback(*node);
+                if (accept) callback(node.get());
             }
         }
     }
