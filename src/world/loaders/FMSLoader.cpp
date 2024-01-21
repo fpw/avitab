@@ -50,7 +50,7 @@ std::vector<std::shared_ptr<world::NavNode>> FMSLoader::load(const std::string &
     for (auto w: nodes) {
         ss << w->getID() << " ";
     }
-    LOG_INFO(1, "Using waypoints: %s", ss.str().c_str());
+    logger::info("Using waypoints: %s", ss.str().c_str());
     return nodes;
 }
 
@@ -141,21 +141,11 @@ void FMSLoader::appendSID() {
     auto sid = departureAirport->getSIDByName(sidName);
     if (sid) {
         auto waypoints = sid->getWaypoints(departureRunway, sidTransName);
-        if (departureRunway && (departureRunway->getID() == waypoints[0]->getID())) {
+        if (departureRunway && !waypoints.empty() && (departureRunway->getID() == waypoints.front()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
             waypoints.erase(waypoints.begin());
         }
         nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
-    } else {
-        if (sidName.empty()) {
-            LOG_INFO(1, "No SID specified");
-        } else {
-            LOG_WARN("Couldn't find SID %s, %s SIDs are :",
-                    sidName.c_str(), departureAirport->getID().c_str());
-            auto sids = departureAirport->getSIDs();
-            for (auto &validSid: sids) {
-                LOG_INFO(1, "%s", validSid->getID().c_str());
-            }
-        }
     }
 }
 
@@ -164,18 +154,11 @@ void FMSLoader::appendSTAR() {
     if (star) {
         arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
         auto waypoints = star->getWaypoints(arrivalRwy, starTransName);
-        nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
-    } else {
-        if (starName.empty()) {
-            LOG_INFO(1, "No STAR specified");
-        } else {
-            LOG_WARN("Couldn't find STAR '%s', %s STARs are :",
-                    starName.c_str(), arrivalAirport->getID().c_str());
-            auto stars = arrivalAirport->getSTARs();
-            for (auto &validStar: stars) {
-                LOG_INFO(1, "%s", validStar->getID().c_str());
-            }
+        if (arrivalRwy && !waypoints.empty() && (arrivalRwy->getID() == waypoints.back()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
+            waypoints.pop_back();
         }
+        nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
     }
 }
 
@@ -184,21 +167,11 @@ void FMSLoader::appendApproach() {
     if (app) {
         arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
         auto waypoints = app->getWaypoints(approachTransName);
-        if (arrivalRwy && (arrivalRwy->getID() == waypoints.back()->getID())) {
+        if (arrivalRwy && !waypoints.empty() && (arrivalRwy->getID() == waypoints.back()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
             waypoints.erase(waypoints.end());
         }
         nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
-    } else {
-        if (approachName.empty()) {
-            LOG_INFO(1, "No APP specified");
-        } else {
-            LOG_WARN("Couldn't find APP '%s', %s APPs are :",
-                approachName.c_str(), arrivalAirport->getID().c_str());
-            auto apps = arrivalAirport->getApproaches();
-            for (auto &validApp: apps) {
-                LOG_INFO(1, "%s", validApp->getID().c_str());
-            }
-        }
     }
 }
 
@@ -213,7 +186,7 @@ void FMSLoader::appendArrivalAirportOrRwy() {
         if (oppRwy) {
             appendNode(idRwy_DER, oppRwy->getLocation());
         }
-        LOG_INFO(1, "Using rwy %s for %s arrival", arrivalRwy->getID().c_str(),
+        logger::info("Using rwy %s for %s arrival", arrivalRwy->getID().c_str(),
                     arrivalAirport->getID().c_str());
     } else {
         nodes.push_back(arrivalAirport);

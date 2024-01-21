@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <stdexcept>
+#include <sstream>
 #include "Airport.h"
 #include "src/world/models/navaids/Fix.h"
 #include "src/Logger.h"
@@ -256,8 +257,17 @@ std::vector<std::shared_ptr<SID>> Airport::getSIDs() const {
 }
 
 std::shared_ptr<SID> Airport::getSIDByName(std::string sidName) const {
+    if (sidName.empty()) {
+        return nullptr;
+    }
     auto sid = sids.find(sidName);
     if (sid == sids.end()) {
+        std::stringstream ss;
+        for (auto &it: sids) {
+            ss << it.first << " ";
+        }
+        logger::warn("Couldn't find SID '%s', %s SIDs are %s",
+            sidName.c_str(), getID().c_str(), ss.str().c_str());
         return nullptr;
     }
     return sid->second;
@@ -272,8 +282,17 @@ std::vector<std::shared_ptr<STAR>> Airport::getSTARs() const {
 }
 
 std::shared_ptr<STAR> Airport::getSTARByName(std::string starName) const {
+    if (starName.empty()) {
+        return nullptr;
+    }
     auto star = stars.find(starName);
     if (star == stars.end()) {
+        std::stringstream ss;
+        for (auto &it: stars) {
+            ss << it.first << " ";
+        }
+        logger::warn("Couldn't find STAR '%s', %s STARs are %s",
+            starName.c_str(), getID().c_str(), ss.str().c_str());
         return nullptr;
     }
     return star->second;
@@ -288,8 +307,17 @@ std::vector<std::shared_ptr<Approach>> Airport::getApproaches() const {
 }
 
 std::shared_ptr<Approach> Airport::getApproachByName(std::string appName) const {
+    if (appName.empty()) {
+        return nullptr;
+    }
     auto approach = approaches.find(appName);
     if (approach == approaches.end()) {
+        std::stringstream ss;
+        for (auto &it: approaches) {
+            ss << it.first << " ";
+        }
+        logger::warn("Couldn't find APP '%s', %s APPs are %s",
+            appName.c_str(), getID().c_str(), ss.str().c_str());
         return nullptr;
     }
     return approach->second;
