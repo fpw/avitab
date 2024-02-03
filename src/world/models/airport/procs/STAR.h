@@ -26,6 +26,8 @@ class STAR: public Procedure {
 public:
     STAR(const std::string &id);
     void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>, std::shared_ptr<NavNode>)> f) const;
+    std::vector<std::shared_ptr<world::NavNode>> getWaypoints(
+            std::shared_ptr<world::Runway> arrivayRwy, std::string starTransName) const;
 };
 
 } /* namespace world */

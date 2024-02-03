@@ -16,6 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "STAR.h"
+#include "src/Logger.h"
+#include <sstream>
 
 namespace world {
 
@@ -85,6 +87,124 @@ void STAR::iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<F
             accept(rw, startIt->second, runwayToApproachEnd[rw]);
         }
     }
+}
+
+std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
+            std::shared_ptr<world::Runway> arrivalRwy, std::string starTransName) const {
+
+    std::string runwayID = arrivalRwy ? arrivalRwy->getID() : "";
+
+    if ((runwayTransitions.size() + commonRoutes.size() + enrouteTransitions.size()) == 0) {
+        logger::warn("STAR %s has no waypoints", getID().c_str());
+        return std::vector<std::shared_ptr<world::NavNode>>();
+    }
+
+    logger::info("STAR %s:\n%s", getID().c_str(), toDebugString().c_str());
+    logger::info("Want from fix '%s' to runway '%s'", starTransName.c_str(), runwayID.c_str());
+
+    /* We're going to run a 3 tier (enroute, common, runway) nested loop through
+     * all permutations of a full STAR route. So transform the structures into vector<vector>
+     * ensuring that all outer vectors have at least an empty vector inside so as to give the
+     * appropriate loop a once through. If the map key NavNode is not in the vector<NavNcde>
+     * then add it.
+     */
+    std::vector<std::vector<std::shared_ptr<NavNode>>> ee;
+    std::vector<std::vector<std::shared_ptr<NavNode>>> cc;
+    std::vector<std::vector<std::shared_ptr<NavNode>>> rr;
+    std::vector<std::shared_ptr<NavNode>> empty;
+    if (enrouteTransitions.size() > 0) {
+        ee = enrouteTransitions;
+    } else {
+        ee.push_back(empty);
+    }
+    if (commonRoutes.size() > 0) {
+        for (auto it: commonRoutes) {
+            auto w = it.second;
+            if (std::find(w.begin(), w.end(), it.first) == w.end()) {
+                w.push_back(it.first);
+            }
+            cc.push_back(w);
+        }
+    } else {
+        cc.push_back(empty);
+    }
+    if (runwayTransitions.size() > 0) {
+        for (auto it: runwayTransitions) {
+            auto w = it.second;
+            if (std::find(w.begin(), w.end(), it.first) == w.end()) {
+                // Put runway at end of list
+                w.push_back(it.first);
+            }
+            rr.push_back(w);
+        }
+    } else {
+        rr.push_back(empty);
+    }
+
+    /* 3 tier loop through all permutations of (common, enroute, runway)
+     * Check if a permutation meets the constraints of enroute and runway that may or may
+     * not have been specified in the flight plan.
+     * Maintain a list of common waypoints in each of the successive validated permutations.
+     * This will often end up the same as one of the entries in the commonRoutes map.
+     * But sometimes there may be a common route even if there are no entries in the commonRoute map.
+     * And sometimes the common route returned can be larger than an entry in the commonRoute map.
+     */
+    std::vector<std::vector<std::shared_ptr<NavNode>>> routePermutations;
+    std::vector<std::shared_ptr<NavNode>> repeatedWaypoints;
+    logger::info("Possible routes are:");
+    for (auto c: cc) {
+        for (auto e: ee) {
+            for (auto r: rr) {
+                std::vector<std::shared_ptr<NavNode>> waypoints;
+                waypoints.insert(waypoints.end(), e.begin(), e.end());
+                waypoints.insert(waypoints.end(), c.begin(), c.end());
+                waypoints.insert(waypoints.end(), r.begin(), r.end());
+                auto newEnd = std::unique(waypoints.begin(), waypoints.end());
+                waypoints.erase(newEnd, waypoints.end());
+
+                if (!waypoints.empty() && !starTransName.empty() && (waypoints.front()->getID() != starTransName)) {
+                    // Specified transition doesn't match - unsuitable
+                    continue;
+                }
+                if (!waypoints.empty() && waypoints.back()->isRunway() && arrivalRwy && (waypoints.back() != arrivalRwy)) {
+                    // Specified arrival runway doesn't match - unsuitable
+                    continue;
+                }
+                if (repeatedWaypoints.empty()) {
+                    // Initialise
+                    repeatedWaypoints = waypoints;
+                } else {
+                    // Filter the list of repeated waypoints using new valid permutation
+                    auto iter = std::remove_if(std::begin(repeatedWaypoints), std::end(repeatedWaypoints), [&waypoints] (const auto &a) -> bool {
+                        return (find(waypoints.begin(), waypoints.end(), a) == waypoints.end());
+                    });
+                    repeatedWaypoints.erase(iter, std::end(repeatedWaypoints));
+                }
+                routePermutations.push_back(waypoints);
+
+                std::stringstream ss;
+                for (auto w: waypoints) {
+                    ss << w->getID() << " ";
+                }
+                logger::info(" %s", ss.str().c_str());
+            }
+        }
+    }
+
+    switch(routePermutations.size()) {
+    case 0:  logger::warn("No waypoints found");
+             return std::vector<std::shared_ptr<world::NavNode>>();
+    case 1:  return routePermutations.front();
+    default: std::stringstream ss;
+             for (auto w: repeatedWaypoints) {
+                 ss << w->getID() << " ";
+             }
+             logger::info("Using common waypoints: %s", ss.str().c_str());
+             return repeatedWaypoints;
+    }
+
+    return std::vector<std::shared_ptr<world::NavNode>>();
+
 }
 
 } /* namespace world */

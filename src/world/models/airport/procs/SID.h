@@ -26,6 +26,8 @@ class SID: public Procedure {
 public:
     SID(const std::string &id);
     void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>)> f) const;
+    std::vector<std::shared_ptr<world::NavNode>> getWaypoints(
+            std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const;
 };
 
 } /* namespace world */

@@ -32,6 +32,7 @@ public:
     const std::shared_ptr<Fix> getStartFix() const;
     const std::shared_ptr<Runway> getRunway() const;
     void iterateTransitions(std::function<void(const std::string &, std::shared_ptr<Fix>, std::shared_ptr<Runway>)> f);
+    std::vector<std::shared_ptr<world::NavNode>> getWaypoints(std::string appTransName) const;
 
 private:
     std::map<std::string, std::vector<std::shared_ptr<NavNode>>> transitions;

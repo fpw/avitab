@@ -36,8 +36,6 @@ private:
     void appendArrival();
     void appendDepartureAirportOrRwy();
     void appendSID();
-    void appendSIDTransition();
-    void appendSTARTransition();
     void appendSTAR();
     void appendApproach();
     void appendArrivalAirportOrRwy();
@@ -48,18 +46,11 @@ private:
     std::shared_ptr<World> world;
     std::vector<std::shared_ptr<world::NavNode>> nodes;
     std::shared_ptr<world::Airport> departureAirport, arrivalAirport;
-    std::shared_ptr<world::Runway> departureRunway;
-    std::shared_ptr<world::Runway> arrivalRwy;
+    std::shared_ptr<world::Runway> departureRunway, arrivalRwy;
     std::string cycle;
-    std::string departureAirportName;
-    std::string arrivalAirportName;
-    std::string departureRwyName;
-    std::string arrivalRwyName;
-    std::string sidName;
-    std::string sidTransName;
-    std::string starName;
-    std::string starTransName;
-    std::string approachName;
+    std::string departureAirportName, departureRwyName, sidName, sidTransName;
+    std::string arrivalAirportName, arrivalRwyName, starName, starTransName;
+    std::string approachName, approachTransName;
 
     bool seenADEPWaypoint = false;
 };
