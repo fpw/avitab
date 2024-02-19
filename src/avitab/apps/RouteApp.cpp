@@ -144,14 +144,16 @@ void RouteApp::onArrivalEntered(const std::string& arrival) {
 
     arrivalNode = ap;
 
-    route = std::make_shared<world::Route>(navWorld, departureNode, arrivalNode);
-    route->setAirwayLevel(airwayLevel);
-    route->setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
+    auto router = api().getRouteFinder();
+    router->setDeparture(departureNode);
+    router->setArrival(arrivalNode);
+    router->setAirwayLevel(airwayLevel);
+    router->setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
         return api().getMagneticVariations(locations);
     });
 
     try {
-        route->find();
+        route = router->find();
         fromFMS = false;
         showRoute();
     } catch (const std::exception &e) {
@@ -335,13 +337,13 @@ void RouteApp::parseFMS(const std::string &fmsFilename) {
     }
     auto magVarMap = api().getMagneticVariations(locations);
 
-    std::vector<world::RouteFinder::RouteDirection> fmsRoute;
+    std::vector<world::Route::Leg> fmsRoute;
     std::shared_ptr<world::NavNode> prevNode;
     for (auto node: nodes) {
         if (prevNode) {
             auto prevLoc = prevNode->getLocation();
             auto magVar = magVarMap[std::make_pair(prevLoc.latitude, prevLoc.longitude)];
-            fmsRoute.push_back(world::RouteFinder::RouteDirection(prevNode, nullptr, node, magVar));
+            fmsRoute.push_back(world::Route::Leg(prevNode, nullptr, node, magVar));
         } else {
             departureNode = node;
         }

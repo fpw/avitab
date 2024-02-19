@@ -20,7 +20,6 @@
 
 #include <map>
 #include <string>
-#include <memory>
 #include <functional>
 #include <atomic>
 #include "src/world/World.h"
@@ -47,6 +46,8 @@ public:
     std::shared_ptr<world::Region> getRegion(const std::string &id) override;
 
     void addFix(std::shared_ptr<world::Fix> fix) override;
+
+    std::shared_ptr<world::RouteFinder> getRouteFinder() override;
 
     void forEachAirport(std::function<void(std::shared_ptr<world::Airport>)> f);
     std::shared_ptr<world::Region> findOrCreateRegion(const std::string &id);

@@ -417,6 +417,10 @@ void AviTab::setRoute(std::shared_ptr<world::Route> route) {
     activeRoute = route;
 }
 
+std::shared_ptr<world::RouteFinder> AviTab::getRouteFinder() {
+    return getNavWorld()->getRouteFinder();
+}
+
 AircraftID AviTab::getActiveAircraftCount() {
     return env->getActiveAircraftCount();
 }

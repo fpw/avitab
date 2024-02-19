@@ -24,66 +24,50 @@
 #include <map>
 #include <functional>
 #include <cmath>
-#include "../graph/NavNode.h"
-#include "../World.h"
+#include "Route.h"
+#include "../models/Airway.h"
 
 namespace world {
 
 class RouteFinder {
 public:
-    using EdgePtr = std::shared_ptr<NavEdge>;
-    using NodePtr = std::shared_ptr<NavNode>;
-    using EdgeFilter = std::function<bool(const EdgePtr, const NodePtr)>;
+    using EdgeFilter = std::function<bool(const Route::EdgePtr, const Route::NodePtr)>;
     using MagVarMap = std::map<std::pair<double, double>, double>;
     using GetMagVarsCallback = std::function<MagVarMap(std::vector<std::pair<double, double>>)>;
-
-    struct RouteDirection {
-        NodePtr from = nullptr;
-        EdgePtr via;
-        NodePtr to;
-        double distanceNm = 0;
-        double initialTrueBearing = 0;
-        double initialMagneticBearing = 0;
-
-        RouteDirection() = default;
-        RouteDirection(EdgePtr via, NodePtr to): via(via), to(to) { }
-        RouteDirection(NodePtr from, EdgePtr via, NodePtr to, double magVar):
-                       from(from), via(via), to(to) {
-            double distanceMetres = from->getLocation().distanceTo(to->getLocation());
-            distanceNm = (distanceMetres / 1000) * world::KM_TO_NM;
-            initialTrueBearing = from->getLocation().bearingTo(to->getLocation());
-            initialMagneticBearing = std::fmod(initialTrueBearing + magVar, 360.0);
-        }
-    };
 
     RouteFinder() = delete;
     RouteFinder(std::shared_ptr<world::World> world);
 
-    void setEdgeFilter(EdgeFilter filter);
+    void setDeparture(Route::NodePtr dep);
+    void setArrival(Route::NodePtr arr);
+    void setAirwayLevel(AirwayLevel level);
     void setGetMagVarsCallback(GetMagVarsCallback cb);
-    void setAirwayChangePenalty(float percent);
-    std::vector<RouteDirection> findRoute(NodePtr from, NodePtr to);
+
+    std::shared_ptr<Route> find();
 
 private:
     std::shared_ptr<World> world;
+    std::shared_ptr<NavNode> departure;
+    std::shared_ptr<NavNode> arrival;
 
-    EdgeFilter edgeFilter;
     GetMagVarsCallback getMagneticVariations;
 
     double directDistance = 0;
+    AirwayLevel airwayLevel = AirwayLevel::LOWER;
     float airwayChangePenalty = 0;
 
-    std::set<NodePtr> closedSet;
-    std::set<NodePtr> openSet;
-    std::map<NodePtr, RouteDirection> cameFrom;
-    std::map<NodePtr, double> gScore;
-    std::map<NodePtr, double> fScore;
+    std::set<Route::NodePtr> closedSet;
+    std::set<Route::NodePtr> openSet;
+    std::map<Route::NodePtr, Route::Leg> cameFrom;
+    std::map<Route::NodePtr, double> gScore;
+    std::map<Route::NodePtr, double> fScore;
 
-    NodePtr getLowestOpen();
-    double minCostHeuristic(NodePtr a, NodePtr b);
-    double cost(NodePtr a, const RouteDirection &dir);
-    double getGScore(NodePtr f);
-    std::vector<RouteDirection> reconstructPath(NodePtr lastFix);
+    bool checkEdge(const Route::EdgePtr via, const Route::NodePtr to) const;
+    Route::NodePtr getLowestOpen();
+    double minCostHeuristic(Route::NodePtr a, Route::NodePtr b);
+    double cost(Route::NodePtr a, const Route::Leg &dir);
+    double getGScore(Route::NodePtr f);
+    std::vector<Route::Leg> reconstructPath(Route::NodePtr lastFix);
 };
 
 } /* namespace world */

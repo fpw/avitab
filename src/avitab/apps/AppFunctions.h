@@ -23,6 +23,7 @@
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/world/World.h"
 #include "src/world/router/Route.h"
+#include "src/world/router/RouteFinder.h"
 #include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 
@@ -67,6 +68,7 @@ public:
     virtual std::shared_ptr<Settings> getSettings() = 0;
     virtual void setRoute(std::shared_ptr<world::Route> route) = 0;
     virtual std::shared_ptr<world::Route> getRoute() = 0;
+    virtual std::shared_ptr<world::RouteFinder> getRouteFinder() = 0;
     virtual ~AppFunctions() = default;
 };
 

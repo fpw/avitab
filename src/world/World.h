@@ -33,7 +33,9 @@ namespace world {
 constexpr const double KM_TO_NM = 0.539957;
 constexpr const double M_TO_FT = 3.28084;
 
-class World {
+class RouteFinder;
+
+class World : public std::enable_shared_from_this<World>{
 public:
     static constexpr const int MAX_SEARCH_RESULTS = 10;
 
@@ -61,6 +63,8 @@ public:
     virtual std::shared_ptr<Region> getRegion(const std::string &code) = 0;
 
     virtual void addFix(std::shared_ptr<Fix> f) = 0;
+
+    virtual std::shared_ptr<RouteFinder> getRouteFinder() = 0;
 };
 
 

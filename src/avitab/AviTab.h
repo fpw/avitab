@@ -75,6 +75,7 @@ public:
     std::shared_ptr<Settings> getSettings() override;
     std::shared_ptr<world::Route> getRoute() override;
     void setRoute(std::shared_ptr<world::Route> route) override;
+    std::shared_ptr<world::RouteFinder> getRouteFinder() override;
 
     ~AviTab();
 

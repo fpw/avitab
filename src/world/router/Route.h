@@ -20,14 +20,34 @@
 
 #include <memory>
 #include <functional>
-#include "RouteFinder.h"
-#include "../graph/NavEdge.h"
-#include "../models/Airway.h"
+#include "../World.h"
 
 namespace world {
 
 class Route {
 public:
+    using EdgePtr = std::shared_ptr<NavEdge>;
+    using NodePtr = std::shared_ptr<NavNode>;
+
+    struct Leg {
+        NodePtr from = nullptr;
+        EdgePtr via;
+        NodePtr to;
+        double distanceNm = 0;
+        double initialTrueBearing = 0;
+        double initialMagneticBearing = 0;
+
+        Leg() = default;
+        Leg(EdgePtr via, NodePtr to): via(via), to(to) { }
+        Leg(NodePtr from, EdgePtr via, NodePtr to, double magVar):
+                       from(from), via(via), to(to) {
+            double distanceMetres = from->getLocation().distanceTo(to->getLocation());
+            distanceNm = (distanceMetres / 1000) * world::KM_TO_NM;
+            initialTrueBearing = from->getLocation().bearingTo(to->getLocation());
+            initialMagneticBearing = std::fmod(initialTrueBearing + magVar, 360.0);
+        }
+    };
+
     using RouteIterator = std::function<void (const std::shared_ptr<NavEdge>, const std::shared_ptr<NavNode>)>;
     using MagVarMap = std::map<std::pair<double, double>, double>;
     using GetMagVarsCallback = std::function<MagVarMap(std::vector<std::pair<double, double>>)>;
@@ -42,13 +62,10 @@ public:
 
     Route(std::shared_ptr<world::World> world, std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest);
 
-    void setAirwayLevel(AirwayLevel level);
-
     std::shared_ptr<NavNode> getStart() const;
     std::shared_ptr<NavNode> getDestination() const;
 
-    void find();
-    void loadRoute(std::vector<RouteFinder::RouteDirection> route);
+    void loadRoute(std::vector<Route::Leg> route);
     void iterateRoute(RouteIterator f) const;
     void iterateLegs(LegIterator f) const;
     void iterateRouteShort(RouteIterator f) const;
@@ -59,13 +76,9 @@ public:
 
 private:
     std::shared_ptr<World> world;
-    RouteFinder router;
     std::shared_ptr<NavNode> startNode, destNode;
-    AirwayLevel airwayLevel = AirwayLevel::LOWER;
-    std::vector<RouteFinder::RouteDirection> waypoints;
+    std::vector<Route::Leg> waypoints;
     GetMagVarsCallback getMagneticVariations;
-
-    bool checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const;
 };
 
 } /* namespace world */
