@@ -20,7 +20,7 @@
 
 #include "OverlayHelper.h"
 #include "src/world/graph/NavNode.h"
-#include "src/world/router/Route.h"
+#include "src/world/routing/Route.h"
 #include "src/libimg/Image.h"
 #include "src/Logger.h"
 

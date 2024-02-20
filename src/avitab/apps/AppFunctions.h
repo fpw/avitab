@@ -22,8 +22,7 @@
 #include <string>
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/world/World.h"
-#include "src/world/router/Route.h"
-#include "src/world/router/RouteFinder.h"
+#include "src/world/routing/Route.h"
 #include "src/charts/ChartService.h"
 #include "src/environment/Environment.h"
 

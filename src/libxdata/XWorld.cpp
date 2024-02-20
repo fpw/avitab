@@ -21,7 +21,7 @@
 #include <sstream>
 #include <memory>
 #include "XWorld.h"
-#include "src/world/router/RouteFinder.h"
+#include "src/world/routing/RouteFinder.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <iomanip>
 #include "RouteApp.h"
+#include "src/world/routing/RouteFinder.h"
 #include "src/Logger.h"
 
 namespace avitab {
