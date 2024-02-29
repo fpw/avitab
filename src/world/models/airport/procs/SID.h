@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,10 +15,10 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_MODELS_AIRPORT_PROCS_SID_H_
-#define SRC_WORLD_MODELS_AIRPORT_PROCS_SID_H_
+#pragma once
 
 #include "Procedure.h"
+#include "../../../models/navaids/Fix.h"
 
 namespace world {
 
@@ -26,10 +26,7 @@ class SID: public Procedure {
 public:
     SID(const std::string &id);
     void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>)> f) const;
-    std::vector<std::shared_ptr<world::NavNode>> getWaypoints(
-            std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const;
+    NavNodeList getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const;
 };
 
 } /* namespace world */
-
-#endif /* SRC_WORLD_MODELS_AIRPORT_PROCS_SID_H_ */

@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -26,11 +26,11 @@ Approach::Approach(const std::string& id):
 {
 }
 
-void Approach::addTransition(const std::string& id, const std::vector<std::shared_ptr<world::NavNode>>& nodes) {
+void Approach::addTransition(const std::string& id, const NavNodeList& nodes) {
     transitions.insert(std::make_pair(id, nodes));
 }
 
-void Approach::addApproach(const std::vector<std::shared_ptr<world::NavNode>> &nodes) {
+void Approach::addApproach(const NavNodeList &nodes) {
     approach = nodes;
 }
 
@@ -62,16 +62,16 @@ void Approach::iterateTransitions(std::function<void(const std::string&, std::sh
     }
 }
 
-std::vector<std::shared_ptr<world::NavNode>> Approach::getWaypoints(std::string appTransName) const {
+NavNodeList Approach::getWaypoints(std::string appTransName) const {
     if ((transitions.size() + approach.size()) == 0) {
         logger::warn("Approach %s has no waypoints", getID().c_str());
-        return std::vector<std::shared_ptr<world::NavNode>>();
+        return NavNodeList();
     }
 
     logger::info("Approach %s from fix '%s'\n%s",
         getID().c_str(), appTransName.c_str(), toDebugString().c_str());
 
-    std::vector<std::shared_ptr<NavNode>> waypoints;
+    NavNodeList waypoints;
     if (transitions.empty() || appTransName.empty()) {
         waypoints = approach;
     } else {

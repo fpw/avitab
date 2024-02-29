@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_AVITAB_H_
-#define SRC_AVITAB_AVITAB_H_
+#pragma once
 
 #include <memory>
 #include <future>
@@ -65,7 +64,7 @@ public:
     std::string getMETARForAirport(const std::string &icao) override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
-    std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) override;
+    world::NavNodeList loadFlightPlan(const std::string filename) override;
     void close() override;
     void setIsInMenu(bool inMenu) override;
     std::shared_ptr<apis::ChartService> getChartService() override;
@@ -108,5 +107,3 @@ private:
 };
 
 } /* namespace avitab */
-
-#endif /* SRC_AVITAB_AVITAB_H_ */

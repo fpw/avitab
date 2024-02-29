@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2023-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -55,7 +55,7 @@ void LoadManager::loadUserFixes() {
     }
 }
 
-std::vector<std::shared_ptr<NavNode>> LoadManager::loadFlightPlan(const std::string filename)
+world::NavNodeList LoadManager::loadFlightPlan(const std::string filename)
 {
     try {
         FMSLoader loader(getWorld());
@@ -64,7 +64,7 @@ std::vector<std::shared_ptr<NavNode>> LoadManager::loadFlightPlan(const std::str
 
     } catch (const std::exception &e) {
         logger::warn("Unable to load/parse flight plan file '%s' %s", filename.c_str(), e.what());
-        return std::vector<std::shared_ptr<NavNode>>();
+        return NavNodeList();
     }
 }
 

@@ -41,7 +41,7 @@ private:
     void loadSTAR(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);
     void loadApproach(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);
 
-    std::vector<std::shared_ptr<world::NavNode>> convertFixes(std::shared_ptr<world::Airport> airport, const std::vector<CIFPData::FixInRegion> &fixes) const;
+    world::NavNodeList convertFixes(std::shared_ptr<world::Airport> airport, const std::vector<CIFPData::FixInRegion> &fixes) const;
     void loadRunwayTransition(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);
     void loadCommonRoutes(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);
     void loadEnroute(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);

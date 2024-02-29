@@ -38,18 +38,18 @@ bool Procedure::isProcedure() const {
     return true;
 }
 
-void Procedure::attachRunwayTransition(std::shared_ptr<Runway> rwy, const std::vector<std::shared_ptr<world::NavNode>> &nodes) {
+void Procedure::attachRunwayTransition(std::shared_ptr<Runway> rwy, const NavNodeList &nodes) {
     if (!rwy) {
         throw std::runtime_error("Null runway passed to procedure " + id);
     }
     runwayTransitions.insert(std::make_pair(rwy, nodes));
 }
 
-void Procedure::attachCommonRoute(std::shared_ptr<world::NavNode> start, const std::vector<std::shared_ptr<world::NavNode>> &nodes) {
+void Procedure::attachCommonRoute(std::shared_ptr<world::NavNode> start, const NavNodeList &nodes) {
     commonRoutes.insert(std::make_pair(start, nodes));
 }
 
-void Procedure::attachEnrouteTransitions(const std::vector<std::shared_ptr<world::NavNode> >& nodes) {
+void Procedure::attachEnrouteTransitions(const NavNodeList& nodes) {
     enrouteTransitions.push_back(nodes);
 }
 

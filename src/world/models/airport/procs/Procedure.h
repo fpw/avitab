@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,17 +15,15 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_MODELS_AIRPORT_PROCS_PROCEDURE_H_
-#define SRC_WORLD_MODELS_AIRPORT_PROCS_PROCEDURE_H_
+#pragma once
 
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
-#include <functional>
-#include "src/world/models/airport/Runway.h"
-#include "src/world/models/navaids/Fix.h"
-#include "src/world/graph/NavNode.h"
+#include "../../../graph/NavEdge.h"
+#include "../../../graph/NavNode.h"
+#include "../Runway.h"
 
 namespace world {
 
@@ -37,23 +35,21 @@ public:
     virtual bool supportsLevel(AirwayLevel level) const override;
     bool isProcedure() const override;
 
-    void attachRunwayTransition(std::shared_ptr<Runway> rwy, const std::vector<std::shared_ptr<NavNode>> &nodes);
-    void attachCommonRoute(std::shared_ptr<NavNode> start, const std::vector<std::shared_ptr<NavNode>> &nodes);
-    void attachEnrouteTransitions(const std::vector<std::shared_ptr<NavNode>> &nodes);
+    void attachRunwayTransition(std::shared_ptr<Runway> rwy, const NavNodeList &nodes);
+    void attachCommonRoute(std::shared_ptr<NavNode> start, const NavNodeList &nodes);
+    void attachEnrouteTransitions(const NavNodeList &nodes);
 
     virtual std::string toDebugString() const;
 
     virtual ~Procedure() = default;
 
 protected:
-    std::map<std::shared_ptr<Runway>, std::vector<std::shared_ptr<NavNode>>> runwayTransitions;
-    std::map<std::shared_ptr<NavNode>, std::vector<std::shared_ptr<NavNode>>> commonRoutes;
-    std::vector<std::vector<std::shared_ptr<NavNode>>> enrouteTransitions;
+    std::map<std::shared_ptr<Runway>, NavNodeList> runwayTransitions;
+    std::map<std::shared_ptr<NavNode>, NavNodeList> commonRoutes;
+    std::vector<NavNodeList> enrouteTransitions;
 
 private:
     std::string id;
 };
 
 } /* namespace world */
-
-#endif /* SRC_WORLD_MODELS_AIRPORT_PROCS_PROCEDURE_H_ */

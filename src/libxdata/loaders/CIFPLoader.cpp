@@ -199,8 +199,8 @@ void CIFPLoader::forEveryMatchingRunway(const std::string& rwSpec, const std::sh
     throw std::runtime_error("Runway spec invalid: " + apt->getID() + ", RW: " + rwSpec);
 }
 
-std::vector<std::shared_ptr<world::NavNode>> CIFPLoader::convertFixes(std::shared_ptr<world::Airport> airport, const std::vector<CIFPData::FixInRegion>& fixes) const {
-    std::vector<std::shared_ptr<world::NavNode>> res;
+world::NavNodeList CIFPLoader::convertFixes(std::shared_ptr<world::Airport> airport, const std::vector<CIFPData::FixInRegion>& fixes) const {
+    world::NavNodeList res;
 
     for (auto &fix: fixes) {
         std::shared_ptr<world::NavNode> node = world->findFixByRegionAndID(fix.region, fix.id);

@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_APPFUNCTIONS_H_
-#define SRC_AVITAB_APPS_APPFUNCTIONS_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -54,7 +53,7 @@ public:
     virtual std::shared_ptr<world::World> getNavWorld() = 0;
     virtual void reloadMetar() = 0;
     virtual void loadUserFixes(std::string filename) = 0;
-    virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename) = 0;
+    virtual world::NavNodeList loadFlightPlan(const std::string filename) = 0;
     using MagVarMap = std::map<std::pair<double, double>, double>;
     virtual MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) = 0;
     virtual std::string getMETARForAirport(const std::string &icao) = 0;
@@ -72,5 +71,3 @@ public:
 };
 
 }
-
-#endif /* SRC_AVITAB_APPS_APPFUNCTIONS_H_ */

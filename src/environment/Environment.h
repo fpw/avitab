@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_ENVIRONMENT_ENVIRONMENT_H_
-#define SRC_ENVIRONMENT_ENVIRONMENT_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -91,7 +90,7 @@ public:
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();
     void reloadMetar();
-    std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
+    world::NavNodeList loadFlightPlan(const std::string filename);
     void loadUserFixes(std::string filename);
     virtual void enableAndPowerPanel();
     virtual void setIsInMenu(bool menu);
@@ -125,5 +124,3 @@ private:
 };
 
 } /* namespace avitab */
-
-#endif /* SRC_ENVIRONMENT_ENVIRONMENT_H_ */

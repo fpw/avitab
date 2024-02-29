@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,30 +15,28 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_MODELS_AIRPORT_PROCS_APPROACH_H_
-#define SRC_WORLD_MODELS_AIRPORT_PROCS_APPROACH_H_
+#pragma once
 
 #include "Procedure.h"
+#include "../../../models/navaids/Fix.h"
 
 namespace world {
 
 class Approach: public Procedure {
 public:
     Approach(const std::string &id);
-    void addTransition(const std::string &id, const std::vector<std::shared_ptr<NavNode>> &nodes);
-    void addApproach(const std::vector<std::shared_ptr<NavNode>> &nodes);
+    void addTransition(const std::string &id, const world::NavNodeList &nodes);
+    void addApproach(const NavNodeList &nodes);
     std::string toDebugString() const override;
 
     const std::shared_ptr<Fix> getStartFix() const;
     const std::shared_ptr<Runway> getRunway() const;
     void iterateTransitions(std::function<void(const std::string &, std::shared_ptr<Fix>, std::shared_ptr<Runway>)> f);
-    std::vector<std::shared_ptr<world::NavNode>> getWaypoints(std::string appTransName) const;
+    NavNodeList getWaypoints(std::string appTransName) const;
 
 private:
-    std::map<std::string, std::vector<std::shared_ptr<NavNode>>> transitions;
-    std::vector<std::shared_ptr<NavNode>> approach;
+    std::map<std::string, NavNodeList> transitions;
+    NavNodeList approach;
 };
 
 } /* namespace world */
-
-#endif /* SRC_WORLD_MODELS_AIRPORT_PROCS_APPROACH_H_ */

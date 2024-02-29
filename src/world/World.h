@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,14 +15,15 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_WORLD_H_
-#define SRC_WORLD_WORLD_H_
+#pragma once
 
 #include <map>
 #include <string>
 #include <memory>
 #include <functional>
-#include <atomic>
+#include <vector>
+#include "graph/NavNode.h"
+#include "graph/NavEdge.h"
 #include "models/airport/Airport.h"
 #include "models/navaids/Fix.h"
 #include "models/Region.h"
@@ -69,5 +70,3 @@ public:
 
 
 } /* namespace world */
-
-#endif /* SRC_WORLD_WORLD_H_ */

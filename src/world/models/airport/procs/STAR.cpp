@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -16,8 +16,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "STAR.h"
-#include "src/Logger.h"
 #include <sstream>
+#include "src/Logger.h"
 
 namespace world {
 
@@ -89,14 +89,13 @@ void STAR::iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<F
     }
 }
 
-std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
-            std::shared_ptr<world::Runway> arrivalRwy, std::string starTransName) const {
+NavNodeList STAR::getWaypoints(std::shared_ptr<world::Runway> arrivalRwy, std::string starTransName) const {
 
     std::string runwayID = arrivalRwy ? arrivalRwy->getID() : "";
 
     if ((runwayTransitions.size() + commonRoutes.size() + enrouteTransitions.size()) == 0) {
         logger::warn("STAR %s has no waypoints", getID().c_str());
-        return std::vector<std::shared_ptr<world::NavNode>>();
+        return NavNodeList();
     }
 
     logger::info("STAR %s:\n%s", getID().c_str(), toDebugString().c_str());
@@ -108,10 +107,10 @@ std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
      * appropriate loop a once through. If the map key NavNode is not in the vector<NavNcde>
      * then add it.
      */
-    std::vector<std::vector<std::shared_ptr<NavNode>>> ee;
-    std::vector<std::vector<std::shared_ptr<NavNode>>> cc;
-    std::vector<std::vector<std::shared_ptr<NavNode>>> rr;
-    std::vector<std::shared_ptr<NavNode>> empty;
+    std::vector<NavNodeList> ee;
+    std::vector<NavNodeList> cc;
+    std::vector<NavNodeList> rr;
+    NavNodeList empty;
     if (enrouteTransitions.size() > 0) {
         ee = enrouteTransitions;
     } else {
@@ -149,13 +148,13 @@ std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
      * But sometimes there may be a common route even if there are no entries in the commonRoute map.
      * And sometimes the common route returned can be larger than an entry in the commonRoute map.
      */
-    std::vector<std::vector<std::shared_ptr<NavNode>>> routePermutations;
-    std::vector<std::shared_ptr<NavNode>> repeatedWaypoints;
+    std::vector<NavNodeList> routePermutations;
+    NavNodeList repeatedWaypoints;
     logger::info("Possible routes are:");
     for (auto c: cc) {
         for (auto e: ee) {
             for (auto r: rr) {
-                std::vector<std::shared_ptr<NavNode>> waypoints;
+                NavNodeList waypoints;
                 waypoints.insert(waypoints.end(), e.begin(), e.end());
                 waypoints.insert(waypoints.end(), c.begin(), c.end());
                 waypoints.insert(waypoints.end(), r.begin(), r.end());
@@ -193,7 +192,7 @@ std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
 
     switch(routePermutations.size()) {
     case 0:  logger::warn("No waypoints found");
-             return std::vector<std::shared_ptr<world::NavNode>>();
+             return NavNodeList();
     case 1:  return routePermutations.front();
     default: std::stringstream ss;
              for (auto w: repeatedWaypoints) {
@@ -203,7 +202,7 @@ std::vector<std::shared_ptr<world::NavNode>> STAR::getWaypoints(
              return repeatedWaypoints;
     }
 
-    return std::vector<std::shared_ptr<world::NavNode>>();
+    return NavNodeList();
 
 }
 
