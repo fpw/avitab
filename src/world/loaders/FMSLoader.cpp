@@ -166,7 +166,7 @@ void FMSLoader::appendApproach() {
     auto app = arrivalAirport->getApproachByName(approachName);
     if (app) {
         arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
-        auto waypoints = app->getWaypoints(approachTransName);
+        auto waypoints = app->getWaypoints(arrivalRwy, approachTransName);
         if (arrivalRwy && !waypoints.empty() && (arrivalRwy->getID() == waypoints.back()->getID())) {
             // Any rwy in FMS already in nodes, so if in new waypoints, remove
             waypoints.erase(waypoints.end());

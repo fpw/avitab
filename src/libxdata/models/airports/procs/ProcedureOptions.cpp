@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,45 +15,37 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#include "ProcedureOptions.h"
 #include <sstream>
-#include "Procedure.h"
 
-namespace world {
+namespace xdata {
 
-Procedure::Procedure(const std::string& id):
-    id(id)
+ProcedureOptions::ProcedureOptions(std::string id)
+:   transitionId(id)
 {
 }
 
-const std::string& Procedure::getID() const {
-    return id;
-}
-
-bool Procedure::supportsLevel(world::AirwayLevel level) const {
-    // a procedure supports both upper and lower levels
-    return true;
-}
-
-bool Procedure::isProcedure() const {
-    return true;
-}
-
-void Procedure::attachRunwayTransition(std::shared_ptr<Runway> rwy, const NavNodeList &nodes) {
+void ProcedureOptions::attachRunwayTransition(std::shared_ptr<world::Runway> rwy, const world::NavNodeList &nodes)
+{
     if (!rwy) {
-        throw std::runtime_error("Null runway passed to procedure " + id);
+        throw std::runtime_error("Null runway passed to procedure " + transitionId);
     }
     runwayTransitions.insert(std::make_pair(rwy, nodes));
 }
 
-void Procedure::attachCommonRoute(std::shared_ptr<world::NavNode> start, const NavNodeList &nodes) {
+void ProcedureOptions::attachCommonRoute(std::shared_ptr<world::NavNode> start, const world::NavNodeList &nodes)
+{
     commonRoutes.insert(std::make_pair(start, nodes));
 }
 
-void Procedure::attachEnrouteTransitions(const NavNodeList& nodes) {
+void ProcedureOptions::attachEnrouteTransitions(const world::NavNodeList& nodes)
+{
     enrouteTransitions.push_back(nodes);
 }
 
-std::string Procedure::toDebugString() const {
+std::string ProcedureOptions::toDebugString() const
+{
     std::stringstream res;
 
     for (auto &it: runwayTransitions) {
@@ -83,4 +75,5 @@ std::string Procedure::toDebugString() const {
     return res.str();
 }
 
-} /* namespace world */
+} /* namespace xdata */
+

@@ -15,82 +15,24 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "SID.h"
+
+#include "XSID.h"
 #include "src/Logger.h"
-#include <map>
 #include <sstream>
 
-namespace world {
+namespace xdata {
 
-SID::SID(const std::string &id):
-    Procedure(id)
+XSID::XSID(const std::string &id)
+:    world::SID(id), ProcedureOptions(id)
 {
 }
 
-void SID::iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>)> f) const {
-    std::map<std::shared_ptr<Runway>, std::shared_ptr<world::NavNode>> runwayToWaypoint;
-    std::map<std::shared_ptr<world::NavNode>, std::shared_ptr<world::NavNode>> waypointToWaypoint;
-    std::multimap<std::shared_ptr<world::NavNode>, std::shared_ptr<world::NavNode>> waypointToFinal;
-
-    auto accept = [&f] (std::shared_ptr<Runway> rw, std::shared_ptr<world::NavNode> fix) {
-        if (fix != nullptr && fix->isGlobalFix()) {
-            f(rw, std::dynamic_pointer_cast<Fix>(fix));
-        }
-    };
-
-    for (auto &it: runwayTransitions) {
-        auto &rwy = it.first;
-        auto &nodes = it.second;
-        auto &last = nodes.empty() ? nullptr : nodes.back();
-        runwayToWaypoint.insert(std::make_pair(rwy, last));
-    }
-
-    for (auto &it: commonRoutes) {
-        auto &srcNode = it.first;
-        auto &nodes = it.second;
-        auto &destNode = nodes.empty() ? nullptr : nodes.back();
-
-        if (srcNode->isRunway()) {
-            auto rw = std::dynamic_pointer_cast<Runway>(srcNode);
-            runwayToWaypoint.insert(std::make_pair(rw, destNode));
-        } else {
-            waypointToWaypoint.insert(std::make_pair(srcNode, destNode));
-        }
-    }
-
-    for (auto &nodes: enrouteTransitions) {
-        auto &srcNode = nodes.front();
-        auto &finalFix = nodes.back();
-        waypointToFinal.insert(std::make_pair(srcNode, finalFix));
-    }
-
-    for (auto &it: runwayToWaypoint) {
-        auto &rw = it.first;
-        auto &waypoint = it.second;
-        auto wpIt = waypointToWaypoint.find(waypoint);
-        std::shared_ptr<world::NavNode> curFix = waypoint;
-        if (wpIt != waypointToWaypoint.end()) {
-            curFix = wpIt->second;
-        }
-
-        auto range = waypointToFinal.equal_range(curFix);
-        if (range.first == range.second) {
-            accept(rw, curFix);
-            continue;
-        }
-
-        for (auto finalIt = range.first; finalIt != range.second; ++finalIt) {
-            accept(rw, finalIt->second);
-        }
-    }
-}
-
-NavNodeList SID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const {
+world::NavNodeList XSID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const {
 
     std::string runwayID = departureRwy ? departureRwy->getID() : "";
     if ((runwayTransitions.size() + commonRoutes.size() + enrouteTransitions.size()) == 0) {
         logger::warn("SID %s has no waypoints", getID().c_str());
-        return NavNodeList();
+        return world::NavNodeList();
     }
 
     logger::info("SID %s:\n%s", getID().c_str(), toDebugString().c_str());
@@ -102,10 +44,10 @@ NavNodeList SID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::
      * appropriate loop a once through. If the map key NavNode is not in the vector<NavNcde>
      * then add it.
      */
-    std::vector<NavNodeList> rr;
-    std::vector<NavNodeList> cc;
-    std::vector<NavNodeList> ee;
-    NavNodeList empty;
+    std::vector<world::NavNodeList> rr;
+    std::vector<world::NavNodeList> cc;
+    std::vector<world::NavNodeList> ee;
+    world::NavNodeList empty;
     if (runwayTransitions.size() > 0) {
         for (auto it: runwayTransitions) {
             auto w = it.second;
@@ -142,13 +84,13 @@ NavNodeList SID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::
      * But sometimes there may be a common route even if there are no entries in the commonRoute map.
      * And sometimes the common route returned can be larger than an entry in the commonRoute map.
      */
-    std::vector<NavNodeList> routePermutations;
-    NavNodeList repeatedWaypoints;
+    std::vector<world::NavNodeList> routePermutations;
+    world::NavNodeList repeatedWaypoints;
     logger::info("Possible routes are:");
     for (auto r: rr) {
         for (auto c: cc) {
             for (auto e: ee) {
-                NavNodeList waypoints;
+                world::NavNodeList waypoints;
                 waypoints.insert(waypoints.end(), r.begin(), r.end());
                 waypoints.insert(waypoints.end(), c.begin(), c.end());
                 waypoints.insert(waypoints.end(), e.begin(), e.end());
@@ -187,7 +129,7 @@ NavNodeList SID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::
 
     switch(routePermutations.size()) {
     case 0:  logger::warn("No waypoints found");
-             return NavNodeList();
+             return world::NavNodeList();
     case 1:  return routePermutations.front();
     default: std::stringstream ss;
              for (auto w: repeatedWaypoints) {
@@ -198,4 +140,67 @@ NavNodeList SID::getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::
     }
 }
 
-} /* namespace world */
+std::string XSID::toDebugString() const
+{
+    return ProcedureOptions::toDebugString();
+}
+
+void XSID::iterate(std::function<void(std::shared_ptr<world::Runway>, std::shared_ptr<world::Fix>)> f) const {
+    std::map<std::shared_ptr<world::Runway>, std::shared_ptr<world::NavNode>> runwayToWaypoint;
+    std::map<std::shared_ptr<world::NavNode>, std::shared_ptr<world::NavNode>> waypointToWaypoint;
+    std::multimap<std::shared_ptr<world::NavNode>, std::shared_ptr<world::NavNode>> waypointToFinal;
+
+    auto accept = [&f] (std::shared_ptr<world::Runway> rw, std::shared_ptr<world::NavNode> fix) {
+        if (fix != nullptr && fix->isGlobalFix()) {
+            f(rw, std::dynamic_pointer_cast<world::Fix>(fix));
+        }
+    };
+
+    for (auto &it: runwayTransitions) {
+        auto &rwy = it.first;
+        auto &nodes = it.second;
+        auto &last = nodes.empty() ? nullptr : nodes.back();
+        runwayToWaypoint.insert(std::make_pair(rwy, last));
+    }
+
+    for (auto &it: commonRoutes) {
+        auto &srcNode = it.first;
+        auto &nodes = it.second;
+        auto &destNode = nodes.empty() ? nullptr : nodes.back();
+
+        if (srcNode->isRunway()) {
+            auto rw = std::dynamic_pointer_cast<world::Runway>(srcNode);
+            runwayToWaypoint.insert(std::make_pair(rw, destNode));
+        } else {
+            waypointToWaypoint.insert(std::make_pair(srcNode, destNode));
+        }
+    }
+
+    for (auto &nodes: enrouteTransitions) {
+        auto &srcNode = nodes.front();
+        auto &finalFix = nodes.back();
+        waypointToFinal.insert(std::make_pair(srcNode, finalFix));
+    }
+
+    for (auto &it: runwayToWaypoint) {
+        auto &rw = it.first;
+        auto &waypoint = it.second;
+        auto wpIt = waypointToWaypoint.find(waypoint);
+        std::shared_ptr<world::NavNode> curFix = waypoint;
+        if (wpIt != waypointToWaypoint.end()) {
+            curFix = wpIt->second;
+        }
+
+        auto range = waypointToFinal.equal_range(curFix);
+        if (range.first == range.second) {
+            accept(rw, curFix);
+            continue;
+        }
+
+        for (auto finalIt = range.first; finalIt != range.second; ++finalIt) {
+            accept(rw, finalIt->second);
+        }
+    }
+}
+
+} /* namespace xdata */

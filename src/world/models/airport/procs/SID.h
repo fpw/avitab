@@ -18,15 +18,14 @@
 #pragma once
 
 #include "Procedure.h"
-#include "../../../models/navaids/Fix.h"
 
 namespace world {
 
-class SID: public Procedure {
+class SID : public Procedure
+{
 public:
-    SID(const std::string &id);
-    void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>)> f) const;
-    NavNodeList getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const;
+    SID(const std::string &id) : Procedure(id) { }
+
 };
 
 } /* namespace world */

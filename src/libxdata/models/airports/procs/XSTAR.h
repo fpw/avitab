@@ -17,30 +17,22 @@
  */
 #pragma once
 
+#include "src/world/models/airport/procs/STAR.h"
+#include "ProcedureOptions.h"
+#include "src/world/models/navaids/Fix.h"
 #include <string>
-#include <vector>
-#include <map>
-#include <memory>
-#include "../../../graph/NavEdge.h"
-#include "../../../graph/NavNode.h"
-#include "../Runway.h"
 
-namespace world {
+namespace xdata {
 
-class Procedure : public NavEdge
+class XSTAR : public world::STAR, public ProcedureOptions
 {
 public:
-    Procedure(const std::string &id) : procId(id) { }
+    XSTAR(const std::string &id);
 
-    const std::string &getID() const override { return procId; }
-    virtual bool supportsLevel(AirwayLevel level) const override { return true; }
-    bool isProcedure() const override { return true; }
+    world::NavNodeList getWaypoints(std::shared_ptr<world::Runway> arrivalRwy, std::string starTransName) const override;
+    std::string toDebugString() const override;
 
-    virtual NavNodeList getWaypoints(std::shared_ptr<world::Runway> runway, std::string appTransName) const = 0;
-    virtual std::string toDebugString() const = 0;
-
-private:
-    std::string procId;
+    void iterate(std::function<void(std::shared_ptr<world::Runway>, std::shared_ptr<world::Fix>, std::shared_ptr<world::NavNode>)> f) const;
 };
 
-} /* namespace world */
+}

@@ -17,30 +17,23 @@
  */
 #pragma once
 
+#include "src/world/models/airport/procs/SID.h"
+#include "ProcedureOptions.h"
+#include "src/world/models/navaids/Fix.h"
 #include <string>
-#include <vector>
-#include <map>
-#include <memory>
-#include "../../../graph/NavEdge.h"
-#include "../../../graph/NavNode.h"
-#include "../Runway.h"
 
-namespace world {
+namespace xdata {
 
-class Procedure : public NavEdge
+class XSID : public world::SID, public ProcedureOptions
 {
 public:
-    Procedure(const std::string &id) : procId(id) { }
+    XSID(const std::string &id);
+    
+    world::NavNodeList getWaypoints(std::shared_ptr<world::Runway> departureRwy, std::string sidTransName) const override;
+    std::string toDebugString() const override;
 
-    const std::string &getID() const override { return procId; }
-    virtual bool supportsLevel(AirwayLevel level) const override { return true; }
-    bool isProcedure() const override { return true; }
+    void iterate(std::function<void(std::shared_ptr<world::Runway>, std::shared_ptr<world::Fix>)> f) const;
 
-    virtual NavNodeList getWaypoints(std::shared_ptr<world::Runway> runway, std::string appTransName) const = 0;
-    virtual std::string toDebugString() const = 0;
-
-private:
-    std::string procId;
 };
 
-} /* namespace world */
+}

@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
-#define SRC_LIBXDATA_LOADERS_CIFPLOADER_H_
+#pragma once
 
 #include <memory>
 #include "src/world/LoadManager.h"
@@ -25,6 +24,9 @@
 #include "../XWorld.h"
 
 namespace xdata {
+
+class ProcedureOptions;
+class XApproach;
 
 class CIFPLoader {
 public:
@@ -42,15 +44,13 @@ private:
     void loadApproach(std::shared_ptr<world::Airport> airport, const CIFPData &procedure);
 
     world::NavNodeList convertFixes(std::shared_ptr<world::Airport> airport, const std::vector<CIFPData::FixInRegion> &fixes) const;
-    void loadRunwayTransition(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);
-    void loadCommonRoutes(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);
-    void loadEnroute(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport);
-    void loadApproachTransitions(const CIFPData& procedure, world::Approach &proc, const std::shared_ptr<world::Airport>& airport);
-    void loadApproaches(const CIFPData& procedure, world::Approach &proc, const std::shared_ptr<world::Airport>& airport);
+    void loadRunwayTransition(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport);
+    void loadCommonRoutes(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport);
+    void loadEnroute(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport);
+    void loadApproachTransitions(const CIFPData& procedure, XApproach &appr, const std::shared_ptr<world::Airport>& airport);
+    void loadApproaches(const CIFPData& procedure, XApproach &appr, const std::shared_ptr<world::Airport>& airport);
 
     void forEveryMatchingRunway(const std::string &rwSpec, const std::shared_ptr<world::Airport> apt, std::function<void (std::shared_ptr<world::Runway>)> f);
 };
 
 } /* namespace xdata */
-
-#endif /* SRC_LIBXDATA_LOADERS_CIFPLOADER_H_ */

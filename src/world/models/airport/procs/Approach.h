@@ -22,21 +22,11 @@
 
 namespace world {
 
-class Approach: public Procedure {
+class Approach : public Procedure
+{
 public:
-    Approach(const std::string &id);
-    void addTransition(const std::string &id, const world::NavNodeList &nodes);
-    void addApproach(const NavNodeList &nodes);
-    std::string toDebugString() const override;
+    Approach(const std::string &id) : Procedure(id) { }
 
-    const std::shared_ptr<Fix> getStartFix() const;
-    const std::shared_ptr<Runway> getRunway() const;
-    void iterateTransitions(std::function<void(const std::string &, std::shared_ptr<Fix>, std::shared_ptr<Runway>)> f);
-    NavNodeList getWaypoints(std::string appTransName) const;
-
-private:
-    std::map<std::string, NavNodeList> transitions;
-    NavNodeList approach;
 };
 
 } /* namespace world */

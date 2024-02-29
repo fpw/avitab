@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,10 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "CIFPLoader.h"
-#include "src/libxdata/parsers/CIFPParser.h"
+#include "../parsers/CIFPParser.h"
+#include "../models/airports/procs/XSID.h"
+#include "../models/airports/procs/XSTAR.h"
+#include "../models/airports/procs/XApproach.h"
 #include "src/Logger.h"
 
 namespace xdata {
@@ -66,7 +69,7 @@ void CIFPLoader::loadRunway(std::shared_ptr<world::Airport> airport, const CIFPD
 }
 
 void CIFPLoader::loadSID(std::shared_ptr<world::Airport> airport, const CIFPData& procedure) {
-    auto sid = std::make_shared<world::SID>(procedure.id);
+    auto sid = std::make_shared<xdata::XSID>(procedure.id);
 
     loadRunwayTransition(procedure, *sid, airport);
     loadCommonRoutes(procedure, *sid, airport);
@@ -82,7 +85,7 @@ void CIFPLoader::loadSID(std::shared_ptr<world::Airport> airport, const CIFPData
 }
 
 void CIFPLoader::loadSTAR(std::shared_ptr<world::Airport> airport, const CIFPData& procedure) {
-    auto star = std::make_shared<world::STAR>(procedure.id);
+    auto star = std::make_shared<xdata::XSTAR>(procedure.id);
 
     loadEnroute(procedure, *star, airport);
     loadCommonRoutes(procedure, *star, airport);
@@ -98,7 +101,7 @@ void CIFPLoader::loadSTAR(std::shared_ptr<world::Airport> airport, const CIFPDat
 }
 
 void CIFPLoader::loadApproach(std::shared_ptr<world::Airport> airport, const CIFPData& procedure) {
-    auto approach = std::make_shared<world::Approach>(procedure.id);
+    auto approach = std::make_shared<xdata::XApproach>(procedure.id);
 
     loadApproachTransitions(procedure, *approach, airport);
     loadApproaches(procedure, *approach, airport);
@@ -118,17 +121,17 @@ void CIFPLoader::loadApproach(std::shared_ptr<world::Airport> airport, const CIF
     });
 }
 
-void CIFPLoader::loadRunwayTransition(const CIFPData& procedure, world::Procedure &proc, const std::shared_ptr<world::Airport>& airport) {
+void CIFPLoader::loadRunwayTransition(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport) {
     for (auto &entry: procedure.runwayTransitions) {
         auto nodes = convertFixes(airport, entry.second.fixes);
         std::string rwyName = entry.first;
-        forEveryMatchingRunway(rwyName, airport, [&nodes, &proc] (std::shared_ptr<world::Runway> rw) {
-            proc.attachRunwayTransition(rw, nodes);
+        forEveryMatchingRunway(rwyName, airport, [&nodes, &trns] (std::shared_ptr<world::Runway> rw) {
+            trns.attachRunwayTransition(rw, nodes);
         });
     }
 }
 
-void CIFPLoader::loadCommonRoutes(const CIFPData& procedure, world::Procedure& proc, const std::shared_ptr<world::Airport>& airport) {
+void CIFPLoader::loadCommonRoutes(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport) {
     for (auto &entry: procedure.commonRoutes) {
         auto nodes = convertFixes(airport, entry.second.fixes);
 
@@ -136,40 +139,40 @@ void CIFPLoader::loadCommonRoutes(const CIFPData& procedure, world::Procedure& p
         if (rw.empty()) {
             // just some ordinary route segment
             if (!nodes.empty()) {
-                proc.attachCommonRoute(*nodes.begin(), nodes);
+                trns.attachCommonRoute(*nodes.begin(), nodes);
             }
         } else {
             // a route segment that connects to a runway
-            forEveryMatchingRunway(rw, airport, [&nodes, &proc] (std::shared_ptr<world::Runway> rw) {
-                proc.attachCommonRoute(rw, nodes);
+            forEveryMatchingRunway(rw, airport, [&nodes, &trns] (std::shared_ptr<world::Runway> rw) {
+                trns.attachCommonRoute(rw, nodes);
             });
         }
     }
 }
 
-void CIFPLoader::loadEnroute(const CIFPData& procedure, world::Procedure& proc, const std::shared_ptr<world::Airport>& airport) {
+void CIFPLoader::loadEnroute(const CIFPData& procedure, ProcedureOptions &trns, const std::shared_ptr<world::Airport>& airport) {
     for (auto &entry: procedure.enrouteTransitions) {
         auto nodes = convertFixes(airport, entry.second.fixes);
         if (!nodes.empty()) {
-            proc.attachEnrouteTransitions(nodes);
+            trns.attachEnrouteTransitions(nodes);
         }
     }
 }
 
-void CIFPLoader::loadApproachTransitions(const CIFPData& procedure, world::Approach& proc, const std::shared_ptr<world::Airport>& airport) {
+void CIFPLoader::loadApproachTransitions(const CIFPData& procedure, XApproach &appr, const std::shared_ptr<world::Airport>& airport) {
     for (auto &entry: procedure.approachTransitions) {
         std::string appName = entry.first;
         auto nodes = convertFixes(airport, entry.second.fixes);
         if (!nodes.empty()) {
-            proc.addTransition(appName, nodes);
+            appr.addTransition(appName, nodes);
         }
     }
 }
 
-void CIFPLoader::loadApproaches(const CIFPData& procedure, world::Approach& proc, const std::shared_ptr<world::Airport>& airport) {
+void CIFPLoader::loadApproaches(const CIFPData& procedure, XApproach &appr, const std::shared_ptr<world::Airport>& airport) {
     auto nodes = convertFixes(airport, procedure.approach);
     if (!nodes.empty()) {
-        proc.addApproach(nodes);
+        appr.addApproach(nodes);
     }
 }
 
