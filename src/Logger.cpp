@@ -89,10 +89,12 @@ void logger::error(const std::string format, ...) {
     va_end(args);
 }
 
+#define MAX_LOG_SIZE 1024
+
 void logger::log_info(bool enable, const char *file, const char *function, const int line, const char *format, ... ) {
     if (enable) {
-        char fileNonConst[256];
-        char message[256];
+        char fileNonConst[MAX_LOG_SIZE];
+        char message[MAX_LOG_SIZE];
         va_list ap;
         strncpy(fileNonConst, file, sizeof(fileNonConst) - 1);
         va_start(ap, format);
@@ -104,8 +106,8 @@ void logger::log_info(bool enable, const char *file, const char *function, const
 
 void logger::log_verbose(bool enable, const char *file, const char *function, const int line, const char *format, ... ) {
     if (enable) {
-        char fileNonConst[256];
-        char message[256];
+        char fileNonConst[MAX_LOG_SIZE];
+        char message[MAX_LOG_SIZE];
         va_list ap;
         strncpy(fileNonConst, file, sizeof(fileNonConst) - 1);
         va_start(ap, format);
@@ -116,8 +118,8 @@ void logger::log_verbose(bool enable, const char *file, const char *function, co
 }
 
 void logger::log_warn(const char *file, const char *function, const int line, const char *format, ... ) {
-    char fileNonConst[256];
-    char message[256];
+    char fileNonConst[MAX_LOG_SIZE];
+    char message[MAX_LOG_SIZE];
     va_list ap;
     strncpy(fileNonConst, file, sizeof(fileNonConst) - 1);
     va_start(ap, format);
@@ -127,8 +129,8 @@ void logger::log_warn(const char *file, const char *function, const int line, co
 }
 
 void logger::log_error(const char *file, const char *function, const int line, const char *format, ... ) {
-    char fileNonConst[256];
-    char message[256];
+    char fileNonConst[MAX_LOG_SIZE];
+    char message[MAX_LOG_SIZE];
     va_list ap;
     strncpy(fileNonConst, file, sizeof(fileNonConst) - 1);
     va_start(ap, format);

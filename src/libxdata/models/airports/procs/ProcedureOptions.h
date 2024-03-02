@@ -17,30 +17,34 @@
  */
 #pragma once
 
-#include <string>
-#include <vector>
+#include "src/world/models/airport/Runway.h"
+#include "src/world/graph/NavNode.h"
 #include <map>
 #include <memory>
-#include "../../../graph/NavEdge.h"
-#include "../../../graph/NavNode.h"
-#include "../Runway.h"
+#include <string>
 
-namespace world {
+namespace xdata {
 
-class Procedure : public NavEdge
+class ProcedureOptions
 {
 public:
-    Procedure(const std::string &id) : procId(id) { }
+    ProcedureOptions(std::string id);
+    ProcedureOptions() = delete;
 
-    const std::string &getID() const override { return procId; }
-    virtual bool supportsLevel(AirwayLevel level) const override { return true; }
-    bool isProcedure() const override { return true; }
+    void attachRunwayTransition(std::shared_ptr<world::Runway> rwy, const world::NavNodeList &nodes);
+    void attachCommonRoute(std::shared_ptr<world::NavNode> start, const world::NavNodeList &nodes);
+    void attachEnrouteTransitions(const world::NavNodeList &nodes);
 
-    virtual NavNodeList getWaypoints(std::shared_ptr<world::Runway> runway, std::string appTransName) const = 0;
-    virtual std::string toDebugString() const = 0;
+    std::string toDebugString() const;
+
+protected:
+    std::map<std::shared_ptr<world::Runway>, world::NavNodeList> runwayTransitions;
+    std::map<std::shared_ptr<world::NavNode>, world::NavNodeList> commonRoutes;
+    std::vector<world::NavNodeList> enrouteTransitions;
 
 private:
-    std::string procId;
+    std::string transitionId;
+
 };
 
-} /* namespace world */
+}

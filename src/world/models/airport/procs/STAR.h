@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018-2023 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,19 +15,17 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_WORLD_MODELS_AIRPORT_PROCS_STAR_H_
-#define SRC_WORLD_MODELS_AIRPORT_PROCS_STAR_H_
+#pragma once
 
 #include "Procedure.h"
 
 namespace world {
 
-class STAR: public Procedure {
+class STAR : public Procedure
+{
 public:
-    STAR(const std::string &id);
-    void iterate(std::function<void(std::shared_ptr<Runway>, std::shared_ptr<Fix>, std::shared_ptr<NavNode>)> f) const;
+    STAR(const std::string &id) : Procedure(id) { }
+
 };
 
 } /* namespace world */
-
-#endif /* SRC_WORLD_MODELS_AIRPORT_PROCS_STAR_H_ */

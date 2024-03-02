@@ -28,22 +28,28 @@ RouteFinder::RouteFinder(std::shared_ptr<world::World> w):
 {
 }
 
-void RouteFinder::setAirwayChangePenalty(float percent) {
-    airwayChangePenalty = percent;
+void RouteFinder::setDeparture(Route::NodePtr dep) {
+    departure = dep;
 }
 
-void RouteFinder::setEdgeFilter(EdgeFilter filter)
-{
-    edgeFilter = filter;
+void RouteFinder::setArrival(Route::NodePtr arr) {
+    arrival = arr;
+}
+
+void RouteFinder::setAirwayLevel(AirwayLevel level) {
+    airwayLevel = level;
 }
 
 void RouteFinder::setGetMagVarsCallback(GetMagVarsCallback cb) {
     getMagneticVariations = cb;
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, NodePtr goal) {
-    logger::verbose("Searching route from %s to %s", from->getID().c_str(), goal->getID().c_str());
-    directDistance = from->getLocation().distanceTo(goal->getLocation());
+std::shared_ptr<Route> RouteFinder::find() {
+    logger::verbose("Searching route from %s to %s", departure->getID().c_str(), arrival->getID().c_str());
+    directDistance = departure->getLocation().distanceTo(arrival->getLocation());
+
+    auto from = departure;
+    auto goal = arrival;
 
     // Init
     closedSet.clear();
@@ -57,10 +63,12 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
     fScore[from] = minCostHeuristic(from, goal);
 
     while (!openSet.empty()) {
-        NodePtr current = getLowestOpen();
+        Route::NodePtr current = getLowestOpen();
         if (current == goal) {
             logger::verbose("Route found");
-            return reconstructPath(goal);
+            std::shared_ptr<world::Route> route = std::make_shared<world::Route>(world, departure, arrival);
+            route->loadRoute(reconstructPath(goal));
+            return route;
         }
 
         openSet.erase(current);
@@ -74,7 +82,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
                 continue;
             }
 
-            if (!edgeFilter(edge, neighbor)) {
+            if (!checkEdge(edge, neighbor)) {
                 continue;
             }
 
@@ -86,12 +94,12 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
                 openSet.insert(neighbor);
             }
 
-            double tentativeGScore = getGScore(current) + cost(current, RouteDirection(edge, neighbor));
+            double tentativeGScore = getGScore(current) + cost(current, Route::Leg(edge, neighbor));
             if (tentativeGScore > getGScore(neighbor)) {
                 continue;
             }
 
-            cameFrom[neighbor] = RouteDirection(edge, current);
+            cameFrom[neighbor] = Route::Leg(edge, current);
             gScore[neighbor] = tentativeGScore;
             fScore[neighbor] = getGScore(neighbor) + minCostHeuristic(neighbor, goal);
         }
@@ -101,9 +109,9 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::findRoute(NodePtr from, No
     throw std::runtime_error("No route found");
 }
 
-std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr lastFix) {
+std::vector<Route::Leg> RouteFinder::reconstructPath(Route::NodePtr lastFix) {
     logger::info("Backtracking route...");
-    std::vector<RouteDirection> res;
+    std::vector<Route::Leg> res;
     std::vector<std::pair<double, double>> locations;
 
     // Collate magnetic variations for the node locations used in the route
@@ -111,7 +119,7 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr la
     auto locLast = lastFix->getLocation();
     locations.push_back(std::make_pair(locLast.latitude, locLast.longitude));
 
-    RouteDirection cur = cameFrom[lastFix];
+    Route::Leg cur = cameFrom[lastFix];
     decltype(cameFrom.find(nullptr)) it;
     while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
         cur = cameFrom[it->first];
@@ -124,13 +132,13 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr la
     // Now we've got magvars, reconstruct the path
     cur = cameFrom[lastFix];
     double magVar = magVarMap[std::make_pair(locLast.latitude, locLast.longitude)];
-    res.push_back(RouteDirection(cur.to, cur.via, lastFix, magVar));
+    res.push_back(Route::Leg(cur.to, cur.via, lastFix, magVar));
 
     while ((it = cameFrom.find(cur.to)) != cameFrom.end()) {
         cur = cameFrom[it->first];
         auto loc = it->first->getLocation();
         magVar = magVarMap[std::make_pair(loc.latitude, loc.longitude)];
-        res.push_back(RouteDirection(cur.to, cur.via, it->first, magVar));
+        res.push_back(Route::Leg(cur.to, cur.via, it->first, magVar));
     }
 
     std::reverse(std::begin(res), std::end(res));
@@ -138,11 +146,23 @@ std::vector<RouteFinder::RouteDirection> RouteFinder::reconstructPath(NodePtr la
     return res;
 }
 
-RouteFinder::NodePtr RouteFinder::getLowestOpen() {
-    NodePtr res = nullptr;
+bool RouteFinder::checkEdge(const Route::EdgePtr via, const Route::NodePtr to) const {
+    if (via->isProcedure()) {
+        // We only allow SIDs, STARs etc. if they are start or end of the route.
+        // This prevents routes that use SIDs and STARs of other airports as waypoints
+        return world->areConnected(departure, to) || (to == arrival);
+    } else {
+        // Normal airways are allowed if their level matches the desired level
+        return via->supportsLevel(airwayLevel);
+    }
+
+}
+
+Route::NodePtr RouteFinder::getLowestOpen() {
+    Route::NodePtr res = nullptr;
     double best = std::numeric_limits<double>::infinity();
 
-    for (NodePtr f: openSet) {
+    for (Route::NodePtr f: openSet) {
         auto fScoreIt = fScore.find(f);
         if (fScoreIt != fScore.end()) {
             if (fScoreIt->second < best) {
@@ -154,12 +174,12 @@ RouteFinder::NodePtr RouteFinder::getLowestOpen() {
     return res;
 }
 
-double RouteFinder::minCostHeuristic(NodePtr a, NodePtr b) {
+double RouteFinder::minCostHeuristic(Route::NodePtr a, Route::NodePtr b) {
     // the minimum cost is a direct line
     return a->getLocation().distanceTo(b->getLocation());
 }
 
-double RouteFinder::cost(NodePtr a, const RouteDirection& dir) {
+double RouteFinder::cost(Route::NodePtr a, const Route::Leg& dir) {
     // the actual cost can have penalties later
     double penalty = 0;
     auto it = cameFrom.find(a);
@@ -172,7 +192,7 @@ double RouteFinder::cost(NodePtr a, const RouteDirection& dir) {
     return minCostHeuristic(a, dir.to) + penalty;
 }
 
-double RouteFinder::getGScore(NodePtr f) {
+double RouteFinder::getGScore(Route::NodePtr f) {
     auto it = gScore.find(f);
     if (it == gScore.end()) {
         return std::numeric_limits<double>::infinity();

@@ -19,7 +19,9 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include "XWorld.h"
+#include "src/world/routing/RouteFinder.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 
@@ -163,6 +165,10 @@ void XWorld::addFix(std::shared_ptr<world::Fix> fix) {
     if (allNodesRegistered) {
         registerNode(fix);
     }
+}
+
+std::shared_ptr<world::RouteFinder> XWorld::getRouteFinder() {
+    return std::make_shared<world::RouteFinder>(shared_from_this());
 }
 
 void XWorld::registerNavNodes() {

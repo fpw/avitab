@@ -23,17 +23,9 @@ namespace world {
 
 Route::Route(std::shared_ptr<world::World> w, std::shared_ptr<NavNode> start, std::shared_ptr<NavNode> dest):
     world(w),
-    router(w),
     startNode(start),
     destNode(dest)
 {
-    router.setEdgeFilter([this] (const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) {
-        return checkEdge(via, to);
-    });
-}
-
-void Route::setAirwayLevel(AirwayLevel level) {
-    airwayLevel = level;
 }
 
 void Route::setGetMagVarsCallback(GetMagVarsCallback cb) {
@@ -48,27 +40,8 @@ std::shared_ptr<NavNode> Route::getDestination() const {
     return destNode;
 }
 
-void Route::find() {
-    router.setGetMagVarsCallback([this] (std::vector<std::pair<double, double>> locations) {
-        return getMagneticVariations(locations);
-    });
-    waypoints = router.findRoute(startNode, destNode);
-}
-
-void Route::loadRoute(std::vector<RouteFinder::RouteDirection> route) {
+void Route::loadRoute(std::vector<Route::Leg> route) {
     waypoints = route;
-}
-
-bool Route::checkEdge(const RouteFinder::EdgePtr via, const RouteFinder::NodePtr to) const {
-    if (via->isProcedure()) {
-        // We only allow SIDs, STARs etc. if they are start or end of the route.
-        // This prevents routes that use SIDs and STARs of other airports as waypoints
-        return world->areConnected(startNode, to) || (to == destNode);
-    } else {
-        // Normal airways are allowed if their level matches the desired level
-        return via->supportsLevel(airwayLevel);
-    }
-
 }
 
 void Route::iterateRoute(RouteIterator f) const {

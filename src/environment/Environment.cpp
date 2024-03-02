@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -60,7 +60,7 @@ void Environment::loadUserFixes(std::string filename) {
     worldManager->loadUserFixes(filename);
 }
 
-std::vector<std::shared_ptr<world::NavNode>> Environment::loadFlightPlan(const std::string filename) {
+world::NavNodeList Environment::loadFlightPlan(const std::string filename) {
     return worldManager->loadFlightPlan(filename);
 }
 

@@ -100,6 +100,9 @@ public:
     std::vector<std::shared_ptr<SID>> getSIDs() const;
     std::vector<std::shared_ptr<STAR>> getSTARs() const;
     std::vector<std::shared_ptr<Approach>> getApproaches() const;
+    std::shared_ptr<SID> getSIDByName(std::string sidName) const;
+    std::shared_ptr<STAR> getSTARByName(std::string starName) const;
+    std::shared_ptr<Approach> getApproachByName(std::string appName) const;
     std::string getInitialATCContactInfo() const;
 
     Airport(const Airport &other) = delete;

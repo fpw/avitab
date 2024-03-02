@@ -22,7 +22,7 @@
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/world/World.h"
-#include "src/world/router/Route.h"
+//#include "src/world/router/Route.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"

@@ -29,7 +29,7 @@ FMSLoader::FMSLoader(std::shared_ptr<World> worldPtr):
     region = std::make_shared<world::Region>("ROUTE");
 }
 
-std::vector<std::shared_ptr<world::NavNode>> FMSLoader::load(const std::string &fmsFilename) {
+NavNodeList FMSLoader::load(const std::string &fmsFilename) {
     logger::info("Loading %s", fmsFilename.c_str());
     FMSParser parser(fmsFilename);
     nodes.clear();
@@ -42,6 +42,15 @@ std::vector<std::shared_ptr<world::NavNode>> FMSLoader::load(const std::string &
         }
     });
     parser.loadFMS();
+
+    auto newEnd = std::unique(nodes.begin(), nodes.end());
+    nodes.erase(newEnd, nodes.end());
+
+    std::stringstream ss;
+    for (auto w: nodes) {
+        ss << w->getID() << " ";
+    }
+    logger::info("Using waypoints: %s", ss.str().c_str());
     return nodes;
 }
 
@@ -53,11 +62,12 @@ void FMSLoader::onFMSLoaded(const FlightPlanNodeData &node) {
         case FlightPlanNodeData::Type::SIDTRANS:  sidTransName = node.id; break;
         case FlightPlanNodeData::Type::STAR:      starName = node.id; break;
         case FlightPlanNodeData::Type::STARTRANS: starTransName = node.id; break;
-        case FlightPlanNodeData::Type::DESRWY:    arrivalRwyName = node.id; break;
+        case FlightPlanNodeData::Type::DESRWY:    arrivalRwyName = stripRWPrefix(node.id); break;
+        case FlightPlanNodeData::Type::APPTRANS:  approachTransName = node.id; break;
         case FlightPlanNodeData::Type::APP:       approachName = node.id; break;
         case FlightPlanNodeData::Type::ADEP:      departureAirportName = node.id; break;
         case FlightPlanNodeData::Type::ADES:      arrivalAirportName = node.id; break;
-        case FlightPlanNodeData::Type::DEPRWY:    departureRwyName = node.id; break;
+        case FlightPlanNodeData::Type::DEPRWY:    departureRwyName = stripRWPrefix(node.id); break;
 
         case FlightPlanNodeData::Type::NDB:
         case FlightPlanNodeData::Type::VOR:
@@ -86,7 +96,6 @@ void FMSLoader::appendDeparture() {
     if (departureAirport) {
         appendDepartureAirportOrRwy();
         appendSID();
-        appendSIDTransition();
     } else {
         logger::warn("Unknown departure airport %s", departureAirportName.c_str());
     }
@@ -95,7 +104,6 @@ void FMSLoader::appendDeparture() {
 void FMSLoader::appendArrival() {
     arrivalAirport = world->findAirportByID(arrivalAirportName);
     if (arrivalAirport) {
-        appendSTARTransition();
         appendSTAR();
         appendApproach();
         appendArrivalAirportOrRwy();
@@ -107,13 +115,14 @@ void FMSLoader::appendArrival() {
 
 void FMSLoader::appendDepartureAirportOrRwy() {
     // If we have a runway, route along it, else use airport location.
-    departureRunway = departureAirport->getRunwayByName(stripRWPrefix(departureRwyName));
+    departureRunway = departureAirport->getRunwayByName(departureRwyName);
     if (departureRunway) {
-        std::string idRwy = departureAirportName + " " + departureRwyName;
-        appendNode(idRwy, departureRunway->getLocation());
+        std::string idRwySER = departureAirportName + "_" + departureRwyName + "_SER" ;
+        std::string idRwyDER = departureAirportName + "_" + departureRwyName + "_DER" ;
+        appendNode(idRwySER, departureRunway->getLocation());
         auto oppRwy = departureAirport->getOppositeRunwayEnd(departureRunway);
         if (oppRwy) {
-            appendNode(departureAirportName, oppRwy->getLocation());
+            appendNode(idRwyDER, oppRwy->getLocation());
         }
         logger::info("Using rwy %s for %s departure", departureRunway->getID().c_str(),
                     departureAirport->getID().c_str());
@@ -129,46 +138,55 @@ void FMSLoader::appendDepartureAirportOrRwy() {
 }
 
 void FMSLoader::appendSID() {
-    if (!sidName.empty()) {
-        LOG_INFO(1, "SID %s : not yet handled", sidName.c_str());
-    }
-}
-
-void FMSLoader::appendSIDTransition() {
-    if (!sidTransName.empty()) {
-        LOG_INFO(1, "SID Transition %s : not yet handled", sidTransName.c_str());
-    }
-}
-
-void FMSLoader::appendSTARTransition() {
-    if (!starTransName.empty()) {
-        LOG_INFO(1, "STAR Transition %s : not yet handled", starTransName.c_str());
+    auto sid = departureAirport->getSIDByName(sidName);
+    if (sid) {
+        auto waypoints = sid->getWaypoints(departureRunway, sidTransName);
+        if (departureRunway && !waypoints.empty() && (departureRunway->getID() == waypoints.front()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
+            waypoints.erase(waypoints.begin());
+        }
+        nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
     }
 }
 
 void FMSLoader::appendSTAR() {
-    if (!starName.empty()) {
-        LOG_INFO(1, "STAR %s : not yet handled", starName.c_str());
+    auto star = arrivalAirport->getSTARByName(starName);
+    if (star) {
+        arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
+        auto waypoints = star->getWaypoints(arrivalRwy, starTransName);
+        if (arrivalRwy && !waypoints.empty() && (arrivalRwy->getID() == waypoints.back()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
+            waypoints.pop_back();
+        }
+        nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
     }
 }
 
 void FMSLoader::appendApproach() {
-    if (!approachName.empty()) {
-        LOG_INFO(1, "Approach %s : not yet handled", approachName.c_str());
+    auto app = arrivalAirport->getApproachByName(approachName);
+    if (app) {
+        arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
+        auto waypoints = app->getWaypoints(arrivalRwy, approachTransName);
+        if (arrivalRwy && !waypoints.empty() && (arrivalRwy->getID() == waypoints.back()->getID())) {
+            // Any rwy in FMS already in nodes, so if in new waypoints, remove
+            waypoints.erase(waypoints.end());
+        }
+        nodes.insert(nodes.end(), waypoints.begin(), waypoints.end());
     }
 }
 
 void FMSLoader::appendArrivalAirportOrRwy() {
     // If we have a runway, route along it, else use airport location.
-    arrivalRwy = arrivalAirport->getRunwayByName(stripRWPrefix(arrivalRwyName));
+    arrivalRwy = arrivalAirport->getRunwayByName(arrivalRwyName);
     if (arrivalRwy) {
-        std::string idRwy = arrivalAirportName + " " + arrivalRwyName;
-        appendNode(idRwy, arrivalRwy->getLocation());
+        std::string idRwy_SER = arrivalAirportName + "_" + arrivalRwyName + "_SER";
+        std::string idRwy_DER = arrivalAirportName + "_" + arrivalRwyName + "_DER";
+        appendNode(idRwy_SER, arrivalRwy->getLocation());
         auto oppRwy = arrivalAirport->getOppositeRunwayEnd(arrivalRwy);
         if (oppRwy) {
-            appendNode(arrivalAirportName, oppRwy->getLocation());
+            appendNode(idRwy_DER, oppRwy->getLocation());
         }
-        LOG_INFO(1, "Using rwy %s for %s arrival", arrivalRwy->getID().c_str(),
+        logger::info("Using rwy %s for %s arrival", arrivalRwy->getID().c_str(),
                     arrivalAirport->getID().c_str());
     } else {
         nodes.push_back(arrivalAirport);

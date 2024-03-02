@@ -31,7 +31,7 @@ public:
     virtual void load() = 0;
     virtual void reloadMetar() = 0;
 
-    virtual std::vector<std::shared_ptr<world::NavNode>> loadFlightPlan(const std::string filename);
+    virtual NavNodeList loadFlightPlan(const std::string filename);
 
     void setUserFixesFilename(std::string &filename);
     void loadUserFixes(std::string &filename);

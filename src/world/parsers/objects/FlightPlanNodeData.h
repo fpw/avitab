@@ -41,7 +41,8 @@ struct FlightPlanNodeData {
         DESRWY,
         STAR,
         STARTRANS,
-        APP
+        APP,
+        APPTRANS
     };
 
     Type type;

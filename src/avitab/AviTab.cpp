@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -401,7 +401,7 @@ void AviTab::loadUserFixes(std::string filename) {
     env->loadUserFixes(filename);
 }
 
-std::vector<std::shared_ptr<world::NavNode>> AviTab::loadFlightPlan(const std::string filename) {
+world::NavNodeList AviTab::loadFlightPlan(const std::string filename) {
     return env->loadFlightPlan(filename);
 }
 
@@ -415,6 +415,10 @@ std::shared_ptr<world::Route> AviTab::getRoute() {
 
 void AviTab::setRoute(std::shared_ptr<world::Route> route) {
     activeRoute = route;
+}
+
+std::shared_ptr<world::RouteFinder> AviTab::getRouteFinder() {
+    return getNavWorld()->getRouteFinder();
 }
 
 AircraftID AviTab::getActiveAircraftCount() {
