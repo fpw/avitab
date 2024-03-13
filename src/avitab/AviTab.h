@@ -21,7 +21,6 @@
 #include <future>
 #include "src/charts/libnavigraph/NavigraphAPI.h"
 #include "src/charts/ChartService.h"
-#include "src/libxdata/XData.h"
 #include "src/environment/Environment.h"
 #include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/Label.h"

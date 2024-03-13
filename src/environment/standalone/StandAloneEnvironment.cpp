@@ -19,12 +19,12 @@
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
+#include "src/libxdata/XData.h"
 
 namespace avitab {
 
 StandAloneEnvironment::StandAloneEnvironment() : ToolEnvironment() {
     xplaneRootPath = findXPlaneInstallationPath();
-    setWorldManager(std::make_shared<xdata::XData>(xplaneRootPath));
 }
 
 std::string StandAloneEnvironment::findXPlaneInstallationPath() {
@@ -58,6 +58,10 @@ std::string StandAloneEnvironment::findXPlaneInstallationPath() {
     return installDir;
 }
 
+std::string StandAloneEnvironment::getDataRootPath() {
+    return xplaneRootPath;
+}
+
 std::string StandAloneEnvironment::getEarthTexturePath() {
     return xplaneRootPath + "/Resources/bitmaps/Earth Orbit Textures/";
 }
@@ -76,6 +80,10 @@ void StandAloneEnvironment::eventLoop() {
         setLastFrameTime(driver->getLastDrawTime() / 1000.0);
     }
     driver.reset();
+}
+
+std::shared_ptr<world::LoadManager> StandAloneEnvironment::createParsingWorldManager() {
+    return std::make_shared<xdata::XData>(xplaneRootPath);
 }
 
 std::shared_ptr<LVGLToolkit> StandAloneEnvironment::createGUIToolkit() {
@@ -150,6 +158,11 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
 
 StandAloneEnvironment::~StandAloneEnvironment() {
     logger::verbose("~StandAloneEnvironment");
+}
+
+bool StandAloneEnvironment::canUseNavDb(const std::string simCode) {
+    // the standalone environment doesn't care where the NAV data originated!
+    return true;
 }
 
 } /* namespace avitab */
