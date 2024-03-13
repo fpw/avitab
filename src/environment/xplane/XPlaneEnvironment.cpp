@@ -26,6 +26,7 @@
 #include "XPlaneGUIDriver.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
+#include "src/libxdata/XData.h"
 
 namespace avitab {
 
@@ -38,11 +39,10 @@ XPlaneEnvironment::XPlaneEnvironment() {
     flightLoopId = createFlightLoop();
 
     xplaneRootPath = getXPlanePath();
-    setWorldManager(std::make_shared<xdata::XData>(xplaneRootPath));
 
-    int xpVersion, xplmVersion;
+    int xplmVersion;
     XPLMHostApplicationID hostId;
-    XPLMGetVersions(&xpVersion, &xplmVersion, &hostId);
+    XPLMGetVersions(&xplaneVersion, &xplmVersion, &hostId);
     if (xplmVersion >= 400) {
         getMetar = (GetMetarPtr) XPLMFindSymbol("XPLMGetMETARForAirport");
     } else {
@@ -166,6 +166,10 @@ XPLMFlightLoopID XPlaneEnvironment::createFlightLoop() {
     return id;
 }
 
+std::shared_ptr<world::LoadManager> XPlaneEnvironment::createParsingWorldManager() {
+    return std::make_shared<xdata::XData>(xplaneRootPath);
+}
+
 std::shared_ptr<LVGLToolkit> XPlaneEnvironment::createGUIToolkit() {
     std::shared_ptr<XPlaneGUIDriver> driver = std::make_shared<XPlaneGUIDriver>();
     driver->setPanelEnabledPtr(panelEnabled);
@@ -260,6 +264,10 @@ std::string XPlaneEnvironment::getAirplanePath() {
 
 std::string XPlaneEnvironment::getProgramPath() {
     return pluginPath;
+}
+
+std::string XPlaneEnvironment::getDataRootPath() {
+    return xplaneRootPath;
 }
 
 std::string XPlaneEnvironment::getSettingsDir() {
@@ -417,6 +425,13 @@ XPlaneEnvironment::~XPlaneEnvironment() {
 
     destroyMenu();
     logger::verbose("~XPlaneEnvironment");
+}
+
+bool XPlaneEnvironment::canUseNavDb(const std::string simCode) {
+
+    std::ostringstream expected;
+    expected << "XP" << (xplaneVersion / 100);
+    return (simCode == expected.str());
 }
 
 void XPlaneEnvironment::reloadAircraftPath() {
