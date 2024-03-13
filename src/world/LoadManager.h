@@ -20,6 +20,7 @@
 
 #include "src/world/World.h"
 #include <memory>
+#include <atomic>
 
 namespace world {
 

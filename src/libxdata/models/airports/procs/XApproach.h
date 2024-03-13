@@ -20,6 +20,7 @@
 #include "src/world/models/airport/procs/Approach.h"
 #include "ProcedureOptions.h"
 #include <string>
+#include <functional>
 
 namespace xdata {
 
