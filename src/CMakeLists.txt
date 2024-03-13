@@ -112,6 +112,9 @@ install(TARGETS avitab_plugin
 )
 endif(WIN32)
 
+# Supporting tools
+include(${CMAKE_CURRENT_LIST_DIR}/tools/CMakeLists.txt)
+
 # Standalone program
 add_executable(AviTab-standalone
     ${CMAKE_CURRENT_LIST_DIR}/StandAlone.cpp
