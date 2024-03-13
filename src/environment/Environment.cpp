@@ -19,11 +19,23 @@
 #include "Environment.h"
 #include "src/Logger.h"
 #include "src/platform/CrashHandler.h"
+#include "src/libnavsql/SqlLoadManager.h"
 
 namespace avitab {
 
 void Environment::loadNavWorldInBackground() {
-    worldManager = createParsingWorldManager();
+    // try to create a SqlWorld instance to manage the world data.
+    // if this fails ask the subclass to provide the default in-memory parser variant
+    try {
+        auto wm = std::make_shared<sqlnav::SqlLoadManager>(getProgramPath() + "navdb/");
+        wm->init_or_throw([this] (std::string simCode) {
+            return this->canUseNavDb(simCode);
+        });
+        worldManager = wm;
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load Sqlite3 NAV database: %s - will fallback to file parsing if available", e.what());
+        worldManager = createParsingWorldManager();
+    }
 
     std::string userfixes_file = settings->getGeneralSetting<std::string>("userfixes_file");
     worldManager->setUserFixesFilename(userfixes_file);
