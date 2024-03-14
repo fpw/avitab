@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <functional>
+#include <cmath>
 #include "../World.h"
 
 namespace world {

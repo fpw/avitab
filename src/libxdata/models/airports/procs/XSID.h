@@ -21,6 +21,7 @@
 #include "ProcedureOptions.h"
 #include "src/world/models/navaids/Fix.h"
 #include <string>
+#include <functional>
 
 namespace xdata {
 
