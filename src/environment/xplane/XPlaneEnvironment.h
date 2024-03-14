@@ -29,6 +29,7 @@
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "src/environment/Environment.h"
 #include "DataCache.h"
+#include "DataRefExport.h"
 
 namespace avitab {
 
@@ -86,7 +87,9 @@ private:
     XPLMMenuID subMenu = nullptr;
     std::shared_ptr<int> panelPowered, panelEnabled;
     std::shared_ptr<float> brightness;
-    XPLMDataRef panelPoweredRef{}, panelEnabledRef{}, brightnessRef{}, isInMenuRef{};
+    std::unique_ptr<DataRefExport<int>> panelPoweredRef, panelEnabledRef, isInMenuRef;
+    std::unique_ptr<DataRefExport<float>> brightnessRef;
+
     bool isInMenu = false;
 
     std::string getXPlanePath();

@@ -16,13 +16,13 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdexcept>
-#include "DataRef.h"
+#include "DataRefImport.h"
 #include "src/Logger.h"
 
 namespace avitab {
 
 template<typename T>
-DataRef<T>::DataRef(const std::string& name) {
+DataRefImport<T>::DataRefImport(const std::string& name) {
     handle = XPLMFindDataRef(name.c_str());
     if (!handle) {
         throw std::runtime_error("Invalid DataRef: " + name);
@@ -30,7 +30,7 @@ DataRef<T>::DataRef(const std::string& name) {
 }
 
 template<typename T>
-DataRef<T>::DataRef(const std::string& name, T defaultValue) {
+DataRefImport<T>::DataRefImport(const std::string& name, T defaultValue) {
     handle = XPLMFindDataRef(name.c_str());
     if (!handle) {
         logger::warn("DataRef '%s' not available, using defaults");
@@ -39,7 +39,7 @@ DataRef<T>::DataRef(const std::string& name, T defaultValue) {
 }
 
 template<>
-DataRef<int>::operator int() {
+DataRefImport<int>::operator int() {
     if (handle) {
         return XPLMGetDatai(handle);
     } else {
@@ -48,7 +48,7 @@ DataRef<int>::operator int() {
 }
 
 template<>
-DataRef<bool>::operator bool() {
+DataRefImport<bool>::operator bool() {
     if (handle) {
         return XPLMGetDatai(handle) != 0;
     } else {
@@ -57,7 +57,7 @@ DataRef<bool>::operator bool() {
 }
 
 template<>
-DataRef<float>::operator float() {
+DataRefImport<float>::operator float() {
     if (handle) {
         return XPLMGetDataf(handle);
     } else {
@@ -65,8 +65,8 @@ DataRef<float>::operator float() {
     }
 }
 
-template class DataRef<int>;
-template class DataRef<bool>;
-template class DataRef<float>;
+template class DataRefImport<int>;
+template class DataRefImport<bool>;
+template class DataRefImport<float>;
 
 }
