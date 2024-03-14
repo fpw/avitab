@@ -37,57 +37,21 @@ XPlaneGUIDriver::XPlaneGUIDriver():
     clickX("sim/graphics/view/click_3d_x_pixels", -1),
     clickY("sim/graphics/view/click_3d_y_pixels", -1)
 {
-    panelLeftRef = XPLMRegisterDataAccessor("avitab/panel_left", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                return us->panelLeft;
-            },
-            [] (void *ref, int newVal) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                us->panelLeft = newVal;
-            },
-            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            this, this
-            );
+    panelLeftRef = std::make_unique<DataRefExport<int>>("avitab/panel_left", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneGUIDriver *>(self))->panelLeft; },
+        [] (void *self, int v) { (reinterpret_cast<XPlaneGUIDriver *>(self))->panelLeft = v; });
 
-    panelWidthRef = XPLMRegisterDataAccessor("avitab/panel_width", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                return us->panelWidth;
-            },
-            [] (void *ref, int newVal) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                us->panelWidth = newVal;
-            },
-            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            this, this
-            );
+    panelWidthRef = std::make_unique<DataRefExport<int>>("avitab/panel_width", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneGUIDriver *>(self))->panelWidth; },
+        [] (void *self, int v) { (reinterpret_cast<XPlaneGUIDriver *>(self))->panelWidth = v; });
 
-    panelBottomRef = XPLMRegisterDataAccessor("avitab/panel_bottom", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                return us->panelBottom;
-            },
-            [] (void *ref, int newVal) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                us->panelBottom = newVal;
-            },
-            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            this, this
-            );
+    panelBottomRef = std::make_unique<DataRefExport<int>>("avitab/panel_bottom", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneGUIDriver *>(self))->panelBottom; },
+        [] (void *self, int v) { (reinterpret_cast<XPlaneGUIDriver *>(self))->panelBottom = v; });
 
-    panelHeightRef = XPLMRegisterDataAccessor("avitab/panel_height", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                return us->panelHeight;
-            },
-            [] (void *ref, int newVal) {
-                XPlaneGUIDriver *us = reinterpret_cast<XPlaneGUIDriver *>(ref);
-                us->panelHeight = newVal;
-            },
-            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            this, this
-            );
+    panelHeightRef = std::make_unique<DataRefExport<int>>("avitab/panel_height", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneGUIDriver *>(self))->panelHeight; },
+        [] (void *self, int v) { (reinterpret_cast<XPlaneGUIDriver *>(self))->panelHeight = v; });
 }
 
 void XPlaneGUIDriver::init(int width, int height) {
@@ -676,11 +640,6 @@ XPlaneGUIDriver::~XPlaneGUIDriver() {
 
     XPLMUnregisterDrawCallback(onDraw3D, xplm_Phase_Gauges, false, this);
     XPLMUnregisterKeySniffer(onKeyPress, 0, this);
-
-    XPLMUnregisterDataAccessor(panelLeftRef);
-    XPLMUnregisterDataAccessor(panelWidthRef);
-    XPLMUnregisterDataAccessor(panelBottomRef);
-    XPLMUnregisterDataAccessor(panelHeightRef);
 
     if (captureWindow) {
         XPLMDestroyWindow(captureWindow);

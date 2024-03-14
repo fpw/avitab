@@ -26,7 +26,8 @@
 #include <memory>
 #include <vector>
 #include "src/environment/GUIDriver.h"
-#include "DataRef.h"
+#include "DataRefImport.h"
+#include "DataRefExport.h"
 
 namespace avitab {
 
@@ -59,8 +60,8 @@ public:
 private:
     WindowRect lastRect{};
     std::shared_ptr<float> brightness;
-    DataRef<bool> isVrEnabled;
-    DataRef<float> clickX, clickY;
+    DataRefImport<bool> isVrEnabled;
+    DataRefImport<float> clickX, clickY;
     XPLMDataRef buttonRef{};
     std::shared_ptr<int> panelPowered, panelEnabled;
     int textureId = -1;
@@ -71,7 +72,7 @@ private:
     std::atomic_int mouseWheel {0};
     std::mutex drawMutex;
     bool needsRedraw = false;
-    XPLMDataRef panelLeftRef{}, panelBottomRef{}, panelWidthRef{}, panelHeightRef{};
+    std::unique_ptr<DataRefExport<int>> panelLeftRef, panelBottomRef, panelWidthRef, panelHeightRef;
     int panelLeft = 0, panelBottom = 0, panelWidth = 0, panelHeight = 0;
     std::vector<int> vrTriggerIndices;
     bool mouseDownFromTrigger = false;
