@@ -57,6 +57,19 @@ DataRefExport<float>::DataRefExport(const std::string &name, void *ref, std::fun
     );
 }
 
+template <>
+DataRefExport<float>::DataRefExport(const std::string &name, void *ref, std::function<float(void *)> onRd)
+:   ownerRef(ref), onRead(onRd), onWrite(nullptr)
+{
+    xpDataRef = XPLMRegisterDataAccessor(name.c_str(), xplmType_Float, false,
+        nullptr, nullptr,
+        [] (void *r) { auto self = reinterpret_cast<DataRefExport<float> *>(r); return self->onRead(self->ownerRef); },
+        nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        this, nullptr
+    );
+}
+
 template <typename T>
 DataRefExport<T>::~DataRefExport()
 {

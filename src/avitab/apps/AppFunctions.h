@@ -67,6 +67,7 @@ public:
     virtual void setRoute(std::shared_ptr<world::Route> route) = 0;
     virtual std::shared_ptr<world::Route> getRoute() = 0;
     virtual std::shared_ptr<world::RouteFinder> getRouteFinder() = 0;
+    virtual void updateMapExports(float lat, float lon, int zoom, float vrange) = 0;
     virtual ~AppFunctions() = default;
 };
 

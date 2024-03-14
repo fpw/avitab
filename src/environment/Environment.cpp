@@ -72,9 +72,7 @@ void Environment::setLastFrameTime(float t) {
     lastFrameTime = t;
 }
 
-float Environment::getLastFrameTime() {
-    return lastFrameTime;
-}
+float Environment::getLastFrameTime() { return lastFrameTime; }
 
 void Environment::reloadMetar() {
     worldManager->reloadMetar();
