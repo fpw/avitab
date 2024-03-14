@@ -33,6 +33,7 @@ namespace world {
 
 constexpr const double KM_TO_NM = 0.539957;
 constexpr const double M_TO_FT = 3.28084;
+constexpr const double LAT_TO_KM = 111.133f;
 
 class RouteFinder;
 

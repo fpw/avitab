@@ -72,6 +72,18 @@ XPlaneEnvironment::XPlaneEnvironment() {
     isInMenuRef = std::make_unique<DataRefExport<int>>("avitab/is_in_menu", this,
         [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->isInMenu; });
 
+    mapLatitudeRef = std::make_unique<DataRefExport<float>>("avitab/map/latitude", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapLatitude(); });
+
+    mapLongitudeRef = std::make_unique<DataRefExport<float>>("avitab/map/longitude", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapLongitude(); });
+
+    mapZoomRef = std::make_unique<DataRefExport<int>>("avitab/map/zoom", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapZoom(); });
+
+    mapVerticalRangeRef = std::make_unique<DataRefExport<float>>("avitab/map/vertical_range", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapVerticalRange(); });
+
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
 
@@ -363,6 +375,34 @@ XPlaneEnvironment::~XPlaneEnvironment() {
 
     destroyMenu();
     logger::verbose("~XPlaneEnvironment");
+}
+
+void XPlaneEnvironment::updateMapExports(float lat, float lon, int zoom, float vrange) {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    mapLatitude = lat;
+    mapLongitude = lon;
+    mapZoom = zoom;
+    mapVerticalRange = vrange;
+}
+
+float XPlaneEnvironment::getMapLatitude() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapLatitude;
+}
+
+float XPlaneEnvironment::getMapLongitude() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapLongitude;
+}
+
+int XPlaneEnvironment::getMapZoom() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapZoom;
+}
+
+float XPlaneEnvironment::getMapVerticalRange() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapVerticalRange;
 }
 
 void XPlaneEnvironment::reloadAircraftPath() {

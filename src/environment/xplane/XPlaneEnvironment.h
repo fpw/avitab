@@ -59,8 +59,25 @@ public:
     void setIsInMenu(bool menu) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
+    void updateMapExports(float lat, float lon, int zoom, float vrange) override;
 
     ~XPlaneEnvironment();
+
+private:
+    // Exported datarefs relating to the overlayed map status
+    float getMapLatitude();
+    float getMapLongitude();
+    int getMapZoom();
+    float getMapVerticalRange();
+    float mapLatitude { 0.0f };
+    float mapLongitude { 0.0f };
+    int mapZoom { 0 };
+    float mapVerticalRange { 0.0f };
+    std::unique_ptr<DataRefExport<float>> mapLatitudeRef;
+    std::unique_ptr<DataRefExport<float>> mapLongitudeRef;
+    std::unique_ptr<DataRefExport<int>> mapZoomRef;
+    std::unique_ptr<DataRefExport<float>> mapVerticalRangeRef;
+
 private:
     using GetMetarPtr = void(*)(const char *id, XPLMFixedString150_t *outMETAR);
 

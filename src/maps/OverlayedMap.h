@@ -22,7 +22,6 @@
 #include <functional>
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/world/World.h"
-//#include "src/world/router/Route.h"
 #include "src/libimg/TTFStamper.h"
 #include "src/environment/Environment.h"
 #include "OverlayHelper.h"
@@ -51,6 +50,7 @@ public:
     void centerOnPlane();
     void setPlaneLocations(std::vector<avitab::Location> &locs);
     void getCenterLocation(double &latitude, double &longitude);
+    float getVerticalRange() const;
 
     void updateImage();
     void zoomIn();
@@ -94,7 +94,7 @@ private:
 
     // current map display attributes, updated on each frame
     double leftLon, rightLon;
-    double bottomLat, topLat;
+    double bottomLat {0.0f}, topLat {0.0f};
     int maxNodeDensity;
     double mapWidthNM;
     double mapScaleNMperPixel;
