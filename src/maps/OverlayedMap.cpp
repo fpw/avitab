@@ -146,6 +146,12 @@ void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
     pixelToPosition(mapImage->getWidth() / 2, mapImage->getHeight() / 2, latitude, longitude);
 }
 
+float OverlayedMap::getVerticalRange() const {
+    auto rangeLat = (topLat - bottomLat) * stitcher->getTargetImage()->getHeight() / mapImage->getHeight();
+    auto rangeKM = rangeLat * world::LAT_TO_KM;
+    return (float)rangeKM * 1000;
+}
+
 bool OverlayedMap::mouse(int x, int y, bool down)
 {
     bool wasClick = false;
@@ -527,7 +533,6 @@ void OverlayedMap::updateMapAttributes()
     double kmPerPixel = (bl.distanceTo(tr) / diagonalPixels) / 1000;
     mapScaleNMperPixel = kmPerPixel * world::KM_TO_NM;
     mapWidthNM = mapScaleNMperPixel * mapImage->getWidth();
-
 }
 
 void OverlayedMap::pixelToPosition(int px, int py, double &lat,

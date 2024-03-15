@@ -421,6 +421,10 @@ std::shared_ptr<world::RouteFinder> AviTab::getRouteFinder() {
     return getNavWorld()->getRouteFinder();
 }
 
+void AviTab::updateMapExports(float lat, float lon, int zoom, float vrange) {
+    env->updateMapExports(lat, lon, zoom, vrange);
+}
+
 AircraftID AviTab::getActiveAircraftCount() {
     return env->getActiveAircraftCount();
 }

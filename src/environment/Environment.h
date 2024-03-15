@@ -96,6 +96,7 @@ public:
     virtual void setIsInMenu(bool menu);
     virtual AircraftID getActiveAircraftCount() = 0;
     virtual Location getAircraftLocation(AircraftID id) = 0;
+    virtual void updateMapExports(float lat, float lon, int zoom, float vrange) { /* default is no operation */ }
     float getLastFrameTime();
 
     virtual ~Environment() = default;
