@@ -53,6 +53,7 @@ public:
     void alignTopRightInParent(int padRight = 0, int padTop = 0);
     void alignInTopLeft();
     void alignInTopRight(int xPad = 0);
+    void alignInBottomLeft();
     void alignInBottomCenter();
     void alignInBottomRight();
     void alignLeftOf(WidgetPtr base);

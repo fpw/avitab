@@ -34,9 +34,18 @@
 *.app
 
 # Project specific ignores
-build
-build-third
-cmake-build-debug
+/build/
+/build-third/
+/cmake-build-debug/
+/build-*/
+/scratch/
+
+# Ignore hidden files, apart from some project specifics
+/.*
+!/.gitattributes
+!/.gitignore
+!/.gitmodules
+!/.clang-format
 
 # Jetbrains IDE
 .idea/
@@ -46,6 +55,7 @@ cmake-build-debug
 
 # VSCode IDE
 .vscode/
+*.code-workspace
 
 # clangd index and compilation database
 .cache

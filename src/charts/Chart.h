@@ -40,12 +40,11 @@ public:
     virtual ChartCategory getCategory() const = 0;
     virtual std::string getName() const = 0;
 
-    virtual bool isLoaded() const = 0;
     virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) = 0;
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) = 0;
     virtual void setCalibrationMetadata(std::string metadata) = 0;
 };
 
-} /* namespace navigraph */
+} /* namespace apis */
 
 #endif //AVITAB_CHART_H

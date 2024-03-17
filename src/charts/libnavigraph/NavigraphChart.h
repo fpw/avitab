@@ -37,19 +37,21 @@ public:
     NavigraphChart(const nlohmann::json &json);
     virtual ~NavigraphChart() = default;
 
-    virtual std::string getICAO() const override;
-    virtual std::string getIndex() const override;
-    virtual apis::ChartCategory getCategory() const override;
-    virtual std::string getName() const override;
+    std::string getICAO() const override;
+    std::string getIndex() const override;
+    apis::ChartCategory getCategory() const override;
+    std::string getName() const override;
 
-    virtual bool isLoaded() const override;
-    virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
-    virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
-    virtual void setCalibrationMetadata(std::string metadata) override {}; // Ignore
+    std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
+    void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
+    void setCalibrationMetadata(std::string metadata) override {} // Ignore
 
+public: // used by NavigraphAPI
+    bool isLoaded() const;
     std::string getFileDay() const;
     std::string getFileNight() const;
     void attachImages(std::shared_ptr<img::Image> day, std::shared_ptr<img::Image> night);
+
 private:
     ChartGEOReference geoRef{};
     std::string fileDay, fileNight;

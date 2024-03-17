@@ -15,17 +15,16 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef AVITAB_CHARTSERVICE_H
-#define AVITAB_CHARTSERVICE_H
+#pragma once
 
 #include <vector>
 #include <memory>
 #include <thread>
 #include "APICall.h"
 #include "Chart.h"
-#include "src/charts/libchartfox/ChartFoxAPI.h"
 #include "src/charts/liblocalfile/LocalFileAPI.h"
 #include "src/charts/libnavigraph/NavigraphAPI.h"
+#include "src/charts/libchartfox/ChartFoxAPI.h"
 #include "src/charts/Crypto.h"
 
 namespace apis {
@@ -44,13 +43,14 @@ public:
 
     // asynchronous calls
     std::shared_ptr<APICall<bool>> loginNavigraph();
+    std::shared_ptr<APICall<bool>> verifyChartFoxAccess();
     std::shared_ptr<APICall<ChartList>> getChartsFor(const std::string &icao);
     std::shared_ptr<APICall<std::shared_ptr<Chart>>> loadChart(std::shared_ptr<Chart> chart);
     std::shared_ptr<APICall<std::string>> getChartFoxDonationLink();
 
     // state
     std::shared_ptr<navigraph::NavigraphAPI> getNavigraph();
-    std::shared_ptr<chartfox::ChartFoxAPI> getChartfox();
+    std::shared_ptr<chartfox::ChartFoxAPI> getChartFox();
     void submitCall(std::shared_ptr<BaseCall> call);
 
     std::string getCalibrationMetadataForFile(std::string utf8ChartFileName) const;
@@ -58,7 +58,7 @@ public:
 
 private:
     std::shared_ptr<navigraph::NavigraphAPI> navigraph;
-    std::shared_ptr<chartfox::ChartFoxAPI> chartfox;
+    std::shared_ptr<chartfox::ChartFoxAPI> chartFox;
     std::shared_ptr<localfile::LocalFileAPI> localFile;
 
     bool useNavigraph = false;
@@ -81,5 +81,3 @@ private:
 };
 
 } // namespace apis
-
-#endif //AVITAB_CHARTSERVICE_H

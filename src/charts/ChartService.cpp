@@ -27,7 +27,10 @@ namespace apis {
 
 ChartService::ChartService(const std::string &programPath) {
     navigraph = std::make_shared<navigraph::NavigraphAPI>(programPath + "/Navigraph/");
-    chartfox = std::make_shared<chartfox::ChartFoxAPI>();
+    if (chartfox::ChartFoxAPI::isSupported()) {
+        chartFox = std::make_shared<chartfox::ChartFoxAPI>(programPath + "/ChartFox/");
+        useChartFox = chartFox->isAuthenticated();
+    }
     localFile= std::make_shared<localfile::LocalFileAPI>(programPath + "/charts/");
 
     keepAlive = true;
@@ -50,15 +53,15 @@ void ChartService::setUseNavigraph(bool use) {
 }
 
 void ChartService::setUseChartFox(bool use) {
-    useChartFox = use;
+    useChartFox = chartFox ? use : false;
 }
 
 std::shared_ptr<navigraph::NavigraphAPI> ChartService::getNavigraph() {
     return navigraph;
 }
 
-std::shared_ptr<chartfox::ChartFoxAPI> ChartService::getChartfox() {
-    return chartfox;
+std::shared_ptr<chartfox::ChartFoxAPI> ChartService::getChartFox() {
+    return chartFox;
 }
 
 std::shared_ptr<APICall<bool>> ChartService::loginNavigraph() {
@@ -68,6 +71,14 @@ std::shared_ptr<APICall<bool>> ChartService::loginNavigraph() {
         }
 
         return true;
+    });
+    return call;
+}
+
+std::shared_ptr<APICall<bool>> ChartService::verifyChartFoxAccess() {
+    auto call = std::make_shared<APICall<bool>>([this] {
+        if (chartFox) return chartFox->isAuthenticated();
+        return false;
     });
     return call;
 }
@@ -82,7 +93,7 @@ std::shared_ptr<APICall<ChartService::ChartList>> ChartService::getChartsFor(con
         }
 
         if (useChartFox) {
-            auto charts = chartfox->getChartsFor(icao);
+            auto charts = chartFox->getChartsFor(icao);
             res.insert(res.end(), charts.begin(), charts.end());
         }
 
@@ -99,14 +110,14 @@ std::shared_ptr<APICall<ChartService::ChartList>> ChartService::getChartsFor(con
 
 std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::shared_ptr<Chart> chart) {
     auto call = std::make_shared<APICall<std::shared_ptr<Chart>>>([this, chart] {
-        auto cfChart = std::dynamic_pointer_cast<chartfox::ChartFoxChart>(chart);
-        if (cfChart) {
-            chartfox->loadChart(cfChart);
-            auto pdfData = cfChart->getPdfData();
+        auto bgChart = std::dynamic_pointer_cast<chartfox::ChartFoxChart>(chart);
+        if (bgChart) {
+            chartFox->loadChart(bgChart);
+            auto pdfData = bgChart->getPdfData();
             auto in = std::string((char *)pdfData.data(), pdfData.size());
             auto hash = crypto.sha256String(in);
             std::string calibrationMetadata = getCalibrationMetadataForHash(hash);
-            cfChart->setCalibrationMetadata(calibrationMetadata);
+            bgChart->setCalibrationMetadata(calibrationMetadata);
         }
 
         auto nvChart = std::dynamic_pointer_cast<navigraph::NavigraphChart>(chart);
@@ -129,7 +140,7 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
 
 std::shared_ptr<APICall<std::string>> ChartService::getChartFoxDonationLink() {
     auto call = std::make_shared<APICall<std::string>>([this] {
-        return chartfox->getDonationLink();
+        return chartFox->getDonationLink();
     });
 
     return call;
@@ -183,7 +194,6 @@ void ChartService::workLoop() {
 
 void ChartService::stop() {
     if (apiThread) {
-        logger::verbose("Ending ChartService");
         {
             std::lock_guard<std::mutex> lock(mutex);
             keepAlive = false;
@@ -249,7 +259,6 @@ std::string ChartService::getCalibrationMetadataForHash(std::string hash) const 
 
 ChartService::~ChartService() {
     stop();
-    logger::verbose("~ChartService");
 }
 
 }
