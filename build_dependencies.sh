@@ -7,6 +7,14 @@ mkdir -p $OUTDIR/include
 
 cd lib
 
+echo "Building sqlite3..."
+if [ ! -f $OUTDIR/include/sqlite3/sqlite3.hpp ]; then
+    mkdir -p $OUTDIR/include/sqlite3
+    cp sqlite3/sqlite3.h $OUTDIR/include/sqlite3
+fi
+
+if [ ! -f $OUTDIR/include/sqlite3/sqlite3.h ]; then echo "Failed"; exit; fi
+
 echo "Building json..."
 if [ ! -f $OUTDIR/include/nlohmann/json.hpp ]; then
     cp -a json/include/* $OUTDIR/include/
