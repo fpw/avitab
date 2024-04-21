@@ -306,7 +306,7 @@ void OverlayedMap::drawNavWorldOverlays() {
 
     // Don't overlay anything if zoomed out beyond half of the globe
     if (rightLon > (leftLon + 180)) return;
-    if ((rightLon < leftLon) && ((rightLon + 360) > (leftLon + 180))) return;
+    if ((getNorthOffset() == 0) && ((rightLon < leftLon)) && ((rightLon + 360) > (leftLon + 180))) return;
 
     // Extend the area of the search to ensure that any NAV data that might be partially visible
     // at the edges of the window will be included, even if the specific NAV item ends up being
