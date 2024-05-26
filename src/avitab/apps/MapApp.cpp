@@ -915,6 +915,10 @@ bool MapApp::onTimer() {
 
     map->doWork();
 
+    double lat, lon;
+    map->getCenterLocation(lat, lon);
+    api().updateMapExports(lat, lon, map->getZoomLevel(), map->getVerticalRange());
+
     return true;
 }
 

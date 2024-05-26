@@ -57,70 +57,32 @@ XPlaneEnvironment::XPlaneEnvironment() {
 
     reloadAircraftPath();
 
-    panelEnabledRef = XPLMRegisterDataAccessor("avitab/panel_enabled", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                return *(us->panelEnabled);
-            },
-            [] (void *ref, int newVal) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                *(us->panelEnabled) = newVal;
-            },
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            this, this
-            );
+    panelEnabledRef = std::make_unique<DataRefExport<int>>("avitab/panel_enabled", this,
+        [] (void *self) { return *((reinterpret_cast<XPlaneEnvironment *>(self))->panelEnabled); },
+        [] (void *self, int v) { *((reinterpret_cast<XPlaneEnvironment *>(self))->panelEnabled) = v; });
 
-    panelPoweredRef = XPLMRegisterDataAccessor("avitab/panel_powered", xplmType_Int, true,
-            [] (void *ref) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                return *(us->panelPowered);
-            },
-            [] (void *ref, int newVal) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                *(us->panelPowered) = newVal;
-            },
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            this, this
-            );
+    panelPoweredRef = std::make_unique<DataRefExport<int>>("avitab/panel_powered", this,
+        [] (void *self) { return *((reinterpret_cast<XPlaneEnvironment *>(self))->panelPowered); },
+        [] (void *self, int v) { *((reinterpret_cast<XPlaneEnvironment *>(self))->panelPowered) = v; });
 
-    brightnessRef = XPLMRegisterDataAccessor("avitab/brightness", xplmType_Float, true,
-            nullptr, nullptr,
-            [] (void *ref) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                return *(us->brightness);
-            },
-            [] (void *ref, float newVal) {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                *(us->brightness) = newVal;
-            },
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            this, this
-            );
+    brightnessRef = std::make_unique<DataRefExport<float>>("avitab/brightness", this,
+        [] (void *self) { return *((reinterpret_cast<XPlaneEnvironment *>(self))->brightness); },
+        [] (void *self, float v) { *((reinterpret_cast<XPlaneEnvironment *>(self))->brightness) = v; });
 
-    isInMenuRef = XPLMRegisterDataAccessor("avitab/is_in_menu", xplmType_Int, false,
-            [] (void *ref) -> int {
-                XPlaneEnvironment *us = reinterpret_cast<XPlaneEnvironment *>(ref);
-                return us->isInMenu;
-            },
-            nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            nullptr, nullptr,
-            this, this
-            );
+    isInMenuRef = std::make_unique<DataRefExport<int>>("avitab/is_in_menu", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->isInMenu; });
+
+    mapLatitudeRef = std::make_unique<DataRefExport<float>>("avitab/map/latitude", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapLatitude(); });
+
+    mapLongitudeRef = std::make_unique<DataRefExport<float>>("avitab/map/longitude", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapLongitude(); });
+
+    mapZoomRef = std::make_unique<DataRefExport<int>>("avitab/map/zoom", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapZoom(); });
+
+    mapVerticalRangeRef = std::make_unique<DataRefExport<float>>("avitab/map/vertical_range", this,
+        [] (void *self) { return (reinterpret_cast<XPlaneEnvironment *>(self))->getMapVerticalRange(); });
 
     XPLMScheduleFlightLoop(flightLoopId, -1, true);
 }
@@ -410,13 +372,37 @@ XPlaneEnvironment::~XPlaneEnvironment() {
     if (flightLoopId) {
         XPLMDestroyFlightLoop(flightLoopId);
     }
-    XPLMUnregisterDataAccessor(panelEnabledRef);
-    XPLMUnregisterDataAccessor(panelPoweredRef);
-    XPLMUnregisterDataAccessor(brightnessRef);
-    XPLMUnregisterDataAccessor(isInMenuRef);
 
     destroyMenu();
     logger::verbose("~XPlaneEnvironment");
+}
+
+void XPlaneEnvironment::updateMapExports(float lat, float lon, int zoom, float vrange) {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    mapLatitude = lat;
+    mapLongitude = lon;
+    mapZoom = zoom;
+    mapVerticalRange = vrange;
+}
+
+float XPlaneEnvironment::getMapLatitude() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapLatitude;
+}
+
+float XPlaneEnvironment::getMapLongitude() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapLongitude;
+}
+
+int XPlaneEnvironment::getMapZoom() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapZoom;
+}
+
+float XPlaneEnvironment::getMapVerticalRange() {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    return mapVerticalRange;
 }
 
 void XPlaneEnvironment::reloadAircraftPath() {
