@@ -16,8 +16,9 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "XSTAR.h"
 #include <sstream>
+#include <algorithm>
+#include "XSTAR.h"
 #include "src/Logger.h"
 
 namespace xdata {

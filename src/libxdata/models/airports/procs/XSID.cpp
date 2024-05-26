@@ -19,6 +19,7 @@
 #include "XSID.h"
 #include "src/Logger.h"
 #include <sstream>
+#include <algorithm>
 
 namespace xdata {
 
