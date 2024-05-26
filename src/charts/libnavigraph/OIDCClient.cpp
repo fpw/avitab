@@ -177,21 +177,6 @@ void OIDCClient::loadIDToken(bool checkNonce) {
 
     std::string sig = idToken.substr(i1 + 1 + i2 + 1);
 
-    // Navigraph's public JWT signing key
-    std::string navigraph_N =
-            "6TjdXuhh9mkBS5P_D0biAvI3z8oZwcs8q3JSQB_Lu2AAm-XoxrH1TomSnSrHg-"
-            "HbCoNl-94cue1Dfff45dl0ay1WTb3W5vQJi1V6bMwCPP2UGjE6Y_mJe26Nn0UW"
-            "aK82mURT3EfojtSbvoOJW4a7CpET986souhvhHq04iMCyoQkwSeJORJnOCCcwg"
-            "Ib50bdqfVRMKGmsR_3ImtRFyUekaHurhmt25CHFJhdh6kRrn5si7FJp93O44eg"
-            "IFdssWz5O5COBDEBTXZEH6ijg8uH4ada3xVelPmwTwWQzky_y5wKaAMe5SsYh8"
-            "YLtcElkNY2s-Ii5oOspvtqK6tzRiXfWw";
-    std::string navigraph_E = "AQAB";
-
-    if (!crypto.RSASHA256(idToken.substr(0, i1 + 1 + i2), sig, navigraph_N, navigraph_E)) {
-        throw std::runtime_error("Invalid RS256 signature");
-    }
-    logger::verbose("RSA-SHA256 signature: Check");
-
     nlohmann::json data = nlohmann::json::parse(crypto.base64URLDecode(payload));
     if (checkNonce) {
         if (data.at("nonce") != nonce) {
