@@ -19,7 +19,7 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define STBI_WINDOWS_UTF8
 #include <stb/stb_image.h>
-#include <stb/stb_image_resize.h>
+#include <stb/stb_image_resize2.h>
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
@@ -165,8 +165,8 @@ void Image::clear(uint32_t background) {
 void Image::scale(int newWidth, int newHeight) {
     Image scaled(newWidth, newHeight, 0);
 
-    stbir_resize_uint8((uint8_t *) getPixels(), width, height, 0,
-                       (uint8_t *) scaled.getPixels(), newWidth, newHeight, 0, 4);
+    stbir_resize_uint8_linear((uint8_t *) getPixels(), width, height, 0,
+                       (uint8_t *) scaled.getPixels(), newWidth, newHeight, 0, STBIR_RGBA);
 
     *this = std::move(scaled);
 }

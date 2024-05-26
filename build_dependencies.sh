@@ -22,11 +22,11 @@ fi
 if [ ! -f $OUTDIR/include/ghc/filesystem.hpp ]; then echo "Failed"; exit; fi
 
 echo "Building stb..."
-if [ ! -f $OUTDIR/include/stb/stb.h ]; then
+if [ ! -f $OUTDIR/include/stb/stb_image.h ]; then
     mkdir -p $OUTDIR/include/stb
     cp stb/*.h $OUTDIR/include/stb/
 fi
-if [ ! -f $OUTDIR/include/stb/stb.h ]; then echo "Failed"; exit; fi
+if [ ! -f $OUTDIR/include/stb/stb_image.h ]; then echo "Failed"; exit; fi
 
 echo "Building XPLM..."
 if [ ! -f $OUTDIR/include/XPLM/XPLMPlugin.h ]; then

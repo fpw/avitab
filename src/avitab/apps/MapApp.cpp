@@ -358,6 +358,10 @@ void MapApp::selectOnlineMaps(bool interactive, const std::shared_ptr<maps::Onli
 
             setTileSource(tileSource);
             currentActiveOnlineMap = conf.name;
+            api().executeLater([this] () {
+                containerWithClickableList.reset();
+                chooserContainer->setVisible(false);
+            });
         });
 
         containerWithClickableList->setCancelCallback([this] () {

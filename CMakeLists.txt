@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(AviTab VERSION 0.6.3 DESCRIPTION "AviTab X-Plane plugin")
+project(AviTab VERSION 0.6.4 DESCRIPTION "AviTab X-Plane plugin")
 
 if (NOT "$ENV{NAVIGRAPH_SECRET}" STREQUAL "")
     set(NAVIGRAPH_SECRET "$ENV{NAVIGRAPH_SECRET}" CACHE INTERNAL "Copied from environment variable")
