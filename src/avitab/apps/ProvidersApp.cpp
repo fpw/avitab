@@ -39,11 +39,17 @@ ProvidersApp::ProvidersApp(FuncsPtr appFuncs):
         }
     }
 
-    if (api().getChartService()->getChartfox()->isSupported()) {
+    if (api().getChartService()->getChartFox() != nullptr) {
         chartFoxPage = tabs->addTab(tabs, "ChartFox");
         windowChartFox = std::make_shared<Window>(chartFoxPage, "ChartFox");
         windowChartFox->setOnClose([this] () { exit(); });
         resetChartFoxLayout();
+
+        auto chartFox = api().getChartService()->getChartFox();
+        if (chartFox->isAuthenticated()) {
+            // modify the tab to display as if just logged in
+            onChartFoxLoginSuccessful();
+        }
     }
 }
 
@@ -60,10 +66,10 @@ void ProvidersApp::resetNavigraphLayout() {
     labelNavigraph->setLongMode(true);
     labelNavigraph->alignInTopLeft();
 
-    button.reset();
-    button = std::make_shared<Button>(windowNavigraph, "Link Navigraph Account");
-    button->alignBelow(labelNavigraph);
-    button->setCallback([this] (const Button &btn) {
+    linkNavigraphButton.reset();
+    linkNavigraphButton = std::make_shared<Button>(windowNavigraph, "Link Navigraph Account");
+    linkNavigraphButton->alignBelow(labelNavigraph);
+    linkNavigraphButton->setCallback([this] (const Button &btn) {
         api().executeLater([this] () { onNavigraphLogin(); });
     });
 }
@@ -71,16 +77,16 @@ void ProvidersApp::resetNavigraphLayout() {
 void ProvidersApp::onNavigraphLogin() {
     auto svc = api().getChartService();
 
-    button.reset();
+    linkNavigraphButton.reset();
     labelNavigraph->setText("Logging in...");
 
     auto call = svc->loginNavigraph();
     call->andThen([this] (std::future<bool> result) {
         try {
             result.get();
-            api().executeLater([this] () { onAuthSuccess(); });
+            api().executeLater([this] () { onNavigraphAuthSuccess(); });
         } catch (const navigraph::LoginException &e) {
-            api().executeLater([this] () { onAuthRequired(); });
+            api().executeLater([this] () { onNavigraphAuthRequired(); });
         } catch (const std::exception &e) {
             labelNavigraph->setTextFormatted("Error: %s", e.what());
         }
@@ -89,23 +95,23 @@ void ProvidersApp::onNavigraphLogin() {
     svc->submitCall(call);
 }
 
-void ProvidersApp::onAuthRequired() {
+void ProvidersApp::onNavigraphAuthRequired() {
     auto navigraph = api().getChartService()->getNavigraph();
 
     labelNavigraph->setText("Linking required\n"
-                   "Clicking the button will open your browser to login to your Navigraph account.\n"
+                   "Clicking the linkNavigraphButton will open your browser to login to your Navigraph account.\n"
                    "If your browser doesn't start, you can find the link to open in AviTab.log\n"
                    "This process is required only once every 30 days.");
 
-    button.reset();
-    button = std::make_shared<Button>(windowNavigraph, "Open Browser");
-    button->alignBelow(labelNavigraph);
-    button->setCallback([this] (const Button &) {
-        api().executeLater([this] () { onStartAuth(); });
+    linkNavigraphButton.reset();
+    linkNavigraphButton = std::make_shared<Button>(windowNavigraph, "Open Browser");
+    linkNavigraphButton->alignBelow(labelNavigraph);
+    linkNavigraphButton->setCallback([this] (const Button &) {
+        api().executeLater([this] () { onNavigraphStartAuth(); });
     });
 }
 
-void ProvidersApp::onStartAuth() {
+void ProvidersApp::onNavigraphStartAuth() {
     auto navigraph = api().getChartService()->getNavigraph();
     auto link = navigraph->startAuthentication([this] {
         api().executeLater([this] () {
@@ -118,73 +124,71 @@ void ProvidersApp::onStartAuth() {
     labelNavigraph->setText("Follow the instructions in your browser.\n"
                    "If your browser didn't start, manually open the link in AviTab's log file");
 
-    button = std::make_shared<Button>(windowNavigraph, "Cancel");
-    button->alignBelow(labelNavigraph);
-    button->setCallback([this] (const Button &btn) {
-        api().executeLater([this] () { onCancelLoginButton(); });
+    linkNavigraphButton = std::make_shared<Button>(windowNavigraph, "Cancel");
+    linkNavigraphButton->alignBelow(labelNavigraph);
+    linkNavigraphButton->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onNavigraphCancelLoginButton(); });
     });
 }
 
-void ProvidersApp::onCancelLoginButton() {
+void ProvidersApp::onNavigraphCancelLoginButton() {
     auto navigraph = api().getChartService()->getNavigraph();
     navigraph->cancelAuth();
     resetNavigraphLayout();
 }
 
-void ProvidersApp::onAuthSuccess() {
+void ProvidersApp::onNavigraphAuthSuccess() {
     auto navigraph = api().getChartService()->getNavigraph();
     if (navigraph->isInDemoMode()) {
         labelNavigraph->setText("Your Navigraph account is linked but doesn't have a charts subscription.\n"
                        "Only LEAL and KONT are usable in demo mode.\n"
                        "Visit navigraph.com to subscribe to Navigraph Charts or Ultimate.\n"
                        "Use the Airport app to access the demo charts.\n"
-                       "Use the home button or the X to close this app.\n");
+                       "Use the home linkNavigraphButton or the X to close this app.\n");
     } else {
         labelNavigraph->setText("Your Navigraph account is now linked to AviTab! Use the Airport app to access charts.\n"
-                       "Use the home button or the X to close this app.\n");
+                       "Use the home linkNavigraphButton or the X to close this app.\n");
     }
 
-    button.reset();
-    button = std::make_shared<Button>(windowNavigraph, "Switch Account");
-    button->alignBelow(labelNavigraph);
-    button->setCallback([this] (const Button &btn) {
-        api().executeLater([this] () { onLogoutButton(); });
+    linkNavigraphButton.reset();
+    linkNavigraphButton = std::make_shared<Button>(windowNavigraph, "Switch Account");
+    linkNavigraphButton->alignBelow(labelNavigraph);
+    linkNavigraphButton->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onNavigraphLogoutButton(); });
     });
 }
 
-void ProvidersApp::onLogoutButton() {
+void ProvidersApp::onNavigraphLogoutButton() {
     auto navigraph = api().getChartService()->getNavigraph();
     navigraph->logout();
     resetNavigraphLayout();
 }
 
 void ProvidersApp::resetChartFoxLayout() {
+    api().getChartService()->setUseChartFox(false);
+
     labelChartFox.reset();
     labelChartFox = std::make_shared<Label>(windowChartFox,
-            "ChartFox.org is a free online service that collects the web locations of\n"
+            "chartfox.org is a free online service that collects the web locations of\n"
             "several official and unofficial (e.g. Vatsim) charts.\n"
-            "AviTab can use ChartFox to look up the locations of airport charts\n"
+            "AviTab can use your ChartFox account to look up the locations of airport charts\n"
             "in order to download them from 3rd party sites for you.\n"
             "\n"
-            "If you want to donate to ChartFox, use the button below (opens browser).\n"
+            "Click the Link Account button to authorise Avitab to use your ChartFox account.\n"
+            "If you want to donate to ChartFox, use the Donate below (opens browser).\n"
         );
     labelChartFox->setLongMode(true);
     labelChartFox->alignInTopLeft();
 
-    chartFoxCheckbox = std::make_shared<Checkbox>(windowChartFox, "Use ChartFox in airport app");
-    chartFoxCheckbox->alignBelow(labelChartFox);
-
-    bool useCf = api().getSettings()->getGeneralSetting<bool>("useChartFox");
-    api().getChartService()->setUseChartFox(useCf);
-
-    chartFoxCheckbox->setChecked(useCf);
-    chartFoxCheckbox->setCallback([this] (bool checked) {
-        api().getSettings()->setGeneralSetting("useChartFox", checked);
-        api().getChartService()->setUseChartFox(checked);
+    chartFoxActionButton.reset();
+    chartFoxActionButton = std::make_shared<Button>(windowChartFox, "Link Account");
+    chartFoxActionButton->alignBelow(labelChartFox);
+    chartFoxActionButton->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { testChartFoxLinkage(); });
     });
 
     chartFoxDonateButton = std::make_shared<Button>(windowChartFox, "Donate to ChartFox");
-    chartFoxDonateButton->alignBelow(chartFoxCheckbox);
+    chartFoxDonateButton->alignInBottomRight();
     chartFoxDonateButton->setCallback([this] (const Button &) {
         auto call = api().getChartService()->getChartFoxDonationLink();
         call->andThen([] (std::future<std::string> urlFuture) {
@@ -197,6 +201,93 @@ void ProvidersApp::resetChartFoxLayout() {
         });
         api().getChartService()->submitCall(call);
     });
+}
+
+void ProvidersApp::testChartFoxLinkage() {
+    auto svc = api().getChartService();
+
+    // short (transient) message, and no button
+    labelChartFox->setText("Logging in...");
+    chartFoxActionButton.reset();
+
+    auto call = svc->verifyChartFoxAccess();
+    call->andThen([this] (std::future<bool> result) {
+        try {
+            bool authenticated = result.get();
+            if (!authenticated) throw chartfox::LoginException();
+            api().executeLater([this] () { onChartFoxLoginSuccessful(); });
+        } catch (const chartfox::LoginException &e) {
+            api().executeLater([this] () { onChartFoxAuthRequired(); });
+        } catch (const std::exception &e) {
+            labelChartFox->setTextFormatted("Error: %s", e.what());
+        }
+    });
+
+    svc->submitCall(call);
+}
+
+void ProvidersApp::onChartFoxAuthRequired() {
+    api().getChartService()->setUseChartFox(false);
+
+    labelChartFox->setText("ChartFox login is required.\n"
+                   "Clicking Open Browser will open your browser to login to your ChartFox account.\n"
+                   "If your browser doesn't start, you can find the URL to visit in AviTab.log\n");
+
+    chartFoxActionButton.reset();
+    chartFoxActionButton = std::make_shared<Button>(windowChartFox, "Open Browser");
+    chartFoxActionButton->alignBelow(labelChartFox);
+    chartFoxActionButton->setCallback([this] (const Button &) {
+        api().executeLater([this] () { onChartFoxStartAuth(); });
+    });
+}
+
+void ProvidersApp::onChartFoxStartAuth() {
+    auto chartFox = api().getChartService()->getChartFox();
+    if (chartFox == nullptr) return;
+    auto link = chartFox->startAuthentication([this] {
+        api().executeLater([this] () {
+            testChartFoxLinkage(); // callback on completion of the OAuth(PKCE) flow
+        });
+    });
+
+    platform::openBrowser(link);
+    labelChartFox->setText("Follow the instructions in your browser.\n"
+                   "If your browser didn't start, visit the URL manually.\n"
+                   "The URL can be found in AviTab's log file, near the end.");
+
+    chartFoxActionButton = std::make_shared<Button>(windowChartFox, "Cancel");
+    chartFoxActionButton->alignBelow(labelChartFox);
+    chartFoxActionButton->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onChartFoxCancelLoginButton(); });
+    });
+}
+
+void ProvidersApp::onChartFoxCancelLoginButton() {
+    auto chartFox = api().getChartService()->getChartFox();
+    if (chartFox) chartFox->cancelAuth();
+    resetChartFoxLayout();
+}
+
+void ProvidersApp::onChartFoxLoginSuccessful() {
+    labelChartFox->setText("Avitab is authorised to use your ChartFox account and will\n"
+                    "attempt to download charts indexed by ChartFox when you use\n"
+                    "the Airport app. You can revoke this by clicking Logout.\n"
+                    "Use the home button or the X to close this app.\n");
+
+    chartFoxActionButton.reset();
+    chartFoxActionButton = std::make_shared<Button>(windowChartFox, "Logout");
+    chartFoxActionButton->alignBelow(labelChartFox);
+    chartFoxActionButton->setCallback([this] (const Button &btn) {
+        api().executeLater([this] () { onChartFoxLogoutButton(); });
+    });
+
+    api().getChartService()->setUseChartFox(true);
+}
+
+void ProvidersApp::onChartFoxLogoutButton() {
+    auto chartFox = api().getChartService()->getChartFox();
+    if (chartFox) chartFox->logout();
+    resetChartFoxLayout();
 }
 
 } /* namespace avitab */

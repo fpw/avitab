@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,36 +15,50 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-#ifndef AVITAB_CHARTFOXAPI_H
-#define AVITAB_CHARTFOXAPI_H
+#pragma once
 
 #include <string>
+#include <memory>
 #include <vector>
+#include <map>
+#include <functional>
+#include <mutex>
+#include <condition_variable>
+#include <nlohmann/json_fwd.hpp>
+#include "src/libimg/Image.h"
+#include "src/libimg/TTFStamper.h"
+#include "src/charts/APICall.h"
+#include "ChartFoxOAuth2Client.h"
 #include "ChartFoxChart.h"
-#include "src/charts/RESTClient.h"
 
 namespace chartfox {
 
 class ChartFoxAPI {
 public:
-    ChartFoxAPI();
-    ~ChartFoxAPI();
+    static bool isSupported();
 
-    bool isSupported();
+    using ChartsList = std::vector<std::shared_ptr<apis::Chart>>;
 
-    std::vector<std::shared_ptr<apis::Chart>> getChartsFor(const std::string &icao);
+    ChartFoxAPI(const std::string &cacheDirectory);
+    virtual ~ChartFoxAPI() = default;
+
+    bool isAuthenticated();
+    std::string startAuthentication(std::function<void()> onAuthDone);
+    void cancelAuth();
+    void logout();
+
+    ChartsList getChartsFor(const std::string &icao);
     void loadChart(std::shared_ptr<ChartFoxChart> chart);
     std::string getDonationLink();
 
 private:
-    bool cancelToken = false;
-    std::string apiKey;
-    apis::RESTClient restClient;
+    std::string encodeUrl(std::string url);
 
-    std::string urlFor(const std::string &path, bool withToken = false);
+private:
+    std::string cacheDirectory;
+    std::shared_ptr<ChartFoxOAuth2Client> oauth;
+
+    std::multimap<std::string, std::shared_ptr<ChartFoxChart>> charts;
 };
 
-} // namespace chartfox
-
-#endif //AVITAB_CHARTFOXAPI_H
+} /* namespace chartfox */

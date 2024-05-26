@@ -82,6 +82,11 @@ void Widget::alignTopRightInParent(int padRight, int padTop) {
     lv_obj_set_auto_realign(lvObj, true);
 }
 
+void Widget::alignInBottomLeft() {
+    lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
+    lv_obj_set_auto_realign(lvObj, true);
+}
+
 void Widget::alignInBottomCenter() {
     lv_obj_align(lvObj, nullptr, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
     lv_obj_set_auto_realign(lvObj, true);

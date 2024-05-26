@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_PROVIDERSAPP_H_
-#define SRC_AVITAB_APPS_PROVIDERSAPP_H_
+#pragma once
 
 #include <memory>
 #include "App.h"
@@ -36,24 +35,27 @@ private:
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<Window> windowNavigraph, windowChartFox;
     std::shared_ptr<Label> labelNavigraph, labelChartFox;
-    std::shared_ptr<Button> button;
-    std::shared_ptr<PixMap> pixmap;
+    std::shared_ptr<Button> linkNavigraphButton, chartFoxActionButton;
 
     std::shared_ptr<Page> navigraphPage, chartFoxPage;
-    std::shared_ptr<Checkbox> chartFoxCheckbox;
     std::shared_ptr<Button> chartFoxDonateButton;
 
     void resetNavigraphLayout();
     void onNavigraphLogin();
-    void onAuthRequired();
-    void onStartAuth();
-    void onCancelLoginButton();
-    void onAuthSuccess();
-    void onLogoutButton();
+    void onNavigraphAuthRequired();
+    void onNavigraphStartAuth();
+    void onNavigraphCancelLoginButton();
+    void onNavigraphAuthSuccess();
+    void onNavigraphLogoutButton();
 
     void resetChartFoxLayout();
+    void testChartFoxLinkage();
+    void onChartFoxAuthComplete();
+    void onChartFoxAuthRequired();
+    void onChartFoxStartAuth();
+    void onChartFoxCancelLoginButton();
+    void onChartFoxLoginSuccessful();
+    void onChartFoxLogoutButton();
 };
 
 } /* namespace avitab */
-
-#endif /* SRC_AVITAB_APPS_PROVIDERSAPP_H_ */

@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,67 +15,38 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 #include <nlohmann/json.hpp>
-#include <stdexcept>
+#include <sstream>
+#include "ChartFoxChart.h"
 #include "src/maps/sources/PDFSource.h"
 #include "src/Logger.h"
-#include "ChartFoxChart.h"
 
 namespace chartfox {
 
-/*
-    type_codes from API docs:
-    0 - Unknown / General
-    1 - Textual Data
-    2 - Ground Layout
-    6 - SID
-    7 - STAR
-    8 - Approach
-    9 - Transition
-    99 - Pilot Briefing
-*/
-
-ChartFoxChart::ChartFoxChart(const nlohmann::json &json, const std::string &icao, size_t idx):
-    icao(icao),
-    index(idx)
-{
-    auto typeCode = json.at("type_code").get<int>();
-    switch (typeCode) {
+ChartFoxChart::ChartFoxChart(const nlohmann::json &json, int icode) {
+    icao = json.at("airport_icao");
+    id = json.at("id");
+    name = json.at("name");
+    try {
+        code = json.at("code");
+    } catch (const std::exception &e) {
+        std::ostringstream oss;
+        oss << icode;
+        code = oss.str();
+    }
+    // Allowed Values: 0 (Unknown), 1 (General), 2 (Textual), 3 (GroundLayout), 4 (SID), 5 (STAR), 6 (Approach), 7 (Transition), 99 (Briefing)
+    auto catNum = json.at("type").get<int>();
+    category = apis::ChartCategory::OTHER;
+    switch (catNum) {
         case 1:  category = apis::ChartCategory::REF; break;
-        case 2:  category = apis::ChartCategory::APT; break;
-        case 6:  category = apis::ChartCategory::DEP; break;
-        case 7:  category = apis::ChartCategory::ARR; break;
-        case 8:  category = apis::ChartCategory::APP; break;
-        case 9:  category = apis::ChartCategory::APP; break;
-        case 99: category = apis::ChartCategory::REF; break;
-        default: category = apis::ChartCategory::REF; break;
-    }
-
-    auto id = json.at("identifier");
-    auto name = json.at("name");
-    if (!name.is_null()) {
-        identifier = name;
-    } else if (!id.is_null()) {
-        identifier = id;
-    } else {
-        throw std::runtime_error("No chart name");
-    }
-
-    auto urlJ = json.at("url");
-    if (!urlJ.is_null()) {
-        url = urlJ;
-        size_t i = 0;
-        while (true) {
-            i = url.find(" ", i);
-            if (i == std::string::npos) {
-                break;
-            }
-            url.replace(i, 1, "%20");
-            i += 3;
-        }
-    } else {
-        throw std::runtime_error("No chart URL");
+        case 2:  category = apis::ChartCategory::REF; break;
+        case 3:  category = apis::ChartCategory::APT; break;
+        case 4:  category = apis::ChartCategory::DEP; break;
+        case 5:  category = apis::ChartCategory::ARR; break;
+        case 6:  category = apis::ChartCategory::APP; break;
+        case 7:  category = apis::ChartCategory::APP; break;
+        case 99: category = apis::ChartCategory::OTHER; break;
+        default: logger::error("UNKNOWN CATEGORY ID: %d", catNum);
     }
 }
 
@@ -84,41 +55,35 @@ std::string ChartFoxChart::getICAO() const {
 }
 
 std::string ChartFoxChart::getIndex() const {
-    return std::string("CF-") +
-           std::to_string(static_cast<int>(category)) + "-" +
-           std::to_string(index);
+    return code;
+}
+
+std::string ChartFoxChart::getName() const {
+    return name;
 }
 
 apis::ChartCategory ChartFoxChart::getCategory() const {
     return category;
 }
 
-std::string ChartFoxChart::getName() const {
-    return identifier;
+void ChartFoxChart::setCalibrationMetadata(std::string metadata) {
+    calibrationMetadata = metadata;
 }
 
-bool ChartFoxChart::isLoaded() const {
-    return !pdfData.empty();
+std::string ChartFoxChart::getID() const {
+    return id;
+}
+
+void ChartFoxChart::setURL(const std::string u) {
+    url = u;
 }
 
 std::string ChartFoxChart::getURL() const {
     return url;
 }
 
-void ChartFoxChart::attachPDF(const std::vector<uint8_t> &data) {
-    pdfData = data;
-}
-
-std::vector<uint8_t> ChartFoxChart::getPdfData() {
-    return pdfData;
-}
-
-void ChartFoxChart::setCalibrationMetadata(std::string metadata) {
-    calibrationMetadata = metadata;
-}
-
 std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode) {
-    if (!isLoaded()) {
+    if (pdfData.empty()) {
         throw std::runtime_error("Chart not loaded");
     }
 
@@ -136,4 +101,10 @@ void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool n
     pdfSrc->setNightMode(nightMode);
 }
 
-} // namespace chartfox
+void ChartFoxChart::attachPDF(const std::vector<uint8_t> &data) {
+    pdfData = data;
+}
+
+const std::vector<uint8_t> ChartFoxChart::getPdfData() const { return pdfData; }
+
+} /* namespace chartfox */

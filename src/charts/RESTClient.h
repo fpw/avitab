@@ -55,6 +55,7 @@ public:
     long head(const std::string &Turl, bool &cancel);
 
     std::map<std::string, std::string> getCookies() const;
+
 private:
     bool verbose = true;
     std::vector<uint8_t> downloadBuf;

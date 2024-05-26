@@ -158,8 +158,9 @@ if(WIN32 AND DEFINED ENV{MSFS_SDK})
     )
 
     add_library(SimConnect STATIC IMPORTED)
-    set_property(TARGET SimConnect PROPERTY IMPORTED_LOCATION "$ENV{MSFS_SDK}/SimConnect SDK/lib/SimConnect.dll")
-    set_property(TARGET SimConnect PROPERTY IMPORTED_IMPLIB "$ENV{MSFS_SDK}/SimConnect SDK/lib/SimConnect.lib")
+    cmake_path(SET MSFS_SDK $ENV{MSFS_SDK})
+    set_property(TARGET SimConnect PROPERTY IMPORTED_LOCATION "${MSFS_SDK}/SimConnect SDK/lib/SimConnect.dll")
+    set_property(TARGET SimConnect PROPERTY IMPORTED_IMPLIB "${MSFS_SDK}/SimConnect SDK/lib/SimConnect.lib")
 
     target_link_libraries(AviTab-msfs
         -static
