@@ -34,7 +34,7 @@
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/DocumentSource.h"
 #include "components/FilesysBrowser.h"
 
 namespace avitab {
@@ -80,7 +80,7 @@ private:
         std::shared_ptr<Window> window;
         std::shared_ptr<PixMap> pixMap;
         std::shared_ptr<img::Image> rasterImage;
-        std::shared_ptr<maps::PDFSource> source;
+        std::shared_ptr<maps::DocumentSource> source;
         std::shared_ptr<img::Stitcher> stitcher;
         std::shared_ptr<maps::OverlayedMap> map;
         int panStartX = 0, panStartY = 0;

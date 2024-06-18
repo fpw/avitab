@@ -20,7 +20,7 @@
 #include <string>
 #include <stdexcept>
 #include "src/platform/Platform.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/DocumentSource.h"
 #include "src/maps/sources/ImageSource.h"
 #include "LocalFileChart.h"
 
@@ -75,13 +75,13 @@ void LocalFileChart::attachData(const std::vector<uint8_t> &data) {
 }
 
 std::shared_ptr<img::TileSource> LocalFileChart::createTileSource(bool nightMode) {
-    auto pdfSrc = std::make_shared<maps::PDFSource>(path, calibrationMetadata);
+    auto pdfSrc = std::make_shared<maps::DocumentSource>(path, calibrationMetadata);
     pdfSrc->setNightMode(nightMode);
     return pdfSrc;
 }
 
 void LocalFileChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
-    auto pdfSrc = std::dynamic_pointer_cast<maps::PDFSource>(src);
+    auto pdfSrc = std::dynamic_pointer_cast<maps::DocumentSource>(src);
     if (!pdfSrc) {
         return;
     }
