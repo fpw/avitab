@@ -50,8 +50,8 @@ public:
     void setURL(const std::string url);
     std::string getURL() const;
 
-    void attachPDF(const std::vector<uint8_t> &data);
-    const std::vector<uint8_t> getPdfData() const;
+    void setChartData(const std::vector<uint8_t> &blob);
+    const std::vector<uint8_t> getChartData() const;
 
 private:
     ChartGEOReference geoRef;
@@ -61,7 +61,7 @@ private:
     std::string code;
     apis::ChartCategory category;
     std::string url;
-    std::vector<uint8_t> pdfData;
+    std::vector<uint8_t> chartData;
     std::string calibrationMetadata;
 };
 

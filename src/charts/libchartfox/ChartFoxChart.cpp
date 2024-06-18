@@ -83,28 +83,30 @@ std::string ChartFoxChart::getURL() const {
 }
 
 std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode) {
-    if (pdfData.empty()) {
+    if (chartData.empty()) {
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto pdfSrc = std::make_shared<maps::DocumentSource>(pdfData, calibrationMetadata);
-    pdfSrc->setNightMode(nightMode);
-    return pdfSrc;
+    auto docSource = std::make_shared<maps::DocumentSource>(chartData, calibrationMetadata);
+    docSource->setNightMode(nightMode);
+    return docSource;
 }
 
 void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
-    auto pdfSrc = std::dynamic_pointer_cast<maps::DocumentSource>(src);
-    if (!pdfSrc) {
+    auto docSource = std::dynamic_pointer_cast<maps::DocumentSource>(src);
+    if (!docSource) {
         return;
     }
 
-    pdfSrc->setNightMode(nightMode);
+    docSource->setNightMode(nightMode);
 }
 
-void ChartFoxChart::attachPDF(const std::vector<uint8_t> &data) {
-    pdfData = data;
+void ChartFoxChart::setChartData(const std::vector<uint8_t> &blob) {
+    chartData = blob;
 }
 
-const std::vector<uint8_t> ChartFoxChart::getPdfData() const { return pdfData; }
+const std::vector<uint8_t> ChartFoxChart::getChartData() const {
+    return chartData;
+}
 
 } /* namespace chartfox */
