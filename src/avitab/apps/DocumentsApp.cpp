@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -122,7 +122,7 @@ void DocumentsApp::onSelect(int data) {
         fsBrowser.goDown(entry.utf8Name);
         showDirectory();
     } else {
-        createPdfTab(fsBrowser.path() + entry.utf8Name);
+        createDocumentTab(fsBrowser.path() + entry.utf8Name);
     }
 }
 
@@ -131,21 +131,21 @@ void DocumentsApp::upOneDirectory() {
     showDirectory();
 }
 
-void DocumentsApp::createPdfTab(const std::string &pdfPath) {
+void DocumentsApp::createDocumentTab(const std::string &docPath) {
     for (auto tabPage: pages) {
-        if (tabPage->path == pdfPath) {
+        if (tabPage->path == docPath) {
             tabs->setActiveTab(tabs->getTabIndex(tabPage->page));
             return;
         }
     }
 
-    std::string name = pdfPath.substr(pdfPath.find_last_of("/\\") + 1);
+    std::string name = docPath.substr(docPath.find_last_of("/\\") + 1);
     if (name.size() > 12) {
         name = name.substr(0, 9) + "...";
     }
 
-    PageInfo tab = std::make_shared<PdfPage>();
-    tab->path = pdfPath;
+    PageInfo tab = std::make_shared<DocumentPage>();
+    tab->path = docPath;
     tab->page = tabs->addTab(tabs, name);
     tab->window = std::make_shared<Window>(tab->page, name);
     tab->window->setDimensions(tab->page->getContentWidth(), tab->page->getHeight());
@@ -169,7 +169,7 @@ void DocumentsApp::createPdfTab(const std::string &pdfPath) {
     setupCallbacks(tab);
 
     try {
-        loadFile(tab, pdfPath);
+        loadFile(tab, docPath);
     } catch (const std::exception &e) {
         logger::warn("Couldn't load file: %s", e.what());
     }
@@ -202,9 +202,9 @@ void DocumentsApp::setupCallbacks(PageInfo tab) {
     tab->window->addSymbol(Widget::Symbol::ROTATE, std::bind(&DocumentsApp::onRotate, this));
 }
 
-void DocumentsApp::loadFile(PageInfo tab, const std::string &pdfPath) {
-    std::string cm = api().getChartService()->getCalibrationMetadataForFile(pdfPath);
-    tab->source = std::make_shared<maps::DocumentSource>(pdfPath, cm);
+void DocumentsApp::loadFile(PageInfo tab, const std::string &docPath) {
+    std::string cm = api().getChartService()->getCalibrationMetadataForFile(docPath);
+    tab->source = std::make_shared<maps::DocumentSource>(docPath, cm);
     tab->stitcher = std::make_shared<img::Stitcher>(tab->rasterImage, tab->source);
     tab->stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
@@ -231,7 +231,7 @@ void DocumentsApp::setTitle(PageInfo tab) {
     tab->window->setCaption(std::string("Page ") + std::to_string(page) + " / " + std::to_string(pageCount));
 }
 
-DocumentsApp::PageInfo DocumentsApp::getActivePdfPage() {
+DocumentsApp::PageInfo DocumentsApp::getActiveDocPage() {
     size_t tabIndex = tabs->getActiveTab();
     if (tabIndex > 0) {
         return pages[tabIndex - 1];
@@ -241,7 +241,7 @@ DocumentsApp::PageInfo DocumentsApp::getActivePdfPage() {
 }
 
 void DocumentsApp::onPan(int x, int y, bool start, bool end) {
-    PageInfo tab = getActivePdfPage();
+    PageInfo tab = getActiveDocPage();
     if (tab) {
         if (start) {
             tab->panStartX = x;
@@ -259,7 +259,7 @@ void DocumentsApp::onPan(int x, int y, bool start, bool end) {
 }
 
 void DocumentsApp::onNextPage() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->source) {
         if (tab->stitcher->nextPage()) {
             setTitle(tab);
@@ -271,7 +271,7 @@ void DocumentsApp::onNextPage() {
 }
 
 void DocumentsApp::onPrevPage() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->source) {
         if (tab->stitcher->prevPage()) {
             setTitle(tab);
@@ -283,35 +283,35 @@ void DocumentsApp::onPrevPage() {
 }
 
 void DocumentsApp::onPlus() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->map) {
         tab->map->zoomIn();
     }
 }
 
 void DocumentsApp::onMinus() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->map) {
         tab->map->zoomOut();
     }
 }
 
 void DocumentsApp::onScrollUp() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->map) {
         tab->stitcher->pan(0, -100);
     }
 }
 
 void DocumentsApp::onScrollDown() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->map) {
         tab->stitcher->pan(0, 100);
     }
 }
 
 void DocumentsApp::onRotate() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->stitcher) {
         tab->stitcher->rotateRight();
         if (tab->stitcher->getPageCount() > 1) {
@@ -323,7 +323,7 @@ void DocumentsApp::onRotate() {
 }
 
 bool DocumentsApp::onTimer() {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab && tab->map) {
         tab->map->doWork();
     }
@@ -331,7 +331,7 @@ bool DocumentsApp::onTimer() {
 }
 
 void DocumentsApp::onMouseWheel(int dir, int x, int y) {
-    auto tab = getActivePdfPage();
+    auto tab = getActiveDocPage();
     if (tab) {
         int hx1, hy1, hx2, hy2;
         tab->window->getHeaderArea(hx1, hy1, hx2, hy2);

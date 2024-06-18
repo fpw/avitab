@@ -32,7 +32,7 @@ class DocumentSource: public img::TileSource {
 public:
     DocumentSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
     DocumentSource(const std::string& file, std::string calibrationMetadata);
-    DocumentSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata);
+    DocumentSource(const std::vector<uint8_t> &docData, std::string calibrationMetadata);
 
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
@@ -62,7 +62,7 @@ public:
     void setNightMode(bool night);
     void rotate() override;
     double getNorthOffsetAngle() override;
-    bool isPDFSource() override { return true; };
+    bool isDocumentSource() override { return true; };
 
 private:
     std::string utf8FileName;

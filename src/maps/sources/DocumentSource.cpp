@@ -41,8 +41,8 @@ DocumentSource::DocumentSource(const std::string& file, std::string calibrationM
     loadProvidedCalibrationMetadata(calibrationMetadata);
 }
 
-DocumentSource::DocumentSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata):
-    rasterizer(pdfData)
+DocumentSource::DocumentSource(const std::vector<uint8_t> &data, std::string calibrationMetadata):
+    rasterizer(data)
 {
     loadProvidedCalibrationMetadata(calibrationMetadata);
 }

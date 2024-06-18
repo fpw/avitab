@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -75,18 +75,18 @@ void LocalFileChart::attachData(const std::vector<uint8_t> &data) {
 }
 
 std::shared_ptr<img::TileSource> LocalFileChart::createTileSource(bool nightMode) {
-    auto pdfSrc = std::make_shared<maps::DocumentSource>(path, calibrationMetadata);
-    pdfSrc->setNightMode(nightMode);
-    return pdfSrc;
+    auto docSource = std::make_shared<maps::DocumentSource>(path, calibrationMetadata);
+    docSource->setNightMode(nightMode);
+    return docSource;
 }
 
 void LocalFileChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
-    auto pdfSrc = std::dynamic_pointer_cast<maps::DocumentSource>(src);
-    if (!pdfSrc) {
+    auto docSource = std::dynamic_pointer_cast<maps::DocumentSource>(src);
+    if (!docSource) {
         return;
     }
 
-    pdfSrc->setNightMode(nightMode);
+    docSource->setNightMode(nightMode);
 }
 
 } // namespace localfile
