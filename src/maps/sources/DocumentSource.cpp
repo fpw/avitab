@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -17,13 +17,13 @@
  */
 #include <stdexcept>
 #include <sstream>
-#include "PDFSource.h"
+#include "DocumentSource.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
 
 namespace maps {
 
-PDFSource::PDFSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService):
+DocumentSource::DocumentSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService):
     utf8FileName(file),
     rasterizer(file),
     chartService(chartService)
@@ -34,20 +34,20 @@ PDFSource::PDFSource(const std::string& file, std::shared_ptr<apis::ChartService
         logger::info("No calibration: %s", e.what());
     }
 }
-PDFSource::PDFSource(const std::string& file, std::string calibrationMetadata):
+DocumentSource::DocumentSource(const std::string& file, std::string calibrationMetadata):
     utf8FileName(file),
     rasterizer(file)
 {
     loadProvidedCalibrationMetadata(calibrationMetadata);
 }
 
-PDFSource::PDFSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata):
+DocumentSource::DocumentSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata):
     rasterizer(pdfData)
 {
     loadProvidedCalibrationMetadata(calibrationMetadata);
 }
 
-void PDFSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata) {
+void DocumentSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata) {
     if (calibrationMetadata != "") {
         logger::info("Using hash-matched calibration metadata");
         calibration.fromJsonString(calibrationMetadata);
@@ -59,19 +59,19 @@ void PDFSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata)
 
 }
 
-int PDFSource::getMinZoomLevel() {
+int DocumentSource::getMinZoomLevel() {
     return -10;
 }
 
-int PDFSource::getMaxZoomLevel() {
+int DocumentSource::getMaxZoomLevel() {
     return 10;
 }
 
-int PDFSource::getInitialZoomLevel() {
+int DocumentSource::getInitialZoomLevel() {
     return -1;
 }
 
-img::Point<double> PDFSource::suggestInitialCenter(int page) {
+img::Point<double> DocumentSource::suggestInitialCenter(int page) {
     int tileSize = rasterizer.getTileSize();
     double width = rasterizer.getPageWidth(page, getInitialZoomLevel());
     double height = rasterizer.getPageHeight(page, getInitialZoomLevel());
@@ -79,20 +79,20 @@ img::Point<double> PDFSource::suggestInitialCenter(int page) {
     return img::Point<double>{width / tileSize / 2.0, height / tileSize / 2.0};
 }
 
-bool PDFSource::supportsWorldCoords() {
+bool DocumentSource::supportsWorldCoords() {
     return calibration.hasCalibration();
 }
 
-std::string PDFSource::getCalibrationReport() {
+std::string DocumentSource::getCalibrationReport() {
     return calibration.getReport();
 }
 
-img::Point<int> PDFSource::getTileDimensions(int zoom) {
+img::Point<int> DocumentSource::getTileDimensions(int zoom) {
     int tileSize = rasterizer.getTileSize();
     return img::Point<int>{tileSize, tileSize};
 }
 
-img::Point<double> PDFSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
+img::Point<double> DocumentSource::transformZoomedPoint(int page, double oldX, double oldY, int oldZoom, int newZoom) {
     double oldWidth = rasterizer.getPageWidth(page, oldZoom);
     double newWidth = rasterizer.getPageWidth(page, newZoom);
     double oldHeight = rasterizer.getPageHeight(page, oldZoom);
@@ -104,11 +104,11 @@ img::Point<double> PDFSource::transformZoomedPoint(int page, double oldX, double
     return img::Point<double>{x, y};
 }
 
-int PDFSource::getPageCount() {
+int DocumentSource::getPageCount() {
     return rasterizer.getPageCount();
 }
 
-bool PDFSource::isTileValid(int page, int x, int y, int zoom) {
+bool DocumentSource::isTileValid(int page, int x, int y, int zoom) {
     if (page < 0 || page >= rasterizer.getPageCount()) {
         return false;
     }
@@ -126,37 +126,37 @@ bool PDFSource::isTileValid(int page, int x, int y, int zoom) {
     return true;
 }
 
-std::string PDFSource::getUniqueTileName(int page, int x, int y, int zoom) {
+std::string DocumentSource::getUniqueTileName(int page, int x, int y, int zoom) {
     std::ostringstream nameStream;
     nameStream << zoom << "/" << x << "/" << y << "/" << page;
     return nameStream.str();
 }
 
-std::unique_ptr<img::Image> PDFSource::loadTileImage(int page, int x, int y, int zoom) {
+std::unique_ptr<img::Image> DocumentSource::loadTileImage(int page, int x, int y, int zoom) {
     return rasterizer.loadTile(page, x, y, zoom, nightMode);
 }
 
-void PDFSource::cancelPendingLoads() {
+void DocumentSource::cancelPendingLoads() {
 }
 
-void PDFSource::resumeLoading() {
+void DocumentSource::resumeLoading() {
 }
 
-void PDFSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {
+void DocumentSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {
     int tileSize = rasterizer.getTileSize();
     double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
     double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
     calibration.setPoint1(normX, normY, lat, lon);
 }
 
-void PDFSource::attachCalibration2(double x, double y, double lat, double lon, int zoom) {
+void DocumentSource::attachCalibration2(double x, double y, double lat, double lon, int zoom) {
     int tileSize = rasterizer.getTileSize();
     double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
     double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
     calibration.setPoint2(normX, normY, lat, lon);
 }
 
-void PDFSource::attachCalibration3Point(double x, double y, double lat, double lon, int zoom)
+void DocumentSource::attachCalibration3Point(double x, double y, double lat, double lon, int zoom)
 {
     int tileSize = rasterizer.getTileSize();
     double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
@@ -170,7 +170,7 @@ void PDFSource::attachCalibration3Point(double x, double y, double lat, double l
     }
 }
 
-void PDFSource::attachCalibration3Angle(double angle)
+void DocumentSource::attachCalibration3Angle(double angle)
 {
     calibration.setAngle(angle);
     try {
@@ -180,11 +180,11 @@ void PDFSource::attachCalibration3Angle(double angle)
     }
 }
 
-img::Point<int> PDFSource::getPageDimensions(int page, int zoom) {
+img::Point<int> DocumentSource::getPageDimensions(int page, int zoom) {
     return img::Point<int>{rasterizer.getPageWidth(page, zoom), rasterizer.getPageHeight(page, zoom)};
 }
 
-img::Point<double> PDFSource::worldToXY(double lon, double lat, int zoom) {
+img::Point<double> DocumentSource::worldToXY(double lon, double lat, int zoom) {
     int tileSize = rasterizer.getTileSize();
 
     auto normXY = calibration.worldToPixels(lon, lat);
@@ -195,7 +195,7 @@ img::Point<double> PDFSource::worldToXY(double lon, double lat, int zoom) {
     return img::Point<double>{x, y};
 }
 
-img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
+img::Point<double> DocumentSource::xyToWorld(double x, double y, int zoom) {
     int tileSize = rasterizer.getTileSize();
 
     double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
@@ -204,13 +204,13 @@ img::Point<double> PDFSource::xyToWorld(double x, double y, int zoom) {
     return calibration.pixelsToWorld(normX, normY);
 }
 
-void PDFSource::rotate() {
+void DocumentSource::rotate() {
     rotateAngle = (rotateAngle + 90) % 360;
     calibration.setPreRotate(rotateAngle);
     rasterizer.setPreRotate(rotateAngle);
 }
 
-void PDFSource::storeCalibration() {
+void DocumentSource::storeCalibration() {
     static const bool SAVE_BAD_JSON = false; // true useful for debug
     if (!calibration.hasCalibration() && !SAVE_BAD_JSON) {
         // Don't save JSON
@@ -226,7 +226,7 @@ void PDFSource::storeCalibration() {
     }
 }
 
-void PDFSource::findAndLoadCalibration() {
+void DocumentSource::findAndLoadCalibration() {
     // Try a co-located name-matched json file for calibration
     std::string calFileName = utf8FileName + ".json";
     fs::ifstream jsonFile(fs::u8path(calFileName));
@@ -267,11 +267,11 @@ void PDFSource::findAndLoadCalibration() {
     rasterizer.setPreRotate(rotateAngle);
 }
 
-void PDFSource::setNightMode(bool night) {
+void DocumentSource::setNightMode(bool night) {
     nightMode = night;
 }
 
-double PDFSource::getNorthOffsetAngle() {
+double DocumentSource::getNorthOffsetAngle() {
    return calibration.getNorthOffset();
 }
 

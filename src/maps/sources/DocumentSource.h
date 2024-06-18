@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_MAPS_PDFSOURCE_H_
-#define SRC_MAPS_PDFSOURCE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -29,11 +28,11 @@
 
 namespace maps {
 
-class PDFSource: public img::TileSource {
+class DocumentSource: public img::TileSource {
 public:
-    PDFSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
-    PDFSource(const std::string& file, std::string calibrationMetadata);
-    PDFSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata);
+    DocumentSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
+    DocumentSource(const std::string& file, std::string calibrationMetadata);
+    DocumentSource(const std::vector<uint8_t> &pdfData, std::string calibrationMetadata);
 
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
@@ -80,5 +79,3 @@ private:
 };
 
 } /* namespace maps */
-
-#endif /* SRC_MAPS_PDFSOURCE_H_ */

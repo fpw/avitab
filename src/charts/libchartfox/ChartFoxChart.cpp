@@ -18,7 +18,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include "ChartFoxChart.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/DocumentSource.h"
 #include "src/Logger.h"
 
 namespace chartfox {
@@ -87,13 +87,13 @@ std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode)
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData, calibrationMetadata);
+    auto pdfSrc = std::make_shared<maps::DocumentSource>(pdfData, calibrationMetadata);
     pdfSrc->setNightMode(nightMode);
     return pdfSrc;
 }
 
 void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
-    auto pdfSrc = std::dynamic_pointer_cast<maps::PDFSource>(src);
+    auto pdfSrc = std::dynamic_pointer_cast<maps::DocumentSource>(src);
     if (!pdfSrc) {
         return;
     }
