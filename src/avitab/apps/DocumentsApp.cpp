@@ -30,7 +30,7 @@ DocumentsApp::DocumentsApp(FuncsPtr appFuncs, const std::string &title, const st
 }
 
 void DocumentsApp::Run(const std::string &dir) {
-    api().getSettings()->loadPdfReadingConfig(configGroup, settings);
+    api().getSettings()->loadDocReadingConfig(configGroup, settings);
     browseStartDirectory = dir;
     fsBrowser.goTo(browseStartDirectory);
     overlays = std::make_shared<maps::OverlayConfig>();
@@ -97,7 +97,7 @@ void DocumentsApp::onSettingsToggle(bool forceClose) {
     }
     bool show = forceClose ? false : !settingsContainer->isVisible();
     if (!show) {
-        api().getSettings()->savePdfReadingConfig(configGroup, settings);
+        api().getSettings()->saveDocReadingConfig(configGroup, settings);
         api().getSettings()->saveAll();
     }
     settingsContainer->setVisible(show);
