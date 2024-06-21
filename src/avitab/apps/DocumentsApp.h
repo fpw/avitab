@@ -104,7 +104,7 @@ private:
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
 
-    Settings::PdfReadingConfig  settings;
+    Settings::DocumentReadingConfig  settings;
     std::shared_ptr<Container> settingsContainer;
     std::shared_ptr<Label> settingsLabel;
     std::shared_ptr<Checkbox> mouseWheelScrollsCheckbox;
