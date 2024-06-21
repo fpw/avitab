@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <algorithm>
+#include <regex>
 
 namespace maps {
 
@@ -196,7 +197,19 @@ std::string OnlineSlippySource::getTileURL(bool randomHost, int x, int y, int zo
     if (randomHost) {
         nameStream << tileServers[hostIndex];
     } else {
-        nameStream << tileServers[0];
+        std::regex replaceChars("[=/#]");
+        tileUrl = tileUrl.replace(0, 1, ""); // Remove leading '/'
+        if (tileUrl.find("?") != std::string::npos) {
+            // If there's a query string, massage tileUrl
+            std::string hostPath = tileUrl.substr(0, tileUrl.find("?"));
+            std::string queryString = tileUrl.substr(tileUrl.find("?") + 1, std::string::npos);
+            hostPath = std::regex_replace(hostPath, replaceChars, "_");
+            queryString = std::regex_replace(queryString, replaceChars, "_");
+            tileUrl = queryString + "/" + hostPath;
+        } else {
+            tileUrl = std::regex_replace(tileUrl, replaceChars, "_");
+        }
+        nameStream << tileServers[0] << "/";
     }
 
     nameStream << tileUrl;
