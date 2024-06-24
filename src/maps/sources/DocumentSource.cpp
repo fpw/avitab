@@ -28,8 +28,8 @@ DocumentSource::DocumentSource(const std::string& file)
 {
 }
  
-DocumentSource::DocumentSource(const std::vector<uint8_t> &data)
-:   rasterizer(data)
+DocumentSource::DocumentSource(const std::vector<uint8_t> &data, const std::string type)
+:   rasterizer(data, type)
 {
 }
 

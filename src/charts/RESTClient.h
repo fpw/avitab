@@ -54,11 +54,13 @@ public:
     std::string getRedirect(const std::string &url, bool &cancel);
     long head(const std::string &Turl, bool &cancel);
 
+    std::string getContentType() const;
     std::map<std::string, std::string> getCookies() const;
 
 private:
     bool verbose = true;
     std::vector<uint8_t> downloadBuf;
+    std::string contentType;
     std::map<std::string, std::string> cookieJar;
     std::string referrer;
     std::string bearer;
