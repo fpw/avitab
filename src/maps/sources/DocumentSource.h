@@ -30,9 +30,8 @@ namespace maps {
 
 class DocumentSource: public img::TileSource {
 public:
-    DocumentSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService = NULL);
-    DocumentSource(const std::string& file, std::string calibrationMetadata);
-    DocumentSource(const std::vector<uint8_t> &docData, std::string calibrationMetadata);
+    DocumentSource(const std::string& file);
+    DocumentSource(const std::vector<uint8_t> &docData);
 
     int getMinZoomLevel() override;
     int getMaxZoomLevel() override;
@@ -54,28 +53,23 @@ public:
     img::Point<double> worldToXY(double lon, double lat, int zoom) override;
     img::Point<double> xyToWorld(double x, double y, int zoom) override;
 
-    void attachCalibration1(double x, double y, double lat, double lon, int zoom) override;
-    void attachCalibration2(double x, double y, double lat, double lon, int zoom) override;
-    void attachCalibration3Point(double x, double y, double lat, double lon, int zoom) override;
-    void attachCalibration3Angle(double angle) override;
-
     void setNightMode(bool night);
     void rotate() override;
     double getNorthOffsetAngle() override;
     bool isDocumentSource() override { return true; };
 
-private:
-    std::string utf8FileName;
+protected:
+    void loadProvidedCalibrationMetadata(std::string calibrationMetadata);
+    void rotateFromCalibration();
+
+protected:
     img::Rasterizer rasterizer;
     Calibration calibration;
+
+private:
     bool nightMode = false;
     int rotateAngle = 0;
-    apis::Crypto crypto;
-    std::shared_ptr<apis::ChartService> chartService;
 
-    void loadProvidedCalibrationMetadata(std::string calibrationMetadata);
-    void storeCalibration();
-    void findAndLoadCalibration();
 };
 
 } /* namespace maps */

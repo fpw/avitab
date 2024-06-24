@@ -204,7 +204,7 @@ void DocumentsApp::setupCallbacks(PageInfo tab) {
 
 void DocumentsApp::loadFile(PageInfo tab, const std::string &docPath) {
     std::string cm = api().getChartService()->getCalibrationMetadataForFile(docPath);
-    tab->source = std::make_shared<maps::DocumentSource>(docPath, cm);
+    tab->source = std::make_shared<maps::LocalFileSource>(docPath, cm);
     tab->stitcher = std::make_shared<img::Stitcher>(tab->rasterImage, tab->source);
     tab->stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 

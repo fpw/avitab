@@ -23,28 +23,14 @@
 
 namespace maps {
 
-DocumentSource::DocumentSource(const std::string& file, std::shared_ptr<apis::ChartService> chartService):
-    utf8FileName(file),
-    rasterizer(file),
-    chartService(chartService)
+DocumentSource::DocumentSource(const std::string& file)
+:   rasterizer(file)
 {
-    try {
-        findAndLoadCalibration();
-    } catch (const std::exception &e) {
-        logger::info("No calibration: %s", e.what());
-    }
 }
-DocumentSource::DocumentSource(const std::string& file, std::string calibrationMetadata):
-    utf8FileName(file),
-    rasterizer(file)
+ 
+DocumentSource::DocumentSource(const std::vector<uint8_t> &data)
+:   rasterizer(data)
 {
-    loadProvidedCalibrationMetadata(calibrationMetadata);
-}
-
-DocumentSource::DocumentSource(const std::vector<uint8_t> &data, std::string calibrationMetadata):
-    rasterizer(data)
-{
-    loadProvidedCalibrationMetadata(calibrationMetadata);
 }
 
 void DocumentSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata) {
@@ -57,6 +43,11 @@ void DocumentSource::loadProvidedCalibrationMetadata(std::string calibrationMeta
         logger::warn("No calibration metadata");
     }
 
+}
+
+void DocumentSource::rotateFromCalibration() {
+    rotateAngle = calibration.getPreRotate();
+    rasterizer.setPreRotate(rotateAngle);
 }
 
 int DocumentSource::getMinZoomLevel() {
@@ -142,44 +133,6 @@ void DocumentSource::cancelPendingLoads() {
 void DocumentSource::resumeLoading() {
 }
 
-void DocumentSource::attachCalibration1(double x, double y, double lat, double lon, int zoom) {
-    int tileSize = rasterizer.getTileSize();
-    double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
-    double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
-    calibration.setPoint1(normX, normY, lat, lon);
-}
-
-void DocumentSource::attachCalibration2(double x, double y, double lat, double lon, int zoom) {
-    int tileSize = rasterizer.getTileSize();
-    double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
-    double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
-    calibration.setPoint2(normX, normY, lat, lon);
-}
-
-void DocumentSource::attachCalibration3Point(double x, double y, double lat, double lon, int zoom)
-{
-    int tileSize = rasterizer.getTileSize();
-    double normX = x * tileSize / rasterizer.getPageWidth(0, zoom);
-    double normY = y * tileSize / rasterizer.getPageHeight(0, zoom);
-    calibration.setPoint3(normX, normY, lat, lon);
-
-    try {
-        storeCalibration();
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't store calibration: %s", e.what());
-    }
-}
-
-void DocumentSource::attachCalibration3Angle(double angle)
-{
-    calibration.setAngle(angle);
-    try {
-        storeCalibration();
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't store calibration: %s", e.what());
-    }
-}
-
 img::Point<int> DocumentSource::getPageDimensions(int page, int zoom) {
     return img::Point<int>{rasterizer.getPageWidth(page, zoom), rasterizer.getPageHeight(page, zoom)};
 }
@@ -207,63 +160,6 @@ img::Point<double> DocumentSource::xyToWorld(double x, double y, int zoom) {
 void DocumentSource::rotate() {
     rotateAngle = (rotateAngle + 90) % 360;
     calibration.setPreRotate(rotateAngle);
-    rasterizer.setPreRotate(rotateAngle);
-}
-
-void DocumentSource::storeCalibration() {
-    static const bool SAVE_BAD_JSON = false; // true useful for debug
-    if (!calibration.hasCalibration() && !SAVE_BAD_JSON) {
-        // Don't save JSON
-        return;
-    }
-    try {
-        calibration.setHash(crypto.getFileSha256(utf8FileName));
-        std::string calFileName = utf8FileName + ".json";
-        fs::ofstream jsonFile(fs::u8path(calFileName));
-        jsonFile << calibration.toString();
-    } catch (const std::exception &e) {
-        logger::warn("Couldn't store calibration: %s", e.what());
-    }
-}
-
-void DocumentSource::findAndLoadCalibration() {
-    // Try a co-located name-matched json file for calibration
-    std::string calFileName = utf8FileName + ".json";
-    fs::ifstream jsonFile(fs::u8path(calFileName));
-
-    if (jsonFile.good()) {
-        logger::info("Loaded co-located json calibration file for %s", utf8FileName.c_str());
-        std::string jsonStr((std::istreambuf_iterator<char>(jsonFile)),
-                             std::istreambuf_iterator<char>());
-        calibration.fromJsonString(jsonStr);
-    } else {
-        // Try a co-located name-matched Google Earth KML file for calibration
-        std::string kmlFileName = utf8FileName + ".kml";
-        fs::ifstream kmlFile(fs::u8path(kmlFileName));
-        if (kmlFile.good()) {
-            logger::info("Loaded co-located kml calibration file for %s", utf8FileName.c_str());
-            std::string kmlStr((std::istreambuf_iterator<char>(kmlFile)),
-                                std::istreambuf_iterator<char>());
-            calibration.fromKmlString(kmlStr);
-            // Store a json file for future use. Might need manual edit for preRotate
-            storeCalibration();
-        } else {
-            // Try finding a hash-matched json file. Doesn't need to be name-matched
-            if (!chartService) {
-                return;
-            }
-            std::string calibrationMetadata = chartService->getCalibrationMetadataForFile(utf8FileName);
-            if (calibrationMetadata != "") {
-                logger::info("Loaded hash-mapped json calibration file for %s", utf8FileName.c_str());
-                calibration.fromJsonString(calibrationMetadata);
-            } else {
-                logger::warn("No json or kml calibration file for %s", utf8FileName.c_str());
-                return;
-            }
-        }
-    }
-
-    rotateAngle = calibration.getPreRotate();
     rasterizer.setPreRotate(rotateAngle);
 }
 
