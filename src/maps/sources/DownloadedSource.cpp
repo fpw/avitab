@@ -20,8 +20,8 @@
 
 namespace maps {
 
-DownloadedSource::DownloadedSource(const std::vector<uint8_t> &data, std::string calibrationMetadata)
-:   DocumentSource(data)
+DownloadedSource::DownloadedSource(const std::vector<uint8_t> &data, const std::string type, std::string calibrationMetadata)
+:   DocumentSource(data, type)
 {
     loadProvidedCalibrationMetadata(calibrationMetadata);
 }

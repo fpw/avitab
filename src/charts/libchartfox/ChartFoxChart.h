@@ -50,7 +50,7 @@ public:
     void setURL(const std::string url);
     std::string getURL() const;
 
-    void setChartData(const std::vector<uint8_t> &blob);
+    void setChartData(const std::vector<uint8_t> &blob, const std::string type);
     const std::vector<uint8_t> getChartData() const;
 
 private:
@@ -62,6 +62,7 @@ private:
     apis::ChartCategory category;
     std::string url;
     std::vector<uint8_t> chartData;
+    std::string chartType;
     std::string calibrationMetadata;
 };
 

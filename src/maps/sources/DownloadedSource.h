@@ -24,7 +24,7 @@ namespace maps {
 
 class DownloadedSource: public DocumentSource {
 public:
-    DownloadedSource(const std::vector<uint8_t> &docData, std::string calibrationMetadata);
+    DownloadedSource(const std::vector<uint8_t> &data, const std::string type, std::string calibrationMetadata);
     
 };
 

@@ -173,7 +173,8 @@ void ChartFoxAPI::loadChart(std::shared_ptr<ChartFoxChart> chart) {
         }
     }
     auto blob = oauth->getBinary(chartUrl);
-    chart->setChartData(blob);
+    auto type = oauth->getContentType();
+    chart->setChartData(blob, type);
 }
 
 } /* namespace chartfox */
