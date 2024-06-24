@@ -25,7 +25,7 @@
 #include "src/platform/strtod.h"
 #include "src/maps/sources/OnlineSlippySource.h"
 #include "src/maps/sources/GeoTIFFSource.h"
-#include "src/maps/sources/DocumentSource.h"
+#include "src/maps/sources/LocalFileSource.h"
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
 
@@ -205,7 +205,7 @@ void MapApp::selectMercator() {
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
             try {
-                auto docSource = std::make_shared<maps::DocumentSource>(selectedUTF8, api().getChartService());
+                auto docSource = std::make_shared<maps::LocalFileSource>(selectedUTF8, api().getChartService());
                 setTileSource(docSource);
                 fileChooser.reset();
                 chooserContainer->setVisible(false);
