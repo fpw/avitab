@@ -67,6 +67,7 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
     } else {
         LOG_VERBOSE(verbose, "GET '%s'", url.c_str());
     }
+    contentType.clear();
 
     CURL *curl = createCURL(url, cancel);
 
@@ -110,6 +111,11 @@ std::vector<uint8_t> RESTClient::getBinary(const std::string& url, bool& cancel)
         curl_easy_cleanup(curl);
         logger::warn("HTTP request: Status %d", httpStatus);
         throw HTTPException(httpStatus);
+    }
+
+    struct curl_header *h;
+    if (curl_easy_header(curl, "Content-Type", 0, CURLH_HEADER, -1, &h) == CURLHE_OK) {
+        contentType = h->value;
     }
 
     curl_easy_cleanup(curl);
@@ -202,6 +208,10 @@ std::string RESTClient::post(const std::string& url, const std::map<std::string,
     curl_easy_cleanup(curl);
 
     return content;
+}
+
+std::string RESTClient::getContentType() const {
+    return contentType;
 }
 
 std::map<std::string, std::string> RESTClient::getCookies() const {

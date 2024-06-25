@@ -29,9 +29,9 @@ Rasterizer::Rasterizer(const std::string &utf8Path) {
     loadFile(utf8Path);
 }
 
-Rasterizer::Rasterizer(const std::vector<uint8_t> &data) {
+Rasterizer::Rasterizer(const std::vector<uint8_t> &data, const std::string type) {
     initFitz();
-    loadMemory(data);
+    loadMemory(data, type);
 }
 
 void Rasterizer::initFitz() {
@@ -59,12 +59,13 @@ void Rasterizer::loadFile(const std::string& file) {
     loadDocument();
 }
 
-void Rasterizer::loadMemory(const std::vector<uint8_t> &data) {
+void Rasterizer::loadMemory(const std::vector<uint8_t> &data, const std::string type) {
     dataBuf = data;
+    const char *mimeType(type.empty() ? "application/pdf" : type.c_str());
 
     fz_try(ctx) {
         stream = fz_open_memory(ctx, dataBuf.data(), dataBuf.size());
-        doc = fz_open_document_with_stream(ctx, "application/pdf", stream);
+        doc = fz_open_document_with_stream(ctx, mimeType, stream);
     } fz_catch(ctx) {
         if (stream) {
             fz_drop_stream(ctx, stream);

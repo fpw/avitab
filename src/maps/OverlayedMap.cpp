@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -55,7 +55,7 @@ OverlayedMap::OverlayedMap(std::shared_ptr<img::Stitcher> stitchedMap, std::shar
     stitcher->setPreRotateCallback([this] () { drawOverlays(); });
     stitcher->setRedrawCallback([this] () {
         copyrightStamp.applyStamp(*(stitcher->getTargetImage()), 0);
-        if (tileSource->isPDFSource() && tileSource->supportsWorldCoords()) {
+        if (tileSource->isDocumentSource() && tileSource->supportsWorldCoords()) {
             drawCompass();
         }
         if (onOverlaysDrawn) {

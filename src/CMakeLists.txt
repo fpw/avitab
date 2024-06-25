@@ -52,6 +52,7 @@ target_link_libraries(avitab_common
 if(WIN32)
     target_link_libraries(avitab_common
         ws2_32
+        bcrypt
     )
 endif(WIN32)
 

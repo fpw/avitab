@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,7 @@
 #include "src/platform/strtod.h"
 #include "src/maps/sources/OnlineSlippySource.h"
 #include "src/maps/sources/GeoTIFFSource.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/LocalFileSource.h"
 #include "src/maps/sources/XPlaneSource.h"
 #include "src/maps/sources/EPSGSource.h"
 
@@ -205,8 +205,8 @@ void MapApp::selectMercator() {
     fileChooser->setSelectCallback([this] (const std::string &selectedUTF8) {
         api().executeLater([this, selectedUTF8] () {
             try {
-                auto pdfSource = std::make_shared<maps::PDFSource>(selectedUTF8, api().getChartService());
-                setTileSource(pdfSource);
+                auto docSource = std::make_shared<maps::LocalFileSource>(selectedUTF8, api().getChartService());
+                setTileSource(docSource);
                 fileChooser.reset();
                 chooserContainer->setVisible(false);
                 if (savedSettings->getGeneralSetting<bool>("show_calibration_msg_on_load")) {

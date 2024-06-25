@@ -30,7 +30,7 @@ namespace img {
 class Rasterizer {
 public:
     Rasterizer(const std::string &utf8Path);
-    Rasterizer(const std::vector<uint8_t> &data);
+    Rasterizer(const std::vector<uint8_t> &data, const std::string type);
 
     int getTileSize();
     int getPageWidth(int page, int zoom);
@@ -56,7 +56,7 @@ private:
 
     void initFitz();
     void loadFile(const std::string &file);
-    void loadMemory(const std::vector<uint8_t> &data);
+    void loadMemory(const std::vector<uint8_t> &data, const std::string type);
     void loadDocument();
     void loadPage(int page);
     float zoomToScale(int zoom) const;

@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -113,8 +113,8 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
         auto bgChart = std::dynamic_pointer_cast<chartfox::ChartFoxChart>(chart);
         if (bgChart) {
             chartFox->loadChart(bgChart);
-            auto pdfData = bgChart->getPdfData();
-            auto in = std::string((char *)pdfData.data(), pdfData.size());
+            auto blob = bgChart->getChartData();
+            auto in = std::string((char *)blob.data(), blob.size());
             auto hash = crypto.sha256String(in);
             std::string calibrationMetadata = getCalibrationMetadataForHash(hash);
             bgChart->setCalibrationMetadata(calibrationMetadata);

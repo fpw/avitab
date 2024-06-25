@@ -172,8 +172,9 @@ void ChartFoxAPI::loadChart(std::shared_ptr<ChartFoxChart> chart) {
             return;
         }
     }
-    auto pdfData = oauth->getBinary(chartUrl);
-    chart->attachPDF(pdfData);
+    auto blob = oauth->getBinary(chartUrl);
+    auto type = oauth->getContentType();
+    chart->setChartData(blob, type);
 }
 
 } /* namespace chartfox */

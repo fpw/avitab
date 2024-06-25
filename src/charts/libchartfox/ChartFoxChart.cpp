@@ -18,7 +18,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include "ChartFoxChart.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/DownloadedSource.h"
 #include "src/Logger.h"
 
 namespace chartfox {
@@ -83,28 +83,31 @@ std::string ChartFoxChart::getURL() const {
 }
 
 std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode) {
-    if (pdfData.empty()) {
+    if (chartData.empty()) {
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto pdfSrc = std::make_shared<maps::PDFSource>(pdfData, calibrationMetadata);
-    pdfSrc->setNightMode(nightMode);
-    return pdfSrc;
+    auto docSource = std::make_shared<maps::DownloadedSource>(chartData, chartType, calibrationMetadata);
+    docSource->setNightMode(nightMode);
+    return docSource;
 }
 
 void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) {
-    auto pdfSrc = std::dynamic_pointer_cast<maps::PDFSource>(src);
-    if (!pdfSrc) {
+    auto docSource = std::dynamic_pointer_cast<maps::DocumentSource>(src);
+    if (!docSource) {
         return;
     }
 
-    pdfSrc->setNightMode(nightMode);
+    docSource->setNightMode(nightMode);
 }
 
-void ChartFoxChart::attachPDF(const std::vector<uint8_t> &data) {
-    pdfData = data;
+void ChartFoxChart::setChartData(const std::vector<uint8_t> &blob, const std::string type) {
+    chartData = blob;
+    chartType = type;
 }
 
-const std::vector<uint8_t> ChartFoxChart::getPdfData() const { return pdfData; }
+const std::vector<uint8_t> ChartFoxChart::getChartData() const {
+    return chartData;
+}
 
 } /* namespace chartfox */

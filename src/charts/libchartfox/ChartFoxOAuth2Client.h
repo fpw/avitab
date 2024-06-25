@@ -47,6 +47,7 @@ public:
 
     std::string get(const std::string &url);
     std::vector<uint8_t> getBinary(const std::string &url);
+    std::string getContentType() const;
     long getTimestamp(const std::string &url);
 
     virtual ~ChartFoxOAuth2Client();

@@ -169,6 +169,11 @@ std::vector<uint8_t> ChartFoxOAuth2Client::getBinary(const std::string& url)
     return res;
 }
 
+std::string ChartFoxOAuth2Client::getContentType() const
+{
+    return restClient.getContentType();
+}
+
 long ChartFoxOAuth2Client::getTimestamp(const std::string& url)
 {
     long res;

@@ -38,11 +38,11 @@ public:
 
     std::shared_ptr<maps::OverlayConfig> getOverlayConfig();
 
-    struct PdfReadingConfig {
+    struct DocumentReadingConfig {
         bool mouseWheelScrollsMultiPage = false;
     };
-    void loadPdfReadingConfig(const std::string appName, PdfReadingConfig &config);
-    void savePdfReadingConfig(const std::string appName, PdfReadingConfig &config);
+    void loadDocReadingConfig(const std::string appName, DocumentReadingConfig &config);
+    void saveDocReadingConfig(const std::string appName, DocumentReadingConfig &config);
 
     void saveWindowRect(const WindowRect &rect);
     WindowRect getWindowRect();
@@ -51,7 +51,7 @@ public:
 
 private:
     void init();
-    void upgrade();
+    void upgrade1to2();
     void load();
     void save();
 
