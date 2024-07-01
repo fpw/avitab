@@ -25,7 +25,6 @@
 #include <future>
 #include <atomic>
 #include "src/world/LoadManager.h"
-#include "src/libxdata/XData.h"
 #include "src/gui_toolkit/LVGLToolkit.h"
 #include "EnvData.h"
 #include "Config.h"
@@ -79,6 +78,7 @@ public:
     void runInEnvironment(EnvironmentCallback cb);
     virtual std::string getFontDirectory() = 0;
     virtual std::string getProgramPath() = 0;
+    virtual std::string getDataRootPath() = 0;
     virtual std::string getSettingsDir() = 0;
     virtual std::string getFlightPlansPath() = 0;
     virtual std::string getEarthTexturePath() = 0;
@@ -103,10 +103,10 @@ public:
 
 protected:
     void runEnvironmentCallbacks();
-    void setWorldManager(std::shared_ptr<world::LoadManager> mgr);
+    virtual std::shared_ptr<world::LoadManager> createParsingWorldManager() = 0;
     std::shared_ptr<world::LoadManager> getWorldManager();
-    void sendUserFixesFilenameToWorldMgr(std::string filename);
     void setLastFrameTime(float t);
+    virtual bool canUseNavDb(const std::string simCode) = 0;
 
 private:
     std::shared_ptr<Config> config;

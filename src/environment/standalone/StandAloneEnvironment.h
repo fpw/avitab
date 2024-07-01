@@ -32,9 +32,11 @@ public:
     void eventLoop();
 
     // Must be called from the environment thread - do not call from GUI thread!
+    std::shared_ptr<world::LoadManager> createParsingWorldManager() override;
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
 
     // Can be called from any thread
+    std::string getDataRootPath() override;
     std::string getFontDirectory() override;
     std::string getEarthTexturePath() override;
     std::string getFlightPlansPath() override;
@@ -44,6 +46,9 @@ public:
     Location getAircraftLocation(AircraftID id) override;
 
     virtual ~StandAloneEnvironment();
+
+protected:
+    bool canUseNavDb(const std::string simCode) override;
 
 protected:
     std::string xplaneRootPath;
