@@ -147,7 +147,7 @@ void OverlayedMap::getCenterLocation(double& latitude, double& longitude) {
 }
 
 float OverlayedMap::getVerticalRange() const {
-    auto rangeLat = (topLat - bottomLat) * stitcher->getTargetImage()->getHeight() / mapImage->getHeight();
+    auto rangeLat = (maxLat - minLat) * stitcher->getTargetImage()->getHeight() / mapImage->getHeight();
     auto rangeKM = rangeLat * world::LAT_TO_KM;
     return (float)rangeKM * 1000;
 }
@@ -311,22 +311,22 @@ void OverlayedMap::drawNavWorldOverlays() {
     }
 
     // Don't overlay anything if zoomed out beyond half of the globe
-    if (rightLon > (leftLon + 180)) return;
-    if ((getNorthOffset() == 0) && ((rightLon < leftLon)) && ((rightLon + 360) > (leftLon + 180))) return;
+    if (bottomRightLon > (topLeftLon + 180)) return;
+    if ((getNorthOffset() == 0) && ((bottomRightLon < topLeftLon)) && ((bottomRightLon + 360) > (topLeftLon + 180))) return;
 
     // Extend the area of the search to ensure that any NAV data that might be partially visible
     // at the edges of the window will be included, even if the specific NAV item ends up being
     // entirely off-screen.
     double marginDegrees = (double)MAX_ILS_RANGE_NM / MAX_NM_PER_DEGREE;
-    world::Location searchBottomLeft(bottomLat - marginDegrees, leftLon - marginDegrees);
-    world::Location searchTopRight(topLat + marginDegrees, rightLon + marginDegrees);
+    world::Location searchMin(minLat - marginDegrees, minLon - marginDegrees);
+    world::Location searchMax(maxLat + marginDegrees, maxLon + marginDegrees);
 
     // Find out what is the likely maximum density of the area being shown, and use this value
     // to configure filters for the node search and graphic/text drawing styles.
-    maxNodeDensity = navWorld->maxDensity(searchBottomLeft, searchTopRight);
+    maxNodeDensity = navWorld->maxDensity(searchMin, searchMax);
     LOG_INFO(DBG_OVERLAYS,"Estimating %d nodes in (%0.2f,%0.2f) -> (%0.2f,%0.2f)",
-                    maxNodeDensity, searchBottomLeft.longitude, searchBottomLeft.latitude,
-                    searchTopRight.longitude, searchTopRight.latitude);
+                    maxNodeDensity, searchMin.longitude, searchMin.latitude,
+                    searchMax.longitude, searchMax.latitude);
     if (maxNodeDensity > MAX_VISIT_OBJECTS_IN_FRAME) {
         return;
     }
@@ -353,7 +353,7 @@ void OverlayedMap::drawNavWorldOverlays() {
     int reusedOverlays = 0; // this is only used for cache hit statistics
     std::shared_ptr<NavNodeToOverlayMap> nodes = std::make_shared<NavNodeToOverlayMap>();
 
-    navWorld->visitNodes(searchBottomLeft, searchTopRight,
+    navWorld->visitNodes(searchMin, searchMax,
                         [this, &reusedOverlays, nodes] (const world::NavNode *node) {
                             // coarse filtering has been done by the NAV world, but
                             // further detailed filtering is needed here
@@ -525,14 +525,23 @@ void OverlayedMap::positionToPixel(double lat, double lon, int& px, int& py, int
 void OverlayedMap::updateMapAttributes()
 {
     // Calculate scaling from a hybrid of horizontal and vertical axes
-    pixelToPosition(0, 0, topLat, leftLon);
-    pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomLat, rightLon);
-    world::Location bl(bottomLat, leftLon);
-    world::Location tr(topLat, rightLon);
+    pixelToPosition(0, 0, topLeftLat, topLeftLon);
+    pixelToPosition(mapImage->getWidth() - 1, mapImage->getHeight() - 1, bottomRightLat, bottomRightLon);
+    world::Location br(bottomRightLat, bottomRightLon);
+    world::Location tl(topLeftLat, topLeftLon);
     double diagonalPixels = sqrt(pow(mapImage->getWidth(), 2) + pow(mapImage->getHeight(), 2));
-    double kmPerPixel = (bl.distanceTo(tr) / diagonalPixels) / 1000;
+    double kmPerPixel = (br.distanceTo(tl) / diagonalPixels) / 1000;
     mapScaleNMperPixel = kmPerPixel * world::KM_TO_NM;
     mapWidthNM = mapScaleNMperPixel * mapImage->getWidth();
+
+    double topRightLat, topRightLon, bottomLeftLat, bottomLeftLon;
+    pixelToPosition(mapImage->getWidth() - 1, 0, bottomLeftLat, bottomLeftLon);
+    pixelToPosition(0, mapImage->getHeight() - 1, topRightLat, topRightLon);
+
+    minLat = std::min(std::min(topLeftLat, bottomRightLat), std::min(topRightLat, bottomLeftLat));
+    minLon = std::min(std::min(topLeftLon, bottomRightLon), std::min(topRightLon, bottomLeftLon));
+    maxLat = std::max(std::max(topLeftLat, bottomRightLat), std::max(topRightLat, bottomLeftLat));
+    maxLon = std::max(std::min(topLeftLon, bottomRightLon), std::max(topRightLon, bottomLeftLon));
 }
 
 void OverlayedMap::pixelToPosition(int px, int py, double &lat,

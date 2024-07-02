@@ -224,12 +224,20 @@ bool fileExists(const std::string& utf8Path) {
 
 void mkdir(const std::string& utf8Path) {
     auto path = fs::u8path(utf8Path);
-    fs::create_directory(path);
+    try {
+        fs::create_directory(path);
+    } catch (const std::exception &e) {
+        LOG_ERROR("%s", e.what());
+    }
 }
 
 void mkpath(const std::string& utf8Path) {
     auto path = fs::u8path(utf8Path);
-    fs::create_directories(path);
+    try {
+        fs::create_directories(path);
+    } catch (const std::exception &e) {
+        LOG_ERROR("%s", e.what());
+    }
 }
 
 void removeFile(const std::string& utf8Path) {

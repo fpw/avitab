@@ -299,8 +299,22 @@ void Calibration::logDebugInfo() const {
     LOG_INFO(dbg, "leP2W reversed %+4.10f, %+4.10f, %+4.10f,  %+4.10f, %+4.10f, %+4.10f",
             axr, bxr, cxr,  ayr, byr, cyr);
 
-    // Recalculate reference points
     img::Point<double> p, w;
+    LOG_INFO(dbg, "Corners P2W -> W2P:");
+    w = pixelsToWorld(0, 0);
+    p = worldToPixels(w.x, w.y);
+    LOG_INFO(dbg, " 0, 0 -> %9.9lf, %9.9lf -> %9.9lf, %9.9lf", w.x, w.y, p.x, p.y);
+    w = pixelsToWorld(0, 1);
+    p = worldToPixels(w.x, w.y);
+    LOG_INFO(dbg, " 0, 1 -> %9.9lf, %9.9lf -> %9.9lf, %9.9lf", w.x, w.y, p.x, p.y);
+    w = pixelsToWorld(1, 0);
+    p = worldToPixels(w.x, w.y);
+    LOG_INFO(dbg, " 1, 0 -> %9.9lf, %9.9lf -> %9.9lf, %9.9lf", w.x, w.y, p.x, p.y);
+    w = pixelsToWorld(1, 1);
+    p = worldToPixels(w.x, w.y);
+    LOG_INFO(dbg, " 1, 1 -> %9.9lf, %9.9lf -> %9.9lf, %9.9lf", w.x, w.y, p.x, p.y);
+
+    // Recalculate reference points
     w = pixelsToWorld(regX1, regY1);
     LOG_INFO(dbg, "reference 1 P2W  %4.6f, %4.6f - > %4.6f, %4.6f", regX1, regY1, regLon1, regLat1);
     LOG_INFO(dbg, "computed    P2W  %4.6f, %4.6f - > %4.6f, %4.6f", regX1, regY1, w.x, w.y);
