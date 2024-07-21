@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_LIBIMG_STITCHER_TILESOURCE_H_
-#define SRC_LIBIMG_STITCHER_TILESOURCE_H_
+#pragma once
 
 #include "src/libimg/Image.h"
 #include <string>
@@ -43,7 +42,7 @@ public:
     virtual void constrainXY(double &x, double &y, int zoom) { /* default is a noop */ }
     virtual std::string getCalibrationReport() {return "No calibration"; };
     virtual double getNorthOffsetAngle() { return 0.0; };
-    virtual bool isPDFSource() { return false; };
+    virtual bool isDocumentSource() { return false; };
 
     // Control the underlying loader
     virtual void cancelPendingLoads() = 0;
@@ -71,5 +70,3 @@ public:
 };
 
 }
-
-#endif /* SRC_LIBIMG_STITCHER_TILESOURCE_H_ */

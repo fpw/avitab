@@ -27,6 +27,8 @@ using json = nlohmann::json;
 
 namespace avitab {
 
+static const int PREFS_VERSION = 2;
+
 Settings::Settings(const std::string &settingsFile)
 :   filePath(settingsFile)
 {
@@ -41,7 +43,27 @@ Settings::Settings(const std::string &settingsFile)
     database = std::make_shared<json>();
     init();
     load();
-    upgrade();
+
+    // Handle older json databases which have since been updated.
+    // The version number is only changed if a setting has been moved, renamed, or removed.
+    // Adding new settings generally does not require a version number increment.
+    // If an upgrade over several versions (eg v1 to v4) is required, this done for each
+    // later version in turn.
+
+    auto loadedPrefsVersion = database->value(json::json_pointer("/general/prefs_version"), PREFS_VERSION);
+    if (loadedPrefsVersion >= PREFS_VERSION) return;
+
+    if (loadedPrefsVersion == 1) {
+        upgrade1to2();
+        ++loadedPrefsVersion;
+    }
+#if 0 // template for future update
+    if (loadedPrefsVersion == 2) {
+        upgrade2to3();
+        ++loadedPrefsVersion;
+    }
+#endif
+    (*database)["general"]["prefs_version"] = PREFS_VERSION;
 }
 
 Settings::~Settings()
@@ -96,7 +118,7 @@ void Settings::setSetting(const std::string &id, const T value) {
 
 void Settings::init() {
     // full init not required, just defaults that aren't zero/false/empty
-    *database = { { "general", { { "prefs_version", 1 },
+    *database = { { "general", { { "prefs_version", PREFS_VERSION },
                                  { "show_calibration_msg_on_load", true },
                                  { "show_overlays_in_airport_app", true },
                                  { "show_overlays_in_charts_app", true },
@@ -158,12 +180,12 @@ void Settings::saveOverlayConfig() {
     setSetting("/overlay/colors/other_aircraft/above", colorIntToString(overlayConfig->colorOtherAircraftAbove));
 }
 
-void Settings::loadPdfReadingConfig(const std::string appName, PdfReadingConfig &config) {
-    config.mouseWheelScrollsMultiPage = getSetting("/" + appName + "/pdfreading/mousewheelscroll", false);
+void Settings::loadDocReadingConfig(const std::string appName, DocumentReadingConfig &config) {
+    config.mouseWheelScrollsMultiPage = getSetting("/" + appName + "/docreading/mousewheelscroll", false);
 }
 
-void Settings::savePdfReadingConfig(const std::string appName, PdfReadingConfig &config) {
-    setSetting("/" + appName + "/pdfreading/mousewheelscroll", config.mouseWheelScrollsMultiPage);
+void Settings::saveDocReadingConfig(const std::string appName, DocumentReadingConfig &config) {
+    setSetting("/" + appName + "/docreading/mousewheelscroll", config.mouseWheelScrollsMultiPage);
 }
 
 void Settings::saveWindowRect(const WindowRect &rect) {
@@ -186,17 +208,18 @@ WindowRect Settings::getWindowRect() {
     return rect;
 }
 
-void Settings::upgrade() {
-    // handle older json databases which have subsequently been updated
-#if 0 // example idea for this code
-    if (getGeneralSetting<int>("prefs_version") == 1) {
-        // upgrade aircraft to my_aircraft
-        if ( (*database)["overlay"].find("aircraft") != (*database)["overlay"].end() ) {
-            setOverlaySetting<bool>("my_aircraft",getOverlaySetting<bool>("aircraft"));
-            (*database)["overlay"].erase("aircraft");
+void Settings::upgrade1to2() {
+    // version 1 preferences used the key 'pdfreading' which was changed to 'docreading' in version 2
+    // to reflect the more general capabilities of the document reading apps
+    std::vector<std::string> apps {"chartsapp", "manualsapp"};
+    for (auto& appname: apps) {
+        if ((*database).contains(appname)) {
+            if ((*database)[appname].contains("pdfreading")) {
+                std::swap((*database)[appname]["pdfreading"], (*database)[appname]["docreading"]);
+                (*database)[appname].erase("pdfreading");
+            }
         }
     }
-#endif
 }
 
 void Settings::saveAll() {

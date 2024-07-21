@@ -7,6 +7,14 @@ mkdir -p $OUTDIR/include
 
 cd lib
 
+echo "Building sqlite3..."
+if [ ! -f $OUTDIR/include/sqlite3/sqlite3.hpp ]; then
+    mkdir -p $OUTDIR/include/sqlite3
+    cp sqlite3/sqlite3.h $OUTDIR/include/sqlite3
+fi
+
+if [ ! -f $OUTDIR/include/sqlite3/sqlite3.h ]; then echo "Failed"; exit; fi
+
 echo "Building json..."
 if [ ! -f $OUTDIR/include/nlohmann/json.hpp ]; then
     cp -a json/include/* $OUTDIR/include/
@@ -71,8 +79,12 @@ if [ ! -f $OUTDIR/lib/libmbedtls.a ]; then echo "Failed"; exit; fi
 echo "Building curl..."
 if [ ! -f $OUTDIR/lib/libcurl.a ]; then
     cd curl
-    ./buildconf
-    ./configure --prefix=$OUTDIR --without-ssl --without-nghttp2 --with-mbedtls=$OUTDIR --with-zlib="`pwd`/../mupdf/thirdparty/zlib/" --without-libpsl --disable-ldap --without-brotli --without-winidn --without-libidn2 --disable-shared --disable-crypto-auth --disable-ftp --disable-telnet --disable-gopher --disable-dict --disable-imap --disable-pop3 --disable-rtsp --disable-smtp --disable-tftp
+    git clean -f -d -x
+    autoreconf -fi
+    ./configure --prefix=$OUTDIR \
+        --with-mbedtls=$OUTDIR --with-zlib="`pwd`/../mupdf/thirdparty/zlib/" \
+        --without-openssl --without-nghttp2 --without-libpsl --without-brotli --without-winidn --without-libidn2 --without-zstd \
+        --disable-shared --disable-crypto-auth --disable-ftp --disable-ldap --disable-telnet --disable-gopher --disable-dict --disable-imap --disable-pop3 --disable-rtsp --disable-smtp --disable-tftp
     CFLAGS=-fPIC make -j10 install
     cd ..
 fi

@@ -38,6 +38,7 @@ public:
     XPlaneEnvironment();
 
     // Must be called from the environment thread - do not call from GUI thread!
+    std::shared_ptr<world::LoadManager> createParsingWorldManager() override;
     std::shared_ptr<LVGLToolkit> createGUIToolkit() override;
     void createMenu(const std::string &name) override;
     void addMenuEntry(const std::string &label, MenuCallback cb) override;
@@ -49,6 +50,7 @@ public:
     // Can be called from any thread
     std::string getFontDirectory() override;
     std::string getProgramPath() override;
+    std::string getDataRootPath() override;
     std::string getSettingsDir() override;
     std::string getEarthTexturePath() override;
     std::string getAirplanePath() override;
@@ -62,6 +64,9 @@ public:
     void updateMapExports(float lat, float lon, int zoom, float vrange) override;
 
     ~XPlaneEnvironment();
+
+protected:
+    bool canUseNavDb(const std::string simCode) override;
 
 private:
     // Exported datarefs relating to the overlayed map status
@@ -91,6 +96,7 @@ private:
     GetMetarPtr getMetar{};
     DataCache dataCache;
     std::string pluginPath, xplanePrefsDir, xplaneRootPath;
+    int xplaneVersion;
     std::vector<Location> aircraftLocations;
     Location nullLocation { 0, 0, 0, 0 };
     std::string aircraftPath;
