@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16)
 project(AviTab VERSION 0.6.4 DESCRIPTION "AviTab X-Plane plugin")
 
 if (NOT "$ENV{NAVIGRAPH_SECRET}" STREQUAL "")

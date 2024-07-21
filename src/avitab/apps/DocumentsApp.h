@@ -1,6 +1,6 @@
 /*
  *   AviTab - Aviator's Virtual Tablet
- *   Copyright (C) 2018 Folke Will <folko@solhost.org>
+ *   Copyright (C) 2018-2024 Folke Will <folko@solhost.org>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as published by
@@ -15,8 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef SRC_AVITAB_APPS_DOCUMENTSAPP_H_
-#define SRC_AVITAB_APPS_DOCUMENTSAPP_H_
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -34,7 +33,7 @@
 #include "src/libimg/Image.h"
 #include "src/libimg/stitcher/Stitcher.h"
 #include "src/maps/OverlayedMap.h"
-#include "src/maps/sources/PDFSource.h"
+#include "src/maps/sources/LocalFileSource.h"
 #include "components/FilesysBrowser.h"
 
 namespace avitab {
@@ -74,27 +73,27 @@ private:
     void onUp();
     void onSelect(int data);
 
-    struct PdfPage {
+    struct DocumentPage {
         std::string path;
         std::shared_ptr<Page> page;
         std::shared_ptr<Window> window;
         std::shared_ptr<PixMap> pixMap;
         std::shared_ptr<img::Image> rasterImage;
-        std::shared_ptr<maps::PDFSource> source;
+        std::shared_ptr<maps::LocalFileSource> source;
         std::shared_ptr<img::Stitcher> stitcher;
         std::shared_ptr<maps::OverlayedMap> map;
         int panStartX = 0, panStartY = 0;
     };
 
-    using PageInfo = std::shared_ptr<PdfPage>;
+    using PageInfo = std::shared_ptr<DocumentPage>;
     std::vector<PageInfo> pages;
 
-    void createPdfTab(const std::string &pdfPath);
+    void createDocumentTab(const std::string &docPath);
     void removeTab(std::shared_ptr<Page> page);
     void setupCallbacks(PageInfo tab);
-    void loadFile(PageInfo tab, const std::string &pdfPath);
+    void loadFile(PageInfo tab, const std::string &docPath);
     void setTitle(PageInfo tab);
-    PageInfo getActivePdfPage();
+    PageInfo getActiveDocPage();
     void onNextPage();
     void onPrevPage();
     void onPlus();
@@ -105,7 +104,7 @@ private:
     void onPan(int x, int y, bool start, bool end);
     bool onTimer();
 
-    Settings::PdfReadingConfig  settings;
+    Settings::DocumentReadingConfig  settings;
     std::shared_ptr<Container> settingsContainer;
     std::shared_ptr<Label> settingsLabel;
     std::shared_ptr<Checkbox> mouseWheelScrollsCheckbox;
@@ -118,5 +117,3 @@ private:
 };
 
 } /* namespace avitab */
-
-#endif /* SRC_AVITAB_APPS_DOCUMENTSAPP_H_ */
