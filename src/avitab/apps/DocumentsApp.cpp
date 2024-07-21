@@ -33,7 +33,11 @@ void DocumentsApp::Run(const std::string &dir) {
     api().getSettings()->loadDocReadingConfig(configGroup, settings);
     browseStartDirectory = dir;
     fsBrowser.goTo(browseStartDirectory);
-    overlays = std::make_shared<maps::OverlayConfig>();
+    if (api().getSettings()->getGeneralSetting<bool>("show_overlays_in_charts_app")) {
+        overlays = api().getSettings()->getOverlayConfig();
+    } else {
+        overlays = std::make_shared<maps::OverlayConfig>();
+    }
     resetLayout();
     showDirectory();
 }
@@ -203,8 +207,7 @@ void DocumentsApp::setupCallbacks(PageInfo tab) {
 }
 
 void DocumentsApp::loadFile(PageInfo tab, const std::string &docPath) {
-    std::string cm = api().getChartService()->getCalibrationMetadataForFile(docPath);
-    tab->source = std::make_shared<maps::LocalFileSource>(docPath, cm);
+    tab->source = std::make_shared<maps::LocalFileSource>(docPath, api().getChartService());
     tab->stitcher = std::make_shared<img::Stitcher>(tab->rasterImage, tab->source);
     tab->stitcher->setCacheDirectory(api().getDataPath() + "MapTiles/");
 
@@ -214,6 +217,7 @@ void DocumentsApp::loadFile(PageInfo tab, const std::string &docPath) {
 
     auto pixMap = tab->pixMap;
     tab->map->setRedrawCallback([pixMap] () { if (pixMap) pixMap->invalidate(); });
+    tab->map->setNavWorld(api().getNavWorld());
     tab->map->updateImage();
 
     setTitle(tab);
@@ -325,6 +329,9 @@ void DocumentsApp::onRotate() {
 bool DocumentsApp::onTimer() {
     auto tab = getActiveDocPage();
     if (tab && tab->map) {
+        std::vector<avitab::Location> loc;
+        loc.push_back(api().getAircraftLocation(0));
+        tab->map->setPlaneLocations(loc);
         tab->map->doWork();
     }
     return true;

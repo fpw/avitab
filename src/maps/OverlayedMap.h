@@ -93,8 +93,9 @@ private:
     img::TTFStamper copyrightStamp;
 
     // current map display attributes, updated on each frame
-    double leftLon, rightLon;
-    double bottomLat {0.0f}, topLat {0.0f};
+    double topLeftLon, bottomRightLon;
+    double bottomRightLat {0.0f}, topLeftLat {0.0f};
+    double minLat, minLon, maxLat, maxLon;
     int maxNodeDensity;
     double mapWidthNM;
     double mapScaleNMperPixel;
