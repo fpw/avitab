@@ -19,10 +19,27 @@
 #include "Environment.h"
 #include "src/Logger.h"
 #include "src/platform/CrashHandler.h"
+#include "src/libnavsql/SqlLoadManager.h"
 
 namespace avitab {
 
 void Environment::loadNavWorldInBackground() {
+    // try to create a SqlWorld instance to manage the world data.
+    // if this fails ask the subclass to provide the default in-memory parser variant
+    try {
+        auto wm = std::make_shared<sqlnav::SqlLoadManager>(getProgramPath() + "navdb/");
+        wm->init_or_throw([this] (std::string simCode) {
+            return this->canUseNavDb(simCode);
+        });
+        worldManager = wm;
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load Sqlite3 NAV database: %s - will fallback to file parsing if available", e.what());
+        worldManager = createParsingWorldManager();
+    }
+
+    std::string userfixes_file = settings->getGeneralSetting<std::string>("userfixes_file");
+    worldManager->setUserFixesFilename(userfixes_file);
+
     worldManager->discoverSceneries();
     navWorldFuture = std::async(std::launch::async, &Environment::loadNavWorldAsync, this);
 }
@@ -39,17 +56,10 @@ void Environment::loadSettings() {
     std::string fname(getSettingsDir() + "/avitab.prf");
     logger::info("Settings file: %s", fname.c_str());
     settings = std::make_unique<Settings>(fname);
-
-    std::string userfixes_file = settings->getGeneralSetting<std::string>("userfixes_file");
-    sendUserFixesFilenameToWorldMgr(userfixes_file);
 }
 
 std::shared_ptr<Settings> Environment::getSettings() {
     return settings;
-}
-
-void Environment::setWorldManager(std::shared_ptr<world::LoadManager> mgr) {
-    worldManager = mgr;
 }
 
 std::shared_ptr<world::LoadManager> Environment::getWorldManager() {
@@ -62,10 +72,6 @@ void Environment::loadUserFixes(std::string filename) {
 
 world::NavNodeList Environment::loadFlightPlan(const std::string filename) {
     return worldManager->loadFlightPlan(filename);
-}
-
-void Environment::sendUserFixesFilenameToWorldMgr(std::string filename) {
-    worldManager->setUserFixesFilename(filename);
 }
 
 void Environment::setLastFrameTime(float t) {

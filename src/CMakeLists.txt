@@ -15,6 +15,7 @@ add_definitions(-DXPLM301=1 -DXPLM300=1 -DXPLM210=1 -DXPLM200=1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/libimg/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/world/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/libnavsql/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/libxdata/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/charts/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/maps/CMakeLists.txt)
@@ -47,6 +48,8 @@ target_link_libraries(avitab_common
     ${PROJECT_SOURCE_DIR}/build-third/lib/libdetex.a
     ${PROJECT_SOURCE_DIR}/build-third/lib/libquickjs.a
     world
+    navsql
+    sqlite3
 )
 
 if(WIN32)
@@ -109,6 +112,9 @@ install(TARGETS avitab_plugin
     RUNTIME DESTINATION  "/Users/rme/Desktop/X-Plane 11/Resources/plugins/AviTab/win_x64/"
 )
 endif(WIN32)
+
+# Supporting tools
+include(${CMAKE_CURRENT_LIST_DIR}/tools/CMakeLists.txt)
 
 # Standalone program
 add_executable(AviTab-standalone
