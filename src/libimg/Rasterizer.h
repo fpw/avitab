@@ -35,6 +35,7 @@ public:
     int getTileSize();
     int getPageWidth(int page, int zoom);
     int getPageHeight(int page, int zoom);
+    double getAspectRatio(int page);
     std::unique_ptr<Image> loadTile(int page, int x, int y, int zoom, bool nightMode);
     void setPreRotate(int angle);
 

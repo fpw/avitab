@@ -160,6 +160,40 @@ void LinearEquation::initialiseFrom2PointsAndAngleW2P(double px1, double py1, do
     LOG_INFO(dbg, "recalculated = %4.6f, %4.6f", getResult(wx2, wy2).first, getResult(wx2, wy2).second);
 }
 
+void LinearEquation::initialiseFromChartfoxP2W(double k, double transformAngle, double tx, double ty, double aspectRatio) {
+    // Before matrix transformation, will need to invert incoming Y (bx & by coeffs)
+    // and multiply incoming X (ax & ay coeffs) by aspectRatio
+    // | 1 0 tx |   | c -s 0 |    | c -s tx |   | k 0 0 |    | ck -sk tx |
+    // | 0 1 ty | * | s  c 0 | => | s  c ty | * | 0 k 0 | => | sk  ck ty |
+    // | 0 0  1 |   | 0  0 1 |    | 0  0  1 |   | 0 0 1 |    |  0   0  1 |
+
+    double c = std::cos(transformAngle);
+    double s = std::sin(transformAngle);
+    ax = c * k * aspectRatio;
+    bx = s * k;
+    cx = tx;
+    ay = -s * k * aspectRatio;
+    by = -c * k;
+    cy = ty;
+}
+
+void LinearEquation::initialiseFromChartfoxW2P(double k, double transformAngle, double tx, double ty, double aspectRatio) {
+    // | 1/k  0  0 |   | c -s 0 |    | c/k -s/k 0 |   | 1 0 -tx |   | c/k  -s/k  -tx.c/k + ty.s/k |
+    // |  0  1/k 0 | * | s  c 0 | => | s/k  c/k 0 | * | 0 1 -ty | = | s/k   c/k  -tx.s/k - ty.c/k |
+    // |  0   0  1 |   | 0  0 1 |    |  0    0  1 |   | 0 0  1  |   |  0     0          1         |
+    // After matrix transformation, will need to invert outgoing Y (all y coeffs)
+    // and divide outgoing X (all x coeffs) by aspectRatio
+
+    double c = std::cos(-transformAngle);
+    double s = std::sin(-transformAngle);
+    ax = c / (k * aspectRatio);
+    bx = -s / (k * aspectRatio);
+    cx = ((-tx * c / k) + (ty * s / k)) / aspectRatio;
+    ay = -s / k;
+    by = -c / k;
+    cy = tx * s / k + ty * c / k;
+}
+
 void LinearEquation::calculateReverseCoeffs(const LinearEquation & le) {
     double divx = le.ax * le.by - le.ay * le.bx;
     ax =  le.by / divx;

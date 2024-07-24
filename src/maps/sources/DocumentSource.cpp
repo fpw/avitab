@@ -34,13 +34,12 @@ DocumentSource::DocumentSource(const std::vector<uint8_t> &data, const std::stri
 }
 
 void DocumentSource::loadProvidedCalibrationMetadata(std::string calibrationMetadata) {
-    if (calibrationMetadata != "") {
-        logger::info("Using hash-matched calibration metadata");
-        calibration.fromJsonString(calibrationMetadata);
+    if ((calibrationMetadata == "") || (calibrationMetadata == "[]")) {
+        logger::warn("No calibration metadata");
+    } else {
+        calibration.fromJsonString(calibrationMetadata, rasterizer.getAspectRatio(0));
         rotateAngle = calibration.getPreRotate();
         rasterizer.setPreRotate(rotateAngle);
-    } else {
-        logger::warn("No calibration metadata");
     }
 
 }

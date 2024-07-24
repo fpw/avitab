@@ -25,12 +25,6 @@
 
 namespace chartfox {
 
-struct ChartGEOReference {
-    double lon1, x1, lon2, x2;
-    double lat1, y1, lat2, y2;
-    bool valid = false;
-};
-
 class ChartFoxChart: public apis::Chart {
 public:
     ChartFoxChart(const nlohmann::json &json, int code);
@@ -44,17 +38,17 @@ public:
     virtual std::shared_ptr<img::TileSource> createTileSource(bool nightMode) override;
     virtual void changeNightMode(std::shared_ptr<img::TileSource> src, bool nightMode) override;
     virtual void setCalibrationMetadata(std::string metadata) override;
+    std::string getCalibrationMetadata() const;
 
     std::string getID() const;
 
     void setURL(const std::string url);
     std::string getURL() const;
 
-    void setChartData(const std::vector<uint8_t> &blob, const std::string type);
+    void setChartData(const std::vector<uint8_t> &blob, const std::string type, const std::string &georef);
     const std::vector<uint8_t> getChartData() const;
 
 private:
-    ChartGEOReference geoRef;
     std::string icao;
     std::string id;
     std::string name;
@@ -63,7 +57,7 @@ private:
     std::string url;
     std::vector<uint8_t> chartData;
     std::string chartType;
-    std::string calibrationMetadata;
+    std::string chartGeoref = "";
 };
 
 } /* namespace chartfox */
