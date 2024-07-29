@@ -116,8 +116,11 @@ std::shared_ptr<APICall<std::shared_ptr<Chart>>> ChartService::loadChart(std::sh
             auto blob = bgChart->getChartData();
             auto in = std::string((char *)blob.data(), blob.size());
             auto hash = crypto.sha256String(in);
-            std::string calibrationMetadata = getCalibrationMetadataForHash(hash);
-            bgChart->setCalibrationMetadata(calibrationMetadata);
+            std::string localCalibrationMetadata = getCalibrationMetadataForHash(hash);
+            if (localCalibrationMetadata != "") {
+                // Use local calibration metadata, overriding any Chartfox georef
+                bgChart->setCalibrationMetadata(localCalibrationMetadata);
+            }
         }
 
         auto nvChart = std::dynamic_pointer_cast<navigraph::NavigraphChart>(chart);

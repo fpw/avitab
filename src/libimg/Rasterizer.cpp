@@ -106,6 +106,11 @@ int Rasterizer::getTileSize() {
     return tileSize;
 }
 
+double Rasterizer::getAspectRatio(int page) {
+    auto &rect = pageRects.at(page);
+    return (rect.x1 - rect.x0) / (rect.y1 - rect.y0);
+}
+
 int Rasterizer::getPageWidth(int page, int zoom) {
     bool swapXY = (preRotateAngle % 180) == 90;
     auto &rect = pageRects.at(page);

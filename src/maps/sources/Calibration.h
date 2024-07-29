@@ -22,6 +22,7 @@
 #include <string>
 #include "src/libimg/stitcher/TileSource.h"
 #include "LinearEquation.h"
+#include <nlohmann/json.hpp>
 
 namespace maps {
 
@@ -35,8 +36,10 @@ public:
     void setHash(const std::string &s);
 
     std::string toString()const;
-    void fromJsonString(const std::string &s);
+    void fromJsonString(const std::string &s, double aspectRatio);
     void fromKmlString(const std::string &s);
+    void fromLocalJson(const nlohmann::json &json);
+    void fromChartfoxJson(const nlohmann::json &json, double aspectRatio);
 
     bool hasCalibration() const;
 
@@ -54,6 +57,7 @@ private:
     std::string regHash{};
     double northOffsetAngle{};
     bool isCalibrated = false;
+    bool isChartfoxGeoreferenced = false;
     bool offsetAngleDefined = false;
     std::string report{"No calibration"};
     bool dbg = false;
@@ -61,10 +65,13 @@ private:
     LinearEquation leWorldToPixels;
     LinearEquation lePixelsToWorld;
 
-    void calculateCalibration();
+    void calculateLocalCalibration();
+    void calculateChartfoxCalibration(double k, double transformAngle, double tx, double ty, double aspectRatio);
     std::pair<double, double> rotate(double x, double y, double angleDegrees) const;
     std::string getKmlTagData(const std::string kml, const std::string tag) const;
     std::pair<double, double> mercator(double lat, double lon) const;
+    std::pair<double, double> latLonToEPSG3857(double lat, double lon) const;
+    std::pair<double, double> EPSG3857toLatLon(double lat3857, double lon3857) const;
     double invMercator(double lat) const;
     void define2PAThirdVertex();
     double getTriangleInnerAngleA(double a, double b, double c) const;
