@@ -18,6 +18,7 @@
 
 #include "SqlWorld.h"
 #include <cmath>
+#include <algorithm>
 #include <cassert>
 #include <thread>
 #include "SqlLoadManager.h"
