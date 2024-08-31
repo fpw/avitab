@@ -524,9 +524,11 @@ void AirportApp::onMouseWheel(int dir, int x, int y) {
 bool AirportApp::onTimer() {
     for (auto &tab: pages) {
         if (tab.map) {
-            std::vector<avitab::Location> loc;
-            loc.push_back(api().getAircraftLocation(0));
-            tab.map->setPlaneLocations(loc);
+            std::vector<avitab::Location> locs;
+            for (AircraftID i = 0; i < api().getActiveAircraftCount(); ++i) {
+                locs.push_back(api().getAircraftLocation(i));
+            }
+            tab.map->setPlaneLocations(locs);
             if (tab.trackPlane) {
                 tab.map->centerOnPlane();
             }

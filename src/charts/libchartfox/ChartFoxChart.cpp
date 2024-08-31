@@ -67,7 +67,11 @@ apis::ChartCategory ChartFoxChart::getCategory() const {
 }
 
 void ChartFoxChart::setCalibrationMetadata(std::string metadata) {
-    calibrationMetadata = metadata;
+    chartGeoref = metadata;
+}
+
+std::string ChartFoxChart::getCalibrationMetadata() const {
+    return chartGeoref;
 }
 
 std::string ChartFoxChart::getID() const {
@@ -87,7 +91,7 @@ std::shared_ptr<img::TileSource> ChartFoxChart::createTileSource(bool nightMode)
         throw std::runtime_error("Chart not loaded");
     }
 
-    auto docSource = std::make_shared<maps::DownloadedSource>(chartData, chartType, calibrationMetadata);
+    auto docSource = std::make_shared<maps::DownloadedSource>(chartData, chartType, chartGeoref);
     docSource->setNightMode(nightMode);
     return docSource;
 }
@@ -101,9 +105,10 @@ void ChartFoxChart::changeNightMode(std::shared_ptr<img::TileSource> src, bool n
     docSource->setNightMode(nightMode);
 }
 
-void ChartFoxChart::setChartData(const std::vector<uint8_t> &blob, const std::string type) {
+void ChartFoxChart::setChartData(const std::vector<uint8_t> &blob, const std::string type, const std::string &georef) {
     chartData = blob;
     chartType = type;
+    chartGeoref = georef;
 }
 
 const std::vector<uint8_t> ChartFoxChart::getChartData() const {

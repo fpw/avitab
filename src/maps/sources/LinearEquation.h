@@ -40,6 +40,9 @@ public:
                                             double px2, double py2, double wx2, double wy2,
                                             double northOffsetAngleDegrees);
 
+    void   initialiseFromChartfoxP2W(double k, double transformAngle, double tx, double ty, double aspectRatio);
+    void   initialiseFromChartfoxW2P(double k, double transformAngle, double tx, double ty, double aspectRatio);
+
     void   calculateReverseCoeffs(const LinearEquation & l);
 
     std::pair<double, double> getResult(double x, double y) const;

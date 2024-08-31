@@ -158,15 +158,17 @@ ChartFoxAPI::ChartsList ChartFoxAPI::getChartsFor(const std::string& icao) {
 
 void ChartFoxAPI::loadChart(std::shared_ptr<ChartFoxChart> chart) {
     auto chartUrl = chart->getURL();
+    auto chartGeoref = chart->getCalibrationMetadata();
     if (chartUrl.empty()) {
         try {
             std::string url = std::string("https://api.chartfox.org/v2/charts/") + chart->getID();
             std::string response = oauth->get(url);
             nlohmann::json respJson = nlohmann::json::parse(response);
             chartUrl = encodeUrl(respJson.at("url"));
+            chartGeoref = nlohmann::to_string(respJson.at("georefs"));
             chart->setURL(chartUrl);
-            std::string calib = nlohmann::to_string(respJson.at("georefs"));
-            logger::info("georefs=%s", calib.c_str());
+            chart->setCalibrationMetadata(chartGeoref);
+            logger::info("georefs=%s", chartGeoref.c_str());
         } catch (const std::exception &e) {
             logger::warn("Unable to obtain URL for chart: %s, %s", chart->getICAO().c_str(), chart->getName().c_str());
             return;
@@ -174,7 +176,7 @@ void ChartFoxAPI::loadChart(std::shared_ptr<ChartFoxChart> chart) {
     }
     auto blob = oauth->getBinary(chartUrl);
     auto type = oauth->getContentType();
-    chart->setChartData(blob, type);
+    chart->setChartData(blob, type, chartGeoref);
 }
 
 } /* namespace chartfox */
