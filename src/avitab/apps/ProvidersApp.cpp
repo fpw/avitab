@@ -120,7 +120,6 @@ void ProvidersApp::onNavigraphStartAuth() {
     });
 
     platform::openBrowser(link);
-    logger::info("Navigraph login link: %s", link.c_str());
     labelNavigraph->setText("Follow the instructions in your browser.\n"
                    "If your browser didn't start, manually open the link in AviTab's log file");
 

@@ -19,7 +19,7 @@
 
 #include <string>
 #include <memory>
-#include "sqlite3.h"
+#include <sqlite3/sqlite3.h>
 
 namespace sqlnav {
 

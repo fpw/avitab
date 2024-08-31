@@ -351,6 +351,7 @@ std::string getMachineID() {
 }
 
 void openBrowser(const std::string& url) {
+    logger::info("Opening browser: %s", url.c_str());
 #ifdef _WIN32
     ShellExecuteA(nullptr, "open", url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 #elif defined(__APPLE__)
