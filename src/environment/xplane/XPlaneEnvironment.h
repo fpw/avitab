@@ -125,6 +125,22 @@ private:
     void reloadAircraftPath();
 
     unsigned int otherAircraftCount;
+    // ============================================================
+    // New TCAS AI/multiplayer interface
+    // int integer If TCAS is not overriden by plugin, returns the number of planes in X-Plane, which might be under plugin control or X-Plane control. If TCAS is overriden, returns how many targets are actually being written to with the override. These are not necessarily consecutive entries in the TCAS arrays.
+    unsigned int tcasAircraftCount;
+
+    // int[64] integer Mode C transponder code 0000 to 7777. This is not really an integer, this is an octal number.
+    std::vector<int> tcasModeCcode;
+    // float[64] degrees global coordinate, degrees.
+    std::vector<float> tcasLat;
+    // float[64] degrees global coordinate, degrees.
+    std::vector<float> tcasLon;
+    // float[64] meter global coordinate, meter.
+    std::vector<float> tcasEle;
+    // float[64] degrees true heading orientation.
+    std::vector<float> tcasPsi;
+
     void updatePlaneCount();
 };
 

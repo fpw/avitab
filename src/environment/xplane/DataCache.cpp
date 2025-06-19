@@ -103,6 +103,17 @@ EnvData DataCache::toEnvData(XPLMDataRef ref) {
         res.doubleValue = XPLMGetDatad(ref);
     }
 
+    if (idMask & xplmType_IntArray) {
+        int size = XPLMGetDatavi(ref, nullptr, 0, 0);
+        res.intVector.resize(size);
+        XPLMGetDatavi(ref, res.intVector.data(), 0, size);
+    }
+
+    if (idMask & xplmType_FloatArray) {
+        int size = XPLMGetDatavf(ref, nullptr, 0, 0);
+        res.floatVector.resize(size);
+        XPLMGetDatavf(ref, res.floatVector.data(), 0, size);
+    }
     return res;
 }
 

@@ -24,10 +24,14 @@ struct EnvData {
     int intValue;
     float floatValue;
     double doubleValue;
+    std::vector<int> intVector;
+    std::vector<float> floatVector;
 };
 
 using AircraftID = unsigned int;
+using TcasID = long unsigned int;
 const static AircraftID MAX_AI_AIRCRAFT = 19;
+const static AircraftID MAX_TCAS_AIRCRAFT = 64;
 
 using LocationPartIndex = unsigned int;
 const static LocationPartIndex NUM_LOCATION_PARTS = 4;

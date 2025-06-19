@@ -252,17 +252,38 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
     std::vector<Location> activeAircraftLocations;
 
     updatePlaneCount();
-    for (AircraftID i = 0; i <= otherAircraftCount; ++i) {
-        try {
+
+    // Use new TCAS scheme - index 0 is user - TCAS arrays also include user
+    if (tcasAircraftCount > 1) {
+        tcasLat = dataCache.getData("sim/cockpit2/tcas/targets/position/lat").floatVector;
+        tcasLon = dataCache.getData("sim/cockpit2/tcas/targets/position/lon").floatVector;
+        tcasEle = dataCache.getData("sim/cockpit2/tcas/targets/position/ele").floatVector;
+        tcasPsi = dataCache.getData("sim/cockpit2/tcas/targets/position/psi").floatVector;
+
+        for (TcasID i = 0; i < tcasAircraftCount; i++) {
             Location loc;
-            loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
-            loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
-            loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
-            loc.heading = dataCache.getLocationData(i, 3).floatValue;
+            loc.latitude = tcasLat.at(i);
+            loc.longitude = tcasLon.at(i);
+            loc.elevation = tcasEle.at(i);
+            loc.heading = tcasPsi.at(i);
             activeAircraftLocations.push_back(loc);
-        } catch (const std::exception &e) {
-            // silently ignore to avoid flooding the log
-            // can fail with TCAS override, more than 19 AI aircraft
+        }
+    }
+
+    // Use old multiplayer scheme
+    if (tcasAircraftCount == 1) {
+        for (AircraftID i = 0; i <= otherAircraftCount; ++i) {
+            try {
+                Location loc;
+                loc.latitude = dataCache.getLocationData(i, 0).doubleValue;
+                loc.longitude = dataCache.getLocationData(i, 1).doubleValue;
+                loc.elevation = dataCache.getLocationData(i, 2).doubleValue;
+                loc.heading = dataCache.getLocationData(i, 3).floatValue;
+                activeAircraftLocations.push_back(loc);
+            } catch (const std::exception &e) {
+                // silently ignore to avoid flooding the log
+                // can fail with TCAS override, more than 19 AI aircraft
+            }
         }
     }
 
@@ -443,6 +464,7 @@ void XPlaneEnvironment::updatePlaneCount() {
     } else {
         otherAircraftCount = 0;
     }
+    tcasAircraftCount = dataCache.getData("sim/cockpit2/tcas/indicators/tcas_num_acf").intValue;
 }
 
 } /* namespace avitab */
