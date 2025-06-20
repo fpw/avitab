@@ -465,6 +465,9 @@ void XPlaneEnvironment::updatePlaneCount() {
         otherAircraftCount = 0;
     }
     tcasAircraftCount = dataCache.getData("sim/cockpit2/tcas/indicators/tcas_num_acf").intValue;
+    if (tcasAircraftCount > 1) {
+        otherAircraftCount = tcasAircraftCount - 1;
+    }
 }
 
 } /* namespace avitab */
