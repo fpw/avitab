@@ -253,13 +253,13 @@ void OverlayedMap::drawOtherAircraftOverlay() {
                                   : (isBelow ? otherAircraftColors[RelativeHeight::below] 
                                              : otherAircraftColors[RelativeHeight::same]));
         positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
-        //mapImage->drawCircle(px, py, 6, color);
-        //mapImage->drawCircle(px, py, 7, color);
+        mapImage->drawCircle(px, py, 3, color);
+        mapImage->drawCircle(px, py, 4, color);
         //px -= otherPlaneIcon.getWidth() / 2;
         //py -= otherPlaneIcon.getHeight() / 2;
-        mapImage->blendImage(otherPlaneIcon, px - otherPlaneIcon.getWidth() / 2, py - otherPlaneIcon.getHeight() / 2, planeLocations[0].heading + getNorthOffset());
+        mapImage->blendImage(otherPlaneIcon, px - otherPlaneIcon.getWidth() / 2, py - otherPlaneIcon.getHeight() / 2, planeLocations[i].heading + getNorthOffset());
 
-        double ax, ay, tx, ty, rx, ry;
+        //double ax, ay, tx, ty, rx, ry;
         //fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), ax, ay);
         //fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), tx, ty);
         //fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
