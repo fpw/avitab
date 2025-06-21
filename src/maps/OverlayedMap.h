@@ -116,6 +116,7 @@ private:
     std::shared_ptr<world::World> navWorld;
     std::vector<avitab::Location> planeLocations;
     img::Image planeIcon;
+    img::Image otherPlaneIcon;
     enum RelativeHeight { below, same, above, total };
     uint32_t otherAircraftColors[RelativeHeight::total];
 

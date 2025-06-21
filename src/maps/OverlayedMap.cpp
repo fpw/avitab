@@ -90,6 +90,12 @@ void OverlayedMap::loadOverlayIcons(const std::string& path) {
     } catch (const std::exception &e) {
         logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
     }
+    planeIconName = "if_icon-plane_outline_211875.png";
+    try {
+        otherPlaneIcon.loadImageFile(path + planeIconName);
+    } catch (const std::exception &e) {
+        logger::warn("Couldn't load icon %s: %s", planeIconName.c_str(), e.what());
+    }
 }
 
 void OverlayedMap::setNavWorld(std::shared_ptr<world::World> world) {
@@ -247,14 +253,18 @@ void OverlayedMap::drawOtherAircraftOverlay() {
                                   : (isBelow ? otherAircraftColors[RelativeHeight::below] 
                                              : otherAircraftColors[RelativeHeight::same]));
         positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
-        mapImage->drawCircle(px, py, 6, color);
-        mapImage->drawCircle(px, py, 7, color);
+        //mapImage->drawCircle(px, py, 6, color);
+        //mapImage->drawCircle(px, py, 7, color);
+        //px -= otherPlaneIcon.getWidth() / 2;
+        //py -= otherPlaneIcon.getHeight() / 2;
+        mapImage->blendImage(otherPlaneIcon, px - otherPlaneIcon.getWidth() / 2, py - otherPlaneIcon.getHeight() / 2, planeLocations[0].heading + getNorthOffset());
+
         double ax, ay, tx, ty, rx, ry;
-        fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), ax, ay);
-        fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), tx, ty);
-        fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
-        mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
-        mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
+        //fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), ax, ay);
+        //fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), tx, ty);
+        //fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
+        //mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
+        //mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
         unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * world::M_TO_FT + 50.0) / 100.0;
         std::string flText = "---";
         flText[0] = '0' + (flightLevel / 100) % 10;
