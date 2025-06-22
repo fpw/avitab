@@ -253,28 +253,18 @@ void OverlayedMap::drawOtherAircraftOverlay() {
                                   : (isBelow ? otherAircraftColors[RelativeHeight::below] 
                                              : otherAircraftColors[RelativeHeight::same]));
         positionToPixel(planeLocations[i].latitude, planeLocations[i].longitude, px, py);
-        mapImage->drawCircle(px, py, 3, color);
-        mapImage->drawCircle(px, py, 4, color);
-        //px -= otherPlaneIcon.getWidth() / 2;
-        //py -= otherPlaneIcon.getHeight() / 2;
         mapImage->blendImage(otherPlaneIcon, px - otherPlaneIcon.getWidth() / 2, py - otherPlaneIcon.getHeight() / 2, planeLocations[i].heading + getNorthOffset());
 
-        //double ax, ay, tx, ty, rx, ry;
-        //fastPolarToCartesian(12.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), ax, ay);
-        //fastPolarToCartesian(3.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()), tx, ty);
-        //fastPolarToCartesian(2.0, static_cast<int>(planeLocations[i].heading + getNorthOffset()) + 90, rx, ry);
-        //mapImage->drawLineAA(px + tx + rx, py + ty + ry, px + ax, py + ay, color);
-        //mapImage->drawLineAA(px + tx - rx, py + ty - ry, px + ax, py + ay, color);
         unsigned int flightLevel = static_cast<unsigned int>(planeLocations[i].elevation * world::M_TO_FT + 50.0) / 100.0;
         std::string flText = "---";
         flText[0] = '0' + (flightLevel / 100) % 10;
         flText[1] = '0' + (flightLevel / 10) % 10;
         flText[2] = '0' + (flightLevel / 1) % 10;
         if (isAbove) {
-            mapImage->drawText(flText, 12, px, py - 17, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+            mapImage->drawText(flText, 12, px, py - 8 - otherPlaneIcon.getHeight() / 2, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
         }
         if (isBelow) {
-            mapImage->drawText(flText, 12, px, py + 7, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+            mapImage->drawText(flText, 12, px, py + otherPlaneIcon.getHeight() / 2, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
         }
     }
 }
