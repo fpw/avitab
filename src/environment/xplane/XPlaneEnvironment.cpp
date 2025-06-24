@@ -260,7 +260,7 @@ float XPlaneEnvironment::onFlightLoop(float elapsedSinceLastCall, float elapseSi
         tcasEle = dataCache.getData("sim/cockpit2/tcas/targets/position/ele").floatVector;
         tcasPsi = dataCache.getData("sim/cockpit2/tcas/targets/position/psi").floatVector;
 
-        for (TcasID i = 0; i < tcasAircraftCount; i++) {
+        for (AircraftID i = 0; i < tcasAircraftCount; i++) {
             Location loc;
             loc.latitude = tcasLat.at(i);
             loc.longitude = tcasLon.at(i);

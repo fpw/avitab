@@ -29,7 +29,6 @@ struct EnvData {
 };
 
 using AircraftID = unsigned int;
-using TcasID = long unsigned int;
 const static AircraftID MAX_AI_AIRCRAFT = 19;
 
 using LocationPartIndex = unsigned int;
