@@ -64,6 +64,20 @@ void AirportApp::resetLayout() {
     });
     keys->setDimensions(searchWindow->getContentWidth(), keys->getHeight());
     keys->setPosition(0, searchWindow->getContentHeight() - keys->getHeight());
+
+    nearestPage = tabs->addTab(tabs, "Nearest");
+    nearestPage->setShowScrollbar(false);
+    //nearestWindow = std::make_shared<Window>(nearestPage, "Nearest");
+    //nearestWindow->setDimensions(nearestPage->getContentWidth(), nearestPage->getHeight());
+    //nearestWindow->centerInParent();
+    //nearestWindow->setOnClose([this] { exit(); });
+
+    planeLatLabel = std::make_shared<Label>(nearestPage, "Latitude");
+    planeLatLabel->alignInTopLeft();
+    planeLonLabel = std::make_shared<Label>(nearestPage, "Longitude");
+    planeLonLabel->alignRightOf(planeLatLabel, 5);
+
+
 }
 
 void AirportApp::onSearchEntered(const std::string& code) {
