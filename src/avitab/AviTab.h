@@ -61,6 +61,7 @@ public:
     using MagVarMap = std::map<std::pair<double, double>, double>;
     MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     std::string getMETARForAirport(const std::string &icao) override;
+    std::string getNearestAirportId() override;
     void reloadMetar() override;
     void loadUserFixes(std::string filename) override;
     world::NavNodeList loadFlightPlan(const std::string filename) override;

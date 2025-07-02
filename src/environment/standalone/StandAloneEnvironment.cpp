@@ -103,6 +103,10 @@ std::string StandAloneEnvironment::getMETARForAirport(const std::string &icao) {
     return "METAR";
 }
 
+std::string StandAloneEnvironment::getNearestAirportId() {
+    return "EDHL";
+}
+
 AircraftID StandAloneEnvironment::getActiveAircraftCount() {
     return 4;
 }

@@ -390,6 +390,10 @@ std::string AviTab::getMETARForAirport(const std::string &icao) {
     return env->getMETARForAirport(icao);
 }
 
+std::string AviTab::getNearestAirportId() {
+    return env->getNearestAirportId();
+}
+
 
 void AviTab::reloadMetar() {
     logger::info("Reloading METAR...");

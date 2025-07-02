@@ -86,6 +86,7 @@ public:
     using MagVarMap = std::map<std::pair<double, double>, double>;
     virtual MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) = 0;
     virtual std::string getMETARForAirport(const std::string &icao) = 0;
+    virtual std::string getNearestAirportId() = 0;
     std::shared_ptr<world::World> getNavWorld();
     virtual std::string getAirplanePath() = 0;
     void cancelNavWorldLoading();

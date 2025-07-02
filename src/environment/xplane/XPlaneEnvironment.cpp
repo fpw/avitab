@@ -15,6 +15,7 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <XPLM/XPLMNavigation.h>
 #include <XPLM/XPLMPlugin.h>
 #include <XPLM/XPLMPlanes.h>
 #include <XPLM/XPLMScenery.h>
@@ -365,6 +366,26 @@ std::string XPlaneEnvironment::getMETARForAirport(const std::string &icao) {
     }
     str << ":\n" << metar << "\n";
     return str.str();
+}
+
+std::string XPlaneEnvironment::getNearestAirportId() {
+    std::string res;
+
+    std::lock_guard<std::mutex> lock(stateMutex);
+    if (aircraftLocations.size() > 0) {
+        Location loc = aircraftLocations[0];
+        float lat = static_cast<float>(loc.latitude);
+        float lon = static_cast<float>(loc.longitude);
+        char outID[32] = "";
+        XPLMNavRef navRef = XPLMFindNavAid(nullptr, nullptr, &lat, &lon, nullptr, xplm_Nav_Airport);
+        if (navRef != XPLM_NAV_NOT_FOUND) {
+			XPLMGetNavAidInfo(navRef, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, outID, nullptr, nullptr);
+            if (strlen(outID)) {
+                res = std::string(outID, strlen(outID));
+            }
+        }
+    }
+    return res;
 }
 
 void XPlaneEnvironment::enableAndPowerPanel() {

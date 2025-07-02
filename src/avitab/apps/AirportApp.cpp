@@ -67,15 +67,21 @@ void AirportApp::resetLayout() {
 
     nearestPage = tabs->addTab(tabs, "Nearest");
     nearestPage->setShowScrollbar(false);
-    //nearestWindow = std::make_shared<Window>(nearestPage, "Nearest");
-    //nearestWindow->setDimensions(nearestPage->getContentWidth(), nearestPage->getHeight());
-    //nearestWindow->centerInParent();
-    //nearestWindow->setOnClose([this] { exit(); });
+    nearestWindow = std::make_shared<Window>(nearestPage, "Nearest");
+    nearestWindow->setDimensions(nearestPage->getContentWidth(), nearestPage->getHeight());
+    nearestWindow->centerInParent();
+    nearestWindow->setOnClose([this] { exit(); });
 
-    planeLatLabel = std::make_shared<Label>(nearestPage, "Latitude");
-    planeLatLabel->alignInTopLeft();
-    planeLonLabel = std::make_shared<Label>(nearestPage, "Longitude");
-    planeLonLabel->alignRightOf(planeLatLabel, 5);
+    nearestButton = std::make_shared<Button>(nearestWindow, "Nearest Airport");
+    nearestButton->alignInTopLeft();
+    nearestIdLabel = std::make_shared<Label>(nearestWindow, "---");
+    nearestIdLabel->alignRightOf(nearestButton, 5);
+    nearestButton->setCallback([this] (const Button &) {
+        std::string res = api().getNearestAirportId();
+        //if (res.size() > 0) {
+            nearestIdLabel->setText(res);
+        //};
+    });
 
 
 }
