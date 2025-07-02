@@ -65,22 +65,15 @@ void AirportApp::resetLayout() {
     keys->setDimensions(searchWindow->getContentWidth(), keys->getHeight());
     keys->setPosition(0, searchWindow->getContentHeight() - keys->getHeight());
 
-    nearestPage = tabs->addTab(tabs, "Nearest");
-    nearestPage->setShowScrollbar(false);
-    nearestWindow = std::make_shared<Window>(nearestPage, "Nearest");
-    nearestWindow->setDimensions(nearestPage->getContentWidth(), nearestPage->getHeight());
-    nearestWindow->centerInParent();
-    nearestWindow->setOnClose([this] { exit(); });
-
-    nearestButton = std::make_shared<Button>(nearestWindow, "Nearest Airport");
-    nearestButton->alignInTopLeft();
-    nearestIdLabel = std::make_shared<Label>(nearestWindow, "---");
-    nearestIdLabel->alignRightOf(nearestButton, 5);
+    nearestButton = std::make_shared<Button>(searchWindow, "Nearest");
+    nearestButton->alignRightOf(searchField);
     nearestButton->setCallback([this] (const Button &) {
         std::string res = api().getNearestAirportId();
-        //if (res.size() > 0) {
-            nearestIdLabel->setText(res);
-        //};
+        if (res.size() > 0) {
+            api().executeLater([this, res] {
+                onSearchEntered(res);
+            });
+        };
     });
 
 
