@@ -75,8 +75,6 @@ void AirportApp::resetLayout() {
             });
         };
     });
-
-
 }
 
 void AirportApp::onSearchEntered(const std::string& code) {
