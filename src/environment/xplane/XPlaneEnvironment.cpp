@@ -379,7 +379,7 @@ std::string XPlaneEnvironment::getNearestAirportId() {
         char outID[32] = "";
         XPLMNavRef navRef = XPLMFindNavAid(nullptr, nullptr, &lat, &lon, nullptr, xplm_Nav_Airport);
         if (navRef != XPLM_NAV_NOT_FOUND) {
-			XPLMGetNavAidInfo(navRef, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, outID, nullptr, nullptr);
+            XPLMGetNavAidInfo(navRef, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, outID, nullptr, nullptr);
             if (strlen(outID)) {
                 res = std::string(outID, strlen(outID));
             }
