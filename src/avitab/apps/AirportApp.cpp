@@ -52,7 +52,7 @@ void AirportApp::resetLayout() {
     searchField->setDimensions(searchField->getWidth(), 30);
 
     searchLabel = std::make_shared<Label>(searchWindow, "Enter a keyword or ICAO code");
-    searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 5);
+    searchLabel->setPosition(0, searchField->getY() + searchField->getHeight() + 12);
 
     keys = std::make_shared<Keyboard>(searchWindow, searchField);
     keys->hideEnterKey();
@@ -66,7 +66,7 @@ void AirportApp::resetLayout() {
     keys->setPosition(0, searchWindow->getContentHeight() - keys->getHeight());
 
     nearestButton = std::make_shared<Button>(searchWindow, "Nearest");
-    nearestButton->alignRightOf(searchField);
+    nearestButton->alignRightOf(searchField, 80);
     nearestButton->setCallback([this] (const Button &) {
         std::string res = api().getNearestAirportId();
         if (res.size() > 0) {
