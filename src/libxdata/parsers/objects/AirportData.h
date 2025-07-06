@@ -35,7 +35,8 @@ struct AirportData {
         SC_DRY_LAKEBED = 12, // "Example: KEDW (Edwards AFB)"
         SC_WATER_RUNWAY = 13, // "Nothing displayed"
         SC_SNOW_OR_ICE = 14, // "Poor friction. Runway markings cannot be added"
-        SC_TRANSPARENT_SURFACE = 15 // "Hard surface, but no texture/markings (use in custom scenery)"
+        SC_TRANSPARENT_SURFACE = 15, // "Hard surface, but no texture/markings (use in custom scenery)"
+        SC_CONCRETE_DARK = 57 // "Dark concrete"
     };
 
     struct Frequency {
