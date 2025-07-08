@@ -64,7 +64,8 @@ private:
 
     // Unique IDs
     std::map<std::string, std::shared_ptr<world::Region>> regions;
-    std::map<std::string, std::shared_ptr<world::Airport>> airports;
+    // Non-Unique IDs (ICAO, FAA, Local or ID)
+    std::multimap<std::string, std::shared_ptr<world::Airport>> airports;
 
     // Unique only within region
     std::multimap<std::string, std::shared_ptr<world::Fix>> fixes;

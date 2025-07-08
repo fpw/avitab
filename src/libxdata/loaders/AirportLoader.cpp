@@ -94,6 +94,18 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
         }
     }
 
+    if (!port.faaCode.empty()) {
+        airport->setFAACode(port.faaCode);
+    }
+
+    if (!port.icaoCode.empty()) {
+        airport->setICAOCode(port.icaoCode);
+    }
+
+    if (!port.localCode.empty()) {
+        airport->setLocalCode(port.localCode);
+    }
+
     for (auto &entry: port.frequencies) {
         int places = 2;
         int code = entry.code;

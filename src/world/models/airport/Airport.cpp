@@ -49,6 +49,30 @@ void Airport::setLocation(const world::Location& loc) {
     this->locationDownRight = loc;
 }
 
+void Airport::setFAACode(std::string faaCode) {
+    this->faaCode = faaCode;
+}
+
+std::string Airport::getFAACode() const {
+    return faaCode;
+}
+
+void Airport::setICAOCode(std::string icaoCode) {
+    this->icaoCode = icaoCode;
+}
+
+std::string Airport::getICAOCode() const {
+    return icaoCode;
+}
+
+void Airport::setLocalCode(std::string localCode) {
+    this->localCode = localCode;
+}
+
+std::string Airport::getLocalCode() const {
+    return localCode;
+}
+
 void Airport::setRegion(std::shared_ptr<Region> region) {
     this->region = region;
 }

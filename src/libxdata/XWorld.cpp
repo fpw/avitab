@@ -47,18 +47,23 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::stri
     std::vector<std::shared_ptr<world::Airport>> res;
 
     std::string key = platform::lower(keyWord);
+    std::string cleanId = platform::upper(keyWord);
+    cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
-    auto directfind = findAirportByID(key);
-    if (directfind) {
-        res.push_back(directfind);
+    auto range = airports.equal_range(cleanId);
+    for (auto it = range.first; it != range.second; ++it) {
+            res.push_back(it->second);
+            if (res.size() >= MAX_SEARCH_RESULTS) {
+                break;
+            }
     }
 
     for (auto &it: airports) {
         if (platform::lower(it.second->getName()).find(key) != std::string::npos) {
-            res.push_back(it.second);
             if (res.size() >= MAX_SEARCH_RESULTS) {
                 break;
             }
+            res.push_back(it.second);
         }
     }
 

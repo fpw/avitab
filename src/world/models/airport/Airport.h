@@ -67,6 +67,12 @@ public:
 
     // Optional
     void setLocation(const Location &loc);
+    void setFAACode(std::string faaCode);
+    std::string getFAACode() const;
+    void setICAOCode(std::string icaoCode);
+    std::string getICAOCode() const;
+    void setLocalCode(std::string localCode);
+    std::string getLocalCode() const;
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
@@ -117,6 +123,9 @@ private:
     int elevation = 0; // feet AMSL
 
     // Optional
+    std::string faaCode;
+    std::string icaoCode;
+    std::string localCode;
     std::shared_ptr<Region> region;
     std::map<ATCFrequency, std::vector<Frequency>> atcFrequencies;
 

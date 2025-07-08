@@ -185,6 +185,10 @@ void AirportParser::parseMetaData() {
         curPort.longitude = parser.parseDouble();
     } else if (key == "icao_code") {
         curPort.icaoCode = parser.parseWord();
+    } else if (key == "local_code") {
+        curPort.localCode = parser.parseWord();
+    } else if (key == "faa_code") {
+        curPort.faaCode = parser.parseWord();
     }
 }
 
@@ -197,6 +201,13 @@ void AirportParser::parseFrequency(int code) {
 }
 
 void AirportParser::finishAirport() {
+    if (!curPort.icaoCode.empty()) {
+        curPort.id = curPort.icaoCode;
+    } else if (!curPort.faaCode.empty()) {
+        curPort.id = curPort.faaCode;
+    } else if (!curPort.localCode.empty()) {
+        curPort.id = curPort.localCode;
+    }
     if (!curPort.id.empty()) {
         acceptor(curPort);
     }
