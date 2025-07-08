@@ -393,6 +393,10 @@ void XPlaneEnvironment::updateMapExports(float lat, float lon, int zoom, float v
     mapVerticalRange = vrange;
 }
 
+float XPlaneEnvironment::getLocalTimeSec() {
+    return dataCache.getData("sim/time/local_time_sec").floatValue;
+}
+
 float XPlaneEnvironment::getMapLatitude() {
     std::lock_guard<std::mutex> lock(stateMutex);
     return mapLatitude;

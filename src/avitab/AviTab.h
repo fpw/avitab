@@ -75,6 +75,7 @@ public:
     void setRoute(std::shared_ptr<world::Route> route) override;
     std::shared_ptr<world::RouteFinder> getRouteFinder() override;
     void updateMapExports(float lat, float lon, int zoom, float vrange) override;
+    float getLocalTimeSec() override;
 
     ~AviTab();
 

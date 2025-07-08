@@ -62,6 +62,7 @@ public:
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
     void updateMapExports(float lat, float lon, int zoom, float vrange) override;
+    float getLocalTimeSec() override;
 
     ~XPlaneEnvironment();
 

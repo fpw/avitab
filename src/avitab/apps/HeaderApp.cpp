@@ -123,13 +123,17 @@ bool HeaderApp::onTick() {
 void HeaderApp::updateClock() {
     if ((timerCount % TIMER_TICKS_PER_SEC) == 0) {
         std::ostringstream t;
+        unsigned int a, b;
         if (stopwatchMode) {
-            unsigned int mins = (timerCount / TIMER_TICKS_PER_SEC) / 60;
-            unsigned int secs = (timerCount / TIMER_TICKS_PER_SEC) % 60;
-            t << std::setfill('0') << std::setw(2) << mins << ":" << std::setw(2) << secs;
+            a = (timerCount / TIMER_TICKS_PER_SEC) / 60;
+            b = (timerCount / TIMER_TICKS_PER_SEC) % 60;
+        //    t << std::setfill('0') << std::setw(2) << mins << ":" << std::setw(2) << secs;
         } else {
-            t << platform::getLocalTime("%H:%M");
+            float secs = api().getLocalTimeSec();
+            a = secs / 3600;
+            b = (secs - a * 3600 ) / 60;
         }
+        t << std::setfill('0') << std::setw(2) << a << ":" << std::setw(2) << b;
         clockLabel->setText(t.str());
         clockLabel->alignRightInParent(HOR_PADDING);
     }

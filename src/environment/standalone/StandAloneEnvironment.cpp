@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <ctime>
 #include "StandAloneEnvironment.h"
 #include "src/Logger.h"
 #include "src/platform/Platform.h"
@@ -154,6 +155,13 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
     }
     ++t;
     return loc[id];
+}
+
+float StandAloneEnvironment::getLocalTimeSec() {
+    time_t now = time(nullptr);
+    tm *local = localtime(&now);
+    unsigned int secs = local->tm_hour * 3600 + local->tm_min * 60 + local->tm_sec;
+    return secs;
 }
 
 StandAloneEnvironment::~StandAloneEnvironment() {

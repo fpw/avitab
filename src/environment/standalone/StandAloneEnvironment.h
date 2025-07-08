@@ -44,6 +44,7 @@ public:
     Environment::MagVarMap getMagneticVariations(std::vector<std::pair<double, double>> locations) override;
     AircraftID getActiveAircraftCount() override;
     Location getAircraftLocation(AircraftID id) override;
+    float getLocalTimeSec() override;
 
     virtual ~StandAloneEnvironment();
 

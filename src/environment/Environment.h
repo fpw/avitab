@@ -98,6 +98,7 @@ public:
     virtual Location getAircraftLocation(AircraftID id) = 0;
     virtual void updateMapExports(float lat, float lon, int zoom, float vrange) { /* default is no operation */ }
     float getLastFrameTime();
+    virtual float getLocalTimeSec() = 0;
 
     virtual ~Environment() = default;
 
