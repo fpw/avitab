@@ -160,7 +160,7 @@ Location StandAloneEnvironment::getAircraftLocation(AircraftID id) {
 float StandAloneEnvironment::getLocalTimeSec() {
     time_t now = time(nullptr);
     tm *local = localtime(&now);
-    unsigned int secs = local->tm_hour * 3600 + local->tm_min * 60 + local->tm_sec;
+    float secs = local->tm_hour * 3600 + local->tm_min * 60 + local->tm_sec;
     return secs;
 }
 

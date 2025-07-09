@@ -127,15 +127,17 @@ void HeaderApp::updateClock() {
         if (stopwatchMode) {
             a = (timerCount / TIMER_TICKS_PER_SEC) / 60;
             b = (timerCount / TIMER_TICKS_PER_SEC) % 60;
-        //    t << std::setfill('0') << std::setw(2) << mins << ":" << std::setw(2) << secs;
         } else {
-            float secs = api().getLocalTimeSec();
-            a = secs / 3600;
-            b = (secs - a * 3600 ) / 60;
+            if ((clockCount % 5) == 0) {
+                localTimeSecs = static_cast<unsigned int>(std::round(api().getLocalTimeSec()));
+            }
+            a = localTimeSecs / 3600;
+            b = (localTimeSecs - a * 3600 ) / 60;
         }
         t << std::setfill('0') << std::setw(2) << a << ":" << std::setw(2) << b;
         clockLabel->setText(t.str());
         clockLabel->alignRightInParent(HOR_PADDING);
+        clockCount++;
     }
     timerCount++;
 }
