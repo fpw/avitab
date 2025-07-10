@@ -83,6 +83,9 @@ void AirportApp::onSearchEntered(const std::string& code) {
         return;
     } else if (airports.size() == 1) {
         onAirportSelected(airports.front());
+        searchLabel->setText("");
+        resultList.reset();
+        nextButton.reset();
         return;
     } else if (airports.size() >= world::World::MAX_SEARCH_RESULTS) {
         searchLabel->setText("Too many results, only showing first " + std::to_string(airports.size()));
@@ -91,8 +94,19 @@ void AirportApp::onSearchEntered(const std::string& code) {
     }
 
     std::vector<std::string> resultStrings;
+    std::string id;
     for (auto &ap: airports) {
-        resultStrings.push_back(ap->getID() + " - " + ap->getName());
+        id = ap->getICAOCode();
+        if (id.empty()) {
+            id = ap->getFAACode();
+        }
+        if (id.empty()) {
+            id = ap->getLocalCode();
+        }
+        if (id.empty()) {
+            id = ap->getID();
+        }
+        resultStrings.push_back(id + " - " + ap->getName());
     }
 
     resultList = std::make_shared<DropDownList>(searchPage, resultStrings);
