@@ -58,14 +58,15 @@ public:
 
 private:
     void registerNode(std::shared_ptr<world::NavNode> n);
+    std::vector<std::shared_ptr<world::Airport>> findAirportByCode(const std::string &keyWord) const;
+    std::vector<std::shared_ptr<world::Airport>> findAirportByName(const std::string &keyWord) const;
 
 private:
     bool allNodesRegistered { false };
 
     // Unique IDs
     std::map<std::string, std::shared_ptr<world::Region>> regions;
-    // Non-Unique IDs (ICAO, FAA, Local or ID)
-    std::multimap<std::string, std::shared_ptr<world::Airport>> airports;
+    std::map<std::string, std::shared_ptr<world::Airport>> airports;
 
     // Unique only within region
     std::multimap<std::string, std::shared_ptr<world::Fix>> fixes;

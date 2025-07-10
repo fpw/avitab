@@ -43,6 +43,40 @@ std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) c
     }
 }
 
+std::vector<std::shared_ptr<world::Airport>> XWorld::findAirportByCode(const std::string& keyWord) const {
+    std::vector<std::shared_ptr<world::Airport>> res;
+    std::string cleanId = platform::upper(keyWord);
+    cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
+
+    for (auto &it: airports) {
+        std::ostringstream codeList;
+        codeList << it.first << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode();
+        if (codeList.str().find(cleanId) != std::string::npos) {
+            res.push_back(it.second);
+            if (res.size() >= MAX_SEARCH_RESULTS) {
+                break;
+            }
+        }
+    }
+    return res;
+}
+
+std::vector<std::shared_ptr<world::Airport>> XWorld::findAirportByName(const std::string& keyWord) const {
+    std::vector<std::shared_ptr<world::Airport>> res;
+    std::stringstream codesList;
+    std::string key = platform::lower(keyWord);
+
+    for (auto &it: airports) {
+        if (platform::lower(it.second->getName()).find(key) != std::string::npos) {
+            res.push_back(it.second);
+            if (res.size() >= MAX_SEARCH_RESULTS) {
+                break;
+            }
+        }
+    }
+    return res;
+}
+
 std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::string& keyWord) const {
     std::vector<std::shared_ptr<world::Airport>> res;
 
@@ -50,23 +84,22 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::stri
     std::string cleanId = platform::upper(keyWord);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
-    auto range = airports.equal_range(cleanId);
-    for (auto it = range.first; it != range.second; ++it) {
-            res.push_back(it->second);
+    if (cleanId.size() <= 4) {
+        for (auto it: findAirportByCode(cleanId)) {
+            res.push_back(it);
             if (res.size() >= MAX_SEARCH_RESULTS) {
                 break;
             }
+        };
     }
-
-    for (auto &it: airports) {
-        if (platform::lower(it.second->getName()).find(key) != std::string::npos) {
+    if (cleanId.size() > 4 || res.size() <= MAX_SEARCH_RESULTS) {
+        for (auto it: findAirportByName(keyWord)) {
             if (res.size() >= MAX_SEARCH_RESULTS) {
                 break;
             }
-            res.push_back(it.second);
+            res.push_back(it);
         }
     }
-
     return res;
 }
 
