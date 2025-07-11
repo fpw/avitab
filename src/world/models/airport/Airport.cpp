@@ -29,10 +29,15 @@ namespace world {
 Airport::Airport(const std::string& airportId):
     id(airportId)
 {
+    setDisplayID(airportId);
 }
 
 void Airport::setName(const std::string& name) {
     this->name = name;
+}
+
+void Airport::setDisplayID(const std::string& displayID) {
+    this->displayID = displayID;
 }
 
 void Airport::setElevation(int elevation) {
@@ -43,34 +48,22 @@ int Airport::getElevation() const {
     return elevation;
 }
 
+void Airport::setICAOCode(const std::string& icaoCode) {
+    this->icaoCode = icaoCode;
+}
+
+void Airport::setFAACode(const std::string& faaCode) {
+    this->faaCode = faaCode;
+}
+
+void Airport::setLocalCode(const std::string& localCode) {
+    this->localCode = localCode;
+}
+
 void Airport::setLocation(const world::Location& loc) {
     this->location = loc;
     this->locationUpLeft = loc;
     this->locationDownRight = loc;
-}
-
-void Airport::setFAACode(std::string faaCode) {
-    this->faaCode = faaCode;
-}
-
-std::string Airport::getFAACode() const {
-    return faaCode;
-}
-
-void Airport::setICAOCode(std::string icaoCode) {
-    this->icaoCode = icaoCode;
-}
-
-std::string Airport::getICAOCode() const {
-    return icaoCode;
-}
-
-void Airport::setLocalCode(std::string localCode) {
-    this->localCode = localCode;
-}
-
-std::string Airport::getLocalCode() const {
-    return localCode;
 }
 
 void Airport::setRegion(std::shared_ptr<Region> region) {
@@ -129,8 +122,24 @@ const std::string& Airport::getID() const {
     return id;
 }
 
+const std::string& Airport::getDisplayID() const {
+    return displayID;
+}
+
 const std::string& Airport::getName() const {
     return name;
+}
+
+const std::string& Airport::getFAACode() const {
+    return faaCode;
+}
+
+const std::string& Airport::getICAOCode() const {
+    return icaoCode;
+}
+
+const std::string& Airport::getLocalCode() const {
+    return localCode;
 }
 
 const std::vector<Frequency> &Airport::getATCFrequencies(ATCFrequency type) {

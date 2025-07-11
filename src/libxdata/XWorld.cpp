@@ -49,9 +49,9 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirportByCode(const std
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
     for (auto &it: airports) {
-        std::ostringstream codeList;
-        codeList << it.first << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode();
-        if (codeList.str().find(cleanId) != std::string::npos) {
+        std::ostringstream codes;
+        codes << it.first << " " << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode();
+        if (codes.str().find(cleanId) != std::string::npos) {
             res.push_back(it.second);
             if (res.size() >= MAX_SEARCH_RESULTS) {
                 break;

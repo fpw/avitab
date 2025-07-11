@@ -94,19 +94,8 @@ void AirportApp::onSearchEntered(const std::string& code) {
     }
 
     std::vector<std::string> resultStrings;
-    std::string id;
     for (auto &ap: airports) {
-        id = ap->getICAOCode();
-        if (id.empty()) {
-            id = ap->getFAACode();
-        }
-        if (id.empty()) {
-            id = ap->getLocalCode();
-        }
-        if (id.empty()) {
-            id = ap->getID();
-        }
-        resultStrings.push_back(id + " - " + ap->getName());
+        resultStrings.push_back(ap->getDisplayID() + " - " + ap->getName());
     }
 
     resultList = std::make_shared<DropDownList>(searchPage, resultStrings);
@@ -134,9 +123,9 @@ void AirportApp::onAirportSelected(std::shared_ptr<world::Airport> airport) {
 
     TabPage tab;
     tab.airport = airport;
-    tab.page = tabs->addTab(tabs, airport->getID());
+    tab.page = tabs->addTab(tabs, airport->getDisplayID());
     tab.page->setShowScrollbar(false);
-    tab.window = std::make_shared<Window>(tab.page, airport->getID());
+    tab.window = std::make_shared<Window>(tab.page, airport->getName() + " (" + airport->getDisplayID() + ", " + std::to_string(airport->getElevation()) + " ft)");
     tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
     tab.window->alignInTopLeft();
 
@@ -183,7 +172,6 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
 
-    str << airport->getName() + ", elevation " + std::to_string(airport->getElevation()) + " ft AMSL\n";
     str << toATCInfo(airport);
     str << "\n";
     str << toRunwayInfo(airport);
@@ -200,8 +188,8 @@ void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Air
 
 std::string AirportApp::toATCInfo(std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
-    str << "ATC Frequencies\n";
-    str << toATCString("    Recorded Messages", airport, world::Airport::ATCFrequency::RECORDED);
+    str << "ATC Frequencies:\n";
+    str << toATCString("    ATIS", airport, world::Airport::ATCFrequency::RECORDED);
     str << toATCString("    UniCom", airport, world::Airport::ATCFrequency::UNICOM);
     str << toATCString("    MultiCom", airport, world::Airport::ATCFrequency::MULTICOM);
     str << toATCString("    Flight Service", airport, world::Airport::ATCFrequency::FSS);
@@ -241,7 +229,6 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
     airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<world::Runway> rwy) {
         str << "  " + rwy->getID();
         auto ils = rwy->getILSData();
-        auto elevation = rwy->getElevation();
         int rwHeading = (int)(rwy->getHeading() + magneticVariation + 0.5 + 360.0) % 360;
         if (ils) {
             int ilsHeading = (int)(ils->getILSLocalizer()->getRunwayHeading() + magneticVariation + 0.5 + 360.0) % 360;
@@ -250,17 +237,14 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
             str << " (ID " << ils->getID();
             str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
             if (ilsHeading != rwHeading) {
-                str << ", CRS " << ilsHeading << "° mag";
+                str << ", CRS " << ilsHeading << "° M";
             }
             str << ")";
         } else {
             str << " without ils";
         }
         if (!std::isnan(rwHeading)) {
-            str << ", CRS " << rwHeading << "° mag";
-        }
-        if (!std::isnan(elevation)) {
-            str << ", " << (int) elevation << " ft MSL";
+            str << ", CRS " << rwHeading << "° M";
         }
         float length = rwy->getLength();
         if (!std::isnan(length)) {

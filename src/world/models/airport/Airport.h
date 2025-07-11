@@ -55,6 +55,7 @@ public:
 
     Airport(const std::string &airportId);
     void setName(const std::string &name);
+    void setDisplayID(const std::string &displayID);
     void setElevation(int elevation);
     int getElevation() const;
 
@@ -66,18 +67,19 @@ public:
     const Location &getLocationDownRight() const;
 
     // Optional
+    void setICAOCode(const std::string &icaoCode);
+    void setFAACode(const std::string &faaCode);
+    void setLocalCode(const std::string &localCode);
     void setLocation(const Location &loc);
-    void setFAACode(std::string faaCode);
-    std::string getFAACode() const;
-    void setICAOCode(std::string icaoCode);
-    std::string getICAOCode() const;
-    void setLocalCode(std::string localCode);
-    std::string getLocalCode() const;
     void setRegion(std::shared_ptr<Region> region);
     void addATCFrequency(ATCFrequency which, const Frequency &frq);
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getName() const;
+    const std::string& getDisplayID() const;
+    const std::string& getFAACode() const;
+    const std::string& getICAOCode() const;
+    const std::string& getLocalCode() const;
     const std::vector<Frequency> &getATCFrequencies(ATCFrequency type);
     const std::string &getMetarTimestamp() const;
     const std::string &getMetarString() const;
@@ -116,6 +118,7 @@ public:
 
 private:
     std::string id; // either ICAO code or X + fictional id
+    std::string displayID; // either Xplane ID or ICAO, FAA or Local code
     std::string name;
     Location location;
     Location locationUpLeft;
