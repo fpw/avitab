@@ -68,11 +68,11 @@ void AirportApp::resetLayout() {
     nearestButton = std::make_shared<Button>(searchWindow, "Nearest");
     nearestButton->alignRightOf(searchField, 80);
     nearestButton->setCallback([this] (const Button &) {
-        std::string res = api().getNearestAirportId();
-        if (res.size() > 0) {
-            api().executeLater([this, res] {
-                onSearchEntered(res);
-            });
+        auto world = api().getNavWorld();
+        std::string id = api().getNearestAirportId();
+        auto airport = world->findAirportByID(id);
+        if (airport != nullptr) {
+            onAirportSelected(airport);
         };
     });
 }
