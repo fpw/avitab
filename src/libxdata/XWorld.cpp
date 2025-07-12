@@ -50,7 +50,7 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirportByCode(const std
 
     for (auto &it: airports) {
         std::ostringstream codes;
-        codes << it.first << " " << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode();
+        codes << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode();
         if (codes.str().find(cleanId) != std::string::npos) {
             res.push_back(it.second);
             if (res.size() >= MAX_SEARCH_RESULTS) {
@@ -84,20 +84,18 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::stri
     std::string cleanId = platform::upper(keyWord);
     cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
 
-    if (cleanId.size() <= 4) {
-        for (auto it: findAirportByCode(cleanId)) {
-            res.push_back(it);
-            if (res.size() >= MAX_SEARCH_RESULTS) {
-                break;
-            }
-        };
-    }
-    if (cleanId.size() > 4 || res.size() <= MAX_SEARCH_RESULTS) {
+    for (auto it: findAirportByCode(cleanId)) {
+        res.push_back(it);
+        if (res.size() >= MAX_SEARCH_RESULTS) {
+            break;
+        }
+    };
+    if (res.size() < MAX_SEARCH_RESULTS) {
         for (auto it: findAirportByName(keyWord)) {
+            res.push_back(it);
             if (res.size() >= MAX_SEARCH_RESULTS) {
                 break;
             }
-            res.push_back(it);
         }
     }
     return res;
