@@ -35,6 +35,7 @@ public:
     void visitNodes(const world::Location &bottomLeft, const world::Location &topRight, NodeAcceptor callback, int filter) override;
 
     std::shared_ptr<world::Airport> findAirportByID(const std::string &id) const override;
+    std::shared_ptr<world::Airport> findAirportByCode(const std::string &id) const override;
     std::shared_ptr<world::Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const override;
     std::vector<std::shared_ptr<world::Airport>> findAirport(const std::string &keyWord) const override;
 
@@ -58,7 +59,6 @@ public:
 
 private:
     void registerNode(std::shared_ptr<world::NavNode> n);
-    std::vector<std::shared_ptr<world::Airport>> findAirportByCode(const std::string &keyWord) const;
 
 private:
     bool allNodesRegistered { false };

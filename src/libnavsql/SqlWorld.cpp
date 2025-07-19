@@ -173,6 +173,13 @@ std::shared_ptr<world::Airport> SqlWorld::findAirportByID(const std::string &id)
     return loadManager.lock()->getAirport(cleanId);
 }
 
+std::shared_ptr<world::Airport> SqlWorld::findAirportByCode(const std::string &id) const
+{
+    std::string cleanId = platform::upper(id);
+    cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
+    return loadManager.lock()->getAirport(cleanId);
+}
+
 std::shared_ptr<world::Fix> SqlWorld::findFixByRegionAndID(const std::string &region, const std::string &id) const
 {
     std::string r(region);

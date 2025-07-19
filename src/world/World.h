@@ -55,6 +55,7 @@ public:
     virtual void visitNodes(const world::Location &bottomLeft, const world::Location &topRight, NodeAcceptor calllback, int filter) = 0;
 
     virtual std::shared_ptr<Airport> findAirportByID(const std::string &id) const = 0;
+    virtual std::shared_ptr<Airport> findAirportByCode(const std::string &id) const = 0;
     virtual std::shared_ptr<Fix> findFixByRegionAndID(const std::string &region, const std::string &id) const = 0;
     virtual std::vector<std::shared_ptr<Airport>> findAirport(const std::string &keyWord) const = 0;
 
