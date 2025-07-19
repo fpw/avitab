@@ -116,7 +116,6 @@ public:
 
 private:
     std::string id; // either ICAO code or X + fictional id
-    std::string displayID; // either Xplane ID or ICAO, FAA or Local code
     std::string name;
     Location location;
     Location locationUpLeft;
