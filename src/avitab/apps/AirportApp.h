@@ -85,6 +85,7 @@ private:
     void onAirportSelected(std::shared_ptr<world::Airport> airport);
     void fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
 
+    std::string getDisplayID(std::shared_ptr<world::Airport> airport);
     std::string toATCInfo(std::shared_ptr<world::Airport> airport);
     std::string toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type);
     std::string toRunwayInfo(std::shared_ptr<world::Airport> airport);

@@ -95,7 +95,7 @@ void AirportApp::onSearchEntered(const std::string& code) {
 
     std::vector<std::string> resultStrings;
     for (auto &ap: airports) {
-        resultStrings.push_back(ap->getDisplayID() + " - " + ap->getName());
+        resultStrings.push_back(getDisplayID(ap) + " - " + ap->getName());
     }
 
     resultList = std::make_shared<DropDownList>(searchPage, resultStrings);
@@ -123,9 +123,9 @@ void AirportApp::onAirportSelected(std::shared_ptr<world::Airport> airport) {
 
     TabPage tab;
     tab.airport = airport;
-    tab.page = tabs->addTab(tabs, airport->getDisplayID());
+    tab.page = tabs->addTab(tabs, getDisplayID(airport));
     tab.page->setShowScrollbar(false);
-    tab.window = std::make_shared<Window>(tab.page, airport->getName() + " (" + airport->getDisplayID() + ", " + std::to_string(airport->getElevation()) + " ft)");
+    tab.window = std::make_shared<Window>(tab.page, airport->getName() + " (" + getDisplayID(airport) + ", " + std::to_string(airport->getElevation()) + " ft)");
     tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
     tab.window->alignInTopLeft();
 
@@ -202,6 +202,20 @@ std::string AirportApp::toATCInfo(std::shared_ptr<world::Airport> airport) {
     return str.str();
 }
 
+std::string AirportApp::getDisplayID(std::shared_ptr<world::Airport> airport) {
+    std::string id = airport->getICAOCode();
+    if (id.empty()) {
+        id = airport->getFAACode();
+    }
+    if (id.empty()) {
+        id = airport->getLocalCode();
+    }
+    if (id.empty()) {
+        id = airport->getID();
+    }
+    return id;
+}
+
 std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type) {
     std::stringstream str;
     auto &freqs = airport->getATCFrequencies(type);
@@ -257,7 +271,11 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
 }
 
 std::string AirportApp::toWeatherInfo(std::shared_ptr<world::Airport> airport) {
-    return api().getMETARForAirport(airport->getICAOCode());
+    std::string id = airport->getICAOCode();
+    if (id.empty()) {
+        id = airport->getID();
+    }
+    return api().getMETARForAirport(id);
 }
 
 AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {
@@ -285,7 +303,11 @@ void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<worl
     TabPage &tab = findPage(page);
     tab.label->setText("Loading...");
 
-    auto call = svc->getChartsFor(airport->getICAOCode());
+    std::string id = airport->getICAOCode();
+    if (id.empty()) {
+        id = airport->getID();
+    }
+    auto call = svc->getChartsFor(id);
     call->andThen([this, page] (std::future<apis::ChartService::ChartList> res) {
         try {
             auto charts = res.get();
