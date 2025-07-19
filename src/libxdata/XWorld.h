@@ -59,7 +59,6 @@ public:
 private:
     void registerNode(std::shared_ptr<world::NavNode> n);
     std::vector<std::shared_ptr<world::Airport>> findAirportByCode(const std::string &keyWord) const;
-    std::vector<std::shared_ptr<world::Airport>> findAirportByName(const std::string &keyWord) const;
 
 private:
     bool allNodesRegistered { false };
