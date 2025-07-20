@@ -20,6 +20,7 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <tuple>
 #include "AirportApp.h"
 #include "src/Logger.h"
 
@@ -92,7 +93,8 @@ void AirportApp::onSearchEntered(const std::string& code) {
     } else {
         searchLabel->setText("");
     }
-
+    sortSearchResults(airports);
+    
     std::vector<std::string> resultStrings;
     for (auto &ap: airports) {
         resultStrings.push_back(getDisplayID(ap) + " - " + ap->getName());
@@ -125,7 +127,7 @@ void AirportApp::onAirportSelected(std::shared_ptr<world::Airport> airport) {
     tab.airport = airport;
     tab.page = tabs->addTab(tabs, getDisplayID(airport));
     tab.page->setShowScrollbar(false);
-    tab.window = std::make_shared<Window>(tab.page, airport->getName() + " (" + getDisplayID(airport) + ", " + std::to_string(airport->getElevation()) + " ft)");
+    tab.window = std::make_shared<Window>(tab.page, toAptHeader(airport));
     tab.window->setDimensions(tab.page->getContentWidth(), tab.page->getHeight());
     tab.window->alignInTopLeft();
 
@@ -169,6 +171,18 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
     }
 }
 
+void AirportApp::sortSearchResults(std::vector<std::shared_ptr<world::Airport>>& airports) {
+    auto a = api().getAircraftLocation(0);
+    world::Location loc(a.latitude, a.longitude);
+    std::sort(airports.begin(), airports.end(),
+        [loc] (std::shared_ptr<world::Airport> a, std::shared_ptr<world::Airport> b) {
+            auto aLoc = a->getLocation();
+            auto bLoc = b->getLocation();
+            return (aLoc.distanceTo(loc) < bLoc.distanceTo(loc));
+        }
+    );
+}
+
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
 
@@ -180,10 +194,27 @@ void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Air
 
     TabPage &tab = findPage(page);
     tab.chartSelect.reset();
+    tab.window->setCaption(toAptHeader(airport));
 
     tab.label->setText(str.str());
     tab.label->setDimensions(tab.window->getContentWidth(), tab.window->getHeight());
     tab.label->setVisible(true);
+}
+
+std::tuple<double, double> AirportApp::getNavData(std::shared_ptr<world::Airport> airport) {
+    auto a = api().getAircraftLocation(0);
+    world::Location loc(a.latitude, a.longitude);
+    auto aptLoc = airport->getLocation();
+    return std::make_tuple((aptLoc.distanceTo(loc) / 1000) * world::KM_TO_NM, loc.bearingTo(aptLoc));
+}
+
+std::string AirportApp::toAptHeader(std::shared_ptr<world::Airport> airport) {
+    std::stringstream str;
+    double distanceNm, bearing;
+    std::tie(distanceNm, bearing) = getNavData(airport);
+    str << airport->getName() << " (" << getDisplayID(airport) << ", " << std::to_string(airport->getElevation()) << " ft) ";
+    str << std::fixed << std::setprecision(1) << distanceNm << " nm, " << bearing << "° T";
+    return str.str();
 }
 
 std::string AirportApp::toATCInfo(std::shared_ptr<world::Airport> airport) {

@@ -83,9 +83,12 @@ private:
     void resetLayout();
     void onSearchEntered(const std::string &code);
     void onAirportSelected(std::shared_ptr<world::Airport> airport);
+    void sortSearchResults(std::vector<std::shared_ptr<world::Airport>> &airports);
     void fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
 
     std::string getDisplayID(std::shared_ptr<world::Airport> airport);
+    std::tuple<double, double> getNavData(std::shared_ptr<world::Airport> airport);
+    std::string toAptHeader(std::shared_ptr<world::Airport> airport);
     std::string toATCInfo(std::shared_ptr<world::Airport> airport);
     std::string toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type);
     std::string toRunwayInfo(std::shared_ptr<world::Airport> airport);
