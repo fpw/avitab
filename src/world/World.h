@@ -39,7 +39,8 @@ class RouteFinder;
 
 class World : public std::enable_shared_from_this<World>{
 public:
-    static constexpr const int MAX_SEARCH_RESULTS = 10;
+    static constexpr const int MAX_SEARCH_RESULTS = 50;
+    static constexpr const int MAX_DISPLAY_RESULTS = 10;
 
     static constexpr const int VISIT_TOWERED_AIRPORTS = 0b1;
     static constexpr const int VISIT_OTHER_AIRPORTS =   0b10;
