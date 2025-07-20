@@ -57,6 +57,7 @@ std::shared_ptr<world::Airport> XWorld::findAirportByCode(const std::string& id)
 
 std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::string& keyWord) const {
     std::vector<std::shared_ptr<world::Airport>> res;
+
     std::string key = platform::lower(keyWord);
 
     auto directfind = findAirportByID(key);
@@ -77,6 +78,7 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::stri
             }
         }
     }
+
     return res;
 }
 

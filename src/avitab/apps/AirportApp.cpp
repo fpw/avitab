@@ -211,6 +211,7 @@ std::tuple<double, double> AirportApp::getNavData(std::shared_ptr<world::Airport
 std::string AirportApp::toAptHeader(std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
     double distanceNm, bearing;
+
     std::tie(distanceNm, bearing) = getNavData(airport);
     str << airport->getName() << " (" << getDisplayID(airport) << ", " << std::to_string(airport->getElevation()) << " ft) ";
     str << std::fixed << std::setprecision(1) << distanceNm << " nm, " << bearing << "° T";
