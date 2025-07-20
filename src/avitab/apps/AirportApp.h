@@ -27,6 +27,8 @@
 #include "src/gui_toolkit/widgets/Label.h"
 #include "src/gui_toolkit/widgets/Page.h"
 #include "src/gui_toolkit/widgets/Button.h"
+#include "src/gui_toolkit/widgets/Checkbox.h"
+#include "src/gui_toolkit/widgets/Container.h"
 #include "src/gui_toolkit/widgets/PixMap.h"
 #include "src/gui_toolkit/widgets/DropDownList.h"
 #include "src/gui_toolkit/widgets/List.h"
@@ -72,12 +74,15 @@ private:
     Timer updateTimer;
     std::shared_ptr<Page> searchPage;
     std::shared_ptr<Window> searchWindow;
-    std::shared_ptr<Label> searchLabel;
+    std::shared_ptr<Container> settingsContainer;
+    std::shared_ptr<Label> searchLabel, settingsLabel;
+    std::shared_ptr<Checkbox> sortCheckbox;
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<TextArea> searchField;
     std::shared_ptr<DropDownList> resultList;
     std::shared_ptr<Button> nextButton;
     std::shared_ptr<Keyboard> keys;
+    std::shared_ptr<avitab::AirportConfig> airportConfig;
 
     void removeTab(std::shared_ptr<Page> page);
     void resetLayout();
@@ -100,6 +105,9 @@ private:
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartService::ChartList &charts);
     void onChartLoaded(std::shared_ptr<Page> page);
+    void showSettings();
+    void resetSettings();
+    void onSettingsButton();
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
     void redrawPage(std::shared_ptr<Page> page);
     bool onTimer();

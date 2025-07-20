@@ -27,7 +27,7 @@ using json = nlohmann::json;
 
 namespace avitab {
 
-static const int PREFS_VERSION = 2;
+static const int PREFS_VERSION = 3;
 
 Settings::Settings(const std::string &settingsFile)
 :   filePath(settingsFile)
@@ -57,12 +57,12 @@ Settings::Settings(const std::string &settingsFile)
         upgrade1to2();
         ++loadedPrefsVersion;
     }
-#if 0 // template for future update
+//#if 0 // template for future update
     if (loadedPrefsVersion == 2) {
         upgrade2to3();
         ++loadedPrefsVersion;
     }
-#endif
+//#endif
     (*database)["general"]["prefs_version"] = PREFS_VERSION;
 }
 
@@ -106,6 +106,10 @@ std::shared_ptr<maps::OverlayConfig> Settings::getOverlayConfig() {
     return overlayConfig;
 }
 
+std::shared_ptr<avitab::AirportConfig> Settings::getAirportConfig() {
+    return airportConfig;
+}
+
 template<typename T>
 T Settings::getSetting(const std::string &ptr, T def) {
     return database->value(json::json_pointer(ptr), def);
@@ -139,6 +143,7 @@ void Settings::load() {
     }
 
     loadOverlayConfig();
+    loadAirportConfig();
 }
 
 void Settings::loadOverlayConfig() {
@@ -188,6 +193,19 @@ void Settings::saveDocReadingConfig(const std::string appName, DocumentReadingCo
     setSetting("/" + appName + "/docreading/mousewheelscroll", config.mouseWheelScrollsMultiPage);
 }
 
+void Settings::loadAirportConfig() {
+    airportConfig = std::make_shared<avitab::AirportConfig>();
+    airportConfig->doSort = getSetting("/airports/sort", false);
+    airportConfig->sortCriteria = getSetting("/airports/sort_criteria", 0);
+    airportConfig->sortAscending = getSetting("/airports/sort_ascending", true);
+}
+
+void Settings::saveAirportConfig() {
+    setSetting("/airports/sort", airportConfig->doSort);
+    setSetting("/airports/sort_criteria", airportConfig->sortCriteria);
+    setSetting("/airports/sort_ascending", airportConfig->sortAscending);
+}
+
 void Settings::saveWindowRect(const WindowRect &rect) {
     setSetting("/window/top", rect.top);
     setSetting("/window/left", rect.left);
@@ -222,9 +240,16 @@ void Settings::upgrade1to2() {
     }
 }
 
+void Settings::upgrade2to3() {
+    (*database)["airports"]["sort"] = false;
+    (*database)["airports"]["sort_criteria"] = 0;
+    (*database)["airports"]["sort_ascending"] = true;
+}
+
 void Settings::saveAll() {
     try {
         saveOverlayConfig();
+        saveAirportConfig();
         fs::ofstream fout(fs::u8path(filePath));
         fout << std::setw(4) << *database;
     } catch (const std::exception &e) {

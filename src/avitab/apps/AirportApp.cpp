@@ -34,6 +34,7 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
     App(appFuncs),
     updateTimer(std::bind(&AirportApp::onTimer, this), 200)
 {
+    airportConfig = api().getSettings()->getAirportConfig();
     resetLayout();
 }
 
@@ -47,6 +48,7 @@ void AirportApp::resetLayout() {
     searchWindow->setDimensions(searchPage->getContentWidth(), searchPage->getHeight());
     searchWindow->centerInParent();
     searchWindow->setOnClose([this] { exit(); });
+    searchWindow->addSymbol(Widget::Symbol::SETTINGS, std::bind(&AirportApp::onSettingsButton, this));
 
     searchField = std::make_shared<TextArea>(searchWindow, "");
     searchField->alignInTopLeft();
@@ -93,7 +95,9 @@ void AirportApp::onSearchEntered(const std::string& code) {
     } else {
         searchLabel->setText("");
     }
-    sortSearchResults(airports);
+    if (airportConfig->doSort) {
+        sortSearchResults(airports);
+    }
     
     std::vector<std::string> resultStrings;
     for (auto &ap: airports) {
@@ -519,6 +523,39 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     }
 
     onTimer();
+}
+
+void AirportApp::resetSettings() {
+    settingsLabel.reset();
+    sortCheckbox.reset();
+    settingsContainer.reset();
+}
+
+void AirportApp::onSettingsButton() {
+    if (settingsContainer) {
+        resetSettings();
+    } else {
+        showSettings();
+    }
+}
+
+void AirportApp::showSettings() {
+    auto ui = getUIContainer();
+
+    settingsContainer = std::make_shared<Container>();
+    settingsContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
+    settingsContainer->alignTopRightInParent(10, 127);
+    settingsContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
+    settingsContainer->setVisible(true);
+
+    settingsLabel = std::make_shared<Label>(settingsContainer, "Settings:");
+    settingsLabel->alignInTopLeft();
+    //settingsLabel->setManaged();
+
+    sortCheckbox = std::make_shared<Checkbox>(settingsContainer, "Sort results");
+    sortCheckbox->setChecked(airportConfig->doSort);
+    sortCheckbox->alignBelow(settingsLabel);
+    sortCheckbox->setCallback([this] (bool checked) { airportConfig->doSort = checked; });
 }
 
 void AirportApp::onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end) {
