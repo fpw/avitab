@@ -35,6 +35,8 @@ DropDownList::DropDownList(WidgetPtr parent, const std::vector<std::string>& cho
     }
 
     lv_ddlist_set_options(obj, choiceStr.c_str());
+    lv_ddlist_set_draw_arrow(obj, true);
+    lv_ddlist_set_style(obj, LV_DDLIST_STYLE_SB, &lv_style_plain_color);
     lv_obj_set_user_data(obj, this);
 
     setObj(obj);
