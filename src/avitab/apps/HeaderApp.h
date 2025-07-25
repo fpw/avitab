@@ -53,7 +53,12 @@ private:
     unsigned int timerCount = 0;
     unsigned int clockCount = 0;
     unsigned int localTimeSecs = 0;
-    bool stopwatchMode = false;
+    enum clockMode {
+        STOPWATCH,
+        SYSTEMTIME,
+        SIMTIME
+    };
+    int curClockMode = SIMTIME;
 
     bool showFps = true;
     std::array<float, 30> fpsRingBuffer{};

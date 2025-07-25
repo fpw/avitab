@@ -108,7 +108,10 @@ void HeaderApp::onBrightnessChange(int brightness) {
 
 void HeaderApp::onClockClick(int x, int y, bool pr, bool rel) {
     if (pr) {
-        stopwatchMode = !stopwatchMode;
+        curClockMode++;
+        if (curClockMode > SIMTIME) {
+            curClockMode = STOPWATCH;
+        }
         timerCount = 0;
         updateClock();
     }
@@ -124,17 +127,21 @@ void HeaderApp::updateClock() {
     if ((timerCount % TIMER_TICKS_PER_SEC) == 0) {
         std::ostringstream t;
         unsigned int a, b;
-        if (stopwatchMode) {
+        if (curClockMode == STOPWATCH) {
             a = (timerCount / TIMER_TICKS_PER_SEC) / 60;
             b = (timerCount / TIMER_TICKS_PER_SEC) % 60;
-        } else {
+            t << std::setfill('0') << std::setw(2) << a << ":" << std::setw(2) << b;
+        } else if (curClockMode == SIMTIME) {
             if ((clockCount % 5) == 0) {
                 localTimeSecs = static_cast<unsigned int>(std::round(api().getLocalTimeSec()));
             }
             a = localTimeSecs / 3600;
             b = (localTimeSecs - a * 3600 ) / 60;
+            t << std::setfill('0') << std::setw(2) << a << ":" << std::setw(2) << b;
         }
-        t << std::setfill('0') << std::setw(2) << a << ":" << std::setw(2) << b;
+        else {
+            t << "RT " << platform::getLocalTime("%H:%M");
+        }
         clockLabel->setText(t.str());
         clockLabel->alignRightInParent(HOR_PADDING);
         clockCount++;
