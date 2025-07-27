@@ -36,6 +36,7 @@ AirportApp::AirportApp(FuncsPtr appFuncs):
 {
     airportConfig = api().getSettings()->getAirportConfig();
     resetLayout();
+    createSettingsContainer();
 }
 
 void AirportApp::resetLayout() {
@@ -47,8 +48,8 @@ void AirportApp::resetLayout() {
     searchWindow = std::make_shared<Window>(searchPage, "Search");
     searchWindow->setDimensions(searchPage->getContentWidth(), searchPage->getHeight());
     searchWindow->centerInParent();
-    searchWindow->setOnClose([this] { exit(); });
-    searchWindow->addSymbol(Widget::Symbol::SETTINGS, std::bind(&AirportApp::onSettingsButton, this));
+    searchWindow->setOnClose([this] { prefContainer->setVisible(false); exit(); });
+    searchWindow->addSymbol(Widget::Symbol::SETTINGS, std::bind(&AirportApp::toggleSettings, this));
 
     searchField = std::make_shared<TextArea>(searchWindow, "");
     searchField->alignInTopLeft();
@@ -525,36 +526,21 @@ void AirportApp::onChartLoaded(std::shared_ptr<Page> page) {
     onTimer();
 }
 
-void AirportApp::resetSettings() {
-    settingsLabel.reset();
-    sortCheckbox.reset();
-    settingsContainer.reset();
+void AirportApp::toggleSettings() {
+    prefContainer->setVisible(!prefContainer->isVisible());
 }
 
-void AirportApp::onSettingsButton() {
-    if (settingsContainer) {
-        resetSettings();
-    } else {
-        showSettings();
-    }
-}
-
-void AirportApp::showSettings() {
+void AirportApp::createSettingsContainer() {
     auto ui = getUIContainer();
 
-    settingsContainer = std::make_shared<Container>();
-    settingsContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
-    settingsContainer->alignTopRightInParent(10, 127);
-    settingsContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
-    settingsContainer->setVisible(true);
+    prefContainer = std::make_shared<Container>();
+    prefContainer->setDimensions(ui->getWidth() / 8, ui->getHeight() / 2);
+    prefContainer->alignTopRightInParent(10, 127);
+    prefContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
+    prefContainer->setVisible(false);
 
-    settingsLabel = std::make_shared<Label>(settingsContainer, "Settings:");
-    settingsLabel->alignInTopLeft();
-    //settingsLabel->setManaged();
-
-    sortCheckbox = std::make_shared<Checkbox>(settingsContainer, "Sort results");
+    sortCheckbox = std::make_shared<Checkbox>(prefContainer, "Sort results");
     sortCheckbox->setChecked(airportConfig->doSort);
-    sortCheckbox->alignBelow(settingsLabel);
     sortCheckbox->setCallback([this] (bool checked) { airportConfig->doSort = checked; });
 }
 

@@ -74,8 +74,8 @@ private:
     Timer updateTimer;
     std::shared_ptr<Page> searchPage;
     std::shared_ptr<Window> searchWindow;
-    std::shared_ptr<Container> settingsContainer;
-    std::shared_ptr<Label> searchLabel, settingsLabel;
+    std::shared_ptr<Container> prefContainer;
+    std::shared_ptr<Label> searchLabel;
     std::shared_ptr<Checkbox> sortCheckbox;
     std::shared_ptr<TabGroup> tabs;
     std::shared_ptr<TextArea> searchField;
@@ -105,9 +105,8 @@ private:
     void fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
     void onChartsLoaded(std::shared_ptr<Page> page, const apis::ChartService::ChartList &charts);
     void onChartLoaded(std::shared_ptr<Page> page);
-    void showSettings();
-    void resetSettings();
-    void onSettingsButton();
+    void createSettingsContainer();
+    void toggleSettings();
     void onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end);
     void redrawPage(std::shared_ptr<Page> page);
     bool onTimer();
