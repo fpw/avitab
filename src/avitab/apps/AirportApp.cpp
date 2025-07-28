@@ -179,10 +179,14 @@ void AirportApp::removeTab(std::shared_ptr<Page> page) {
 void AirportApp::sortSearchResults(std::vector<std::shared_ptr<world::Airport>>& airports) {
     auto a = api().getAircraftLocation(0);
     world::Location loc(a.latitude, a.longitude);
+    bool sortOrder = airportConfig->sortAscending;
     std::sort(airports.begin(), airports.end(),
-        [loc] (std::shared_ptr<world::Airport> a, std::shared_ptr<world::Airport> b) {
+        [loc, sortOrder] (std::shared_ptr<world::Airport> a, std::shared_ptr<world::Airport> b) {
             auto aLoc = a->getLocation();
             auto bLoc = b->getLocation();
+            if (! sortOrder) {
+                return (aLoc.distanceTo(loc) > bLoc.distanceTo(loc));
+            }
             return (aLoc.distanceTo(loc) < bLoc.distanceTo(loc));
         }
     );
@@ -539,9 +543,16 @@ void AirportApp::createSettingsContainer() {
     prefContainer->setFit(Container::Fit::TIGHT, Container::Fit::TIGHT);
     prefContainer->setVisible(false);
 
-    sortCheckbox = std::make_shared<Checkbox>(prefContainer, "Sort results");
+    sortLabel = std::make_shared<Label>(prefContainer, "Sort options");
+    sortCheckbox = std::make_shared<Checkbox>(prefContainer, "by Distance");
     sortCheckbox->setChecked(airportConfig->doSort);
     sortCheckbox->setCallback([this] (bool checked) { airportConfig->doSort = checked; });
+    sortCheckbox->alignBelow(sortLabel);
+
+    sortAscCheckbox = std::make_shared<Checkbox>(prefContainer, "Ascending");
+    sortAscCheckbox->setChecked(airportConfig->sortAscending);
+    sortAscCheckbox->setCallback([this] (bool checked) { airportConfig->sortAscending = checked; });
+    sortAscCheckbox->alignRightOf(sortCheckbox);
 }
 
 void AirportApp::onMapPan(std::shared_ptr<Page> page, int x, int y, bool start, bool end) {
