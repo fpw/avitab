@@ -544,7 +544,7 @@ void AirportApp::createSettingsContainer() {
     prefContainer->setVisible(false);
 
     sortLabel = std::make_shared<Label>(prefContainer, "Sort options");
-    sortCheckbox = std::make_shared<Checkbox>(prefContainer, "by Distance");
+    sortCheckbox = std::make_shared<Checkbox>(prefContainer, "Distance");
     sortCheckbox->setChecked(airportConfig->doSort);
     sortCheckbox->setCallback([this] (bool checked) { airportConfig->doSort = checked; });
     sortCheckbox->alignBelow(sortLabel);

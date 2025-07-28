@@ -57,12 +57,11 @@ Settings::Settings(const std::string &settingsFile)
         upgrade1to2();
         ++loadedPrefsVersion;
     }
-//#if 0 // template for future update
     if (loadedPrefsVersion == 2) {
         upgrade2to3();
         ++loadedPrefsVersion;
     }
-//#endif
+
     (*database)["general"]["prefs_version"] = PREFS_VERSION;
 }
 
@@ -195,14 +194,12 @@ void Settings::saveDocReadingConfig(const std::string appName, DocumentReadingCo
 
 void Settings::loadAirportConfig() {
     airportConfig = std::make_shared<avitab::AirportConfig>();
-    airportConfig->doSort = getSetting("/airports/sort", false);
-    airportConfig->sortCriteria = getSetting("/airports/sort_criteria", 0);
+    airportConfig->doSort = getSetting("/airports/sort", true);
     airportConfig->sortAscending = getSetting("/airports/sort_ascending", true);
 }
 
 void Settings::saveAirportConfig() {
     setSetting("/airports/sort", airportConfig->doSort);
-    setSetting("/airports/sort_criteria", airportConfig->sortCriteria);
     setSetting("/airports/sort_ascending", airportConfig->sortAscending);
 }
 
@@ -241,8 +238,7 @@ void Settings::upgrade1to2() {
 }
 
 void Settings::upgrade2to3() {
-    (*database)["airports"]["sort"] = false;
-    (*database)["airports"]["sort_criteria"] = 0;
+    (*database)["airports"]["sort"] = true;
     (*database)["airports"]["sort_ascending"] = true;
 }
 

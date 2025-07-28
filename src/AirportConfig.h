@@ -23,11 +23,10 @@
 namespace avitab {
 
 struct AirportConfig {
-    bool doSort = false;
-    int sortCriteria = 0;
+    bool doSort = true;
     bool sortAscending = true;
 };
 
-} /* namespace airports */
+} /* namespace avitab */
 
 #endif /* SRC_AIRPORT_CONFIG_H_ */
