@@ -55,6 +55,7 @@ public:
 
     Airport(const std::string &airportId);
     void setName(const std::string &name);
+    void setDisplayID(const std::string &displayID);
     void setElevation(int elevation);
     int getElevation() const;
 
@@ -75,6 +76,7 @@ public:
     void setCurrentMetar(const std::string &timestamp, const std::string &metar);
 
     const std::string& getName() const;
+    const std::string& getDisplayID() const;
     const std::string& getFAACode() const;
     const std::string& getICAOCode() const;
     const std::string& getLocalCode() const;
@@ -116,6 +118,7 @@ public:
 
 private:
     std::string id; // either ICAO code or X + fictional id
+    std::string displayID; // either Xplane ID or ICAO, FAA or Local code
     std::string name;
     Location location;
     Location locationUpLeft;

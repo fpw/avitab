@@ -67,7 +67,7 @@ std::vector<std::shared_ptr<world::Airport>> XWorld::findAirport(const std::stri
 
     for (auto &it: airports) {
         std::ostringstream codes;
-        codes << it.second->getID() << " " << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode() << " " << it.second->getName();
+        codes << it.second->getICAOCode() << " " << it.second->getFAACode() << " " << it.second->getLocalCode() << " " << it.second->getName();
         if (platform::lower(codes.str()).find(key) != std::string::npos) {
             if (std::find(res.begin(), res.end(), it.second) != res.end()) {
                 continue;
