@@ -78,7 +78,7 @@ void OverlayedAirport::drawText(bool detailed) {
     auto mapImage = overlayHelper->getMapImage();
 
     if (detailed) {
-        std::string nameAndID = airport->getName() + " (" + airport->getID() + ")";
+        std::string nameAndID = airport->getName() + " (" + airport->getDisplayID() + ")";
         std::string elevationFeet = std::to_string(airport->getElevation());
         int rwyLengthHundredsFeet = (airport->getLongestRunwayLength() * world::M_TO_FT) / 100.0;
         std::string rwyLength = (rwyLengthHundredsFeet == 0) ? "" : (" " + std::to_string(rwyLengthHundredsFeet));
@@ -87,7 +87,7 @@ void OverlayedAirport::drawText(bool detailed) {
         mapImage->drawText(nameAndID,   14, posX, yOffset,      color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
         mapImage->drawText(airportInfo, 12, posX, yOffset + 14, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     } else {
-        mapImage->drawText(airport->getID(), 14, posX, yOffset, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
+        mapImage->drawText(airport->getDisplayID(), 14, posX, yOffset, color, img::COLOR_TRANSPARENT_WHITE, img::Align::CENTRE);
     }
 }
 
