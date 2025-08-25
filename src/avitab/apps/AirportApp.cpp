@@ -298,7 +298,11 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
 }
 
 std::string AirportApp::toWeatherInfo(std::shared_ptr<world::Airport> airport) {
-    return api().getMETARForAirport(airport->getICAOCode());
+    std::string id = airport->getICAOCode();
+    if (id.empty()) {
+        id = airport->getID();
+    }
+    return api().getMETARForAirport(id);
 }
 
 AirportApp::TabPage &AirportApp::findPage(std::shared_ptr<Page> page) {
@@ -326,7 +330,11 @@ void AirportApp::fillChartsPage(std::shared_ptr<Page> page, std::shared_ptr<worl
     TabPage &tab = findPage(page);
     tab.label->setText("Loading...");
 
-    auto call = svc->getChartsFor(airport->getICAOCode());
+    std::string id = airport->getICAOCode();
+    if (id.empty()) {
+        id = airport->getID();
+    }
+    auto call = svc->getChartsFor(id);
     call->andThen([this, page] (std::future<apis::ChartService::ChartList> res) {
         try {
             auto charts = res.get();
