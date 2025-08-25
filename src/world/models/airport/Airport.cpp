@@ -135,7 +135,7 @@ const std::string& Airport::getFAACode() const {
 }
 
 const std::string& Airport::getICAOCode() const {
-    return (icaoCode.empty()) ? id : icaoCode;
+    return icaoCode;
 }
 
 const std::string& Airport::getLocalCode() const {
