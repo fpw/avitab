@@ -44,11 +44,13 @@ std::shared_ptr<world::Airport> XWorld::findAirportByID(const std::string& id) c
 }
 
 std::shared_ptr<world::Airport> XWorld::findAirportByCode(const std::string& id) const {
+    std::string cleanId = platform::upper(id);
+    cleanId.erase(std::remove(cleanId.begin(), cleanId.end(), ' '), cleanId.end());
     std::vector<std::string> codes;
 
     for (auto &it: airports) {
         codes = {it.second->getICAOCode(), it.second->getFAACode(), it.second->getLocalCode()};
-        if (std::find(codes.begin(), codes.end(), id) != codes.end()) {
+        if (std::find(codes.begin(), codes.end(), cleanId) != codes.end()) {
             return it.second;
         }
     }
