@@ -72,7 +72,7 @@ void TTFStamper::setSize(float size) {
 }
 
 void TTFStamper::setText(const std::string& newText) {
-    text = newText;
+    text = platform::strToWstr(newText);
     width = calculateTextWidth();
     if (width == 0) {
         stamp.resize(0, 0, 0);
@@ -84,8 +84,8 @@ void TTFStamper::setText(const std::string& newText) {
     double baseline = std::abs(fontFace->descender) * fontSize / fontFace->units_per_EM;
 
     size_t penX = 0;
-    for (size_t i = 0; i < newText.size(); i++) {
-        auto error = FT_Load_Char(fontFace, newText[i], FT_LOAD_RENDER);
+    for (size_t i = 0; i < text.size(); i++) {
+        auto error = FT_Load_Char(fontFace, text[i], FT_LOAD_RENDER);
         if (error) {
             continue;
         }

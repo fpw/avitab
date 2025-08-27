@@ -85,6 +85,7 @@ int getElapsedMillis(std::chrono::time_point<std::chrono::steady_clock> startAt)
 
 constexpr size_t getMaxPathLen();
 std::string UTF8ToACP(const std::string &utf8);
+std::wstring strToWstr(const std::string &str);
 
 #ifdef _WIN32
 constexpr const char *FS_ROOT = "";

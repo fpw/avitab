@@ -44,7 +44,7 @@ private:
 
     std::vector<uint8_t> fontData;
     uint32_t color = 0x808080;
-    std::string text;
+    std::wstring text;
     size_t width = 0;
     Image stamp;
 
