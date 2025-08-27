@@ -60,7 +60,7 @@ void AirportApp::resetLayout() {
 
     keys = std::make_shared<Keyboard>(searchWindow, searchField);
     keys->hideEnterKey();
-    keys->setOnCancel([this] { searchField->setText(""); });
+    keys->setOnCancel([this] { clearSearch(); });
     keys->setOnOk([this] {
         api().executeLater([this] {
             onSearchEntered(searchField->getText());
@@ -87,9 +87,7 @@ void AirportApp::onSearchEntered(const std::string& code) {
         return;
     } else if (airports.size() == 1) {
         onAirportSelected(airports.front());
-        searchLabel->setText("");
-        resultList.reset();
-        nextButton.reset();
+        clearSearch();
         return;
     } else if (airports.size() >= world::World::MAX_DISPLAY_RESULTS) {
         searchLabel->setText("Too many results, only showing first " + std::to_string(world::World::MAX_DISPLAY_RESULTS));
@@ -163,6 +161,13 @@ void AirportApp::onAirportSelected(std::shared_ptr<world::Airport> airport) {
     pages.push_back(tab);
     fillPage(page, airport);
     tabs->showTab(page);
+}
+
+void AirportApp::clearSearch() {
+    searchField->setText("");
+    searchLabel->setText("");
+    resultList.reset();
+    nextButton.reset();
 }
 
 void AirportApp::removeTab(std::shared_ptr<Page> page) {

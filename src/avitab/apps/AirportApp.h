@@ -88,6 +88,7 @@ private:
     void resetLayout();
     void onSearchEntered(const std::string &code);
     void onAirportSelected(std::shared_ptr<world::Airport> airport);
+    void clearSearch();
     void sortSearchResults(std::vector<std::shared_ptr<world::Airport>> &airports);
     void fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport);
 
