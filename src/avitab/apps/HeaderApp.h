@@ -51,7 +51,6 @@ private:
     static constexpr int TIMER_TICKS_PER_SEC = 1000 / TIMER_PERIOD_MS;
     Timer tickTimer;
     unsigned int timerCount = 0;
-    unsigned int clockCount = 0;
     unsigned int localTimeSecs = 0;
     enum clockMode {
         STOPWATCH,
