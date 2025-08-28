@@ -32,8 +32,24 @@ void Heliport::setLocation(const world::Location& loc) {
     location = loc;
 }
 
+void Heliport::setLength(const float& l) {
+    length = l;
+}
+
+void Heliport::setWidth(const float& w) {
+    width = w;
+}
+
 const world::Location& Heliport::getLocation() const {
     return location;
+}
+
+float Heliport::getLength() const {
+    return length;
+}
+
+float Heliport::getWidth() const {
+    return width;
 }
 
 } /* namespace world */

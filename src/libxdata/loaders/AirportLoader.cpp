@@ -135,6 +135,8 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
     for (auto &entry: port.heliports) {
         auto heliport = std::make_shared<world::Heliport>(entry.name);
         heliport->setLocation(world::Location(entry.latitude, entry.longitude));
+        heliport->setLength(entry.length);
+        heliport->setWidth(entry.width);
         airport->addHeliport(heliport);
     }
 

@@ -70,6 +70,8 @@ struct AirportData {
         std::string name;
         double latitude;
         double longitude;
+        double length;
+        double width;
         SurfaceCode surfaceTypeCode;
     };
 

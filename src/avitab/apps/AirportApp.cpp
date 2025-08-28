@@ -200,10 +200,18 @@ void AirportApp::sortSearchResults(std::vector<std::shared_ptr<world::Airport>>&
 void AirportApp::fillPage(std::shared_ptr<Page> page, std::shared_ptr<world::Airport> airport) {
     std::stringstream str;
 
-    str << toATCInfo(airport);
-    str << "\n";
-    str << toRunwayInfo(airport);
-    str << "\n";
+    if (airport->hasATCFrequencies()) {
+        str << toATCInfo(airport);
+        str << "\n";
+    }
+    if (!airport->hasOnlyHeliports()) {
+        str << toRunwayInfo(airport);
+        str << "\n";
+    }
+    if (airport->hasHeliports()) {
+        str << toHeliportInfo(airport);
+        str << "\n";
+    }
     str << toWeatherInfo(airport);
 
     TabPage &tab = findPage(page);
@@ -258,10 +266,6 @@ std::string AirportApp::toATCString(const std::string &name, std::shared_ptr<wor
 }
 
 std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
-    if (airport->hasOnlyHeliports()) {
-        return "No runways\n";
-    }
-
     std::stringstream str;
     str << std::fixed << std::setprecision(0);
     auto aptLoc = airport->getLocation();
@@ -272,31 +276,48 @@ std::string AirportApp::toRunwayInfo(std::shared_ptr<world::Airport> airport) {
     auto magneticVariation = api().getMagneticVariations(locations)[loc];
 
     str << "Runways:\n";
-    airport->forEachRunway([&str, &magneticVariation] (const std::shared_ptr<world::Runway> rwy) {
-        str << "  " + rwy->getID();
-        auto ils = rwy->getILSData();
-        int rwHeading = (int)(rwy->getHeading() + magneticVariation + 0.5 + 360.0) % 360;
-        if (ils) {
-            int ilsHeading = (int)(ils->getILSLocalizer()->getRunwayHeading() + magneticVariation + 0.5 + 360.0) % 360;
-
-            str << " " << ils->getILSLocalizer()->getFrequency().getDescription();
-            str << " (ID " << ils->getID();
-            str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
-            if (ilsHeading != rwHeading) {
-                str << ", CRS " << ilsHeading << "° M";
-            }
-            str << ")";
-        } else {
-            str << " without ils";
+    airport->forEachRunwayPair([&str, &magneticVariation] (const std::shared_ptr<world::Runway> rwyF, const std::shared_ptr<world::Runway> rwyS) {
+        float width = rwyF->getWidth();
+        float length = rwyF->getLength();
+        str << "  " << rwyF->getID() + "/" + rwyS->getID() + " (";
+        if (!std::isnan(width)) {
+            str << std::to_string((int) (width * world::M_TO_FT + 0.5));
         }
-        if (!std::isnan(rwHeading)) {
-            str << ", CRS " << rwHeading << "° M";
-        }
-        float length = rwy->getLength();
         if (!std::isnan(length)) {
-            str << ", " << std::to_string((int) (length * world::M_TO_FT + 0.5)) << " ft";
+            str << " x " << std::to_string((int) (length * world::M_TO_FT + 0.5)) << " ft";
         }
-        str << ", " << rwy->getSurfaceTypeDescription();
+        str <<  ", " + rwyF->getSurfaceTypeDescription() + ")\n";
+        for (auto rwy : {rwyF, rwyS} ) {
+            str << "    " + rwy->getID();
+            auto ils = rwy->getILSData();
+            int rwHeading = (int)(rwy->getHeading() + magneticVariation + 0.5 + 360.0) % 360;
+            if (ils) {
+                int ilsHeading = (int)(ils->getILSLocalizer()->getRunwayHeading() + magneticVariation + 0.5 + 360.0) % 360;
+
+                str << " " << ils->getILSLocalizer()->getFrequency().getDescription();
+                str << " (ID " << ils->getID();
+                str << " on " << ils->getILSLocalizer()->getFrequency().getFrequencyString();
+                if (ilsHeading != rwHeading) {
+                    str << ", CRS " << ilsHeading << "° M";
+                }
+                str << "),";
+            }
+            if (!std::isnan(rwHeading)) {
+                str << " CRS " << rwHeading << "° M";
+            }
+            str << "\n";
+        }
+    });
+    return str.str();
+}
+
+std::string AirportApp::toHeliportInfo(std::shared_ptr<world::Airport> airport) {
+    std::stringstream str;
+    str << std::fixed << std::setprecision(1);
+
+    str << "Helipads:\n";
+    airport->forEachHeliport([&str] (const std::shared_ptr<world::Heliport> port) {
+        str << "  " << port->getID() << " (" << port->getLength() * world::M_TO_FT << " x " << port->getWidth() * world::M_TO_FT  << " ft)";
         str << "\n";
     });
     return str.str();

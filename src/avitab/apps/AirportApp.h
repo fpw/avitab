@@ -98,6 +98,7 @@ private:
     std::string toATCInfo(std::shared_ptr<world::Airport> airport);
     std::string toATCString(const std::string &name, std::shared_ptr<world::Airport> airport, world::Airport::ATCFrequency type);
     std::string toRunwayInfo(std::shared_ptr<world::Airport> airport);
+    std::string toHeliportInfo(std::shared_ptr<world::Airport> airport);
     std::string toWeatherInfo(std::shared_ptr<world::Airport> airport);
 
     TabPage &findPage(std::shared_ptr<Page> page);

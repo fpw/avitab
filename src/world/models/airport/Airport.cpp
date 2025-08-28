@@ -239,6 +239,16 @@ float Airport::getLongestRunwayLength() const {
     return longestRunwayLength;
 }
 
+void Airport::forEachHeliport(std::function<void(const std::shared_ptr<Heliport>)> f) const {
+    for (auto &port: heliports) {
+        f(port.second);
+    }
+}
+
+bool Airport::hasHeliports() const {
+    return !heliports.empty();
+}
+
 bool Airport::hasOnlyHeliports() const {
     return runways.empty() && !heliports.empty();
 }
@@ -257,6 +267,10 @@ bool Airport::hasOnlyWaterRunways() const {
 
 bool Airport::hasControlTower() const {
     return (atcFrequencies.count(ATCFrequency::TWR) >= 1);
+}
+
+bool Airport::hasATCFrequencies() const {
+    return (atcFrequencies.size() >= 1);
 }
 
 bool Airport::hasHardRunway() const {

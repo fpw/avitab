@@ -86,16 +86,19 @@ public:
     void addRunway(std::shared_ptr<Runway> rwy);
     void forEachRunway(std::function<void(const std::shared_ptr<Runway>)> f) const;
     float getLongestRunwayLength() const;
+    void forEachHeliport(std::function<void(const std::shared_ptr<Heliport>)> f) const;
     void addRunwayEnds(std::shared_ptr<Runway> rwy1, std::shared_ptr<Runway> rwy2);
     void forEachRunwayPair(std::function<void(const std::shared_ptr<Runway>, const std::shared_ptr<Runway>)> f) const;
     const std::shared_ptr<Runway> getRunwayByName(const std::string &rw) const;
     const std::shared_ptr<Runway> getOppositeRunwayEnd(const std::shared_ptr<Runway> rw) const;
     void addHeliport(std::shared_ptr<Heliport> port);
 
+    bool hasHeliports() const;
     bool hasOnlyHeliports() const;
     bool hasOnlyWaterRunways() const;
     bool hasHardRunway() const;
     bool hasControlTower() const;
+    bool hasATCFrequencies() const;
 
     void addTerminalFix(std::shared_ptr<Fix> fix);
     std::shared_ptr<Fix> getTerminalFix(const std::string &id);

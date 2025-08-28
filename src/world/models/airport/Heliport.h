@@ -30,6 +30,11 @@ class Heliport: public NavNode {
 public:
     Heliport(const std::string &name);
     void setLocation(const Location &loc);
+    void setLength(const float &l);
+    void setWidth(const float &w);
+
+    float getLength() const;
+    float getWidth() const;
 
     const std::string &getID() const override;
     const Location &getLocation() const override;
@@ -39,6 +44,8 @@ public:
 private:
     std::string name;
     Location location;
+    float length = std::numeric_limits<float>::quiet_NaN(); // meters
+    float width = std::numeric_limits<float>::quiet_NaN(); // meters
 };
 
 } /* namespace world */
