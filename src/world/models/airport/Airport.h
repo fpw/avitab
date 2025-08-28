@@ -55,7 +55,6 @@ public:
 
     Airport(const std::string &airportId);
     void setName(const std::string &name);
-    void setDisplayID(const std::string &displayID);
     void setElevation(int elevation);
     int getElevation() const;
 

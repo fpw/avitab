@@ -94,22 +94,17 @@ void AirportLoader::onAirportLoaded(const AirportData& port) const {
         }
     }
 
-    std::string displayID = port.id;
     if (!port.localCode.empty()) {
         airport->setLocalCode(port.localCode);
-        displayID = port.localCode;
     }
 
     if (!port.faaCode.empty()) {
         airport->setFAACode(port.faaCode);
-        displayID = port.faaCode;
     }
 
     if (!port.icaoCode.empty()) {
         airport->setICAOCode(port.icaoCode);
-        displayID = port.icaoCode;
     }
-    airport->setDisplayID(displayID);
 
     for (auto &entry: port.frequencies) {
         int places = 2;

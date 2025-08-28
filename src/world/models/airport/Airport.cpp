@@ -29,15 +29,11 @@ namespace world {
 Airport::Airport(const std::string& airportId):
     id(airportId)
 {
-    setDisplayID(airportId);
+    displayID = id;
 }
 
 void Airport::setName(const std::string& name) {
     this->name = name;
-}
-
-void Airport::setDisplayID(const std::string& displayID) {
-    this->displayID = displayID;
 }
 
 void Airport::setElevation(int elevation) {
@@ -50,14 +46,17 @@ int Airport::getElevation() const {
 
 void Airport::setICAOCode(const std::string& icaoCode) {
     this->icaoCode = icaoCode;
+    this->displayID = icaoCode;
 }
 
 void Airport::setFAACode(const std::string& faaCode) {
     this->faaCode = faaCode;
+    this->displayID = faaCode;
 }
 
 void Airport::setLocalCode(const std::string& localCode) {
     this->localCode = localCode;
+    this->displayID = localCode;
 }
 
 void Airport::setLocation(const world::Location& loc) {
