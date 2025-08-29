@@ -41,6 +41,10 @@ struct OverlayConfig {
     bool drawMarkers = false;
 };
 
+struct MapConfig {
+    unsigned int onlineMapIndex;
+};
+
 } /* namespace maps */
 
 #endif /* SRC_MAPS_OVERLAY_CONFIG_H_ */

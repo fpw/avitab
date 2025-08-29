@@ -83,6 +83,7 @@ private:
     MapSource currentActiveMapSource;
     std::string currentActiveOnlineMap;
     std::shared_ptr<maps::OverlayConfig> overlayConf;
+    std::shared_ptr<maps::MapConfig> mapConf;
     std::unique_ptr<FileChooser> fileChooser;
     std::unique_ptr<ContainerWithClickableCustomList> containerWithClickableList;
     std::shared_ptr<img::TileSource> tileSource;

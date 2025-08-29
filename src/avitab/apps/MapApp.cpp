@@ -38,6 +38,7 @@ MapApp::MapApp(FuncsPtr funcs):
     updateTimer(std::bind(&MapApp::onTimer, this), 200)
 {
     overlayConf = api().getSettings()->getOverlayConfig();
+    mapConf = api().getSettings()->getMapConfig();
 
     window->setOnClose([this] () { exit(); });
     window->addSymbol(Widget::Symbol::LIST, std::bind(&MapApp::onSettingsButton, this));
@@ -348,6 +349,7 @@ void MapApp::selectOnlineMaps(bool interactive, const std::shared_ptr<maps::Onli
         containerWithClickableList->setListItems(slippyMapNames);
 
         containerWithClickableList->setSelectCallback([this](int selectedItem) {
+            mapConf->onlineMapIndex = selectedItem;
             const auto &conf = slippyMaps.at(selectedItem);
             std::shared_ptr<img::TileSource> tileSource;
 
@@ -374,9 +376,10 @@ void MapApp::selectOnlineMaps(bool interactive, const std::shared_ptr<maps::Onli
         containerWithClickableList->show(chooserContainer);
         chooserContainer->setVisible(true);
     } else {
-        // If non-interactive selection, pick the first map
+        // If non-interactive selection, pick the last used map
         // found in the mapconfig.json
-        const auto &conf = slippyMaps.at(0);
+        mapConf->onlineMapIndex = (slippyMaps.size() > mapConf->onlineMapIndex) ? mapConf->onlineMapIndex : 0;
+        const auto &conf = slippyMaps.at(mapConf->onlineMapIndex);
         std::shared_ptr<img::TileSource> tileSource;
         tileSource =
             std::make_shared<maps::OnlineSlippySource>(

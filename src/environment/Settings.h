@@ -37,6 +37,7 @@ public:
     void setGeneralSetting(const std::string &id, const T value);
 
     std::shared_ptr<maps::OverlayConfig> getOverlayConfig();
+    std::shared_ptr<maps::MapConfig> getMapConfig();
 
     struct DocumentReadingConfig {
         bool mouseWheelScrollsMultiPage = false;
@@ -59,9 +60,13 @@ private:
     const std::string filePath;
     std::shared_ptr<nlohmann::json> database;
     std::shared_ptr<maps::OverlayConfig> overlayConfig;
+    std::shared_ptr<maps::MapConfig> mapConfig;
 
     void loadOverlayConfig();
     void saveOverlayConfig();
+
+    void loadMapConfig();
+    void saveMapConfig();
 
     template<typename T>
     T getSetting(const std::string &ptr, T def);
