@@ -185,12 +185,14 @@ void MsfsAddonEnvironment::updateAircraftLocation(SIMCONNECT_RECV_SIMOBJECT_DATA
             userLocation.elevation = pLoc->altitude / world::M_TO_FT; // convert to meters
             userLocation.heading = pLoc->heading;
         } else {
-            size_t id = pObjData->dwentrynumber - 1;
             otherLocations.resize(pObjData->dwoutof);
-            otherLocations[id].latitude = pLoc->latitude;
-            otherLocations[id].longitude = pLoc->longitude;
-            otherLocations[id].elevation = pLoc->altitude / world::M_TO_FT; // convert to meters;
-            otherLocations[id].heading = pLoc->heading;
+            size_t id = pObjData->dwentrynumber - 1;
+            if (id < otherLocations.size()) {
+                otherLocations[id].latitude = pLoc->latitude;
+                otherLocations[id].longitude = pLoc->longitude;
+                otherLocations[id].elevation = pLoc->altitude / world::M_TO_FT; // convert to meters;
+                otherLocations[id].heading = pLoc->heading;
+            }
         }
     }
 }
