@@ -287,13 +287,7 @@ std::vector<AtoolsDbProcedureCompiler::Runway> AtoolsDbProcedureCompiler::matchi
     if (results.empty()) {
         if ((proc_name.size() == 2) && isdigit(proc_name[0]) && isdigit(proc_name[1])) {
             // have code for this
-        } else if ((proc_name.size() == 3) && isdigit(proc_name[0]) && isdigit(proc_name[1]) && (proc_name[2] == 'L')) {
-                // have code for this
-        } else if ((proc_name.size() == 3) && isdigit(proc_name[0]) && isdigit(proc_name[1]) && (proc_name[2] == 'C')) {
-                // have code for this
-        } else if ((proc_name.size() == 3) && isdigit(proc_name[0]) && isdigit(proc_name[1]) && (proc_name[2] == 'R')) {
-                // have code for this
-        } else if ((proc_name.size() == 3) && isdigit(proc_name[0]) && isdigit(proc_name[1]) && (proc_name[2] == 'T')) {
+        } else if ((proc_name.size() == 3) && isdigit(proc_name[0]) && isdigit(proc_name[1]) && (std::string("CLRTW").find(proc_name[2]) != std::string::npos)) {
                 // have code for this
         } else if ((proc_name.size() == 5) && (proc_name[0] == 'R') && (proc_name[1] == 'W') && isdigit(proc_name[2]) && isdigit(proc_name[3]) && (proc_name[4] == 'B')) {
                 // have code for this

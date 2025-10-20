@@ -28,7 +28,7 @@ public:
     AtoolsDbNavTranslator(std::shared_ptr<sqlnav::SqlDatabase> targ, std::shared_ptr<sqlnav::SqlDatabase> src);
     void translate();
 
-    void exec_insert(const std::string &table, const std::string &values);
+    void exec_insert(const std::string &table, const std::string &values, bool ignore_errors = false);
 
 private:
     void compile_metadata();

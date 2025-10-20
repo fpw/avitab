@@ -54,7 +54,7 @@ void AtoolsDbNavTranslator::translate()
     optimize();
 }
 
-void AtoolsDbNavTranslator::exec_insert(const std::string &table, const std::string &values)
+void AtoolsDbNavTranslator::exec_insert(const std::string &table, const std::string &values, bool ignore_errors)
 {
     if (values.size() == 0) return;
     std::string script = "INSERT INTO ";
@@ -64,10 +64,30 @@ void AtoolsDbNavTranslator::exec_insert(const std::string &table, const std::str
     script.back() = ';';
     std::string errMsg;
     int e = avi->runscript(script, errMsg);
-    if (e != 0) {
-        std::cerr << "Error code " << e << " when writing to Avitab " << table << " table" << std::endl;
-        std::cerr << "Message was: " << errMsg << std::endl;
-        throw std::runtime_error("Avitab database write error");
+    if (!ignore_errors) {
+        if (e == SQLITE_CONSTRAINT) {
+            // One (or more) of the rows being inserted references a parent table row that
+            // does not exist. So we repeat the insertion one row at a time and ignore the
+            // ones that fail.
+            size_t p = 0;
+            while (p < values.size()) {
+                size_t q = values.find("),(", p);
+                if (q == std::string::npos) {
+                    q = values.size();
+                } else {
+                    q += 2;
+                }
+                std::string val = values.substr(p, q - p);
+                exec_insert(table, val, true);
+                p = q;
+            }
+        } else if (e != 0) {
+            std::cerr << "Error code " << e << " when writing to Avitab " << table << " table" << std::endl;
+            std::cerr << "Message was: " << errMsg << std::endl;
+            throw std::runtime_error("Avitab database write error");
+        }
+    } else {
+        logger::info("Skipping failed insert of %s to Avitab %s table", values.c_str(), table.c_str());
     }
 }
 
