@@ -12,7 +12,6 @@ if(WIN32)
         -static-libgcc
         -static-libstdc++
         avitab_common
-        -Wl,--subsystem,windows
     )
 elseif(APPLE)
     target_link_libraries(AviTab-buildnavdb
