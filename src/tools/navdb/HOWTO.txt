@@ -1,0 +1,38 @@
+How to build a Navigation database for Avitab.
+
+Avitab normally creates an in-memory Navigation database by reading the X-Plane
+data files during the startup phase.
+
+Alternatively Avitab can use a pre-built SQLite3 Navigation database. This reduces
+Avitab's memory footprint and makes the startup phase much quicker (although
+this is not noticeable with the X-Plane plugin since it happens in parallel
+with X-Plane's own startup phase).
+
+Currently there is no inbuilt or external process to create the SQLite3 database
+from the simulator data files. While this is in development there is a workaround
+which uses a tool to convert a Little Navmap database to an Avitab navigation
+database.
+
+To create an Avitab Navigation database from the Microsoft Flight Simulator data
+files, the following (convoluted) steps should be followed.
+
+(1) Install Little Navmap from https://littlenavmap.org. If already installed then
+go to step (3).
+
+(2) Start Little Navmap and select the MSFS option when the 'Load Scenery Library'
+dialog is presented. Wait until the scenery loading completes (a few minutes). Select
+'Use this database' once the loading is complete.
+
+(3) In Little Navmap's menu bar go to Tools -> Files and Directories -> Show Databases.
+
+(4) Window Explorer should open a new file browser containing a number of SQLite
+database files. Copy 'little_navmap_msfs.sqlite' into the folder that contains this
+HOWTO file and the program 'AviTab-buildnavdb.exe'.
+
+(5) Rename 'little_navmap_msfs.sqlite' to 'input.sqlite'.
+
+(6) Start 'AviTab-buildnavdb.exe' (double-click or run from command prompt) 
+
+(7) When the tool has finished there will be a new file 'avitab_navdb.sqlite' in the folder. The copy of the Little Navmap database file ('input.sqlite') can now be deleted.
+
+When Avitab is next started it will use the SQLite3 database that was created by the tool. Avitab's log file can be checked to verify this.
