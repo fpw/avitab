@@ -1,7 +1,12 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Constants
 BUILD_FOLDER="$(pwd)"/build
+CI_MODE="${AVITAB_CI:-0}"
+BUILD_TARGET="${AVITAB_BUILD_TARGET:-}"
+SKIP_PKG_INSTALL="${AVITAB_SKIP_PACKAGE_INSTALL:-0}"
 
 aptInstall() {
   sudo apt install -y "$1"
@@ -20,8 +25,6 @@ copyResources() {
   echo "Moving files..."
   if [ ! -f "$BUILD_FOLDER"/config.json ]; then
     cp -a "$(pwd)"/res/* "$BUILD_FOLDER"
-    cp -a "$(pwd)"/res/* "$BUILD_FOLDER"
-    cd ..
   fi
   if [ ! -f "$BUILD_FOLDER"/config.json ]; then
     echo "Failed"
@@ -47,14 +50,18 @@ plugin() {
 case "$OSTYPE" in
 linux*)
   echo "Linux detected..."
-  aptInstall cmake
-  aptInstall make
-  aptInstall autoconf
-  aptInstall automake
-  aptInstall libtool
-  aptInstall libglfw3
-  aptInstall libglfw3-dev
-  aptInstall uuid-dev
+  if [ "$SKIP_PKG_INSTALL" != "1" ]; then
+    aptInstall cmake
+    aptInstall make
+    aptInstall g++
+    aptInstall autoconf
+    aptInstall automake
+    aptInstall libtool
+    aptInstall patch
+    aptInstall libglfw3
+    aptInstall libglfw3-dev
+    aptInstall uuid-dev
+  fi
   ;;
 msys*)
   echo "Windows detected..."
@@ -118,19 +125,38 @@ echo "Running build_dependencies..."
 echo "Running CMake..."
 cmake -G 'Unix Makefiles' -B "$BUILD_FOLDER"
 
-echo "Select next step..."
-printf "1. Make AviTab-Standalone\n2. Make avitab-plugin\n3. Nothing\n"
+if [ "$CI_MODE" = "1" ]; then
+  case "$BUILD_TARGET" in
+  standalone)
+    standalone
+    ;;
+  plugin)
+    plugin
+    ;;
+  all)
+    standalone
+    plugin
+    ;;
+  *)
+    echo "Invalid AVITAB_BUILD_TARGET='$BUILD_TARGET' for CI mode. Use standalone, plugin, or all."
+    exit 1
+    ;;
+  esac
+else
+  echo "Select next step..."
+  printf "1. Make AviTab-Standalone\n2. Make avitab-plugin\n3. Nothing\n"
 
-read -r selection
+  read -r selection
 
-case "$selection" in
-1)
-  standalone
-  ;;
-2)
-  plugin
-  ;;
-*)
-  echo "Exiting..."
-  ;;
-esac
+  case "$selection" in
+  1)
+    standalone
+    ;;
+  2)
+    plugin
+    ;;
+  *)
+    echo "Exiting..."
+    ;;
+  esac
+fi
