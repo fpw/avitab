@@ -39,6 +39,10 @@
 /cmake-build-debug/
 /build-*/
 /scratch/
+/dist/
+/AviTab.log
+/avitab.prf
+/lib/
 
 # Ignore hidden files, apart from some project specifics
 /.*
@@ -46,6 +50,9 @@
 !/.gitignore
 !/.gitmodules
 !/.clang-format
+!/.github/
+!/.github/workflows/
+!/.github/workflows/*.yml
 
 # Jetbrains IDE
 .idea/
