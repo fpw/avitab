@@ -1,0 +1,62 @@
+name: Build AviTab
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Update apt index
+        run: sudo apt update
+
+      - name: Build with setup.sh
+        env:
+          AVITAB_CI: "1"
+          AVITAB_BUILD_TARGET: "all"
+        run: ./setup.sh
+
+      - name: Package standalone artifact
+        run: |
+          mkdir -p dist/AviTab-standalone-linux
+          cp build/AviTab-standalone dist/AviTab-standalone-linux/
+          cp -a res dist/AviTab-standalone-linux/
+          tar -C dist -czf dist/AviTab-standalone-linux.tar.gz AviTab-standalone-linux
+
+      - name: Package plugin artifact
+        run: |
+          mkdir -p dist/AviTab-plugin-linux/lin_x64
+          cp build/AviTab.xpl dist/AviTab-plugin-linux/lin_x64/
+          cp -a res/* dist/AviTab-plugin-linux/
+          tar -C dist -czf dist/AviTab-plugin-linux.tar.gz AviTab-plugin-linux
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: avitab-linux-builds
+          path: |
+            dist/AviTab-standalone-linux.tar.gz
+            dist/AviTab-plugin-linux.tar.gz
+
+      - name: Upload release assets
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AviTab-standalone-linux.tar.gz
+            dist/AviTab-plugin-linux.tar.gz
