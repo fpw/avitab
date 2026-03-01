@@ -1,0 +1,104 @@
+name: Build AviTab
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Update apt index
+        run: sudo apt update
+
+      - name: Verify release assets
+        run: |
+          set -euo pipefail
+          required=(
+            "release-assets/readme.txt"
+            "release-assets/AircraftIntegration/readme.txt"
+            "release-assets/AircraftIntegration/sample.zip"
+            "release-assets/MapTiles/EPSG-3857/readme.txt"
+            "release-assets/MapTiles/GeoTIFFs/readme.txt"
+            "release-assets/MapTiles/Mercator/readme.txt"
+          )
+          for path in "${required[@]}"; do
+            if [ ! -f "$path" ]; then
+              echo "Missing required release asset: $path"
+              exit 1
+            fi
+          done
+
+      - name: Build with setup.sh
+        env:
+          AVITAB_CI: "1"
+          AVITAB_BUILD_TARGET: "all"
+        run: ./setup.sh
+
+      - name: Package standalone artifact
+        run: |
+          mkdir -p dist/AviTab-standalone-linux
+          cp build/AviTab-standalone dist/AviTab-standalone-linux/
+          cp -a res dist/AviTab-standalone-linux/
+          tar -C dist -czf dist/AviTab-standalone-linux.tar.gz AviTab-standalone-linux
+
+      - name: Package plugin artifact
+        run: |
+          set -euo pipefail
+          ASSETS_DIR="release-assets"
+          OUT_DIR="dist/AviTab"
+
+          if [ ! -f "${ASSETS_DIR}/readme.txt" ]; then
+            echo "Missing ${ASSETS_DIR}/readme.txt"
+            exit 1
+          fi
+          if [ ! -d "${ASSETS_DIR}/AircraftIntegration" ]; then
+            echo "Missing ${ASSETS_DIR}/AircraftIntegration directory"
+            exit 1
+          fi
+          if [ ! -d "${ASSETS_DIR}/MapTiles" ]; then
+            echo "Missing ${ASSETS_DIR}/MapTiles directory"
+            exit 1
+          fi
+
+          mkdir -p "${OUT_DIR}/lin_x64"
+          cp build/AviTab.xpl "${OUT_DIR}/lin_x64/"
+          cp -a res/charts "${OUT_DIR}/"
+          cp -a res/icons "${OUT_DIR}/"
+          cp -a res/online-maps "${OUT_DIR}/"
+          cp res/config.json "${OUT_DIR}/"
+          cp LICENSE "${OUT_DIR}/"
+          cp "${ASSETS_DIR}/readme.txt" "${OUT_DIR}/readme.txt"
+          cp -a "${ASSETS_DIR}/AircraftIntegration" "${OUT_DIR}/"
+          cp -a "${ASSETS_DIR}/MapTiles" "${OUT_DIR}/"
+          tar -C dist -czf dist/AviTab-plugin-linux.tar.gz AviTab
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: avitab-linux-builds
+          path: |
+            dist/AviTab-standalone-linux.tar.gz
+            dist/AviTab-plugin-linux.tar.gz
+
+      - name: Upload release assets
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AviTab-standalone-linux.tar.gz
+            dist/AviTab-plugin-linux.tar.gz
