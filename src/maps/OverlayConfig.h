@@ -19,6 +19,7 @@
 #define SRC_MAPS_OVERLAY_CONFIG_H_
 
 #include <string>
+#include <cstdint>
 
 namespace maps {
 
