@@ -53,6 +53,7 @@
 !/.github/
 !/.github/workflows/
 !/.github/workflows/*.yml
+!/.devcontainer
 
 # Jetbrains IDE
 .idea/
