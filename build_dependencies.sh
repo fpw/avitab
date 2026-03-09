@@ -80,6 +80,7 @@ echo "Building curl..."
 if [ ! -f $OUTDIR/lib/libcurl.a ]; then
     cd curl
     git clean -f -d -x
+    patch -p1 -s -N < ../patches/curl.patch
     autoreconf -fi
     ./configure --prefix=$OUTDIR \
         --with-mbedtls=$OUTDIR --with-zlib="`pwd`/../mupdf/thirdparty/zlib/" \
