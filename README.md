@@ -1,5 +1,8 @@
 # AviTab - The Aviator's Tablet
 
+> This repository is no longer active. Maintenance and development of Avitab has now been moved to https://github.com/TeamAvitab/avitab.
+Please visit the new location to report suspected bugs and request features or submit updates.
+
 AviTab is a plugin for the [X-Plane](http://www.x-plane.com/) flight simulator (versions 11.20+ and 12). It displays a tablet like computer with a few apps in the cockpit and is mainly used for flying in virtual reality. But is also very handy in windowed mode, with integrations such as Zibo's B737-800X, it truly enhances the flight experience with a fully functioning EFB in the virtual cockpit.
 
 ![](screenshots/launcher.jpg)
@@ -25,7 +28,7 @@ More screenshots here: [Screenshots](screenshots/)
 
 ## Installation
 
-* Download the latest release from the [release page](https://github.com/fpw/avitab/releases/latest)
+* Download the latest release from the [release page](https://github.com/TeamAvitab/avitab/releases/latest)
 * Extract the archive and move the folder into your ``X-Plane/Resources/Plugins`` directory
 * Start X-Plane
 * Find a new menu inside the ``plugins`` directory to toggle the tablet
@@ -49,7 +52,7 @@ charts there, including subdirectories.
 
 ## Compiling
 
-See [Compiling](https://github.com/fpw/avitab/wiki/Compiling) in the Wiki.
+See [Compiling](https://github.com/TeamAvitab/avitab/wiki/Compiling) in the Wiki.
 
 ## Donate
 If you like AviTab and want to support its further development, you can donate.
